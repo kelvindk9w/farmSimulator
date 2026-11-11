@@ -4,7 +4,11 @@ import { AnimationMixer, Box3, Group, LoopOnce, LoopRepeat, Matrix4, Vector3 } f
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 const loader = new GLTFLoader();
+// Hospedagens que não servem arquivos .glb: o build "--embutido" entrega os GLB dentro de um .js (endereço -> base64)
+const embutidos = globalThis.__benchEmbutidos || null;
+const deBase64 = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)).buffer;
 export function loadGLB(src) {
+  if (typeof src === 'string' && embutidos && embutidos[src]) return loader.parseAsync(deBase64(embutidos[src]), '');
   return typeof src === 'string' ? loader.loadAsync(src) : loader.parseAsync(src, '');
 }
 

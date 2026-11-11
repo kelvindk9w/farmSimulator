@@ -57,6 +57,7 @@ O projeto Godot também abre no editor (`godot/project.godot`), mas rode `node t
 | `node tools/capturar.mjs` | refaz tudo em `capturas/` (`--sem-video` pula o vídeo, que demora) |
 | `node tools/medir.mjs` | refaz `medidas.json` e a tabela deste README |
 | `node tools/gerar-assets.mjs` | refaz a arte provisória (só se mexer no gerador; a saída é idêntica byte a byte a cada execução) |
+| `node threejs/build.mjs --embutido` | monta `threejs/dist-embutido/`: igual ao build normal, mas com os `.glb` dentro de um `.js`, para hospedagens que não servem arquivos `.glb`. Conferido: mesma imagem do build normal e nenhum pedido de `.glb` |
 | `node tools/glb-de-teste.mjs entrada.glb saida.glb` | gera um GLB de teste com textura e outros nomes de ossos e clipes (ver "O que foi verificado") |
 
 As três primeiras usam o Playwright com Chromium já instalado na máquina; em outra máquina: `npm i -D playwright && npx playwright install chromium`. O vídeo precisa do `ffmpeg`.
@@ -80,7 +81,7 @@ prototypes/character-test/
   medidas.json          números da última medição
 ```
 
-Fora do git (ver `.gitignore`): `node_modules/`, `threejs/dist/`, `godot/build/`, `godot/.godot/`, e as cópias `godot/assets/` e `godot/config/`.
+Fora do git (ver `.gitignore`): `node_modules/`, `threejs/dist/`, `threejs/dist-embutido/`, `godot/build/`, `godot/.godot/`, e as cópias `godot/assets/` e `godot/config/`.
 
 ## Trocar pela arte final
 

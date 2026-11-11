@@ -1,6 +1,7 @@
 # dependências e saídas de build (tudo isto é recriado pelos comandos do README)
 node_modules/
 threejs/dist/
+threejs/dist-embutido/
 godot/.godot/
 godot/build/
 # cópias dos pacotes de arte e da configuração que o Godot precisa ter dentro do projeto
