@@ -60,7 +60,7 @@ As of Nov 2026 the web-native JS/TS engines (Three.js, Babylon.js, PlayCanvas) a
 
 **Defold**
 - Free, no royalties or fees, "developer-friendly license" for commercial use; empty HTML5 build ≈1.1 MB gzipped. [P] — [Defold product overview](https://defold.com/product); [Defold forum: typical HTML5 size](https://forum.defold.com/t/typical-size-for-html5-build/78216)
-- Defold says games built with Defold on Poki generated €3 million and 600M+ plays in 2024. [P, vendor claim] — [Defold gamescom page](https://www.defold.com/gamescom2025/)
+- Defold says games built with Defold on Poki generated €3 million and 600M+ plays in 2024 (exact Defold page not pinned down; surfaced alongside its 2025/2026 event pages). [P, vendor claim] — [Defold gamescom 2025 page](https://www.defold.com/gamescom2025/); [Defold gamescom 2026 page](https://defold.com/gamescom2026/)
 - Official Poki SDK extension exists; a Sept 2026 Defold interview describes shipping "Green Train" to YouTube Playables through the Playgama Bridge SDK for Defold. [P] — [Defold Poki extension](https://defold.com/extension-poki-sdk); [Defold blog 2026-09-07](https://defold.com/2026/09/07/Interview-Green-Train-Playgama/)
 
 **Unreal Engine**
