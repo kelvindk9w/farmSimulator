@@ -1,0 +1,67 @@
+id,nome,construcao,nivel,tempo_min,insumos,saida,preco_base,xp,racao,mvp
+fuba,Fubá,moinho,3,1,milho:2,1,6,3,0,1
+racao_galinha,Ração de galinha,moinho,4,2,milho:2;feijao:1,3,4,4,1,1
+racao_vaca,Ração de vaca,moinho,9,4,milho:2;cana:1,3,8,6,1,1
+racao_cabra,Ração de cabra,moinho,34,6,soja:2;milho:1,3,10,7,1,0
+oleo_girassol,Óleo de girassol,moinho,40,30,girassol:3,1,76,16,0,0
+farinha_mandioca,Farinha de mandioca,casa_farinha,5,5,mandioca:2,1,21,7,0,1
+polvilho,Polvilho,casa_farinha,7,15,mandioca:3,1,35,12,0,1
+tapioca,Tapioca,casa_farinha,10,20,polvilho:2,1,112,13,0,1
+tucupi,Tucupi,casa_farinha,37,120,mandioca:4,1,91,33,0,0
+bolo_fuba,Bolo de fubá,fogao,7,10,fuba:2;ovo:1,1,52,9,0,1
+feijao_tropeiro,Feijão tropeiro,fogao,8,20,feijao:3;farinha_mandioca:1;ovo:1,1,79,13,0,1
+molho_tomate,Molho de tomate,fogao,9,15,tomate:3,1,43,12,0,1
+pamonha,Pamonha,fogao,10,30,milho:3;leite:1,1,73,16,0,1
+arroz_feijao,Arroz com feijão,fogao,12,25,arroz:2;feijao:2,1,65,15,0,1
+pao_de_queijo,Pão de queijo,fogao,15,40,polvilho:1;queijo_minas:1;ovo:1,1,237,19,0,1
+doce_abobora,Doce de abóbora,fogao,16,60,abobora:2;acucar:1,1,162,23,0,1
+bolo_laranja,Bolo de laranja,fogao,19,50,laranja:2;ovo:1;acucar:1;fuba:1,1,163,21,0,1
+bolo_banana,Bolo de banana,fogao,21,45,banana:2;ovo:1;fuba:1,1,111,20,0,1
+doce_batata_doce,Doce de batata-doce,fogao,24,75,batata_doce:2;acucar:1,1,178,26,0,1
+doce_abacaxi,Doce de abacaxi,fogao,29,90,abacaxi:2;acucar:1,1,212,28,0,1
+cuscuz,Cuscuz,fogao,30,20,fuba:2;manteiga:1,1,167,13,0,1
+quiabo_refogado,Quiabo refogado,fogao,33,35,quiabo:3;molho_tomate:1,1,144,18,0,0
+pao_de_mel,Pão de mel,fogao,41,60,mel:1;fuba:2;ovo:1,1,169,23,0,0
+acucar,Açúcar mascavo,engenho,11,10,cana:3,1,50,9,0,1
+garapa,Garapa,engenho,12,3,cana:2,1,30,5,0,1
+melado,Melado,engenho,13,30,cana:4,1,76,16,0,1
+rapadura,Rapadura,engenho,18,60,acucar:2,1,172,23,0,1
+queijo_minas,Queijo minas,queijaria,14,30,leite:2,1,108,16,0,1
+manteiga,Manteiga,queijaria,16,20,leite:2,1,102,13,0,1
+requeijao,Requeijão,queijaria,21,60,leite:3,1,163,23,0,1
+doce_de_leite,Doce de leite,queijaria,25,120,leite:2;acucar:1,1,211,33,0,1
+queijo_cabra,Queijo de cabra,queijaria,35,90,leite_cabra:2,1,185,28,0,0
+queijo_curado,Queijo curado,queijaria,59,360,leite:3;leite_cabra:1,1,315,57,0,0
+cafe_torrado,Café torrado,torrefacao,18,30,cafe:3,1,91,16,0,1
+cafezinho,Cafezinho,torrefacao,20,5,cafe_torrado:1;acucar:1,1,187,7,0,1
+amendoim_torrado,Amendoim torrado,torrefacao,22,45,amendoim:3,1,107,20,0,1
+pacoca,Paçoca,torrefacao,27,90,amendoim_torrado:2;acucar:1;farinha_mandioca:1,1,416,28,0,1
+cafe_com_leite,Café com leite,torrefacao,28,8,cafe_torrado:1;leite:1,1,166,8,0,1
+mate,Mate,torrefacao,45,60,erva_mate:3,1,200,23,0,0
+guarana_po,Guaraná em pó,torrefacao,53,120,guarana:3,1,262,33,0,0
+suco_laranja,Suco de laranja,casa_sucos,32,15,laranja:3,1,65,12,0,0
+vitamina_banana,Vitamina de banana,casa_sucos,34,20,banana:2;leite:1,1,105,13,0,0
+suco_caju,Suco de caju,casa_sucos,36,30,caju:3,1,106,16,0,0
+suco_abacaxi,Suco de abacaxi,casa_sucos,37,30,abacaxi:2;acucar:1,1,183,16,0,0
+suco_manga,Suco de manga,casa_sucos,38,30,manga:3,1,117,16,0,0
+suco_maracuja,Suco de maracujá,casa_sucos,42,25,maracuja:2;acucar:1,1,173,15,0,0
+acai_na_tigela,Açaí na tigela,casa_sucos,48,60,acai:3;banana:1;mel:1,1,263,23,0,0
+refresco_guarana,Refresco de guaraná,casa_sucos,54,40,guarana_po:1;acucar:1,1,427,19,0,0
+bananada,Bananada,doceria,38,90,banana:3;acucar:1,1,186,28,0,0
+doce_caju,Doce de caju,doceria,40,120,caju:3;acucar:1,1,208,33,0,0
+pe_de_moleque,Pé de moleque,doceria,43,120,amendoim_torrado:2;rapadura:1,1,553,33,0,0
+geleia_pimenta,Geleia de pimenta,doceria,46,180,pimenta:3;acucar:1,1,239,40,0,0
+brigadeiro,Brigadeiro,doceria,49,60,chocolate:1;doce_de_leite:1;manteiga:1,1,828,23,0,0
+balas_de_mel,Balas de mel,doceria,52,150,mel:2;acucar:1,1,316,37,0,0
+cesta_da_roca,Cesta da roça,doceria,60,240,pao_de_mel:1;brigadeiro:1;queijo_cabra:1;bandeirinhas:1,1,2637,46,0,0
+cacau_torrado,Cacau torrado,chocolateria,44,60,cacau:2,1,112,23,0,0
+chocolate,Chocolate,chocolateria,46,120,cacau_torrado:1;acucar:1;leite:1,1,312,33,0,0
+chocolate_quente,Chocolate quente,chocolateria,48,10,chocolate:1;leite:1,1,445,9,0,0
+bombom_caju,Bombom de caju,chocolateria,51,90,chocolate:1;caju:2,1,500,28,0,0
+trufa_maracuja,Trufa de maracujá,chocolateria,55,120,chocolate:1;maracuja:1;manteiga:1,1,629,33,0,0
+fio_algodao,Fio de algodão,tecelagem,50,45,algodao:3,1,111,20,0,0
+tecido_chita,Tecido de chita,tecelagem,52,180,fio_algodao:3,1,506,40,0,0
+bandeirinhas,Bandeirinhas,tecelagem,54,120,tecido_chita:1;fio_algodao:1,1,842,33,0,0
+chapeu_palha,Chapéu de palha,tecelagem,56,120,milho:6;fio_algodao:1,1,217,33,0,0
+rede,Rede de dormir,tecelagem,57,360,tecido_chita:2;fio_algodao:2,1,1679,57,0,0
+colcha_retalhos,Colcha de retalhos,tecelagem,58,480,tecido_chita:3,1,2060,66,0,0

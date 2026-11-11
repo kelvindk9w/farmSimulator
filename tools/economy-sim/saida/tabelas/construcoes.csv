@@ -1,0 +1,11 @@
+id,nome,nivel,custo,construcao_min,vaga3_nivel,vaga3_custo,vaga3_ferramentas,mvp
+moinho,Moinho,3,66,0.2,8,360,8,1
+casa_farinha,Casa de farinha,5,280,1,10,680,8,1
+fogao,Fogão a lenha,7,740,5,12,1100,8,1
+engenho,Engenho,11,2700,30,16,2600,8,1
+queijaria,Queijaria,14,5300,120,19,4200,8,1
+torrefacao,Torrefação,18,11000,240,23,7300,8,1
+casa_sucos,Casa de sucos,32,56000,480,37,28000,8,0
+doceria,Doceria,38,92000,720,43,43000,8,0
+chocolateria,Chocolateria,44,140000,1080,49,63000,8,0
+tecelagem,Tecelagem,50,200000,1440,55,88000,8,0

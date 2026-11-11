@@ -1,0 +1,7 @@
+id,nome,fruta,nivel,maturacao_min,ciclo_min,rendimento,preco_base,xp,lotes_nivel_qtd_custo,mvp
+laranjeira,Laranjeira,laranja,9,240,120,3,12,15,9:2:190;13:2:810;19:2:3200,1
+bananeira,Bananeira,banana,15,480,240,3,17,20,15:2:810;19:2:2400;25:2:6900,1
+cajueiro,Cajueiro,caju,22,720,360,3,20,24,22:2:2400;26:2:5800;32:2:14000,1
+mangueira,Mangueira,manga,35,1440,480,3,23,27,35:2:9100;39:2:18000;45:2:37000,0
+cacaueiro,Cacaueiro,cacau,43,2160,600,3,26,29,43:2:16000;47:2:31000;53:2:59000,0
+acaizeiro,Açaizeiro,acai,47,2880,720,3,29,32,47:2:21000;51:2:40000;57:2:73000,0

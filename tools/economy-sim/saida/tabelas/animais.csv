@@ -1,0 +1,5 @@
+id,nome,abrigo,nivel,produto,ciclo_min,racao,preco_base_produto,xp,lotes_nivel_qtd_custo,mvp
+galinha,Galinha,Galinheiro,4,ovo,20,racao_galinha,17,8,4:3:62;12:3:1400;24:3:10000,1
+vaca,Vaca,Curral,9,leite,60,racao_vaca,31,13,9:2:630;17:2:3900;28:2:16000,1
+cabra,Cabra,Aprisco,34,leite_cabra,180,racao_cabra,50,21,34:2:28000;41:2:47000;52:2:93000,0
+abelha,Colmeia de abelhas,Apiário,40,mel,360,girassol,69,28,40:2:44000;47:2:70000;56:2:120000,0

@@ -1,0 +1,222 @@
+{
+  "_nota": "Parametros de regra e coeficientes das formulas. Tudo aqui e desenho proprio do projeto; nenhum valor foi copiado de outro jogo. Tempos em minutos, salvo indicacao. Edite, rode exportar_tabelas.py e simular.py, e compare com as metas.",
+
+  "geral": {
+    "nivel_teto": 60,
+    "nivel_teto_mvp": 30,
+    "dias": 180,
+    "cadencia_niveis_por_mes": 2,
+    "marcos_dias": [1, 3, 7, 14, 30, 60, 90, 120, 180]
+  },
+
+  "inicio": {"moedas": 60, "cash": 10, "canteiros": 6, "silo": 75, "celeiro": 75},
+
+  "curva_xp": {
+    "_nota": "XP para sair do nivel L. Curva por trechos de potencia, continua: vale 'a' no nivel 1 e cresce com o expoente de cada trecho [nivel_inicio, expoente]. Acima do teto (niveis de mestre) cada nivel custa pos_teto_mult vezes o nivel do teto, mais pos_teto_incremento por nivel: calibrado para o engajado ganhar cerca de 2 niveis de mestre por mes, o mesmo ritmo do conteudo mensal.",
+    "a": 5.0,
+    "trechos": [[1, 1.8], [4, 3.35], [16, 2.3], [30, 2.8]],
+    "pos_teto_mult": 3.25, "pos_teto_incremento": 0.02
+  },
+
+  "cultura": {
+    "_nota": "Valor bruto por canteiro colhido G = g0 * T^gexp. Preco unitario = G / rend. Semente = frac_semente * G. XP por canteiro = x0 * T^xexp.",
+    "g0": 4.0, "gexp": 0.5, "frac_semente": 0.25, "rend": 3,
+    "x0": 2.0, "xexp": 0.42
+  },
+  "arvore": {
+    "_nota": "Valor bruto por colheita = mult_valor * g0 * ciclo^gexp. XP por colheita = x0 * ciclo^xexp.",
+    "mult_valor": 0.8, "x0": 2.0, "xexp": 0.42
+  },
+  "animal": {
+    "_nota": "Valor do produto = valor de 1 racao + a0 * ciclo^aexp. XP por coleta = x0 * ciclo^xexp.",
+    "a0": 3.0, "aexp": 0.5, "x0": 2.4, "xexp": 0.42
+  },
+  "receita": {
+    "_nota": "Valor = (mult_insumos * soma dos insumos + r0 * T^rexp) / saida. XP por fornada coletada = x0 * T^xexp.",
+    "mult_insumos": 1.25, "r0": 4.0, "rexp": 0.6,
+    "x0": 3.0, "xexp": 0.5
+  },
+
+  "custos": {
+    "_nota": "Custos em moedas = multiplicador * ref(L), com ref(L) = c0 * L^cexp (renda esperada de um nivel inteiro de jogo no nivel L).",
+    "c0": 2.4, "cexp": 2.85,
+    "mult_construcao": 1.2,
+    "mult_terra": 0.45,
+    "mult_lote_animal": 0.5,
+    "mult_arvore": 0.15,
+    "mult_vaga3": 0.4, "vaga3_nivel_apos": 5, "vaga3_ferramentas": 8,
+    "mult_vila": 1.0
+  },
+
+  "terras": {
+    "_nota": "30 expansoes de terra no lancamento. 'niveis' = nivel exigido de cada uma; 'canteiros' = canteiros que cada expansao acrescenta (padrao repetido). Escrituras = escrituras_base + k.",
+    "escrituras_base": 2,
+    "niveis": [3, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60],
+    "padrao_canteiros": [2, 1, 1, 2, 1]
+  },
+
+  "arvores_lotes": {
+    "_nota": "Quantas mudas de cada tipo podem ser compradas: 2 no nivel de desbloqueio, +2 quatro niveis depois, +2 dez niveis depois (6 por tipo).",
+    "lotes": [[0, 2], [4, 2], [10, 2]]
+  },
+
+  "armazem": {
+    "_nota": "Silo guarda colheitas e frutas; celeiro guarda produtos de animais, processados e racoes. Pecas de reforma ficam em inventario separado e nunca ocupam espaco. Ampliacao j: +passo de capacidade; custa s0 * j^sexp moedas e (tabuas_base + tabuas_por_ampliacao * j) tabuas.",
+    "passo": 40, "s0": 40, "sexp": 2.2, "tabuas_base": 3, "tabuas_por_ampliacao": 2,
+    "ampliar_apos_vendas_forcadas": 1,
+    "vender_quando_ocupacao": 0.92, "vender_ate_ocupacao": 0.75
+  },
+
+  "vagas_producao": {
+    "_nota": "Cada construcao nasce com 2 vagas na fila. 3a vaga: moedas + ferramentas. 4a e 5a: cash OU maestria da construcao (itens produzidos nela).",
+    "iniciais": 2,
+    "vaga4_cash": 25, "vaga4_maestria_itens": 400,
+    "vaga5_cash": 50, "vaga5_maestria_itens": 2000
+  },
+
+  "pedidos": {
+    "_nota": "Quadro de pedidos. TV(L) = tv0 * L^tvexp e o valor-alvo (em moedas de preco base) de um pedido. Recompensa: moedas = mult_moedas * valor; XP = mult_xp * valor.",
+    "vagas": [[1, 2], [3, 3], [6, 4], [10, 5], [15, 6], [22, 7], [30, 8], [40, 9]],
+    "tv0": 10.0, "tvexp": 1.25,
+    "mult_moedas": 1.25, "mult_xp": 0.7,
+    "espera_base_min": 2.0, "espera_por_nivel_min": 0.3, "espera_max_min": 15.0,
+    "mult_espera_descarte": 2.0,
+    "descartar_apos_min": 1440,
+    "linhas_por_nivel": [[1, [1.0, 0.0, 0.0]], [5, [0.5, 0.5, 0.0]], [15, [0.25, 0.45, 0.30]]],
+    "pesos_categoria": {"cultura": 0.30, "fruta": 0.10, "animal": 0.20, "processado": 0.40},
+    "_nota_qmax": "Lote maximo por linha, por tipo de item e duracao do item em minutos: [[duracao_minima, lote]].",
+    "qmax": {"cultura": [[0, 12], [61, 9], [241, 6]], "fruta": [[0, 6]], "animal": [[0, 8], [61, 5]], "processado": [[0, 5], [31, 3], [121, 2]]},
+    "peso_novidade": 2.0, "janela_novidade_niveis": 5,
+    "vies_estoque": 0.5,
+    "variacao": [0.75, 1.25],
+    "pecas_a_cada_pedidos": 3
+  },
+
+  "feira": {
+    "_nota": "Relogio curto. A cada reabastecimento aparece 1 fregues (compra ate 'fregues_qtd' unidades de um item do seu estoque livre) e 1 oferta de insumo bruto (ate 'oferta_qtd' unidades).",
+    "reabastece_min": 5,
+    "fregues_qtd": 3, "fregues_mult_moedas": 1.15, "fregues_mult_xp": 0.4,
+    "oferta_qtd": 4, "oferta_mult_preco": 1.6
+  },
+
+  "banca": {"_nota": "Venda direta: piso de preco. Sempre disponivel, nunca da XP.", "mult_moedas": 1.0},
+
+  "nivel_recompensa": {
+    "_nota": "Ao subir de nivel: moedas = mult_tv * TV(L); cash por faixa; pecas de reforma.",
+    "mult_tv": 1.5,
+    "cash_por_faixa": [[2, 1], [21, 2], [41, 3], [61, 10]],
+    "pecas": 2
+  },
+
+  "missoes": {
+    "_nota": "3 missoes por dia. Cada uma paga mult_tv_xp * TV(L) de XP e mult_tv * TV(L) em moedas; completar as 3 abre o bau do dia. Metas = [base, por_nivel, teto].",
+    "desde_nivel": 5,
+    "mult_tv_xp": 0.3, "mult_tv": 0.5,
+    "bau_mult_tv_xp": 0.6, "bau_mult_tv": 1.0, "bau_cash": 1, "bau_pecas": 2,
+    "meta_pedidos": [3, 0.1, 8],
+    "meta_colheitas": [20, 2.0, 120],
+    "meta_producao": [4, 0.2, 14]
+  },
+
+  "calendario": {
+    "_nota": "Calendario de retorno: 7 casas; dia perdido nao zera, so nao avanca. Primeira volta (boas-vindas) e voltas seguintes. Valores de moedas em multiplos de TV(L).",
+    "primeira_volta": [
+      {"moedas_tv": 1.0}, {"pecas": 2}, {"moedas_tv": 1.5}, {"cash": 3}, {"pecas": 3}, {"moedas_tv": 3.0}, {"cash": 5, "decoracao": "Espantalho de boas-vindas"}
+    ],
+    "voltas_seguintes": [
+      {"moedas_tv": 1.0}, {"pecas": 2}, {"moedas_tv": 1.5}, {"cash": 2}, {"pecas": 2}, {"moedas_tv": 2.0}, {"cash": 3}
+    ]
+  },
+
+  "conquistas": {
+    "_nota": "Cash de conquistas, colecoes e marcos, modelado como gotejamento: por dia nas janelas [dia_ini, dia_fim].",
+    "cash_por_dia": [[1, 30, 1.0], [31, 90, 0.5], [91, 9999, 0.25]]
+  },
+
+  "maestria": {
+    "_nota": "5 estrelas por item, medidas em horas de producao (canteiro-hora, arvore-hora, animal-hora, construcao-hora). Fracoes do total para cada estrela. Cada estrela: +bonus_valor no preco do item; estrelas 3 e 5 dao cash.",
+    "horas_5_estrelas": {"cultura": 6000, "fruta": 8000, "animal": 15000, "processado": 600},
+    "fracoes": [0.02, 0.08, 0.25, 0.55, 1.0],
+    "bonus_valor_por_estrela": 0.02,
+    "cash_estrela3": 1, "cash_estrela5": 3,
+    "xp_por_estrela_x_nivel_item": 24
+  },
+
+  "vila": {
+    "_nota": "Restauracao do sitio e da vila: 30 estagios no lancamento. Nivel exigido = nivel_inicial + passo_nivel * (s - 1). Custo = mult_vila * ref(L). Obra leva tempo. Recompensa: pct_xp do XP do nivel exigido + cash. Depois do ultimo estagio: 'Festa da vila' semanal em cotas (sumidouro renovavel): ate festa_cotas_semana cotas por semana, cada uma custando festa_mult_ref_cota * ref(nivel, limitado ao teto).",
+    "estagios": 30, "nivel_inicial": 8, "passo_nivel": 1.76,
+    "obra_min_base": 60, "obra_min_exp": 1.12,
+    "pct_xp": 0.05, "cash": 2,
+    "caseiro_no_estagio": 12,
+    "festa_semanal_desde_nivel": 20, "festa_cotas_semana": 5, "festa_mult_ref_cota": 0.2, "festa_cota_mult_tv_xp": 0.5, "festa_cash": 3
+  },
+
+  "minijogos": {
+    "_nota": "Pesca e barraca da feira: opcionais. Cada tentativa dura dur_min e paga mult_tv_moedas * TV(L) e mult_tv_xp * TV(L). Tentativas gratis por dia; +1 por anuncio.",
+    "desde_nivel": 8, "dur_min": 0.75, "gratis_por_dia": 5,
+    "mult_tv_moedas": 0.15, "mult_tv_xp": 0.1
+  },
+
+  "acelerar": {
+    "_nota": "Preco em cash para concluir um temporizador com m minutos restantes: ceil(k * m^exp). Gratis se faltar ate gratis_ate_min. Teto diario de aceleracoes pagas por sitio.",
+    "k": 0.28, "exp": 0.7, "gratis_ate_min": 0.5,
+    "max_por_dia": 24
+  },
+
+  "anuncios": {
+    "_nota": "Somente video recompensado, por iniciativa do jogador. Ordem de uso na simulacao = ordem da lista. Teto total por dia = soma dos tetos.",
+    "desde_nivel": 6,
+    "pontos": [
+      {"id": "bau_do_dia", "max_dia": 1, "moedas_tv": 1.0, "pecas": 1, "cash": 1},
+      {"id": "acelerar", "max_dia": 3, "minutos": 20},
+      {"id": "dobrar_pedido", "max_dia": 2},
+      {"id": "minijogo_extra", "max_dia": 1},
+      {"id": "feira_reabastecer", "max_dia": 1}
+    ]
+  },
+
+  "loja": {
+    "_nota": "Referencia: 10 cash = R$ 1,00 no pacote de entrada. Pacotes maiores dao bonus. Nao ha conversao de cash em moedas.",
+    "pacotes": [
+      {"preco_brl": 6.90, "cash": 70},
+      {"preco_brl": 12.90, "cash": 135},
+      {"preco_brl": 19.90, "cash": 215},
+      {"preco_brl": 29.90, "cash": 335},
+      {"preco_brl": 59.90, "cash": 700},
+      {"preco_brl": 129.90, "cash": 1600}
+    ],
+    "pacote_inicial": {"preco_brl": 4.90, "cash": 100, "pecas": 10, "cosmetico": "Chapéu de palha do avatar + cerca de bambu"},
+    "peca_cash": 3,
+    "passe": {
+      "preco_brl": 19.90, "dias": 30,
+      "premium_cash_total": 300, "premium_pecas_total": 30,
+      "gratis_cash_total": 30, "gratis_pecas_total": 15,
+      "vaga_extra_fila": 1, "caseiro": true, "anuncio_sem_assistir": true
+    }
+  },
+
+  "mutirao": {
+    "_nota": "Cooperativo em tempo real. Ajudante planta, colhe, coleta, alimenta e poe na fila; so o dono entrega pedidos e gasta moedas/cash. Diaria do ajudante: a cada 'acoes_por_bau' acoes uteis no sitio de um amigo, um bau proporcional ao PROPRIO nivel do ajudante (multiplos de TV do nivel dele). As acoes do ajudante entregam os produtos ao dono, mas nao dao XP de colheita/producao ao dono.",
+    "acoes_por_bau": 30, "baus_por_dia": 4,
+    "bau_mult_tv_xp": 0.35, "bau_mult_tv": 0.5
+  },
+
+  "acoes_seg": {
+    "_nota": "Tempo de jogador por acao (segundos) na simulacao.",
+    "abertura_sessao": 20,
+    "plantar": 1.2, "colher": 1.0, "colher_arvore": 2.0,
+    "coletar_animal": 1.5, "alimentar": 1.5,
+    "coletar_produto": 2.5, "enfileirar": 2.5,
+    "entregar_pedido": 5.0, "vender_banca": 3.0, "comprar": 10.0,
+    "feira": 4.0
+  },
+
+  "bot": {
+    "_nota": "Politica do jogador simulado.",
+    "estoque_alvo_processado": 3,
+    "estoque_alvo_animal_por_cabeca": 1.5,
+    "estoque_alvo_racao_por_cabeca": 1.0,
+    "reserva_sementes_ciclos": 2,
+    "limite_estoque_cultura_padrao": 12
+  }
+}

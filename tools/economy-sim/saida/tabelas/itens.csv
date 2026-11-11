@@ -1,0 +1,97 @@
+id,nome,tipo,nivel,preco_base,armazem,entra_em_pedidos,mvp
+milho,Milho,cultura,1,1,silo,1,1
+feijao,Feijão,cultura,2,2,silo,1,1
+fuba,Fubá,processado,3,6,celeiro,1,1
+mandioca,Mandioca,cultura,4,4,silo,1,1
+ovo,Ovo,animal,4,17,celeiro,1,1
+racao_galinha,Ração de galinha,racao,4,4,celeiro,0,1
+farinha_mandioca,Farinha de mandioca,processado,5,21,celeiro,1,1
+tomate,Tomate,cultura,6,6,silo,1,1
+abobora,Abóbora,cultura,7,21,silo,1,1
+bolo_fuba,Bolo de fubá,processado,7,52,celeiro,1,1
+polvilho,Polvilho,processado,7,35,celeiro,1,1
+cana,Cana-de-açúcar,cultura,8,9,silo,1,1
+feijao_tropeiro,Feijão tropeiro,processado,8,79,celeiro,1,1
+laranja,Laranja,fruta,9,12,silo,1,1
+leite,Leite,animal,9,31,celeiro,1,1
+molho_tomate,Molho de tomate,processado,9,43,celeiro,1,1
+racao_vaca,Ração de vaca,racao,9,8,celeiro,0,1
+pamonha,Pamonha,processado,10,73,celeiro,1,1
+tapioca,Tapioca,processado,10,112,celeiro,1,1
+acucar,Açúcar mascavo,processado,11,50,celeiro,1,1
+arroz,Arroz,cultura,11,13,silo,1,1
+arroz_feijao,Arroz com feijão,processado,12,65,celeiro,1,1
+garapa,Garapa,processado,12,30,celeiro,1,1
+melado,Melado,processado,13,76,celeiro,1,1
+melancia,Melancia,cultura,13,29,silo,1,1
+queijo_minas,Queijo minas,processado,14,108,celeiro,1,1
+banana,Banana,fruta,15,17,silo,1,1
+pao_de_queijo,Pão de queijo,processado,15,237,celeiro,1,1
+doce_abobora,Doce de abóbora,processado,16,162,celeiro,1,1
+manteiga,Manteiga,processado,16,102,celeiro,1,1
+cafe,Café,cultura,17,16,silo,1,1
+cafe_torrado,Café torrado,processado,18,91,celeiro,1,1
+rapadura,Rapadura,processado,18,172,celeiro,1,1
+bolo_laranja,Bolo de laranja,processado,19,163,celeiro,1,1
+amendoim,Amendoim,cultura,20,18,silo,1,1
+cafezinho,Cafezinho,processado,20,187,celeiro,1,1
+bolo_banana,Bolo de banana,processado,21,111,celeiro,1,1
+requeijao,Requeijão,processado,21,163,celeiro,1,1
+amendoim_torrado,Amendoim torrado,processado,22,107,celeiro,1,1
+caju,Caju,fruta,22,20,silo,1,1
+batata_doce,Batata-doce,cultura,23,25,silo,1,1
+doce_batata_doce,Doce de batata-doce,processado,24,178,celeiro,1,1
+doce_de_leite,Doce de leite,processado,25,211,celeiro,1,1
+abacaxi,Abacaxi,cultura,26,36,silo,1,1
+pacoca,Paçoca,processado,27,416,celeiro,1,1
+cafe_com_leite,Café com leite,processado,28,166,celeiro,1,1
+doce_abacaxi,Doce de abacaxi,processado,29,212,celeiro,1,1
+cuscuz,Cuscuz,processado,30,167,celeiro,1,1
+soja,Soja,cultura,31,7,silo,1,0
+suco_laranja,Suco de laranja,processado,32,65,celeiro,1,0
+quiabo,Quiabo,cultura,33,15,silo,1,0
+quiabo_refogado,Quiabo refogado,processado,33,144,celeiro,1,0
+leite_cabra,Leite de cabra,animal,34,50,celeiro,1,0
+racao_cabra,Ração de cabra,racao,34,10,celeiro,0,0
+vitamina_banana,Vitamina de banana,processado,34,105,celeiro,1,0
+manga,Manga,fruta,35,23,silo,1,0
+queijo_cabra,Queijo de cabra,processado,35,185,celeiro,1,0
+pimenta,Pimenta,cultura,36,23,silo,1,0
+suco_caju,Suco de caju,processado,36,106,celeiro,1,0
+suco_abacaxi,Suco de abacaxi,processado,37,183,celeiro,1,0
+tucupi,Tucupi,processado,37,91,celeiro,1,0
+bananada,Bananada,processado,38,186,celeiro,1,0
+suco_manga,Suco de manga,processado,38,117,celeiro,1,0
+girassol,Girassol,cultura,39,12,silo,1,0
+doce_caju,Doce de caju,processado,40,208,celeiro,1,0
+mel,Mel,animal,40,69,celeiro,1,0
+oleo_girassol,Óleo de girassol,processado,40,76,celeiro,1,0
+pao_de_mel,Pão de mel,processado,41,169,celeiro,1,0
+maracuja,Maracujá,cultura,42,33,silo,1,0
+suco_maracuja,Suco de maracujá,processado,42,173,celeiro,1,0
+cacau,Cacau,fruta,43,26,silo,1,0
+pe_de_moleque,Pé de moleque,processado,43,553,celeiro,1,0
+cacau_torrado,Cacau torrado,processado,44,112,celeiro,1,0
+erva_mate,Erva-mate,cultura,45,41,silo,1,0
+mate,Mate,processado,45,200,celeiro,1,0
+chocolate,Chocolate,processado,46,312,celeiro,1,0
+geleia_pimenta,Geleia de pimenta,processado,46,239,celeiro,1,0
+acai,Açaí,fruta,47,29,silo,1,0
+acai_na_tigela,Açaí na tigela,processado,48,263,celeiro,1,0
+chocolate_quente,Chocolate quente,processado,48,445,celeiro,1,0
+algodao,Algodão,cultura,49,19,silo,1,0
+brigadeiro,Brigadeiro,processado,49,828,celeiro,1,0
+fio_algodao,Fio de algodão,processado,50,111,celeiro,1,0
+bombom_caju,Bombom de caju,processado,51,500,celeiro,1,0
+balas_de_mel,Balas de mel,processado,52,316,celeiro,1,0
+tecido_chita,Tecido de chita,processado,52,506,celeiro,1,0
+guarana,Guaraná,cultura,53,51,silo,1,0
+guarana_po,Guaraná em pó,processado,53,262,celeiro,1,0
+bandeirinhas,Bandeirinhas,processado,54,842,celeiro,1,0
+refresco_guarana,Refresco de guaraná,processado,54,427,celeiro,1,0
+trufa_maracuja,Trufa de maracujá,processado,55,629,celeiro,1,0
+chapeu_palha,Chapéu de palha,processado,56,217,celeiro,1,0
+rede,Rede de dormir,processado,57,1679,celeiro,1,0
+colcha_retalhos,Colcha de retalhos,processado,58,2060,celeiro,1,0
+queijo_curado,Queijo curado,processado,59,315,celeiro,1,0
+cesta_da_roca,Cesta da roça,processado,60,2637,celeiro,1,0

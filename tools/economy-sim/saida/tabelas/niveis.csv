@@ -1,0 +1,66 @@
+nivel,xp_para_o_proximo,xp_acumulado,valor_alvo_pedido,vagas_pedidos,espera_pedido_min,moedas_ao_chegar,cash_ao_chegar,desbloqueios
+1,5,0,10,2,2.3,0,0,Cultura: Milho ; Recurso: Quadro de pedidos (2 vagas) e banca de venda direta ; Recurso: Entrar como ajudante no sítio de um amigo (por link)
+2,17,5,24,2,2.6,36,1,Cultura: Feijão
+3,36,22,39,3,2.9,59,1,"Construção: Moinho ; Receita: Fubá ; Terra 1 (+2 canteiros) ; Quadro de pedidos: 3 vagas ; Recurso: Feira (relógio curto, reabastece a cada 5 min)"
+4,61,58,57,3,3.2,85,1,Cultura: Mandioca ; Galinheiro (3 galinhas) ; Receita: Ração de galinha ; Terra 2 (+1 canteiro)
+5,130,119,75,3,3.5,110,1,Construção: Casa de farinha ; Receita: Farinha de mandioca ; Recurso: Missões diárias e calendário de retorno ; Recurso: Mutirão: abrir o próprio sítio para até 3 amigos
+6,240,249,94,4,3.8,140,1,Cultura: Tomate ; Terra 3 (+1 canteiro) ; Quadro de pedidos: 4 vagas
+7,400,489,114,4,4.1,170,1,Cultura: Abóbora ; Construção: Fogão a lenha ; Receita: Polvilho ; Receita: Bolo de fubá
+8,620,889,135,4,4.4,200,1,Cultura: Cana-de-açúcar ; Receita: Feijão tropeiro ; Terra 4 (+2 canteiros) ; Vila: estágio 1 ; Recurso: Pesca (minijogo) e restauração do sítio e da vila
+9,920,1509,156,4,4.7,230,1,Árvore: Laranjeira ; Curral (2 vacas) ; Receita: Ração de vaca ; Receita: Molho de tomate
+10,1300,2429,178,5,5.0,270,1,Receita: Tapioca ; Receita: Pamonha ; Terra 5 (+1 canteiro) ; Vila: estágio 2 ; Quadro de pedidos: 5 vagas ; Recurso: Álbum de coleções
+11,1800,3729,200,5,5.3,300,1,Cultura: Arroz ; Construção: Engenho ; Receita: Açúcar mascavo
+12,2400,5529,223,5,5.6,340,1,Galinheiro +3 ; Receita: Arroz com feijão ; Receita: Garapa ; Terra 6 (+2 canteiros) ; Vila: estágio 3 ; Recurso: Barraca na feira (minijogo)
+13,3100,7929,247,5,5.9,370,1,Cultura: Melancia ; Receita: Melado ; Vila: estágio 4
+14,4000,11029,271,5,6.2,410,1,Construção: Queijaria ; Receita: Queijo minas ; Terra 7 (+1 canteiro)
+15,5100,15029,295,6,6.5,440,1,"Árvore: Bananeira ; Receita: Pão de queijo ; Vila: estágio 5 ; Quadro de pedidos: 6 vagas ; Recurso: Maestria (estrelas por cultura, animal e receita)"
+16,6300,20129,320,6,6.8,480,1,Receita: Doce de abóbora ; Receita: Manteiga ; Terra 8 (+1 canteiro)
+17,7200,26429,345,6,7.1,520,1,Cultura: Café ; Curral +2 ; Vila: estágio 6
+18,8300,33629,371,6,7.4,560,1,Construção: Torrefação ; Receita: Rapadura ; Receita: Café torrado ; Terra 9 (+2 canteiros) ; Recurso: Cooperativas e liga semanal
+19,9400,41929,397,6,7.7,600,1,Receita: Bolo de laranja ; Vila: estágio 7
+20,11000,51329,423,6,8.0,630,1,Cultura: Amendoim ; Receita: Cafezinho ; Terra 10 (+1 canteiro) ; Vila: estágio 8 ; Recurso: Passe de temporada e eventos sazonais
+21,12000,62329,450,6,8.3,670,2,Receita: Bolo de banana ; Receita: Requeijão
+22,13000,74329,476,7,8.6,710,2,Árvore: Cajueiro ; Receita: Amendoim torrado ; Terra 11 (+2 canteiros) ; Vila: estágio 9 ; Quadro de pedidos: 7 vagas
+23,15000,87329,504,7,8.9,760,2,Cultura: Batata-doce
+24,16000,102329,531,7,9.2,800,2,Galinheiro +3 ; Receita: Doce de batata-doce ; Terra 12 (+1 canteiro) ; Vila: estágio 10
+25,18000,118329,559,7,9.5,840,2,Receita: Doce de leite ; Recurso: Nota da fazenda (vitrine de decoração)
+26,19000,136329,587,7,9.8,880,2,Cultura: Abacaxi ; Terra 13 (+1 canteiro) ; Vila: estágio 11
+27,21000,155329,615,7,10.1,920,2,Receita: Paçoca ; Vila: estágio 12
+28,23000,176329,644,7,10.4,970,2,Curral +2 ; Receita: Café com leite ; Terra 14 (+2 canteiros)
+29,25000,199329,673,7,10.7,1000,2,Receita: Doce de abacaxi ; Vila: estágio 13
+30,27000,224329,702,8,11.0,1100,2,Receita: Cuscuz ; Terra 15 (+1 canteiro) ; Quadro de pedidos: 8 vagas
+31,29000,251329,731,8,11.3,1100,2,Cultura: Soja ; Vila: estágio 14
+32,32000,280329,761,8,11.6,1100,2,Construção: Casa de sucos ; Receita: Suco de laranja ; Terra 16 (+2 canteiros)
+33,35000,312329,791,8,11.9,1200,2,Cultura: Quiabo ; Receita: Quiabo refogado ; Vila: estágio 15
+34,38000,347329,821,8,12.2,1200,2,Aprisco (2 cabras) ; Receita: Ração de cabra ; Receita: Vitamina de banana ; Terra 17 (+1 canteiro) ; Vila: estágio 16
+35,41000,385329,851,8,12.5,1300,2,Árvore: Mangueira ; Receita: Queijo de cabra
+36,45000,426329,882,8,12.8,1300,2,Cultura: Pimenta ; Receita: Suco de caju ; Terra 18 (+1 canteiro) ; Vila: estágio 17
+37,48000,471329,913,8,13.1,1400,2,Receita: Tucupi ; Receita: Suco de abacaxi
+38,52000,519329,943,8,13.4,1400,2,Construção: Doceria ; Receita: Suco de manga ; Receita: Bananada ; Terra 19 (+2 canteiros) ; Vila: estágio 18
+39,56000,571329,975,8,13.7,1500,2,Cultura: Girassol
+40,60000,627329,1006,9,14.0,1500,2,Apiário (2 colmeias) ; Receita: Óleo de girassol ; Receita: Doce de caju ; Terra 20 (+1 canteiro) ; Vila: estágio 19 ; Quadro de pedidos: 9 vagas
+41,64000,687329,1037,9,14.3,1600,3,Aprisco +2 ; Receita: Pão de mel ; Vila: estágio 20
+42,69000,751329,1069,9,14.6,1600,3,Cultura: Maracujá ; Receita: Suco de maracujá ; Terra 21 (+2 canteiros)
+43,73000,820329,1101,9,14.9,1700,3,Árvore: Cacaueiro ; Receita: Pé de moleque ; Vila: estágio 21
+44,78000,893329,1133,9,15.0,1700,3,Construção: Chocolateria ; Receita: Cacau torrado ; Terra 22 (+1 canteiro)
+45,83000,971329,1166,9,15.0,1700,3,Cultura: Erva-mate ; Receita: Mate ; Vila: estágio 22
+46,89000,1054329,1198,9,15.0,1800,3,Receita: Geleia de pimenta ; Receita: Chocolate ; Terra 23 (+1 canteiro)
+47,94000,1143329,1231,9,15.0,1800,3,Árvore: Açaizeiro ; Apiário +2 ; Vila: estágio 23
+48,100000,1237329,1263,9,15.0,1900,3,Receita: Açaí na tigela ; Receita: Chocolate quente ; Terra 24 (+2 canteiros) ; Vila: estágio 24
+49,110000,1337329,1296,9,15.0,1900,3,Cultura: Algodão ; Receita: Brigadeiro
+50,110000,1447329,1330,9,15.0,2000,3,Construção: Tecelagem ; Receita: Fio de algodão ; Terra 25 (+1 canteiro) ; Vila: estágio 25
+51,120000,1557329,1363,9,15.0,2000,3,Receita: Bombom de caju
+52,120000,1677329,1396,9,15.0,2100,3,Aprisco +2 ; Receita: Balas de mel ; Receita: Tecido de chita ; Terra 26 (+2 canteiros) ; Vila: estágio 26
+53,130000,1797329,1430,9,15.0,2100,3,Cultura: Guaraná ; Receita: Guaraná em pó
+54,140000,1927329,1464,9,15.0,2200,3,Receita: Refresco de guaraná ; Receita: Bandeirinhas ; Terra 27 (+1 canteiro) ; Vila: estágio 27
+55,150000,2067329,1498,9,15.0,2200,3,Receita: Trufa de maracujá
+56,150000,2217329,1532,9,15.0,2300,3,Apiário +2 ; Receita: Chapéu de palha ; Terra 28 (+1 canteiro) ; Vila: estágio 28
+57,160000,2367329,1566,9,15.0,2300,3,Receita: Rede de dormir ; Vila: estágio 29
+58,170000,2527329,1601,9,15.0,2400,3,Receita: Colcha de retalhos ; Terra 29 (+2 canteiros)
+59,180000,2697329,1635,9,15.0,2500,3,Receita: Queijo curado ; Vila: estágio 30
+60,190000,2877329,1670,9,15.0,2500,3,Receita: Cesta da roça ; Terra 30 (+1 canteiro)
+61,610000,3067329,1705,9,15.0,2600,10,
+62,620000,3677329,1740,9,15.0,2600,10,
+63,630000,4297329,1775,9,15.0,2700,10,
+64,640000,4927329,1810,9,15.0,2700,10,
+65,650000,5567329,1846,9,15.0,2800,10,
