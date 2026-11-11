@@ -2,6 +2,8 @@
 
 Documento de desenho, anterior ao código. Define como o jogador avança, quanto tempo cada etapa leva e que números sustentam isso. Todos os valores são desenho próprio do projeto e estão em `tools/economy-sim/dados/`; as tabelas deste documento foram geradas por `tools/economy-sim/exportar_tabelas.py` e os resultados por `tools/economy-sim/simular.py`. Data: 11 de novembro de 2026.
 
+> **Atualização de direção (11 de novembro de 2026).** O multijogador será assíncrono: cada jogador na própria fazenda, com lista de amigos; presentes, ajuda e invasão ficam para depois. A seção "Mutirão" passa a valer como desenho futuro da ajuda entre amigos por visita, sem presença simultânea. Os números dos perfis que jogam sozinhos, que são os da tabela abaixo, não dependem dela. Sem o mutirão no lançamento, o alerta de ocupação do jogador engajado pesa mais: o tempo que sobra precisa vir da feira, dos minijogos, da decoração e da limpeza de obstáculos, que é a forma visível das 30 expansões de terra.
+
 ## Resposta curta
 
 O jogo fica nem fácil nem difícil demais se três coisas valerem ao mesmo tempo: o avanço é limitado pela **capacidade do sítio** (canteiros, animais, horas de construção), e não por quantos toques o jogador dá; o conteúdo destravado por nível é uma **rampa de cerca de três meses** para o jogador mais dedicado; e, depois dela, o que segura o jogador são **sistemas que se renovam sozinhos** (maestria, vila, liga de cooperativas, temporada, coleções) mais um pacote mensal pequeno de conteúdo.
