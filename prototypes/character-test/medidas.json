@@ -1,0 +1,591 @@
+{
+  "gerado": "2026-11-11T20:39:34.165Z",
+  "aviso": "Tempos medidos no Chromium sem tela, com WebGL por software (sem placa de vídeo), num servidor, com os arquivos vindos de 127.0.0.1 sem compressão. Servem para comparar as variantes entre si nesta máquina; NÃO são desempenho de celular.",
+  "ambiente": {
+    "webgl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "chromium": "153.0.8010.12",
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.30GHz × 4",
+    "sistema": "Linux 6.18.44-fc-v378",
+    "node": "v22.23.4",
+    "three": "0.187.0",
+    "godot": "4.7.2.stable.official.ed1daf0bf"
+  },
+  "metodo": {
+    "rodadas": 5,
+    "tela": "800x450 @1x",
+    "primeiroQuadro": "performance.now() logo após o primeiro quadro desenhado (contexto novo a cada rodada, cache vazio)",
+    "desenho": "no passo 131 do roteiro (andando), sem a interface por cima"
+  },
+  "variantes": {
+    "three-3d": {
+      "nome": "Three.js · 3D",
+      "download": {
+        "total": {
+          "raw": 940718,
+          "gzip": 226498,
+          "brotli": 178874
+        },
+        "motor": {
+          "raw": 661510,
+          "gzip": 171543,
+          "brotli": 143001
+        },
+        "arte": {
+          "raw": 279208,
+          "gzip": 54955,
+          "brotli": 35873
+        },
+        "arquivos": [
+          {
+            "caminho": "index.html",
+            "grupo": "motor",
+            "raw": 3686,
+            "gzip": 1345,
+            "brotli": 1089
+          },
+          {
+            "caminho": "main.js",
+            "grupo": "motor",
+            "raw": 12188,
+            "gzip": 5119,
+            "brotli": 4690
+          },
+          {
+            "caminho": "pedaco-chunk-BSLO6YE6.js",
+            "grupo": "motor",
+            "raw": 716,
+            "gzip": 334,
+            "brotli": 314
+          },
+          {
+            "caminho": "pedaco-chunk-R4LMTHW6.js",
+            "grupo": "motor",
+            "raw": 180,
+            "gzip": 159,
+            "brotli": 124
+          },
+          {
+            "caminho": "pedaco-view3d-SHBKCIRB.js",
+            "grupo": "motor",
+            "raw": 54172,
+            "gzip": 16906,
+            "brotli": 15235
+          },
+          {
+            "caminho": "pedaco-chunk-RT5PCAVZ.js",
+            "grupo": "motor",
+            "raw": 590568,
+            "gzip": 147680,
+            "brotli": 121549
+          },
+          {
+            "caminho": "assets/3d/personagem.glb",
+            "grupo": "arte",
+            "raw": 279208,
+            "gzip": 54955,
+            "brotli": 35873
+          }
+        ]
+      },
+      "primeiroQuadroMs": {
+        "mediana": 255,
+        "min": 243,
+        "max": 387,
+        "rodadas": [
+          387,
+          255,
+          244,
+          243,
+          259
+        ]
+      },
+      "desenho": {
+        "chamadas": 6,
+        "triangulos": 3176
+      },
+      "modelo": {
+        "triangles": 3102,
+        "bones": 18,
+        "height": 1.6,
+        "clips": [
+          "idle",
+          "walk",
+          "run",
+          "jump",
+          "crouch",
+          "sit",
+          "lie"
+        ],
+        "missing": [],
+        "headBone": "head",
+        "hairMeshes": [
+          "cabelo"
+        ],
+        "beardMeshes": []
+      },
+      "malhaBytes": 144888,
+      "texturas": {
+        "bytes": 0
+      }
+    },
+    "three-2d": {
+      "nome": "Three.js · 2D",
+      "download": {
+        "total": {
+          "raw": 1660079,
+          "gzip": 1180720,
+          "brotli": 1147941
+        },
+        "motor": {
+          "raw": 613360,
+          "gzip": 157481,
+          "brotli": 130396
+        },
+        "arte": {
+          "raw": 1046719,
+          "gzip": 1023239,
+          "brotli": 1017545
+        },
+        "arquivos": [
+          {
+            "caminho": "index.html",
+            "grupo": "motor",
+            "raw": 3686,
+            "gzip": 1345,
+            "brotli": 1089
+          },
+          {
+            "caminho": "main.js",
+            "grupo": "motor",
+            "raw": 12188,
+            "gzip": 5119,
+            "brotli": 4690
+          },
+          {
+            "caminho": "pedaco-chunk-BSLO6YE6.js",
+            "grupo": "motor",
+            "raw": 716,
+            "gzip": 334,
+            "brotli": 314
+          },
+          {
+            "caminho": "pedaco-chunk-R4LMTHW6.js",
+            "grupo": "motor",
+            "raw": 180,
+            "gzip": 159,
+            "brotli": 124
+          },
+          {
+            "caminho": "pedaco-view2d-L3E7FZWX.js",
+            "grupo": "motor",
+            "raw": 6022,
+            "gzip": 2844,
+            "brotli": 2630
+          },
+          {
+            "caminho": "pedaco-chunk-RT5PCAVZ.js",
+            "grupo": "motor",
+            "raw": 590568,
+            "gzip": 147680,
+            "brotli": 121549
+          },
+          {
+            "caminho": "assets/2d/sprites.json",
+            "grupo": "arte",
+            "raw": 1109,
+            "gzip": 384,
+            "brotli": 340
+          },
+          {
+            "caminho": "assets/2d/sprites/idle.png",
+            "grupo": "arte",
+            "raw": 73186,
+            "gzip": 71123,
+            "brotli": 70863
+          },
+          {
+            "caminho": "assets/2d/sprites/walk.png",
+            "grupo": "arte",
+            "raw": 207098,
+            "gzip": 200865,
+            "brotli": 199236
+          },
+          {
+            "caminho": "assets/2d/sprites/run.png",
+            "grupo": "arte",
+            "raw": 189518,
+            "gzip": 184467,
+            "brotli": 183186
+          },
+          {
+            "caminho": "assets/2d/sprites/jump.png",
+            "grupo": "arte",
+            "raw": 176799,
+            "gzip": 174783,
+            "brotli": 174183
+          },
+          {
+            "caminho": "assets/2d/sprites/lie.png",
+            "grupo": "arte",
+            "raw": 173150,
+            "gzip": 170567,
+            "brotli": 169788
+          },
+          {
+            "caminho": "assets/2d/sprites/crouch.png",
+            "grupo": "arte",
+            "raw": 113594,
+            "gzip": 111142,
+            "brotli": 110639
+          },
+          {
+            "caminho": "assets/2d/sprites/sit.png",
+            "grupo": "arte",
+            "raw": 112265,
+            "gzip": 109908,
+            "brotli": 109310
+          }
+        ]
+      },
+      "primeiroQuadroMs": {
+        "mediana": 178,
+        "min": 167,
+        "max": 185,
+        "rodadas": [
+          183,
+          178,
+          185,
+          167,
+          172
+        ]
+      },
+      "desenho": {
+        "chamadas": 5,
+        "triangulos": 76
+      },
+      "texturas": {
+        "folhas": 7,
+        "bytes": 52428800,
+        "comVarianteB": {
+          "folhas": 8,
+          "bytes": 62914560
+        }
+      }
+    },
+    "godot-3d": {
+      "nome": "Godot · 3D",
+      "download": {
+        "total": {
+          "raw": 41157647,
+          "gzip": 11559297,
+          "brotli": 8291543
+        },
+        "motor": {
+          "raw": 39831735,
+          "gzip": 10247739,
+          "brotli": 6986230
+        },
+        "arte": {
+          "raw": 1325912,
+          "gzip": 1311558,
+          "brotli": 1305313
+        },
+        "arquivos": [
+          {
+            "caminho": "index.html",
+            "grupo": "motor",
+            "raw": 5452,
+            "gzip": 2190,
+            "brotli": 1696
+          },
+          {
+            "caminho": "index.png",
+            "grupo": "motor",
+            "raw": 21443,
+            "gzip": 19459,
+            "brotli": 19366
+          },
+          {
+            "caminho": "index.js",
+            "grupo": "motor",
+            "raw": 279815,
+            "gzip": 68917,
+            "brotli": 59854
+          },
+          {
+            "caminho": "index.wasm",
+            "grupo": "motor",
+            "raw": 39514754,
+            "gzip": 10153810,
+            "brotli": 6902599
+          },
+          {
+            "caminho": "index.pck",
+            "grupo": "arte",
+            "raw": 1325912,
+            "gzip": 1311558,
+            "brotli": 1305313
+          },
+          {
+            "caminho": "index.audio.position.worklet.js",
+            "grupo": "motor",
+            "raw": 2973,
+            "gzip": 1168,
+            "brotli": 895
+          },
+          {
+            "caminho": "index.audio.worklet.js",
+            "grupo": "motor",
+            "raw": 7298,
+            "gzip": 2195,
+            "brotli": 1820
+          }
+        ]
+      },
+      "primeiroQuadroMs": {
+        "mediana": 1249,
+        "min": 1165,
+        "max": 1581,
+        "rodadas": [
+          1581,
+          1184,
+          1249,
+          1165,
+          1330
+        ]
+      },
+      "desenho": {
+        "chamadas": 6,
+        "triangulos": 3204,
+        "comInterface": {
+          "chamadas": 37,
+          "triangulos": 7068
+        }
+      },
+      "godot": {
+        "memoriaTextura": 14607811,
+        "memoriaBuffers": 15113536,
+        "memoriaVideo": 29721347,
+        "objetos": 6
+      },
+      "modelo": {
+        "clips": [
+          "idle",
+          "walk",
+          "run",
+          "jump",
+          "crouch",
+          "sit",
+          "lie"
+        ],
+        "missing": [],
+        "headBone": "head",
+        "bones": 18,
+        "materiaisCorPorVertice": 2
+      },
+      "pckSoDestaRota": {
+        "raw": 177828,
+        "gzip": 165479,
+        "brotli": 162664
+      }
+    },
+    "godot-2d": {
+      "nome": "Godot · 2D",
+      "download": {
+        "total": {
+          "raw": 41157647,
+          "gzip": 11559297,
+          "brotli": 8291543
+        },
+        "motor": {
+          "raw": 39831735,
+          "gzip": 10247739,
+          "brotli": 6986230
+        },
+        "arte": {
+          "raw": 1325912,
+          "gzip": 1311558,
+          "brotli": 1305313
+        },
+        "arquivos": [
+          {
+            "caminho": "index.html",
+            "grupo": "motor",
+            "raw": 5452,
+            "gzip": 2190,
+            "brotli": 1696
+          },
+          {
+            "caminho": "index.png",
+            "grupo": "motor",
+            "raw": 21443,
+            "gzip": 19459,
+            "brotli": 19366
+          },
+          {
+            "caminho": "index.js",
+            "grupo": "motor",
+            "raw": 279815,
+            "gzip": 68917,
+            "brotli": 59854
+          },
+          {
+            "caminho": "index.wasm",
+            "grupo": "motor",
+            "raw": 39514754,
+            "gzip": 10153810,
+            "brotli": 6902599
+          },
+          {
+            "caminho": "index.pck",
+            "grupo": "arte",
+            "raw": 1325912,
+            "gzip": 1311558,
+            "brotli": 1305313
+          },
+          {
+            "caminho": "index.audio.position.worklet.js",
+            "grupo": "motor",
+            "raw": 2973,
+            "gzip": 1168,
+            "brotli": 895
+          },
+          {
+            "caminho": "index.audio.worklet.js",
+            "grupo": "motor",
+            "raw": 7298,
+            "gzip": 2195,
+            "brotli": 1820
+          }
+        ]
+      },
+      "primeiroQuadroMs": {
+        "mediana": 1083,
+        "min": 1042,
+        "max": 1174,
+        "rodadas": [
+          1051,
+          1083,
+          1174,
+          1042,
+          1174
+        ]
+      },
+      "desenho": {
+        "chamadas": 5,
+        "triangulos": 74,
+        "canvas": {
+          "chamadas": 5,
+          "primitivas": 74
+        },
+        "comInterface": {
+          "chamadas": 36,
+          "triangulos": 3926
+        }
+      },
+      "texturas": {
+        "folhas": 7,
+        "bytes": 52428800,
+        "comVarianteB": {
+          "folhas": 8,
+          "bytes": 62914560
+        }
+      },
+      "godot": {
+        "memoriaTextura": 72813967,
+        "memoriaBuffers": 14933272,
+        "memoriaVideo": 87747239,
+        "objetos": 5
+      },
+      "pckSoDestaRota": {
+        "raw": 1204288,
+        "gzip": 1193984,
+        "brotli": 1189930
+      }
+    }
+  },
+  "arteDeOrigem": {
+    "3d": [
+      {
+        "caminho": "3d/barba.glb",
+        "raw": 11172,
+        "gzip": 4145,
+        "brotli": 3263
+      },
+      {
+        "caminho": "3d/cabelo-b.glb",
+        "raw": 21048,
+        "gzip": 6930,
+        "brotli": 4310
+      },
+      {
+        "caminho": "3d/cabelo-c.glb",
+        "raw": 13792,
+        "gzip": 5625,
+        "brotli": 4122
+      },
+      {
+        "caminho": "3d/personagem.glb",
+        "raw": 279208,
+        "gzip": 54955,
+        "brotli": 35873
+      }
+    ],
+    "2d": [
+      {
+        "caminho": "2d/sprites.json",
+        "raw": 1109,
+        "gzip": 384,
+        "brotli": 340
+      },
+      {
+        "caminho": "2d/sprites/crouch.png",
+        "raw": 113594,
+        "gzip": 111142,
+        "brotli": 110639
+      },
+      {
+        "caminho": "2d/sprites/idle.png",
+        "raw": 73186,
+        "gzip": 71123,
+        "brotli": 70863
+      },
+      {
+        "caminho": "2d/sprites/jump.png",
+        "raw": 176799,
+        "gzip": 174783,
+        "brotli": 174183
+      },
+      {
+        "caminho": "2d/sprites/lie.png",
+        "raw": 173150,
+        "gzip": 170567,
+        "brotli": 169788
+      },
+      {
+        "caminho": "2d/sprites/run.png",
+        "raw": 189518,
+        "gzip": 184467,
+        "brotli": 183186
+      },
+      {
+        "caminho": "2d/sprites/sit.png",
+        "raw": 112265,
+        "gzip": 109908,
+        "brotli": 109310
+      },
+      {
+        "caminho": "2d/sprites/walk.png",
+        "raw": 207098,
+        "gzip": 200865,
+        "brotli": 199236
+      },
+      {
+        "caminho": "2d/variante-b/walk.png",
+        "raw": 231541,
+        "gzip": 225488,
+        "brotli": 223693
+      }
+    ]
+  }
+}

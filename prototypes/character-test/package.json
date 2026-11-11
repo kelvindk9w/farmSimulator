@@ -1,0 +1,27 @@
+{
+  "name": "character-test",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Bancada de teste do personagem: 2D (sprites) x 3D (GLB), em Three.js e em Godot 4",
+  "type": "module",
+  "license": "UNLICENSED",
+  "scripts": {
+    "assets": "node tools/gerar-assets.mjs",
+    "sync": "node tools/sync.mjs",
+    "build:three": "node threejs/build.mjs",
+    "build:godot": "node tools/build-godot.mjs",
+    "build": "node threejs/build.mjs && node tools/build-godot.mjs",
+    "serve:three": "node tools/servir.mjs threejs/dist 8081",
+    "serve:godot": "node tools/servir.mjs godot/build/web 8082",
+    "verificar": "node tools/verificar.mjs",
+    "capturas": "node tools/capturar.mjs",
+    "medir": "node tools/medir.mjs"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "sharp": "^0.35.5"
+  }
+}

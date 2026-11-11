@@ -1,0 +1,91 @@
+{
+  "_nota": "Constantes de comportamento da bancada. As quatro variantes (Three.js 3D/2D e Godot 3D/2D) leem este mesmo arquivo, para que velocidade, câmera, cores e roteiro da demonstração sejam idênticos.",
+
+  "step": 0.016666666666666666,
+
+  "camera": { "yawDeg": 45, "elevDeg": 35.264, "viewUnits": 5, "lookAtY": 0.55 },
+
+  "ground": {
+    "size": 10, "gridStep": 1, "lineWidth": 0.03, "borderWidth": 0.08,
+    "color": "#8fd071", "gridColor": "#7cc160", "borderColor": "#69ad52", "background": "#e6f2f8"
+  },
+
+  "shadow": { "radius": 0.36, "opacity": 0.22 },
+
+  "light": {
+    "_nota": "Intensidades na convenção do Three.js; o Godot divide por pi. O sol vem do mesmo azimute da câmera para a luz ficar simétrica na tela (o espelhamento dos sprites não troca o lado iluminado).",
+    "sunAzDeg": 45, "sunElDeg": 58, "sunColor": "#fff4e0", "sunIntensity": 2.2,
+    "ambientColor": "#e3e9f2", "ambientIntensity": 1.4
+  },
+
+  "movement": { "walkSpeed": 1.3, "runSpeed": 3.0, "turnDegPerSec": 720, "limitE": 2.1, "limitN": 2.6, "deadzone": 0.3 },
+
+  "animations": {
+    "idle":   { "loop": true,  "hold": false, "fade": 0.2 },
+    "walk":   { "loop": true,  "hold": false, "fade": 0.2 },
+    "run":    { "loop": true,  "hold": false, "fade": 0.2 },
+    "jump":   { "loop": false, "hold": false, "fade": 0.1 },
+    "crouch": { "loop": false, "hold": true,  "fade": 0.15 },
+    "sit":    { "loop": false, "hold": true,  "fade": 0.15 },
+    "lie":    { "loop": false, "hold": true,  "fade": 0.15 }
+  },
+  "standUpFade": 0.25,
+
+  "sprites": {
+    "_nota": "Valores do contrato usados quando o sprites.json não informa. pixelsPerUnit converte pixels da folha em unidades de mundo (personagem de 1,6 unidade com cerca de 200 px de altura na vista do jogo).",
+    "json": "sprites.json",
+    "variantWalk": "variante-b/walk.png",
+    "pixelsPerUnit": 138,
+    "cell": [256, 256],
+    "anchor": [128, 232],
+    "directions": ["S", "SE", "E", "NE", "N"],
+    "defaults": {
+      "idle":   { "frames": 4, "fps": 2 },
+      "walk":   { "frames": 8, "fps": 10 },
+      "run":    { "frames": 8, "fps": 15 },
+      "jump":   { "frames": 6, "fps": 8 },
+      "crouch": { "frames": 4, "fps": 10 },
+      "sit":    { "frames": 4, "fps": 8 },
+      "lie":    { "frames": 6, "fps": 6 }
+    }
+  },
+
+  "model": {
+    "_nota": "headBone e os nomes de malha aceitam 'auto' (procura por 'head'/'cabeca', 'hair'/'cabelo', 'beard'/'barba', sem diferenciar maiúsculas) ou o nome exato. pieceSpace diz em que espaço as peças avulsas foram exportadas: 'model' (na altura da cabeça do modelo em pé), 'bone' (relativas ao osso da cabeça) ou 'auto'.",
+    "file": "personagem.glb",
+    "headBone": "auto",
+    "hairMesh": "auto",
+    "beardMesh": "auto",
+    "pieceSpace": "auto",
+    "hairs": { "B": "cabelo-b.glb", "C": "cabelo-c.glb" },
+    "beard": "barba.glb"
+  },
+
+  "demo": {
+    "_nota": "Roteiro fixo, em passos de 1/60 s. move = direção de tela (N, NE, E, SE, S, SW, W, NW); press = tecla de ação apertada no primeiro passo.",
+    "start": { "e": -0.65, "n": 1.569, "dir": "S" },
+    "steps": [
+      { "frames": 45, "label": "parado" },
+      { "frames": 60, "move": "E",  "label": "andar · L" },
+      { "frames": 60, "move": "SE", "label": "andar · SE" },
+      { "frames": 60, "move": "S",  "label": "andar · S" },
+      { "frames": 60, "move": "SW", "label": "andar · SO" },
+      { "frames": 60, "move": "W",  "label": "andar · O" },
+      { "frames": 60, "move": "NW", "label": "andar · NO" },
+      { "frames": 60, "move": "N",  "label": "andar · N" },
+      { "frames": 60, "move": "NE", "label": "andar · NE" },
+      { "frames": 30, "label": "parado" },
+      { "frames": 48, "move": "E",  "run": true, "label": "correr · L" },
+      { "frames": 66, "move": "W",  "run": true, "label": "correr · O" },
+      { "frames": 44, "move": "SE", "run": true, "label": "correr · SE" },
+      { "frames": 30, "label": "parado" },
+      { "frames": 60, "press": "jump",   "label": "pular" },
+      { "frames": 84, "press": "crouch", "label": "agachar" },
+      { "frames": 30, "press": "crouch", "label": "levantar" },
+      { "frames": 96, "press": "sit",    "label": "sentar" },
+      { "frames": 30, "press": "sit",    "label": "levantar" },
+      { "frames": 150, "press": "lie",   "label": "deitar" },
+      { "frames": 60, "press": "lie",    "label": "levantar" }
+    ]
+  }
+}

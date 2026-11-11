@@ -1,0 +1,12 @@
+# dependências e saídas de build (tudo isto é recriado pelos comandos do README)
+node_modules/
+threejs/dist/
+godot/.godot/
+godot/build/
+# cópias dos pacotes de arte e da configuração que o Godot precisa ter dentro do projeto
+# (a fonte fica em assets/ e config/; tools/sync.mjs recria estas pastas)
+godot/assets/
+godot/config/
+# temporários de captura e medição
+capturas/tmp/
+*.tmp

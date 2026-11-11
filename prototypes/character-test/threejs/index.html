@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Teste de personagem · Three.js</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #e6f2f8; }
+  body { font: 14px/1.3 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #1f2a30; -webkit-user-select: none; user-select: none; touch-action: none; }
+  #tela { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  #hud { position: fixed; inset: 0; pointer-events: none; }
+  #hud > * { pointer-events: auto; }
+  .canto { position: absolute; display: flex; flex-direction: column; gap: 4px; pointer-events: none !important; }
+  .canto button { pointer-events: auto; }
+  .topo-esq { left: calc(10px + env(safe-area-inset-left)); top: calc(10px + env(safe-area-inset-top)); align-items: flex-start; max-width: 60vw; }
+  .topo-dir { right: calc(10px + env(safe-area-inset-right)); top: calc(10px + env(safe-area-inset-top)); align-items: flex-end; }
+  .rotulo { background: #1f2a30; color: #fff; font-weight: 700; font-size: 16px; padding: 6px 12px; border-radius: 999px; }
+  .linha { background: rgba(255, 255, 255, .78); padding: 2px 8px; border-radius: 8px; font-size: 12px; }
+  .linha:empty { display: none; }
+  .fila { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  button { font: inherit; font-weight: 600; color: #1f2a30; background: rgba(255, 255, 255, .9); border: 2px solid #1f2a30; border-radius: 12px; padding: 8px 12px; min-height: 40px; cursor: pointer; touch-action: none; }
+  button:active, button.ligado { background: #1f2a30; color: #fff; }
+  .manche { position: absolute; left: calc(18px + env(safe-area-inset-left)); bottom: calc(18px + env(safe-area-inset-bottom)); width: 132px; height: 132px; border-radius: 50%; background: rgba(255, 255, 255, .55); border: 2px solid rgba(31, 42, 48, .7); touch-action: none; }
+  .pino { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; background: #1f2a30; opacity: .85; pointer-events: none; }
+  .acoes { position: absolute; right: calc(14px + env(safe-area-inset-right)); bottom: calc(18px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(3, auto); gap: 8px; justify-items: stretch; }
+  .acoes button { min-width: 84px; min-height: 48px; }
+  .acao-run { grid-column: 1 / span 3; }
+  .acao-jump { grid-column: 3; grid-row: 2 / span 2; }
+  .legenda { background: #2f6f3e; color: #fff; padding: 3px 10px; border-radius: 999px; font-weight: 600; font-size: 13px; }
+  .legenda:empty { display: none; }
+  .mensagem { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: rgba(255, 255, 255, .9); padding: 10px 16px; border-radius: 12px; font-weight: 600; pointer-events: none !important; }
+  @media (pointer: coarse) { .ajuda { display: none; } }
+  /* tela estreita: o rótulo desce para baixo da fileira de botões e as ações ficam em duas colunas */
+  @media (max-width: 599px) {
+    .com-controles .topo-esq { top: calc(56px + env(safe-area-inset-top)); }
+    .topo-dir .linha { margin-top: 6px; }
+  }
+  @media (max-width: 479px) {
+    .acoes { grid-template-columns: repeat(2, auto); }
+    .acao-run { grid-column: 1 / span 2; }
+    .acao-jump { grid-column: 2; grid-row: 3; }
+  }
+  .sem-controles .manche, .sem-controles .acoes, .sem-controles .topo-dir, .sem-controles .ajuda { display: none; }
+</style>
+</head>
+<body>
+<canvas id="tela"></canvas>
+<div id="hud"></div>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

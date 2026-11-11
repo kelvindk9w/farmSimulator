@@ -1,0 +1,62 @@
+{
+  "_nota": "PROVISÓRIO: folhas renderizadas a partir do avatar feito em código (tools/gerar-assets.mjs). Trocar pelo pacote do gerador de arte.",
+  "cell": {
+    "width": 256,
+    "height": 256
+  },
+  "anchor": {
+    "x": 128,
+    "y": 232
+  },
+  "directions": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N"
+  ],
+  "animations": {
+    "idle": {
+      "file": "sprites/idle.png",
+      "frames": 4,
+      "fps": 2,
+      "loop": true
+    },
+    "walk": {
+      "file": "sprites/walk.png",
+      "frames": 8,
+      "fps": 10,
+      "loop": true
+    },
+    "run": {
+      "file": "sprites/run.png",
+      "frames": 8,
+      "fps": 15,
+      "loop": true
+    },
+    "jump": {
+      "file": "sprites/jump.png",
+      "frames": 6,
+      "fps": 8,
+      "loop": false
+    },
+    "crouch": {
+      "file": "sprites/crouch.png",
+      "frames": 4,
+      "fps": 10,
+      "loop": false
+    },
+    "sit": {
+      "file": "sprites/sit.png",
+      "frames": 4,
+      "fps": 8,
+      "loop": false
+    },
+    "lie": {
+      "file": "sprites/lie.png",
+      "frames": 6,
+      "fps": 6,
+      "loop": false
+    }
+  }
+}

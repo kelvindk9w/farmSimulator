@@ -1,0 +1,47 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Teste de personagem"
+config/description="Bancada de teste do personagem: 2D (sprites) x 3D (GLB) em Godot 4."
+run/main_scene="res://cenas/boot.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+boot_splash/bg_color=Color(0.902, 0.949, 0.973, 1)
+boot_splash/show_image=false
+
+[autoload]
+
+Bench="*res://scripts/bench.gd"
+
+[display]
+
+window/size/viewport_width=960
+window/size/viewport_height=600
+window/stretch/mode="disabled"
+
+[importer_defaults]
+
+texture={
+"process/fix_alpha_border": false,
+"process/premult_alpha": true
+}
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=false
+anti_aliasing/quality/msaa_3d=2
+environment/defaults/default_clear_color=Color(0.902, 0.949, 0.973, 1)
