@@ -1,6 +1,6 @@
 // Rota 3D em Three.js: GLB com esqueleto, AnimationMixer e transições suaves entre clipes.
 import {
-  CircleGeometry, Color, DoubleSide, Group, Mesh, MeshBasicMaterial, OrthographicCamera, Scene, SRGBColorSpace, WebGLRenderer,
+  CircleGeometry, Color, ColorManagement, DoubleSide, Group, Mesh, MeshBasicMaterial, OrthographicCamera, Scene, SRGBColorSpace, WebGLRenderer,
 } from 'three';
 import { Character3D } from './character3d.js';
 import { addBenchLights } from './lights.js';
@@ -13,6 +13,7 @@ export class View {
 
   async init(canvas, cfg, iso, assets) {
     this.cfg = cfg; this.iso = iso;
+    ColorManagement.enabled = true; // a rota 2D desliga; ao voltar para o 3D na mesma página é preciso religar
     const r = this.renderer = new WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
     r.outputColorSpace = SRGBColorSpace;
     const scene = this.scene = new Scene();
@@ -58,6 +59,8 @@ export class View {
     cam.lookAt(0, C.lookAtY, 0);
     cam.updateProjectionMatrix();
   }
+
+  dispose() { this.renderer.dispose(); this.renderer.forceContextLoss(); }
 
   // chamado a cada passo da simulação
   step(sim, dt) {

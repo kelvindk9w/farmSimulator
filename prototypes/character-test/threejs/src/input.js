@@ -6,7 +6,7 @@ const KEYS = {
 const PRESS = { Space: 'jump', KeyC: 'crouch', KeyX: 'sit', KeyZ: 'lie' };
 
 export class Input {
-  constructor(hud) {
+  constructor(hud, signal) {
     this.down = new Set();
     this.queue = []; // ações apertadas, uma por passo da simulação
     this.stick = { x: 0, y: 0 };
@@ -16,9 +16,9 @@ export class Input {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       if (KEYS[e.code]) { this.down.add(KEYS[e.code]); e.preventDefault(); }
       else if (PRESS[e.code]) { if (!e.repeat) this.queue.push(PRESS[e.code]); e.preventDefault(); }
-    });
-    addEventListener('keyup', (e) => { if (KEYS[e.code]) this.down.delete(KEYS[e.code]); });
-    addEventListener('blur', () => { this.down.clear(); this.stick.x = this.stick.y = 0; });
+    }, { signal });
+    addEventListener('keyup', (e) => { if (KEYS[e.code]) this.down.delete(KEYS[e.code]); }, { signal });
+    addEventListener('blur', () => { this.down.clear(); this.stick.x = this.stick.y = 0; }, { signal });
 
     // alavanca
     const base = hud.stick, knob = hud.knob;

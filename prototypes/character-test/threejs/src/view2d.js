@@ -92,6 +92,8 @@ export class View {
     this.world.position.y = -C.lookAtY * this.iso.cosE * ppu; // mesmo enquadramento da câmera 3D
   }
 
+  dispose() { this.renderer.dispose(); this.renderer.forceContextLoss(); }
+
   step() { /* nada: o quadro sai direto do relógio da simulação */ }
 
   render(sim) {

@@ -43,8 +43,9 @@ Endereços (valem para as duas portas):
 | `/?modo=2d&demo=1` | roteiro fixo de demonstração: anda nas 8 direções, corre, pula, agacha, senta, deita |
 | `&visual=N` | começa com o visual N (3D: 0–5 = cabelo A/B/C, depois os mesmos com barba; 2D: 0 = A, 1 = B) |
 | `&ui=0` | esconde os controles de toque e os botões; `&hud=0` esconde tudo |
+| `/#modo-2d`, `/#modo-3d` | só no Three.js: o modo também pode vir depois do `#`, para páginas embutidas que não aceitam `?` |
 
-Controles: **WASD ou setas** andam, **Shift** corre, **Espaço** pula, **C** agacha, **X** senta, **Z** deita; qualquer tecla de movimento levanta. No toque: alavanca à esquerda e botões à direita ("Correr" liga e desliga). No alto da tela: **Ver em 2D/3D**, **Trocar visual** (o teste de personalização) e **Demonstração**.
+Controles: **WASD ou setas** andam, **Shift** corre, **Espaço** pula, **C** agacha, **X** senta, **Z** deita; qualquer tecla de movimento levanta. No toque: alavanca à esquerda e botões à direita ("Correr" liga e desliga). No alto da tela: **Ver em 2D/3D**, **Trocar visual** (o teste de personalização) e **Demonstração**. No Three.js, **Ver em 2D/3D** troca na própria página, sem recarregar (encerra o modo atual e libera o contexto WebGL antes de iniciar o outro); no Godot, troca de cena, também sem recarregar.
 
 O projeto Godot também abre no editor (`godot/project.godot`), mas rode `node tools/sync.mjs` antes: ele copia `assets/` e `config/` para dentro do projeto (essas cópias não vão para o git). No computador as opções vão depois de `--`: `godot --path godot -- --modo=2d --demo`.
 
@@ -113,12 +114,12 @@ Nas capturas as quatro variantes rodam em modo "passo": a ferramenta manda avan�
 <!-- medidas:inicio -->
 | | Three.js · 3D | Three.js · 2D | Godot · 3D | Godot · 2D |
 |---|---:|---:|---:|---:|
-| **Download para começar** (bruto / gzip / brotli) | **919 KB / 221 KB / 175 KB** | **1,58 MB / 1,13 MB / 1,09 MB** | **39,25 MB / 11,02 MB / 7,91 MB** | **39,25 MB / 11,02 MB / 7,91 MB** |
-| — motor e código | 646 KB / 168 KB / 140 KB | 599 KB / 154 KB / 127 KB | 37,99 MB / 9,77 MB / 6,66 MB | 37,99 MB / 9,77 MB / 6,66 MB |
+| **Download para começar** (bruto / gzip / brotli) | **919 KB / 222 KB / 175 KB** | **1,58 MB / 1,13 MB / 1,10 MB** | **39,25 MB / 11,02 MB / 7,91 MB** | **39,25 MB / 11,02 MB / 7,91 MB** |
+| — motor e código | 647 KB / 168 KB / 140 KB | 600 KB / 154 KB / 128 KB | 37,99 MB / 9,77 MB / 6,66 MB | 37,99 MB / 9,77 MB / 6,66 MB |
 | — arte e dados | 273 KB / 54 KB / 35 KB | 1,00 MB / 999 KB / 994 KB | 1,26 MB / 1,25 MB / 1,24 MB | 1,26 MB / 1,25 MB / 1,24 MB |
 | — arquivos buscados | 7 | 14 | 7 | 7 |
 | Godot: `.pck` se só esta rota fosse publicada | — | — | 174 KB / 162 KB / 159 KB | 1,15 MB / 1,14 MB / 1,13 MB |
-| **Primeiro quadro** (mediana de 5; mín–máx) | **255 ms** (243–387) | **178 ms** (167–185) | **1249 ms** (1165–1581) | **1083 ms** (1042–1174) |
+| **Primeiro quadro** (mediana de 5; mín–máx) | **260 ms** (228–320) | **155 ms** (146–169) | **1205 ms** (1179–1650) | **1126 ms** (1019–1173) |
 | Chamadas de desenho por quadro (só a cena) | 6 | 5 | 6 | 5 |
 | Triângulos por quadro (só a cena) | 3.176 | 76 | 3.204 | 74 |
 | — com a interface do próprio motor | interface em HTML (fora da conta) | interface em HTML (fora da conta) | 37 chamadas, 7.068 triângulos | 36 chamadas, 3.926 triângulos |
@@ -133,10 +134,10 @@ Medido em 2026-11-11 · Chromium 153.0.8010.12 sem tela · WebGL: ANGLE (Google,
 | arquivo | grupo | bruto | gzip | brotli |
 |---|---|---:|---:|---:|
 | `index.html` | motor | 3,6 KB | 1,3 KB | 1,1 KB |
-| `main.js` | motor | 12 KB | 5 KB | 4,6 KB |
+| `main.js` | motor | 13 KB | 5,3 KB | 4,9 KB |
 | `pedaco-chunk-BSLO6YE6.js` | motor | 0,7 KB | 0,3 KB | 0,3 KB |
 | `pedaco-chunk-R4LMTHW6.js` | motor | 0,2 KB | 0,2 KB | 0,1 KB |
-| `pedaco-view3d-SHBKCIRB.js` | motor | 53 KB | 17 KB | 15 KB |
+| `pedaco-view3d-CVPPN4PT.js` | motor | 53 KB | 17 KB | 15 KB |
 | `pedaco-chunk-RT5PCAVZ.js` | motor | 577 KB | 144 KB | 119 KB |
 | `assets/3d/personagem.glb` | arte | 273 KB | 54 KB | 35 KB |
 
@@ -145,19 +146,19 @@ Medido em 2026-11-11 · Chromium 153.0.8010.12 sem tela · WebGL: ANGLE (Google,
 | arquivo | grupo | bruto | gzip | brotli |
 |---|---|---:|---:|---:|
 | `index.html` | motor | 3,6 KB | 1,3 KB | 1,1 KB |
-| `main.js` | motor | 12 KB | 5 KB | 4,6 KB |
+| `main.js` | motor | 13 KB | 5,3 KB | 4,9 KB |
 | `pedaco-chunk-BSLO6YE6.js` | motor | 0,7 KB | 0,3 KB | 0,3 KB |
 | `pedaco-chunk-R4LMTHW6.js` | motor | 0,2 KB | 0,2 KB | 0,1 KB |
-| `pedaco-view2d-L3E7FZWX.js` | motor | 5,9 KB | 2,8 KB | 2,6 KB |
+| `pedaco-view2d-DN2G62ZQ.js` | motor | 5,9 KB | 2,8 KB | 2,6 KB |
 | `pedaco-chunk-RT5PCAVZ.js` | motor | 577 KB | 144 KB | 119 KB |
 | `assets/2d/sprites.json` | arte | 1,1 KB | 0,4 KB | 0,3 KB |
 | `assets/2d/sprites/idle.png` | arte | 71 KB | 69 KB | 69 KB |
 | `assets/2d/sprites/walk.png` | arte | 202 KB | 196 KB | 195 KB |
 | `assets/2d/sprites/run.png` | arte | 185 KB | 180 KB | 179 KB |
 | `assets/2d/sprites/jump.png` | arte | 173 KB | 171 KB | 170 KB |
-| `assets/2d/sprites/lie.png` | arte | 169 KB | 167 KB | 166 KB |
 | `assets/2d/sprites/crouch.png` | arte | 111 KB | 109 KB | 108 KB |
 | `assets/2d/sprites/sit.png` | arte | 110 KB | 107 KB | 107 KB |
+| `assets/2d/sprites/lie.png` | arte | 169 KB | 167 KB | 166 KB |
 
 **Godot · 3D**
 

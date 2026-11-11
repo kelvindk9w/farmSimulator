@@ -1,5 +1,5 @@
 {
-  "gerado": "2026-11-11T20:39:34.165Z",
+  "gerado": "2026-11-11T20:48:00.486Z",
   "aviso": "Tempos medidos no Chromium sem tela, com WebGL por software (sem placa de vídeo), num servidor, com os arquivos vindos de 127.0.0.1 sem compressão. Servem para comparar as variantes entre si nesta máquina; NÃO são desempenho de celular.",
   "ambiente": {
     "webgl": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
@@ -21,14 +21,14 @@
       "nome": "Three.js · 3D",
       "download": {
         "total": {
-          "raw": 940718,
-          "gzip": 226498,
-          "brotli": 178874
+          "raw": 941509,
+          "gzip": 226888,
+          "brotli": 179189
         },
         "motor": {
-          "raw": 661510,
-          "gzip": 171543,
-          "brotli": 143001
+          "raw": 662301,
+          "gzip": 171933,
+          "brotli": 143316
         },
         "arte": {
           "raw": 279208,
@@ -46,9 +46,9 @@
           {
             "caminho": "main.js",
             "grupo": "motor",
-            "raw": 12188,
-            "gzip": 5119,
-            "brotli": 4690
+            "raw": 12898,
+            "gzip": 5476,
+            "brotli": 5023
           },
           {
             "caminho": "pedaco-chunk-BSLO6YE6.js",
@@ -65,11 +65,11 @@
             "brotli": 124
           },
           {
-            "caminho": "pedaco-view3d-SHBKCIRB.js",
+            "caminho": "pedaco-view3d-CVPPN4PT.js",
             "grupo": "motor",
-            "raw": 54172,
-            "gzip": 16906,
-            "brotli": 15235
+            "raw": 54253,
+            "gzip": 16939,
+            "brotli": 15217
           },
           {
             "caminho": "pedaco-chunk-RT5PCAVZ.js",
@@ -88,15 +88,15 @@
         ]
       },
       "primeiroQuadroMs": {
-        "mediana": 255,
-        "min": 243,
-        "max": 387,
+        "mediana": 260,
+        "min": 228,
+        "max": 320,
         "rodadas": [
-          387,
-          255,
-          244,
-          243,
-          259
+          320,
+          257,
+          260,
+          228,
+          270
         ]
       },
       "desenho": {
@@ -132,14 +132,14 @@
       "nome": "Three.js · 2D",
       "download": {
         "total": {
-          "raw": 1660079,
-          "gzip": 1180720,
-          "brotli": 1147941
+          "raw": 1660856,
+          "gzip": 1181103,
+          "brotli": 1148284
         },
         "motor": {
-          "raw": 613360,
-          "gzip": 157481,
-          "brotli": 130396
+          "raw": 614137,
+          "gzip": 157864,
+          "brotli": 130739
         },
         "arte": {
           "raw": 1046719,
@@ -157,9 +157,9 @@
           {
             "caminho": "main.js",
             "grupo": "motor",
-            "raw": 12188,
-            "gzip": 5119,
-            "brotli": 4690
+            "raw": 12898,
+            "gzip": 5476,
+            "brotli": 5023
           },
           {
             "caminho": "pedaco-chunk-BSLO6YE6.js",
@@ -176,11 +176,11 @@
             "brotli": 124
           },
           {
-            "caminho": "pedaco-view2d-L3E7FZWX.js",
+            "caminho": "pedaco-view2d-DN2G62ZQ.js",
             "grupo": "motor",
-            "raw": 6022,
-            "gzip": 2844,
-            "brotli": 2630
+            "raw": 6089,
+            "gzip": 2870,
+            "brotli": 2640
           },
           {
             "caminho": "pedaco-chunk-RT5PCAVZ.js",
@@ -225,13 +225,6 @@
             "brotli": 174183
           },
           {
-            "caminho": "assets/2d/sprites/lie.png",
-            "grupo": "arte",
-            "raw": 173150,
-            "gzip": 170567,
-            "brotli": 169788
-          },
-          {
             "caminho": "assets/2d/sprites/crouch.png",
             "grupo": "arte",
             "raw": 113594,
@@ -244,19 +237,26 @@
             "raw": 112265,
             "gzip": 109908,
             "brotli": 109310
+          },
+          {
+            "caminho": "assets/2d/sprites/lie.png",
+            "grupo": "arte",
+            "raw": 173150,
+            "gzip": 170567,
+            "brotli": 169788
           }
         ]
       },
       "primeiroQuadroMs": {
-        "mediana": 178,
-        "min": 167,
-        "max": 185,
+        "mediana": 155,
+        "min": 146,
+        "max": 169,
         "rodadas": [
-          183,
-          178,
-          185,
-          167,
-          172
+          146,
+          169,
+          151,
+          166,
+          155
         ]
       },
       "desenho": {
@@ -343,15 +343,15 @@
         ]
       },
       "primeiroQuadroMs": {
-        "mediana": 1249,
-        "min": 1165,
-        "max": 1581,
+        "mediana": 1205,
+        "min": 1179,
+        "max": 1650,
         "rodadas": [
-          1581,
-          1184,
-          1249,
-          1165,
-          1330
+          1650,
+          1186,
+          1179,
+          1205,
+          1287
         ]
       },
       "desenho": {
@@ -364,8 +364,8 @@
       },
       "godot": {
         "memoriaTextura": 14607811,
-        "memoriaBuffers": 15113536,
-        "memoriaVideo": 29721347,
+        "memoriaBuffers": 17243728,
+        "memoriaVideo": 31851539,
         "objetos": 6
       },
       "modelo": {
@@ -460,15 +460,15 @@
         ]
       },
       "primeiroQuadroMs": {
-        "mediana": 1083,
-        "min": 1042,
-        "max": 1174,
+        "mediana": 1126,
+        "min": 1019,
+        "max": 1173,
         "rodadas": [
-          1051,
-          1083,
-          1174,
-          1042,
-          1174
+          1019,
+          1148,
+          1173,
+          1126,
+          1060
         ]
       },
       "desenho": {
@@ -493,8 +493,8 @@
       },
       "godot": {
         "memoriaTextura": 72813967,
-        "memoriaBuffers": 14933272,
-        "memoriaVideo": 87747239,
+        "memoriaBuffers": 10672888,
+        "memoriaVideo": 83486855,
         "objetos": 5
       },
       "pckSoDestaRota": {
