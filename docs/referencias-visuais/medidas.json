@@ -1,0 +1,207 @@
+{
+  "js_three": {
+    "minKB": 579.5,
+    "gzipKB": 147.5,
+    "brotliKB": 121.5,
+    "bytesDoThree": 592456,
+    "bytesProprios": 0,
+    "simbolosThree": 47
+  },
+  "js_app": {
+    "minKB": 672.3,
+    "gzipKB": 179.1,
+    "brotliKB": 148.4,
+    "bytesDoThree": 588749,
+    "bytesProprios": 99687
+  },
+  "three_versao": "187",
+  "cenaA": {
+    "comSombra": {
+      "calls": 111,
+      "triangles": 262282
+    },
+    "semSombra": {
+      "calls": 59,
+      "triangles": 149172
+    },
+    "meshes": 59,
+    "instanced": 51,
+    "instances": 783,
+    "geometries": 59,
+    "textures": 5
+  },
+  "cenaB": {
+    "comSombra": {
+      "calls": 114,
+      "triangles": 267294
+    },
+    "semSombra": {
+      "calls": 62,
+      "triangles": 154184
+    },
+    "meshes": 62,
+    "instanced": 51,
+    "instances": 783,
+    "geometries": 121,
+    "textures": 10
+  },
+  "cena2D": {
+    "tiposDeSprite": 152,
+    "imagens": 249,
+    "megapixels": 28.47,
+    "vramMB": 108.6,
+    "instancias": 1523,
+    "objetosDesenhados": 826,
+    "pngMB": 1.28
+  },
+  "avatar": {
+    "info": {
+      "triangulos": 2634,
+      "vertices": 2111,
+      "ossos": 18,
+      "clipes": 10,
+      "chavesDeAnimacao": 1654,
+      "duracaoTotal": 9.799999999999999
+    },
+    "comAnimacoes": {
+      "glbKB": 232.3,
+      "glbGzipKB": 47.4,
+      "otimizadoKB": 65.5,
+      "otimizadoGzipKB": 28.4
+    },
+    "soMalha": {
+      "glbKB": 144.2,
+      "glbGzipKB": 28.8,
+      "otimizadoKB": 27,
+      "otimizadoGzipKB": 15.6
+    },
+    "animacoesKB": 88.1,
+    "animacoesOtimizadasGzipKB": 12.8,
+    "visuais": {
+      "leo": {
+        "triangulos": 2480,
+        "vertices": 1878,
+        "glbKB": 129.6,
+        "glbGzipKB": 26.3,
+        "otimizadoKB": 24.8,
+        "otimizadoGzipKB": 13.5
+      },
+      "bia": {
+        "triangulos": 2974,
+        "vertices": 2360,
+        "glbKB": 160.8,
+        "glbGzipKB": 31.5,
+        "otimizadoKB": 29.4,
+        "otimizadoGzipKB": 16.6
+      },
+      "junino": {
+        "triangulos": 2478,
+        "vertices": 1902,
+        "glbKB": 131,
+        "glbGzipKB": 26.8,
+        "otimizadoKB": 25.3,
+        "otimizadoGzipKB": 14.6
+      },
+      "boiadeira": {
+        "triangulos": 2572,
+        "vertices": 1927,
+        "glbKB": 133,
+        "glbGzipKB": 27.7,
+        "otimizadoKB": 25.8,
+        "otimizadoGzipKB": 15.1
+      },
+      "chuva": {
+        "triangulos": 2396,
+        "vertices": 1908,
+        "glbKB": 130.9,
+        "glbGzipKB": 25.7,
+        "otimizadoKB": 24.9,
+        "otimizadoGzipKB": 13.7
+      },
+      "base": {
+        "triangulos": 1834,
+        "vertices": 1326,
+        "glbKB": 93.5,
+        "glbGzipKB": 18.9,
+        "otimizadoKB": 19.2,
+        "otimizadoGzipKB": 10.2
+      }
+    }
+  },
+  "cenario3D": {
+    "triangulos": 37318,
+    "modelos": 116,
+    "glbKB": 3000,
+    "glbGzipKB": 731.6,
+    "otimizadoKB": 794.6,
+    "otimizadoGzipKB": 371.4
+  },
+  "sprites": {
+    "celula128": {
+      "quadrosPorDirecao": 68,
+      "animacoes": {
+        "parado": 8,
+        "andar": 8,
+        "correr": 8,
+        "pular": 6,
+        "agachar": 4,
+        "sentar": 4,
+        "deitar": 6,
+        "regar": 8,
+        "colher": 8,
+        "carregar": 8
+      },
+      "semEspelho": {
+        "direcoesRenderizadas": 8,
+        "quadros": 544,
+        "png32MB": 0.67,
+        "png8MB": 0.7,
+        "webp90MB": 0.8,
+        "vramMB": 34,
+        "vramRecortadoMB": 8.9
+      },
+      "comEspelho": {
+        "direcoesRenderizadas": 5,
+        "quadros": 340,
+        "png32MB": 0.42,
+        "png8MB": 0.43,
+        "webp90MB": 0.5,
+        "vramMB": 21.3,
+        "vramRecortadoMB": 5.5
+      }
+    },
+    "celula256": {
+      "quadrosPorDirecao": 68,
+      "animacoes": {
+        "parado": 8,
+        "andar": 8,
+        "correr": 8,
+        "pular": 6,
+        "agachar": 4,
+        "sentar": 4,
+        "deitar": 6,
+        "regar": 8,
+        "colher": 8,
+        "carregar": 8
+      },
+      "semEspelho": {
+        "direcoesRenderizadas": 8,
+        "quadros": 544,
+        "png32MB": 1.8,
+        "png8MB": 1.88,
+        "webp90MB": 1.9,
+        "vramMB": 136,
+        "vramRecortadoMB": 35.1
+      },
+      "comEspelho": {
+        "direcoesRenderizadas": 5,
+        "quadros": 340,
+        "png32MB": 1.12,
+        "png8MB": 1.17,
+        "webp90MB": 1.19,
+        "vramMB": 85,
+        "vramRecortadoMB": 21.7
+      }
+    }
+  }
+}
