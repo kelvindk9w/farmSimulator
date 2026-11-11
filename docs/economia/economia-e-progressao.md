@@ -993,7 +993,7 @@ Cada linha traz o padrão recomendado e o teste que o mudaria.
 |---|---|---|
 | Teto de conteúdo no lançamento web | Nível 60 | Se, no lançamento suave, os 5% mais ativos passarem do nível 42 no dia 30, endurecer o trecho 30–60 com `calibrar.py` antes de abrir mais países |
 | Conteúdo do MVP | Níveis 1 a 30, com maestria e vila já ligadas | Se testadores do alfa chegarem ao nível 30 antes do dia 12, antecipar os níveis 31 a 36 |
-| Curva de XP | `5 × L^1,8` até o 4; expoentes 3,3, 2,2 e 2,8 nos trechos seguintes | Mediana real fora da meta em mais de 2 níveis no dia 7 ou no dia 30: recalibrar |
+| Curva de XP | `5 × L^1,8` até o 4; expoentes 3,35, 2,3 e 2,8 nos trechos seguintes | Mediana real fora da meta em mais de 2 níveis no dia 7 ou no dia 30: recalibrar |
 | Níveis de mestre | 3,25 vezes o XP do nível 60, mais 2% por nível | Engajados reais ganhando mais de 2,5 ou menos de 1,5 nível por mês: ajustar o fator |
 | Cadência de conteúdo | 2 níveis de mestre por mês | Se a equipe não sustentar, cair para 1 por mês e subir o fator para cerca de 6,5 |
 | Canteiros e rendimento | 48 canteiros, 3 unidades por canteiro | Sala de 4 jogadores com 48 canteiros pesada em celular intermediário: 36 canteiros com 4 unidades |
