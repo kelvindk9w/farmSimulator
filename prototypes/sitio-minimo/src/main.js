@@ -6,6 +6,7 @@
 import arteCfg from '../config/arte.json';
 import './arte/codigo/index.js';
 import './arte/molde/index.js';
+import './arte/brinquedo/index.js';
 import { listarConjuntos, rotuloDoConjunto } from './arte/registro.js';
 import { PASSO } from './jogo/util.js';
 import { NOME_ITEM, TIPOS } from './jogo/contrato.js';

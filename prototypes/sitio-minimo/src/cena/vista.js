@@ -3,7 +3,7 @@
 // Também faz a ponte entre visuais: entrega ao personagem os pontos do objeto em que ele está mexendo
 // (para a mão ir até a manivela, o úbere, a fruta...) e entrega ao objeto a posição das mãos do personagem.
 import * as THREE from 'three';
-import { criarVisual, conferirVisual, listarConjuntos, temVisual } from '../arte/registro.js';
+import { criarVisual, conferirVisual, listarConjuntos, temVisual, ambienteDoConjunto } from '../arte/registro.js';
 
 export class Vista {
   // config: { padrao: 'codigo', porTipo: { tipo: conjunto } }  (config/arte.json)
@@ -30,6 +30,8 @@ export class Vista {
     if (e.visual) e.visual.descartar();
     e.visual = criarVisual(this.conjuntoPorTipo[e.tipo], e.tipo, { id: e.id, tipo: e.tipo, def: e.def, sitio: this.mundo.sitio });
     this.cena.arte.add(e.visual.raiz);
+    // a luz, o fundo e a sombra são os do conjunto que desenha o chão
+    if (e.tipo === 'chao') this.cena.definirAmbiente(ambienteDoConjunto(this.conjuntoPorTipo.chao));
   }
 
   // troca a arte de um tipo (ou de todos) na hora, sem recarregar e sem mexer na lógica

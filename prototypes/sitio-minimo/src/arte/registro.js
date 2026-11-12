@@ -11,9 +11,12 @@ import { TIPOS } from '../jogo/contrato.js';
 
 const conjuntos = new Map(); // nome -> { rotulo, tipos: Map(tipo -> fábrica) }
 
-export function registrarConjunto(nome, rotulo, fabricas) {
-  conjuntos.set(nome, { rotulo, tipos: new Map(Object.entries(fabricas)) });
+// extras.ambiente (opcional): luz, sombra e fundo do conjunto; a cena aplica o ambiente do conjunto que desenha o chão.
+//   { fundo, ceu: { cor, chao, intensidade }, sol: { cor, intensidade, direcao: [x, y, z] }, sombra: { tamanho, raio, intensidade } | null }
+export function registrarConjunto(nome, rotulo, fabricas, extras = {}) {
+  conjuntos.set(nome, { rotulo, tipos: new Map(Object.entries(fabricas)), ambiente: extras.ambiente || null });
 }
+export const ambienteDoConjunto = (nome) => (conjuntos.get(nome) || {}).ambiente || null;
 export const listarConjuntos = () => [...conjuntos.keys()];
 export const rotuloDoConjunto = (nome) => (conjuntos.get(nome) || {}).rotulo || nome;
 export const temVisual = (conjunto, tipo) => !!(conjuntos.get(conjunto) && conjuntos.get(conjunto).tipos.has(tipo));

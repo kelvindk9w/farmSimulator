@@ -9,6 +9,7 @@ const DIR = new THREE.Vector3(Math.cos(ELEV) * Math.sin(GIRO), Math.sin(ELEV), M
 const DIREITA = new THREE.Vector3(Math.cos(GIRO), 0, -Math.sin(GIRO));
 const CIMA = new THREE.Vector3().crossVectors(DIR, DIREITA).normalize();
 const CEU = 0xcfeaf7;
+const AMBIENTE_PADRAO = (() => { const el = 50 * RAD, az = -48 * RAD; return { fundo: CEU, ceu: { cor: '#d4e8ff', chao: '#c9d6a0', intensidade: 1.55 }, sol: { cor: '#fff1d6', intensidade: 2.75, direcao: [Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az)] }, sombra: null }; })();
 
 export class Cena {
   constructor(canvas, sitio) {
@@ -16,14 +17,14 @@ export class Cena {
     const r = this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
     r.outputColorSpace = THREE.SRGBColorSpace;
     r.toneMapping = THREE.NoToneMapping;
-    r.setClearColor(CEU, 1);
     this.scene = new THREE.Scene();
-    // luz do dia de tools/visual-refs, sem mapas de sombra (as sombras são manchas simples no chão)
-    this.scene.add(new THREE.HemisphereLight('#d4e8ff', '#c9d6a0', 1.55));
-    const sol = new THREE.DirectionalLight('#fff1d6', 2.75);
-    const el = 50 * RAD, az = -48 * RAD;
-    sol.position.set(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az)).multiplyScalar(40);
-    this.scene.add(sol);
+    // a luz, o fundo e a sombra vêm do "ambiente" do conjunto de arte que desenha o chão (ver definirAmbiente)
+    this.ceu = new THREE.HemisphereLight('#ffffff', '#ffffff', 1);
+    this.sol = new THREE.DirectionalLight('#ffffff', 1);
+    this.scene.add(this.ceu, this.sol, this.sol.target);
+    r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFShadowMap;
+    this.lado = sitio.terreno;
+    this.definirAmbiente(null);
     this.arte = new THREE.Group(); // todos os visuais entram aqui
     this.scene.add(this.arte);
     this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 200);
@@ -48,6 +49,32 @@ export class Cena {
       const u = p.dot(DIREITA), v = p.dot(CIMA), c = this._caixa;
       if (p === this.cantos[0]) { c.u0 = c.u1 = u; c.v0 = c.v1 = v; }
       c.u0 = Math.min(c.u0, u); c.u1 = Math.max(c.u1, u); c.v0 = Math.min(c.v0, v); c.v1 = Math.max(c.v1, v);
+    }
+  }
+
+  // Ambiente de um conjunto de arte: fundo, luz do céu, sol e (se o conjunto quiser) um mapa de sombra do sol.
+  // Sem ambiente vale o padrão: a luz do dia de tools/visual-refs, sem mapa de sombra (as sombras são manchas no chão).
+  definirAmbiente(a) {
+    a = a || AMBIENTE_PADRAO;
+    if (this.ambiente === a) return;
+    this.ambiente = a;
+    this.renderer.setClearColor(a.fundo, 1);
+    this.ceu.color.set(a.ceu.cor); this.ceu.groundColor.set(a.ceu.chao); this.ceu.intensity = a.ceu.intensidade;
+    const sol = this.sol, d = new THREE.Vector3(...a.sol.direcao).normalize();
+    sol.color.set(a.sol.cor); sol.intensity = a.sol.intensidade;
+    sol.position.copy(d).multiplyScalar(40); sol.target.position.set(0, 0, 0);
+    sol.castShadow = !!a.sombra;
+    if (a.sombra) {
+      const s = sol.shadow, L = this.lado;
+      if (s.mapSize.x !== a.sombra.tamanho) { s.mapSize.set(a.sombra.tamanho, a.sombra.tamanho); if (s.map) { s.map.dispose(); s.map = null; } }
+      s.radius = a.sombra.raio; s.intensity = a.sombra.intensidade === undefined ? 1 : a.sombra.intensidade;
+      s.bias = -0.0004; s.normalBias = 0.03;
+      // a câmera da sombra cobre o sítio inteiro (do chão até a cumeeira do celeiro), visto do sol
+      sol.updateMatrixWorld(); sol.target.updateMatrixWorld();
+      const olho = new THREE.Matrix4().lookAt(sol.position, sol.target.position, new THREE.Vector3(0, 1, 0)).setPosition(sol.position).invert();
+      const c = s.camera, p = new THREE.Vector3(); let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9, z0 = 1e9, z1 = -1e9;
+      for (const x of [-L, L]) for (const y of [-0.7, 5.2]) for (const z of [-L, L]) { p.set(x, y, z).applyMatrix4(olho); x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); z0 = Math.min(z0, -p.z); z1 = Math.max(z1, -p.z); }
+      c.left = x0; c.right = x1; c.bottom = y0; c.top = y1; c.near = Math.max(0.5, z0 - 1); c.far = z1 + 1; c.updateProjectionMatrix();
     }
   }
 
