@@ -11,8 +11,10 @@
 # - A resposta final do Codex fica em <pasta-de-trabalho>/ultima-resposta.md e o registro
 #   completo em <pasta-de-trabalho>/codex.log.
 #
-# O login do Codex fica em $CODEX_HOME (padrão ~/.codex-farm), fora do repositório.
-# Nunca copie, mostre nem versione nada dessa pasta.
+# Login do Codex: usa o que já existir na máquina. Se CODEX_HOME estiver definido, vale ele;
+# senão, se houver um login em ~/.codex-farm (feito numa sessão na nuvem), usa esse;
+# senão, o padrão do Codex (~/.codex), que é onde fica o login de quem já usa o Codex no computador.
+# Nunca copie, mostre nem versione nada dessas pastas.
 set -euo pipefail
 
 if [ "$#" -lt 2 ]; then
@@ -21,7 +23,7 @@ if [ "$#" -lt 2 ]; then
 fi
 
 trabalho="$1"; pedido="$2"; shift 2
-export CODEX_HOME="${CODEX_HOME:-$HOME/.codex-farm}"
+if [ -z "${CODEX_HOME:-}" ] && [ -f "$HOME/.codex-farm/auth.json" ]; then export CODEX_HOME="$HOME/.codex-farm"; fi
 CODEX_BIN="${CODEX_BIN:-codex}"
 
 [ -f "$pedido" ] || { echo "Pedido não encontrado: $pedido" >&2; exit 2; }

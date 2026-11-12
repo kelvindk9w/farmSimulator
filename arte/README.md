@@ -24,16 +24,9 @@ tools/arte/codex.sh /root/arte-codex/<tarefa> /root/arte-codex/<tarefa>/pedido-0
 - O Codex roda sem interação, no sandbox dele: só escreve na pasta de trabalho, que fica fora do repositório, e os comandos que ele executa não têm rede.
 - Só o que foi olhado e aprovado pelo agente é copiado para `arte/`. As tentativas descartadas não entram no repositório.
 
-Isso exige o Codex instalado e com login na sessão, o que não fica guardado entre sessões na nuvem:
+Isso exige o Codex instalado e com login na máquina onde a sessão roda:
 
-```bash
-npm install -g @openai/codex@0.167.1
-```
-
-```bash
-CODEX_HOME=~/.codex-farm codex login
-```
-
-O segundo comando mostra um endereço de login e fica esperando a resposta em `http://127.0.0.1:1455` dentro da sessão (isso foi conferido). Como o navegador do dono da conta está em outra máquina, o endereço para o qual ele é mandado no fim do login, que começa com `http://127.0.0.1:1455/auth/callback`, dá erro de conexão; esse endereço precisa ser copiado da barra do navegador e entregue ao Codex da sessão com `curl`. Essa última parte ainda não foi testada aqui. O login por código (`--device-auth`) existe, mas não funcionou para o dono do projeto. O ambiente precisa permitir `auth.openai.com` e `chatgpt.com`. O login fica em `~/.codex-farm`, fora do repositório, e nunca deve ser copiado ou versionado.
+- **Sessão no computador do dono do projeto** (aplicativo do Claude ou `claude` no terminal, na pasta do projeto): o Codex já instalado e logado ali é usado direto, e o login continua valendo de uma sessão para a outra. É o caminho recomendado para a etapa 3.
+- **Sessão na nuvem**: a máquina é apagada no fim da sessão, então o Codex precisa ser instalado (`npm install -g @openai/codex@0.167.1`) e logado de novo a cada sessão (`CODEX_HOME=~/.codex-farm codex login`), e o ambiente precisa permitir `auth.openai.com` e `chatgpt.com`. O login feito no computador não chega até a nuvem.
 
 Sem login do Codex na sessão, a etapa 3 funciona como a 1: o agente escreve os pedidos e o dono do projeto gera as imagens.
