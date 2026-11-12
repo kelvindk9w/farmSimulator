@@ -2,7 +2,7 @@
 // Cada um é uma malha articulada (uma chamada de desenho) animada por código a partir do estado que a lógica entrega.
 import { Visual } from '../registro.js';
 import { TIPOS, TIRAR_AGUA } from '../../jogo/contrato.js';
-import { THREE, C, mix, shade, malha, articulado, sombra, sombraRet, Borrifo, Mola, TAU, GRAUS, limitar, suave, rampa, janela, amortecer, acaso, elastico } from './base.js';
+import { THREE, C, mix, shade, materialProprio, malha, articulado, sombra, sombraRet, Borrifo, Mola, TAU, GRAUS, limitar, suave, rampa, janela, amortecer, acaso, elastico } from './base.js';
 import { canteiro as canteiroDeTerra } from '../../../../../tools/visual-refs/src/models/props.js';
 import { milho } from '../../../../../tools/visual-refs/src/models/nature.js';
 import { fardo } from '../../../../../tools/visual-refs/src/models/buildings.js';
@@ -18,7 +18,7 @@ const MOLHADA = new THREE.Color(0.56, 0.52, 0.6);
 export function canteiro() {
   const v = new Visual('canteiro');
   const [w, d] = TIPOS.canteiro.tamanho;
-  const terra = new THREE.MeshLambertMaterial({ vertexColors: true }); terra.userData.proprio = true;
+  const terra = materialProprio();
   v.raiz.add(malha((b) => canteiroDeTerra(b, w - 0.25, d - 0.25, { rows: 2 }), 3, terra));
   const ossos = [['raiz', null, [0, 0, 0]]];
   FASES.forEach((f, s) => LUGARES.forEach(([x, z], i) => ossos.push([`f${s}p${i}`, 'raiz', [x, 0.22, z]])));

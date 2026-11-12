@@ -5,7 +5,7 @@
 // cinemática inversa de dois ossos, e os objetos de mão (regador, caixote, banquinho...) são malhas próprias.
 import { Visual } from '../registro.js';
 import { ESCALA_PERSONAGEM } from '../../jogo/contrato.js';
-import { THREE, Builder, C, mix, shade, sombra, Borrifo, TAU, GRAUS, limitar, suave, rampa, janela, amortecer, acaso } from './base.js';
+import { THREE, C, mix, shade, estilo, construtor, materialProprio, sombra, Borrifo, TAU, GRAUS, limitar, suave, rampa, janela, amortecer, acaso } from './base.js';
 import { criarAvatar, OUTFITS, BONES, BONE_INDEX } from '../../../../../tools/visual-refs/src/avatar/rig.js';
 import { POSES, lerpPose, cenarioPose } from '../../../../../tools/visual-refs/src/avatar/poses.js';
 import { caixote } from '../../../../../tools/visual-refs/src/models/buildings.js';
@@ -188,8 +188,9 @@ function alcancar(av, lado, alvo, peso) {
 
 // ---------------- objetos de mão ----------------
 function fazerObjetos(material) {
-  const feito = (desenhar, semente = 11) => { const b = new Builder(semente); desenhar(b); return new THREE.Mesh(b.build(), material); };
-  const emprestado = (tipo) => { const m = cenarioPose(tipo); m.material = material; return m; };
+  const E = estilo();
+  const feito = (desenhar, semente = 11) => { const b = construtor(semente); desenhar(b); const m = new THREE.Mesh(b.build(), material); if (E && E.aoCriar) E.aoCriar(m); return m; };
+  const emprestado = (tipo) => { if (E && E.objetoDeMao) return feito((b) => E.objetoDeMao(b, tipo)); const m = cenarioPose(tipo); m.material = material; return m; };
   const caixa = (recheio) => feito((b) => {
     if (recheio === 'laranja' || recheio === 'milho') { caixote(b, { p: [0, -0.16, 0], s: 0.9 }, recheio); return; }
     caixote(b, { p: [0, -0.16, 0], s: 0.9 }, null);
@@ -225,10 +226,11 @@ const CAIXA_DO_ITEM = { milho: 'caixaMilho', leite: 'caixaLeite', ovo: 'caixaOvo
 // ---------------- o visual ----------------
 export function personagem() {
   const v = new Visual('personagem');
-  const av = criarAvatar(VISUAL);
+  const E = estilo();
+  const av = E && E.avatar ? E.avatar() : criarAvatar(VISUAL);
   av.mesh.material.userData.proprio = true;
   av.group.scale.setScalar(ESCALA_PERSONAGEM);
-  const matObj = new THREE.MeshLambertMaterial({ vertexColors: true }); matObj.userData.proprio = true;
+  const matObj = materialProprio();
   const obj = fazerObjetos(matObj), esc = {};
   for (const n in obj) { obj[n].visible = false; av.group.add(obj[n]); esc[n] = 0; }
   const mancha = sombra(0.44, 0.36);

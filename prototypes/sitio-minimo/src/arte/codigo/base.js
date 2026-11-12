@@ -6,6 +6,29 @@ import { Builder, MAT } from '../../../../../tools/visual-refs/src/lib/builder.j
 import { C, mix, shade } from '../../../../../tools/visual-refs/src/lib/palette.js';
 
 export { THREE, Builder, MAT, C, mix, shade };
+
+// ---- estilo: quem veste os modelos ----
+// As fábricas deste conjunto desenham com um "construtor" de primitivas e com as cores de C. Outro conjunto de arte pode
+// reaproveitar os mesmos esqueletos e a mesma animação trocando só isso: enquanto a fábrica roda dentro de comEstilo(),
+// o construtor, o material, as cores e as sombras vêm do estilo (ver src/arte/brinquedo/kit.js).
+//   estilo = { Builder, material(), paleta: { nomeDeC: cor }, sombra(rx, rz, x, z, y), sombraRet(w, d, x, z, y), aoCriar(mesh), geoParticula(raio), ... }
+let ESTILO = null;
+export const estilo = () => ESTILO;
+export function comEstilo(e, fn) {
+  const antes = ESTILO, guardadas = {};
+  ESTILO = e;
+  if (e && e.paleta) for (const k in e.paleta) if (C[k]) { guardadas[k] = C[k].clone(); C[k].set(e.paleta[k]); }
+  try { return fn(); } finally { for (const k in guardadas) C[k].copy(guardadas[k]); ESTILO = antes; }
+}
+export const construtor = (semente = 7) => (ESTILO ? new ESTILO.Builder(semente) : new Builder(semente));
+export const materialComum = () => (ESTILO ? ESTILO.material() : MAT());
+// material só deste visual (para poder tingir sem afetar os outros); quem cria marca como "proprio" e o descartar() libera
+export function materialProprio() {
+  const m = ESTILO ? ESTILO.material().clone() : new THREE.MeshLambertMaterial({ vertexColors: true });
+  m.userData.proprio = true;
+  return m;
+}
+const pronta = (mesh) => { if (ESTILO && ESTILO.aoCriar) ESTILO.aoCriar(mesh); return mesh; };
 export const TAU = Math.PI * 2;
 export const GRAUS = Math.PI / 180;
 export const limitar = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -34,10 +57,9 @@ export class Mola {
 
 // malha estática feita com o construtor (um desenho = uma chamada de desenho)
 export function malha(desenhar, semente = 7, material = null) {
-  const b = new Builder(semente);
+  const b = construtor(semente);
   desenhar(b);
-  const m = new THREE.Mesh(b.build(), material || MAT());
-  return m;
+  return pronta(new THREE.Mesh(b.build(), material || materialComum()));
 }
 
 // Malha articulada com skinning rígido (cada vértice segue um osso), como o avatar.
@@ -50,7 +72,7 @@ export function articulado(ossos, desenhar, semente = 5) {
   bones[0].updateMatrixWorld(true);
   const geos = [];
   ossos.forEach(([nome], i) => {
-    const b = new Builder(semente + i * 3);
+    const b = construtor(semente + i * 3);
     desenhar(b, nome);
     for (const g of b.parts) { g.applyMatrix4(bones[i].matrixWorld); g.userData.osso = i; geos.push(g); }
   });
@@ -61,7 +83,7 @@ export function articulado(ossos, desenhar, semente = 5) {
   for (const g of geos) { const c = g.attributes.position.count; for (let j = 0; j < c; j++, k++) { si[k * 4] = g.userData.osso; sw[k * 4] = 1; } }
   junta.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(si, 4));
   junta.setAttribute('skinWeight', new THREE.Float32BufferAttribute(sw, 4));
-  const mesh = new THREE.SkinnedMesh(junta, MAT());
+  const mesh = pronta(new THREE.SkinnedMesh(junta, materialComum()));
   mesh.frustumCulled = false;
   const grupo = new THREE.Group();
   grupo.add(bones[0]); grupo.add(mesh);
@@ -76,6 +98,7 @@ const GEO_SOMBRA = new THREE.CircleGeometry(1, 22).rotateX(-Math.PI / 2);
 GEO_SOMBRA.userData.compartilhada = true;
 const MAT_SOMBRA = new THREE.MeshBasicMaterial({ color: 0x16260f, transparent: true, opacity: 0.2, depthWrite: false });
 export function sombra(rx, rz, x = 0, z = 0, y = 0.028) {
+  if (ESTILO && ESTILO.sombra) return ESTILO.sombra(rx, rz, x, z, y);
   const m = new THREE.Mesh(GEO_SOMBRA, MAT_SOMBRA);
   m.scale.set(rx, 1, rz); m.position.set(x, y, z); m.renderOrder = 2;
   return m;
@@ -84,6 +107,7 @@ export function sombra(rx, rz, x = 0, z = 0, y = 0.028) {
 const GEO_SOMBRA_RET = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
 GEO_SOMBRA_RET.userData.compartilhada = true;
 export function sombraRet(w, d, x = 0, z = 0, y = 0.028) {
+  if (ESTILO && ESTILO.sombraRet) return ESTILO.sombraRet(w, d, x, z, y);
   const m = new THREE.Mesh(GEO_SOMBRA_RET, MAT_SOMBRA);
   m.scale.set(w, 1, d); m.position.set(x, y, z); m.renderOrder = 2;
   return m;
@@ -100,9 +124,9 @@ function matParticula(cor) {
 export class Borrifo {
   // n: máximo de partículas vivas; raio: tamanho; g: gravidade; vida: segundos; chao: altura em que somem (null = não somem)
   constructor(n, cor, raio, { g = 9, vida = 0.8, chao = null, achatada = 1, gira = 0, arrasto = 0 } = {}) {
-    const geo = new THREE.IcosahedronGeometry(raio, 0);
+    const geo = ESTILO && ESTILO.geoParticula ? ESTILO.geoParticula(raio) : new THREE.IcosahedronGeometry(raio, 0);
     if (achatada !== 1) geo.scale(1, achatada, 1);
-    this.mesh = new THREE.InstancedMesh(geo, matParticula(cor), n);
+    this.mesh = new THREE.InstancedMesh(geo, ESTILO && ESTILO.matParticula ? ESTILO.matParticula(cor) : matParticula(cor), n);
     this.mesh.frustumCulled = false;
     this.n = n; this.g = g; this.vida = vida; this.chao = chao; this.gira = gira; this.arrasto = arrasto;
     this.p = []; for (let i = 0; i < n; i++) this.p.push({ t: -1, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, s: 1, vida });
