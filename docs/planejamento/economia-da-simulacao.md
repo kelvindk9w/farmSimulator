@@ -426,6 +426,19 @@ As etapas 1 a 4 são protótipo, sem servidor e sem progresso gravado. Elas resp
 
 ## 12. Perguntas em aberto
 
+**Decisões já tomadas pelo dono do projeto (12 de novembro de 2026).** Valem sobre o que estiver diferente no resto do documento:
+
+1. **Começo:** o gramado vazio pode ter o poço velho e a banca desde o início.
+2. **Buscar ferramenta e recipiente:** um toque faz a cadeia toda; o passo a passo fica só para o tutorial.
+3. **Animal que chega ao fim da vida produtiva** (vale para galinha e vaca): o jogador escolhe entre três saídas.
+   - **Fica de estimação:** não produz mais nada, mas continua gerando o custo normal de ração, água e tratamento.
+   - **Vende para o frigorífico.**
+   - **Vende para um fazendeiro (NPC).**
+
+   Isso substitui a recomendação anterior de "mascote sem custo" e "pasto do vizinho ou granja" como únicas saídas. Os preços de cada saída ainda precisam ser propostos e calibrados (seção 6).
+
+As demais perguntas continuam em aberto:
+
 | Pergunta | Recomendação |
 |---|---|
 | "Só gramado" admite um poço velho e uma banca na porteira? | Sim. Sem água e sem onde vender não existe primeiro minuto. O resto começa vazio |
