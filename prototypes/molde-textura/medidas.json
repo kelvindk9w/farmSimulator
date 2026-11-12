@@ -1,0 +1,121 @@
+{
+  "geradoPor": "node scripts/medir.mjs",
+  "moldes": {
+    "casa": {
+      "triangulos": 104,
+      "vertices": 206,
+      "slots": [
+        "parede",
+        "telhado",
+        "madeira",
+        "porta",
+        "janela"
+      ],
+      "triangulosPorSlot": {
+        "parede": 10,
+        "telhado": 6,
+        "madeira": 80,
+        "porta": 2,
+        "janela": 6
+      },
+      "chamadasDeDesenho": 5,
+      "triangulosDesenhados": 104,
+      "chamadasComSombra": 8,
+      "glbBytes": 10168
+    },
+    "celeiro": {
+      "triangulos": 36,
+      "vertices": 70,
+      "slots": [
+        "telhado",
+        "madeira",
+        "porta",
+        "janela"
+      ],
+      "triangulosPorSlot": {
+        "telhado": 4,
+        "madeira": 26,
+        "porta": 4,
+        "janela": 2
+      },
+      "chamadasDeDesenho": 4,
+      "triangulosDesenhados": 36,
+      "chamadasComSombra": 6,
+      "glbBytes": 5032
+    },
+    "canteiro": {
+      "triangulos": 34,
+      "vertices": 68,
+      "slots": [
+        "madeira",
+        "terra-arada"
+      ],
+      "triangulosPorSlot": {
+        "madeira": 32,
+        "terra-arada": 2
+      },
+      "chamadasDeDesenho": 2,
+      "triangulosDesenhados": 34,
+      "chamadasComSombra": 4,
+      "glbBytes": 4020
+    },
+    "chao": {
+      "triangulos": 2,
+      "vertices": 4,
+      "slots": [
+        "grama"
+      ],
+      "triangulosPorSlot": {
+        "grama": 2
+      },
+      "chamadasDeDesenho": 1,
+      "triangulosDesenhados": 2,
+      "chamadasComSombra": 2,
+      "glbBytes": 1336
+    }
+  },
+  "texturas": {
+    "provisorio-a": {
+      "nome": "Provisório A",
+      "bytesEmDisco": 816549,
+      "arquivos": {
+        "parede": 153111,
+        "telhado": 159917,
+        "madeira": 35151,
+        "porta": 23389,
+        "janela": 5205,
+        "grama": 256576,
+        "terra-arada": 183200
+      },
+      "memoriaDeVideoEstimadaBytes": 11184811
+    },
+    "provisorio-b": {
+      "nome": "Provisório B",
+      "bytesEmDisco": 683364,
+      "arquivos": {
+        "parede": 39634,
+        "telhado": 125481,
+        "madeira": 19679,
+        "porta": 28989,
+        "janela": 3993,
+        "grama": 234844,
+        "terra-arada": 230744
+      },
+      "memoriaDeVideoEstimadaBytes": 11184811
+    },
+    "teste-uv": {
+      "nome": "Teste de UV",
+      "bytesEmDisco": 38483,
+      "arquivos": {
+        "parede": 4607,
+        "telhado": 4556,
+        "madeira": 4601,
+        "porta": 10691,
+        "janela": 4991,
+        "grama": 4518,
+        "terra-arada": 4519
+      },
+      "memoriaDeVideoEstimadaBytes": 11184811
+    }
+  }
+}

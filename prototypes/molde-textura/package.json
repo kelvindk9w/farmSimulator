@@ -1,0 +1,23 @@
+{
+  "name": "molde-textura",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Demonstração técnica: moldes 3D feitos em código + conjuntos de texturas 2D trocáveis",
+  "type": "module",
+  "license": "UNLICENSED",
+  "scripts": {
+    "tudo": "node scripts/tudo.mjs",
+    "texturas": "node scripts/gerar-texturas.mjs",
+    "moldes": "node scripts/build.mjs && node scripts/exportar-moldes.mjs",
+    "capturas": "node scripts/build.mjs && node scripts/capturar.mjs",
+    "medir": "node scripts/build.mjs && node scripts/medir.mjs",
+    "verificar": "node scripts/build.mjs && node scripts/verificar.mjs"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "sharp": "^0.35.5"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "nome": "Teste de UV",
+  "descricao": "Xadrez numerado, uma cor por slot. Serve para conferir a direção e a densidade do UV dos moldes; não entra na comparação.",
+  "uso": "teste",
+  "slots": {
+    "parede": {
+      "arquivo": "parede.png",
+      "repete": true,
+      "tamanhoNoMundo": 2
+    },
+    "telhado": {
+      "arquivo": "telhado.png",
+      "repete": true,
+      "tamanhoNoMundo": 2
+    },
+    "madeira": {
+      "arquivo": "madeira.png",
+      "repete": true,
+      "tamanhoNoMundo": 2
+    },
+    "porta": {
+      "arquivo": "porta.png",
+      "repete": false,
+      "transparente": true
+    },
+    "janela": {
+      "arquivo": "janela.png",
+      "repete": false,
+      "transparente": true
+    },
+    "grama": {
+      "arquivo": "grama.png",
+      "repete": true,
+      "tamanhoNoMundo": 2
+    },
+    "terra-arada": {
+      "arquivo": "terra-arada.png",
+      "repete": true,
+      "tamanhoNoMundo": 2
+    }
+  }
+}

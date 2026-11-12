@@ -1,0 +1,41 @@
+{
+  "nome": "Provisório A",
+  "descricao": "Reboco branco, telha de barro, madeira marrom, porta e janela azuis, grama viva, terra escura.",
+  "slots": {
+    "parede": {
+      "arquivo": "parede.png",
+      "repete": true,
+      "tamanhoNoMundo": 2
+    },
+    "telhado": {
+      "arquivo": "telhado.png",
+      "repete": true,
+      "tamanhoNoMundo": 2
+    },
+    "madeira": {
+      "arquivo": "madeira.png",
+      "repete": true,
+      "tamanhoNoMundo": 2
+    },
+    "porta": {
+      "arquivo": "porta.png",
+      "repete": false,
+      "transparente": true
+    },
+    "janela": {
+      "arquivo": "janela.png",
+      "repete": false,
+      "transparente": true
+    },
+    "grama": {
+      "arquivo": "grama.png",
+      "repete": true,
+      "tamanhoNoMundo": 4
+    },
+    "terra-arada": {
+      "arquivo": "terra-arada.png",
+      "repete": true,
+      "tamanhoNoMundo": 2
+    }
+  }
+}

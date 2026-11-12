@@ -1,0 +1,17 @@
+{
+  "descricao": "Regras que valem para todos os moldes. Os moldes não sabem nada sobre as imagens: só dizem a que slot cada face pertence e onde ela fica na imagem (UV).",
+  "densidade": {
+    "unidadesDeMundoPorRepeticao": 2,
+    "explicacao": "Nos slots que repetem, 1 unidade de UV equivale a 2 unidades de mundo em qualquer face de qualquer molde. Um conjunto de texturas pode pedir outro tamanho por slot em texturas.json (tamanhoNoMundo); a geometria não muda."
+  },
+  "folgaDosQuadros": 0.02,
+  "slots": {
+    "parede": { "repete": true, "orientacao": "V aponta para cima na parede." },
+    "telhado": { "repete": true, "orientacao": "V sobe a água do telhado, do beiral para a cumeeira; a parte de baixo da imagem fica do lado do beiral." },
+    "madeira": { "repete": true, "orientacao": "V acompanha o veio: para cima em paredes e postes, ao longo do comprimento em vigas e tábuas deitadas." },
+    "porta": { "repete": false, "proporcao": [1, 2], "orientacao": "Uma folha de porta por quadro, UV de 0 a 1. Na porta dupla a segunda folha é espelhada." },
+    "janela": { "repete": false, "proporcao": [1, 1], "orientacao": "Uma janela por quadro, UV de 0 a 1." },
+    "grama": { "repete": true, "orientacao": "Vista de cima; sem direção preferida." },
+    "terra-arada": { "repete": true, "orientacao": "Vista de cima; os sulcos acompanham V." }
+  }
+}
