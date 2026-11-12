@@ -27,6 +27,11 @@ tools/arte/codex.sh /root/arte-codex/<tarefa> /root/arte-codex/<tarefa>/pedido-0
 Isso exige o Codex instalado e com login na máquina onde a sessão roda:
 
 - **Sessão no computador do dono do projeto** (aplicativo do Claude ou `claude` no terminal, na pasta do projeto): o Codex já instalado e logado ali é usado direto, e o login continua valendo de uma sessão para a outra. É o caminho recomendado para a etapa 3.
-- **Sessão na nuvem**: a máquina é apagada no fim da sessão, então o Codex precisa ser instalado (`npm install -g @openai/codex@0.167.1`) e logado de novo a cada sessão (`CODEX_HOME=~/.codex-farm codex login`), e o ambiente precisa permitir `auth.openai.com` e `chatgpt.com`. O login feito no computador não chega até a nuvem.
+- **Sessão na nuvem**: a máquina é apagada no fim da sessão, então o Codex precisa ser instalado (`npm install -g @openai/codex@0.167.1`) e logado de novo a cada sessão, e o ambiente precisa permitir `auth.openai.com` e `chatgpt.com`. O login feito no computador não chega até a nuvem. O login por link funciona assim (testado):
+  1. A sessão roda `CODEX_HOME=~/.codex-farm codex login` em segundo plano e passa ao dono do projeto o link que o Codex imprime.
+  2. O dono do projeto abre o link e entra com a conta do Codex. No fim, o navegador tenta abrir um endereço que começa com `http://127.0.0.1:1455/auth/callback?code=` e mostra erro de conexão, porque esse endereço aponta para a máquina da nuvem.
+  3. Ele copia esse endereço inteiro e cola na conversa; a sessão o entrega ao Codex com `curl` na própria máquina, e `codex login status` passa a responder "Logged in using ChatGPT".
+
+  O endereço colado vale uma vez só e só para o login que está esperando. O login por código (`--device-auth`) não é usado.
 
 Sem login do Codex na sessão, a etapa 3 funciona como a 1: o agente escreve os pedidos e o dono do projeto gera as imagens.
