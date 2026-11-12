@@ -7,8 +7,8 @@ export const ESCALA_PERSONAGEM = 1.25; // o avatar de tools/visual-refs tem 1,6 
 
 // quanto o personagem avança em UM ciclo completo do clipe (dois passos). A arte tem de respeitar isto,
 // senão o pé escorrega. A lógica entrega "fase" = distância andada / passada.
-export const PASSADA = { andar: 1.66, correr: 2.45, vaca: 0.92, galinha: 0.34 };
-export const VELOCIDADE = { andar: 2.1, correr: 3.6, vaca: 0.55, galinha: 0.9, galinhaFugindo: 2.3 };
+export const PASSADA = { andar: 1.6, correr: 2.5, vaca: 0.92, galinha: 0.34 };
+export const VELOCIDADE = { andar: 2.2, correr: 3.9, vaca: 0.55, galinha: 0.9, galinhaFugindo: 2.3 };
 
 export const ITENS = ['milho', 'leite', 'ovo', 'laranja'];
 export const NOME_ITEM = { milho: 'milho', leite: 'leite', ovo: 'ovo', laranja: 'laranja', agua: 'água' };
@@ -28,11 +28,11 @@ export const ACOES = {
 // "tirar água": trechos (s) dentro da ação
 export const TIRAR_AGUA = { alcanca: 0.3, gira: 1.3, voltas: 2.5, despejaDe: 1.7, despejaAte: 2.38, solta: 0.4 };
 // celeiro: tempos (s) da porta e de ficar lá dentro
-export const CELEIRO = { abrir: 0.6, fechar: 0.6, dentro: 0.7, deposito: 0.3 };
+export const CELEIRO = { abrir: 0.6, fechar: 0.6, dentro: 0.55, deposito: 0.3 };
 
 // Tempos do sítio (s)
 export const TEMPOS = {
-  canteiro: { semeado: 4, broto: 7, crescendo: 8 }, // só correm com o canteiro molhado; soma = 19 s
+  canteiro: { semeado: 3.5, broto: 6.5, crescendo: 7.5 }, // só correm com o canteiro molhado; soma = 17,5 s
   leite: { primeiro: 6, depois: 25 },
   ovo: { primeiro: 2, depois: 15, botando: 2.4 },
   laranja: 12,
@@ -55,14 +55,14 @@ export const TIPOS = {
     tamanho: [1.8, 1.8],
     // ele fica na beira do fundo, perto do canto direito, olhando para a câmera: as plantas nunca o escondem
     pontos: { ficar: [0.55, 0, -1.25], olhar: [0.45, 0, 0] },
-    ancoras: { centro: [0, 0.2, 0] },
+    ancoras: { centro: [0, 0.2, 0], espiga: [0.5, 1.05, -0.38] },
     toque: [2.0, 0.7, 2.0],
   },
   poco: {
     estados: ['ocioso', 'tirando'],
     raio: 0.8,
     pontos: { ficar: [-0.5, 0, 1.15], olhar: [0.6, 0, 1.15] },
-    ancoras: { manivela: [0, 1.2, 1.15], borda: [-0.62, 0.8, 0.45] },
+    ancoras: { manivela: [0, 1.2, 1.15], borda: [0.55, 0.8, 0.55], balde: [0, 0.9, 0] },
     toque: [1.9, 2.3, 2.4],
   },
   celeiro: {
@@ -77,8 +77,8 @@ export const TIPOS = {
     estados: ['parada', 'pastando', 'andando', 'esperandoOrdenha', 'ordenhada'],
     escala: 1.1,
     // com a vaca olhando para +Z: o personagem fica do lado direito dela (-X), perto das patas de trás
-    pontos: { ficar: [-0.7, 0, -0.54], olhar: [0, 0, -0.28] },
-    ancoras: { ubere: [0, 0.74, -0.28], balde: [-0.12, 0, -0.28] },
+    pontos: { ficar: [-0.85, 0, -0.3], olhar: [0, 0, -0.25] },
+    ancoras: { ubere: [-0.04, 0.62, -0.27], balde: [-0.2, 0, -0.27] },
     toque: [1.5, 1.7, 2.6],
   },
   galinha: {
@@ -98,8 +98,9 @@ export const TIPOS = {
     estados: ['ociosa', 'colhendo'],
     raioTronco: 0.3,
     frutasMax: 3,
-    pontos: { ficar: [-0.45, 0, 1.3], olhar: [0.6, 0, 1.3] },
-    ancoras: { fruta: [0, 2.2, 1.28] },
+    // ele fica embaixo da copa, meio de frente para a câmera; a penca de laranjas pende à direita dele
+    pontos: { ficar: [-0.25, 0, 1.15], olhar: [0.65, 0, 1.75] },
+    ancoras: { fruta: [-0.49, 2.05, 1.6] },
     toque: [2.6, 4.0, 2.6, [0, 0, 0.2]],
   },
   chao: { estados: ['normal'], pontos: {}, ancoras: {}, toque: null },

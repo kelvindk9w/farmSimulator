@@ -5,7 +5,7 @@
 
 export const SITIO = {
   terreno: 5.5, // meia-largura do quadrado de terra
-  inicio: { x: 2.5, z: 1.9, rumo: 0.6 },
+  inicio: { x: 2.5, z: 2.6, rumo: 0.6 },
   objetos: {
     celeiro: { tipo: 'celeiro', nome: 'Celeiro', x: -3.2, z: -3.7 },
     arvore: { tipo: 'arvore', nome: 'Laranjeira', x: 0.1, z: -4.0 },
@@ -13,7 +13,7 @@ export const SITIO = {
     canteiro1: { tipo: 'canteiro', nome: 'Canteiro 1', x: -2.2, z: 4.3 },
     canteiro2: { tipo: 'canteiro', nome: 'Canteiro 2', x: 0.3, z: 4.3 },
     ninho: { tipo: 'ninho', nome: 'Ninho', x: -4.1, z: 1.5 },
-    vaca: { tipo: 'vaca', nome: 'Vaca', x: 3.9, z: -4.0, rumo: -2.2 },
+    vaca: { tipo: 'vaca', nome: 'Vaca', x: 4.2, z: -3.6, rumo: -0.8 }, // de lado para a câmera, para o pastar aparecer
     galinha1: { tipo: 'galinha', nome: 'Galinha', x: -3.0, z: 1.9, rumo: 2.0, variante: 'branca', poedeira: true },
     galinha2: { tipo: 'galinha', nome: 'Galinha', x: -4.6, z: 0.4, rumo: 0.5, variante: 'caramelo' },
   },
@@ -21,7 +21,7 @@ export const SITIO = {
   pasto: {
     x0: 1.6, z0: -5.2, x1: 5.2, z1: -1.8,
     porteira: { x0: 2.25, x1: 3.55 },
-    ordenha: { x: 3.45, z: -3.05, rumo: Math.PI / 2 }, // onde a vaca espera a ordenha, olhando para +X
+    ordenha: { x: 3.3, z: -3.7, rumo: 1.22 }, // onde a vaca espera a ordenha: longe da cerca da frente, meio de lado para a câmera
     folga: 0.9, // a vaca passeia a esta distância da cerca
   },
   // área por onde as galinhas ciscam

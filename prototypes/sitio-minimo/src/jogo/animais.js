@@ -104,7 +104,8 @@ export class Galinha {
     this.tx = this.x; this.tz = this.z; this.descanso = 0;
     this.area = sitio.terreiro;
     const n = sitio.objetos.ninho;
-    this.ninho = { x: n.x, z: n.z, r: TIPOS.ninho.raio + 0.25 };
+    // a que não bota fica mais longe do ninho, para não parar na frente da que está botando
+    this.ninho = { x: n.x, z: n.z, r: TIPOS.ninho.raio + (this.poedeira ? 0.25 : 0.7) };
     this.acao = null;
   }
   _entrar(estado, dur = 0) { this.estado = estado; this.t = 0; this.dur = dur; }
@@ -116,12 +117,18 @@ export class Galinha {
     const u = l2 > 0 ? limitar(((n.x - this.x) * dx + (n.z - this.z) * dz) / l2, 0, 1) : 0;
     return Math.hypot(this.x + dx * u - n.x, this.z + dz * u - n.z) > n.r;
   }
+  // a outra galinha mais perto de (x, z): devolve a distância
+  _outra(m, x, z) {
+    let perto = Infinity;
+    for (const id in m.objetos) { const o = m.objetos[id]; if (o !== this && o.tipo === 'galinha') perto = Math.min(perto, Math.hypot(o.x - x, o.z - z)); }
+    return perto;
+  }
   _ciscar(m) {
     const s = m.sorteio;
     for (let i = 0; i < 8; i++) {
       const a = s.entre(-Math.PI, Math.PI), d = s.entre(0.6, 1.7);
       const x = this.x + Math.sin(a) * d, z = this.z + Math.cos(a) * d;
-      if (this._serve(x, z)) { this.tx = x; this.tz = z; this._entrar('andando'); return; }
+      if (this._serve(x, z) && this._outra(m, x, z) > 0.8) { this.tx = x; this.tz = z; this._entrar('andando'); return; }
     }
     this._entrar('parada', 0.8);
   }
@@ -132,13 +139,27 @@ export class Galinha {
     const andar = (tx, tz, v = VELOCIDADE.galinha) => seguir(this, tx, tz, v, GIRO_GALINHA, 6, PASSADA.galinha, 0.07);
     const solta = this.estado === 'parada' || this.estado === 'andando' || this.estado === 'bicando' || this.estado === 'batendoAsas';
     // susto: o personagem passou perto demais
-    if (solta && p.visivel && this.descanso <= 0) {
+    if (solta && p.visivel) {
       const dx = this.x - p.x, dz = this.z - p.z, d = Math.hypot(dx, dz);
-      if (d < 0.8) {
-        const k = 1.4 / (d || 1), a = this.area;
-        let x = limitar(this.x + (d ? dx : 1) * k, a.x0, a.x1), z = limitar(this.z + dz * k, a.z0, a.z1);
-        if (!this._serve(x, z)) { x = limitar(this.x - dz * k, a.x0, a.x1); z = limitar(this.z + dx * k, a.z0, a.z1); }
-        if (this._serve(x, z)) { this.tx = x; this.tz = z; this._entrar('fugindo'); this.descanso = 1.6; }
+      if (d < (this.descanso <= 0 ? 0.95 : 0.6)) { // logo depois de um susto ela só foge de novo se ele chegar bem perto
+        // foge para longe dele; se esse lado não serve (cerca, ninho), tenta cada vez mais de lado
+        const a0 = d ? Math.atan2(dx, dz) : this.rumo;
+        for (const da of [0, 0.7, -0.7, 1.3, -1.3, 1.9, -1.9]) {
+          const x = this.x + Math.sin(a0 + da) * 1.3, z = this.z + Math.cos(a0 + da) * 1.3;
+          if (this._serve(x, z)) { this.tx = x; this.tz = z; this._entrar('fugindo'); this.descanso = 1.6; break; }
+        }
+      }
+    }
+    // outra galinha em cima dela (uma que desceu do ninho, por exemplo): dá uns passos para o lado
+    if (solta && this.estado !== 'andando') {
+      let perto = null, dp = 0.46;
+      for (const id in m.objetos) { const o = m.objetos[id]; if (o !== this && o.tipo === 'galinha') { const d = Math.hypot(o.x - this.x, o.z - this.z); if (d < dp) { dp = d; perto = o; } } }
+      if (perto) {
+        const a0 = dp > 1e-6 ? Math.atan2(this.x - perto.x, this.z - perto.z) : this.rumo + 1.5;
+        for (const da of [0, 0.7, -0.7, 1.3, -1.3, 1.9, -1.9]) {
+          const x = this.x + Math.sin(a0 + da) * 0.8, z = this.z + Math.cos(a0 + da) * 0.8;
+          if (this._serve(x, z)) { this.tx = x; this.tz = z; this._entrar('andando'); break; }
+        }
       }
     }
     // hora de botar: a poedeira larga o que está fazendo e vai para o ninho
@@ -151,16 +172,23 @@ export class Galinha {
           if (r < 0.46) this._ciscar(m); else if (r < 0.86) this._entrar('bicando', 1.35); else this._entrar('batendoAsas', 0.95);
         }
         break;
-      case 'andando': if (andar(this.tx, this.tz)) this._entrar(m.sorteio.prox() < 0.6 ? 'bicando' : 'parada', m.sorteio.entre(0.5, 1.35)); if (this.estado === 'bicando') this.dur = 1.35; break;
+      case 'andando':
+        if (andar(this.tx, this.tz)) { this._entrar(m.sorteio.prox() < 0.6 ? 'bicando' : 'parada', m.sorteio.entre(0.5, 1.35)); if (this.estado === 'bicando') this.dur = 1.35; }
+        else if (this.t > 0.3 && this._outra(m, this.x + Math.sin(this.rumo) * 0.3, this.z + Math.cos(this.rumo) * 0.3) < 0.42) this._entrar('parada', 0.3); // a outra está no caminho: para e escolhe outro rumo
+        break;
       case 'bicando': case 'batendoAsas': this.vel = 0; if (this.t >= this.dur) this._entrar('parada', m.sorteio.entre(0.4, 1.3)); break;
       case 'fugindo': if (andar(this.tx, this.tz, VELOCIDADE.galinhaFugindo)) this._entrar('parada', m.sorteio.entre(0.5, 1.0)); break;
       case 'indoAoNinho': if (andar(this.ninho.x, this.ninho.z)) this._entrar('botando', TEMPOS.ovo.botando); break;
       case 'botando':
         this.vel = 0;
         if (this.t >= this.dur) {
-          // desce do ninho pelo lado do terreiro que tem mais espaço
-          const a = this.area, cx = (a.x0 + a.x1) / 2, cz = (a.z0 + a.z1) / 2, d = Math.hypot(cx - this.x, cz - this.z) || 1;
-          this.tx = this.x + ((cx - this.x) / d) * 1.0; this.tz = this.z + ((cz - this.z) / d) * 1.0;
+          // desce do ninho pelo lado oposto ao de quem vem pegar o ovo; se não couber, pelo lado com mais espaço
+          const a = this.area, F = TIPOS.ninho.pontos.ficar, l = Math.hypot(F[0], F[2]) || 1;
+          this.tx = this.x - (F[0] / l) * 1.0; this.tz = this.z - (F[2] / l) * 1.0;
+          if (this.tx < a.x0 || this.tx > a.x1 || this.tz < a.z0 || this.tz > a.z1) {
+            const cx = (a.x0 + a.x1) / 2, cz = (a.z0 + a.z1) / 2, d = Math.hypot(cx - this.x, cz - this.z) || 1;
+            this.tx = this.x + ((cx - this.x) / d) * 1.0; this.tz = this.z + ((cz - this.z) / d) * 1.0;
+          }
           this._entrar('saindoDoNinho');
         }
         break;

@@ -3,7 +3,7 @@
 // Também faz a ponte entre visuais: entrega ao personagem os pontos do objeto em que ele está mexendo
 // (para a mão ir até a manivela, o úbere, a fruta...) e entrega ao objeto a posição das mãos do personagem.
 import * as THREE from 'three';
-import { criarVisual, conferirVisual, listarConjuntos } from '../arte/registro.js';
+import { criarVisual, conferirVisual, listarConjuntos, temVisual } from '../arte/registro.js';
 
 export class Vista {
   // config: { padrao: 'codigo', porTipo: { tipo: conjunto } }  (config/arte.json)
@@ -19,7 +19,8 @@ export class Vista {
     this.personagem = { id: 'personagem', tipo: 'personagem', def: {}, ler: () => p.visual(), pos: () => [p.x, p.z, p.rumo] };
     this.entidades.push(this.personagem);
     this.porId = new Map(this.entidades.map((e) => [e.id, e]));
-    for (const e of this.entidades) this.conjuntoPorTipo[e.tipo] = (config.porTipo && config.porTipo[e.tipo]) || config.padrao;
+    // um conjunto pode não ter todos os tipos: o que faltar fica com o conjunto padrão
+    for (const e of this.entidades) { const c = (config.porTipo && config.porTipo[e.tipo]) || config.padrao; this.conjuntoPorTipo[e.tipo] = temVisual(c, e.tipo) ? c : config.padrao; }
     for (const e of this.entidades) this._criar(e);
     this._maos = { D: new THREE.Vector3(), E: new THREE.Vector3() };
     this._alvo = {};
@@ -33,7 +34,7 @@ export class Vista {
 
   // troca a arte de um tipo (ou de todos) na hora, sem recarregar e sem mexer na lógica
   definirConjuntoDoTipo(tipo, conjunto) {
-    if (this.conjuntoPorTipo[tipo] === conjunto) return;
+    if (this.conjuntoPorTipo[tipo] === conjunto || !temVisual(conjunto, tipo)) return; // se o conjunto não tem este tipo, fica como está
     this.conjuntoPorTipo[tipo] = conjunto;
     for (const e of this.entidades) if (e.tipo === tipo) this._criar(e);
     this.atualizar(0);

@@ -3,12 +3,13 @@
 // de um tipo não mexe na lógica. Tem os mesmos estados e pontos do conjunto "codigo", com animação bem crua.
 import * as THREE from 'three';
 import { Visual, registrarConjunto } from '../registro.js';
-import { TIPOS, ESCALA_PERSONAGEM } from '../../jogo/contrato.js';
+import { TIPOS, ACOES, ESCALA_PERSONAGEM } from '../../jogo/contrato.js';
 
 const TAU = Math.PI * 2;
 const CLARO = new THREE.MeshLambertMaterial({ color: 0xd8d8d8 });
 const CHAO = new THREE.MeshLambertMaterial({ color: 0xbcbcbc });
 const ESCURO = new THREE.MeshLambertMaterial({ color: 0x8f8f8f });
+const CAMINHO = new THREE.MeshLambertMaterial({ color: 0xa6a6a6 });
 const suave = (t) => { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); };
 const janela = (t, a, b, s = 0.15, d = 0.15) => suave((t - a) / s) * (1 - suave((t - (b - d)) / d));
 
@@ -50,6 +51,8 @@ function personagem() {
   pD.add(caixa(0.2, 0.88, 0.22, { pende: true })); pE.add(caixa(0.2, 0.88, 0.22, { pende: true }));
   const caixote = caixa(0.52, 0.3, 0.38, { y: 0.28, z: 0.42 }); tronco.add(caixote);
   const naMao = caixa(0.2, 0.2, 0.2, { y: -0.72 }); bD.add(naMao);
+  // na ordenha: um banquinho debaixo dele e o balde no ponto que a vaca indica
+  const banco = caixa(0.34, 0.3, 0.3, { z: -0.04 }), balde = cilindro(0.17, 0.26, { seg: 8 }); v.raiz.add(banco, balde);
   const a = { tx: 0, bd: 0, be: 0, pd: 0, pe: 0, y: 0 }; // pose atual (ângulos em radianos, y = quanto o corpo desce)
   const mao = new THREE.Vector3();
   v.atualizar = (dt) => {
@@ -76,6 +79,9 @@ function personagem() {
     corpo.position.y = -a.y * corpo.scale.y + (e === 'parado' ? 0.012 * Math.sin(v.tempo * 2.6) : 0);
     caixote.visible = !!d.carregando; naMao.visible = mostra;
     v.raiz.updateMatrixWorld(true);
+    const A = d.alvoPontos;
+    banco.visible = e === 'ordenhar'; balde.visible = e === 'ordenhar' && !!(A && A.balde);
+    if (balde.visible) v.raiz.worldToLocal(balde.position.copy(A.balde));
     for (const [nome, b] of [['maoD', bD], ['maoE', bE]]) v.pontos[nome].copy(v.raiz.worldToLocal(b.localToWorld(mao.set(0, -0.62, 0))));
   };
   return v;
@@ -158,7 +164,6 @@ function vaca() {
   for (const [x, z, fase] of [[0.26, 0.6, 0], [-0.26, 0.6, 0.5], [0.26, -0.6, 0.75], [-0.26, -0.6, 0.25]]) { const p = pivo(corpo, x, 0.74, z); p.add(caixa(0.2, 0.74, 0.2, { pende: true })); pernas.push([p, fase]); }
   const rabo = pivo(corpo, 0, 1.35, -0.85); rabo.add(caixa(0.08, 0.75, 0.08, { pende: true }));
   const sinal = bola(0.16, { y: 2.2 }); corpo.add(sinal);
-  const balde = cilindro(0.17, 0.26, { x: -0.12, z: -0.28, seg: 8 }); corpo.add(balde);
   let cab = 0;
   v.atualizar = (dt) => {
     v.tempo += dt;
@@ -169,7 +174,6 @@ function vaca() {
     for (const [p, fase] of pernas) p.rotation.x = 0.38 * Math.sin(((d.fase || 0) + fase) * TAU) * anda;
     rabo.rotation.z = 0.3 * Math.sin(v.tempo * 2.2);
     sinal.visible = !!d.leitePronto && e !== 'ordenhada'; sinal.position.y = 2.2 + 0.08 * Math.sin(v.tempo * 4);
-    balde.visible = e === 'ordenhada';
   };
   return v;
 }
@@ -217,18 +221,21 @@ function arvore() {
   v.raiz.add(cilindro(0.22, 2.0, { seg: 8 }));
   const copa = pivo(v.raiz, 0, 1.9, 0);
   copa.add(bola(1.4, { y: 1.1 }));
-  const frutas = [[-0.3, 0.42, 1.2], [0, 0.3, 1.28], [0.32, 0.45, 1.18]].map(([x, y, z]) => { const f = bola(0.13, { x, y, z, mat: ESCURO }); copa.add(f); return f; });
+  copa.add(bola(0.62, { x: -0.5, y: 0.92, z: 1.3 })); // o galho baixo de onde pendem as frutas
+  const frutas = [[-0.6, 0.17, 1.52], [-0.42, 0.2, 1.46], [-0.5, 0.24, 1.64]].map(([x, y, z]) => { const f = bola(0.13, { x, y, z, mat: ESCURO }); copa.add(f); return f; });
   v.atualizar = (dt) => {
     v.tempo += dt;
     const d = v.dados, a = d.acao;
-    const puxa = a && !a.feito ? janela(a.t, 0.75, a.efeito + 0.05, 0.2, 0.05) : 0;
-    const treme = a && a.feito ? Math.exp(-(a.t - a.efeito) * 4) * Math.sin((a.t - a.efeito) * 28) : 0;
+    const efeito = ACOES.colherFruta.efeito;
+    const puxa = a && !a.feito ? janela(a.t, 0.75, efeito + 0.05, 0.2, 0.05) : 0;
+    const treme = a && a.feito ? Math.exp(-(a.t - efeito) * 4) * Math.sin((a.t - efeito) * 28) : 0;
     copa.rotation.z = 0.02 * Math.sin(v.tempo * 1.3) + 0.05 * treme; copa.rotation.x = 0.04 * puxa + 0.04 * treme;
     frutas.forEach((f, i) => {
       const s = d.frutas[i] ? 1 : i === d.crescendo ? 0.15 + 0.7 * d.matura : 0;
       f.visible = s > 0 && !(a && a.feito && i === d.alvo); f.scale.setScalar(Math.max(0.01, s));
     });
     const i = d.alvo >= 0 ? d.alvo : Math.max(0, d.frutas.indexOf(1));
+    copa.updateMatrix();
     v.pontos.fruta.copy(frutas[i].position).applyMatrix4(copa.matrix);
   };
   return v;
@@ -241,7 +248,7 @@ function chao({ sitio }) {
   v.raiz.add(caixa(L, 0.6, L, { y: -0.6, mat: CHAO }));
   for (const linha of sitio.caminhos) for (let i = 0; i < linha.length - 1; i++) {
     const [x0, z0] = linha[i], [x1, z1] = linha[i + 1], c = Math.hypot(x1 - x0, z1 - z0);
-    const m = caixa(sitio.larguraCaminho, 0.03, c + sitio.larguraCaminho * 0.5, { x: (x0 + x1) / 2, z: (z0 + z1) / 2, mat: CHAO });
+    const m = caixa(sitio.larguraCaminho, 0.02, c + sitio.larguraCaminho * 0.5, { x: (x0 + x1) / 2, z: (z0 + z1) / 2, mat: CAMINHO });
     m.rotation.y = Math.atan2(x1 - x0, z1 - z0); v.raiz.add(m);
   }
   return v;

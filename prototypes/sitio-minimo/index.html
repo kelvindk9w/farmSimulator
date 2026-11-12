@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Sítio mínimo</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #cfeaf7; overscroll-behavior: none; }
+  body { font: 600 14px/1.25 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif; color: #4a2f1b; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+  #tela { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  #hud { position: fixed; inset: 0; pointer-events: none; padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); display: flex; flex-direction: column; justify-content: space-between; }
+  .topo { display: flex; flex-wrap: wrap; gap: 6px 10px; justify-content: space-between; align-items: flex-start; }
+  .contadores, .botoes { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip, button, .dica { background: #fff9ec; border: 2px solid #4a2f1b; border-radius: 12px; box-shadow: 0 2px 0 rgba(74, 47, 27, .35); }
+  .chip { padding: 5px 10px; display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+  .chip b { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: #8a6a4c; }
+  .chip .item { display: inline-flex; align-items: center; gap: 4px; margin-left: 4px; }
+  .chip .item.zero { opacity: .38; }
+  .bola { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #4a2f1b; display: inline-block; box-sizing: border-box; }
+  .gota { width: 11px; height: 11px; border-radius: 0 50% 50% 50%; transform: rotate(45deg); border: 1.5px solid #4a2f1b; display: inline-block; box-sizing: border-box; margin: 0 2px; background: transparent; }
+  .gota.cheia { background: #4cb8d8; }
+  button { pointer-events: auto; font: inherit; color: inherit; padding: 8px 12px; min-height: 40px; cursor: pointer; touch-action: manipulation; }
+  button:active { transform: translateY(2px); box-shadow: none; }
+  button.ligado { background: #41a85c; color: #fff; }
+  .rodape { display: flex; justify-content: center; }
+  .dica { padding: 7px 14px; max-width: min(92vw, 640px); text-align: center; font-weight: 500; }
+  .dica.previa { opacity: .8; border-style: dashed; }
+  .rotulos { position: fixed; inset: 0; overflow: hidden; }
+  .rotulo { position: absolute; left: 0; top: 0; padding: 2px 9px; border-radius: 10px; background: #fff9ec; border: 2px solid #4a2f1b; font-weight: 700; white-space: nowrap; will-change: transform, opacity; }
+  .anel { position: absolute; width: 36px; height: 36px; margin: -18px 0 0 -18px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(74, 47, 27, .6); animation: anel .45s ease-out forwards; }
+  @keyframes anel { from { transform: scale(.3); opacity: 1; } to { transform: scale(1.2); opacity: 0; } }
+  .erro { position: fixed; inset: auto 8px 8px 8px; background: #7a1f1f; color: #fff; padding: 10px 14px; border-radius: 10px; font-weight: 500; }
+  body.sem-hud #hud { display: none; }
+  @media (max-width: 520px) { body { font-size: 13px; } .chip { padding: 4px 8px; } button { padding: 7px 10px; } }
+</style>
+</head>
+<body>
+<canvas id="tela"></canvas>
+<div id="hud"></div>
+<noscript><p style="padding:16px">Este protótipo precisa de JavaScript e WebGL.</p></noscript>
+<script src="./main.js" defer></script>
+</body>
+</html>

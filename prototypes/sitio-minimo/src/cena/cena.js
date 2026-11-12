@@ -37,6 +37,7 @@ export class Cena {
     const ALTURA = { celeiro: 4.4, arvore: 4.4, poco: 2.5 };
     for (const o of Object.values(sitio.objetos)) if (ALTURA[o.tipo]) this.cantos.push(new THREE.Vector3(o.x, ALTURA[o.tipo], o.z));
     this.modo = 'tudo'; // 'tudo' | 'perto'
+    this.fixo = null;
     this.w = 1; this.h = 1; this.dpr = 1; this.escala = 30; // px (CSS) por unidade de mundo
     this.margens = { cima: 0, baixo: 0, esq: 0, dir: 0 };
     this.centro = new THREE.Vector2(); // centro da vista no plano da câmera (u = direita, v = cima)
@@ -64,7 +65,23 @@ export class Cena {
     return Math.min((this.w - m.esq - m.dir) / (c.u1 - c.u0), (this.h - m.cima - m.baixo) / (c.v1 - c.v0));
   }
   seguir(x, z, dt) { this.foco.set(x, 1.0, z); this._enquadrar(false, dt); }
-  arrastar(dxPx, dyPx) { if (this.modo === 'perto') { this.arrasto.x -= dxPx / this.escala; this.arrasto.y += dyPx / this.escala; } }
+  // para as ferramentas de captura: prende a vista num ponto do mundo, com uma escala dada (px por unidade); null solta
+  fixar(ponto, escala) { this.fixo = ponto ? { p: new THREE.Vector3(ponto[0], ponto[1], ponto[2]), escala } : null; this._enquadrar(true); }
+  // até onde o centro da vista "de perto" pode ir sem sair do sítio
+  _limites() {
+    const c = this._caixa, m = this.margens;
+    const mu = (this.w - m.esq - m.dir) / 2 / this.escala, mv = (this.h - m.cima - m.baixo) / 2 / this.escala;
+    const cu = (c.u0 + c.u1) / 2, cv = (c.v0 + c.v1) / 2, su = c.u1 - c.u0 <= 2 * mu, sv = c.v1 - c.v0 <= 2 * mv;
+    return { u0: su ? cu : c.u0 + mu, u1: su ? cu : c.u1 - mu, v0: sv ? cv : c.v0 + mv, v1: sv ? cv : c.v1 - mv };
+  }
+  // arrastar o dedo (só de perto): a vista acompanha o dedo na hora e para na beira do sítio, sem "sobra" para desfazer
+  arrastar(dxPx, dyPx) {
+    if (this.modo !== 'perto' || this.fixo) return;
+    const L = this._limites(), fu = this.foco.dot(DIREITA), fv = this.foco.dot(CIMA);
+    const u = Math.max(L.u0, Math.min(L.u1, fu + this.arrasto.x)) - dxPx / this.escala, v = Math.max(L.v0, Math.min(L.v1, fv + this.arrasto.y)) + dyPx / this.escala;
+    this.arrasto.set(Math.max(L.u0, Math.min(L.u1, u)) - fu, Math.max(L.v0, Math.min(L.v1, v)) - fv);
+    this._enquadrar(true);
+  }
   soltarArrasto() { this.arrasto.set(0, 0); }
 
   _enquadrar(direto, dt = 0) {
@@ -72,16 +89,19 @@ export class Cena {
     const util = { w: w - m.esq - m.dir, h: h - m.cima - m.baixo };
     const tudo = this.escalaTudo();
     let u, v;
-    if (this.modo === 'tudo') {
+    if (this.fixo) {
+      this.escala = this.fixo.escala;
+      u = this.fixo.p.dot(DIREITA); v = this.fixo.p.dot(CIMA);
+      direto = true;
+    } else if (this.modo === 'tudo') {
       this.escala = tudo;
       u = (c.u0 + c.u1) / 2; v = (c.v0 + c.v1) / 2;
     } else {
       this.escala = Math.max(tudo * 1.15, Math.min(62, Math.max(40, tudo * 2)));
       u = this.foco.dot(DIREITA) + this.arrasto.x; v = this.foco.dot(CIMA) + this.arrasto.y;
       // não deixa a vista sair do sítio
-      const mu = util.w / 2 / this.escala, mv = util.h / 2 / this.escala;
-      u = c.u1 - c.u0 <= 2 * mu ? (c.u0 + c.u1) / 2 : Math.max(c.u0 + mu, Math.min(c.u1 - mu, u));
-      v = c.v1 - c.v0 <= 2 * mv ? (c.v0 + c.v1) / 2 : Math.max(c.v0 + mv, Math.min(c.v1 - mv, v));
+      const L = this._limites();
+      u = Math.max(L.u0, Math.min(L.u1, u)); v = Math.max(L.v0, Math.min(L.v1, v));
     }
     // o ponto (u, v) tem de aparecer no centro da área útil (a tela menos as margens da interface)
     const alvoU = u - (m.esq + util.w / 2 - w / 2) / this.escala, alvoV = v + (m.cima + util.h / 2 - h / 2) / this.escala;

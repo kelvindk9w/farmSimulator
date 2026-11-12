@@ -67,6 +67,13 @@ export function conferirVisual(tipo, v, tolerancia = 0.05) {
       else if (Math.hypot(q.x - p[0], q.y - p[1], q.z - p[2]) > tolerancia) problemas.push(`ponto de jogo "${n}" em (${q.x.toFixed(2)}, ${q.y.toFixed(2)}, ${q.z.toFixed(2)}), o contrato pede (${p.join(', ')})`);
     }
     for (const n of Object.keys(T.ancoras)) if (!v.pontos[n]) problemas.push(`falta o ponto de mão "${n}"`);
+    for (const [n, q] of Object.entries(v.pontos)) if (!Number.isFinite(q.x + q.y + q.z)) problemas.push(`o ponto "${n}" tem valor inválido (NaN ou infinito)`);
+  }
+  // uma conta errada na animação (divisão por zero, dado que não existe) deixa a peça invisível: aqui ela é denunciada
+  if (v.raiz && v.raiz.isObject3D) {
+    let ruim = null;
+    v.raiz.traverse((o) => { if (!ruim && !(Number.isFinite(o.position.x + o.position.y + o.position.z + o.quaternion.x + o.quaternion.y + o.quaternion.z + o.quaternion.w + o.scale.x + o.scale.y + o.scale.z))) ruim = o; });
+    if (ruim) problemas.push(`uma peça do visual (${ruim.name || ruim.type}) tem posição, giro ou escala inválidos (NaN ou infinito)`);
   }
   return problemas;
 }
