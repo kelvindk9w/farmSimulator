@@ -188,8 +188,9 @@ export function canteiroPlantas(b, nome) {
   const s = +nome[1], i = +nome[3];
   b.group({ r: [0, i * 67 + s * 30, 0] }, () => {
     if (s === 0) { // semente: uma meia bolinha amarela num montinho
-      b.bola(0.13, P.terraClara, { s: [1, 0.42, 1], seg: 7, aneis: 3 });
-      b.bola(0.07, P.semente, { p: [0, 0.04, 0], s: [1, 0.8, 1] });
+      // o osso fica dentro da leira (o alto dela passa 0,12 acima dele): o montinho sobe para aparecer em cima da terra
+      b.bola(0.15, P.terraClara, { p: [0, 0.12, 0], s: [1, 0.45, 1], seg: 7, aneis: 3 });
+      b.bola(0.075, P.semente, { p: [0, 0.18, 0], s: [1, 0.8, 1] });
     } else if (s === 1) { // broto: duas folhinhas gordas e uma menor no meio
       b.cap(0.035, 0.14, P.milhoCaule, { n: 5, nc: 1 });
       for (const e of [0, 1]) b.folha(0.34, 0.16, P.milhoFolha, { p: [0, 0.07, 0], r: [0, e * 180, -32], dobra: 50, esp: 0.45 });
