@@ -1,0 +1,6 @@
+# dependências e saída de build (recriadas por "npm install" e "npm run build")
+node_modules/
+dist/
+# temporários das ferramentas de captura
+capturas/tmp/
+*.tmp

@@ -1,0 +1,23 @@
+{
+  "name": "sitio-minimo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sítio mínimo: protótipo jogável com um objeto de cada tipo, com a arte de cada objeto atrás de uma interface",
+  "type": "module",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "node build.mjs",
+    "servir": "node tools/servir.mjs dist 8090",
+    "simular": "node tools/simular.mjs",
+    "verificar": "node tools/verificar.mjs",
+    "capturas": "node tools/capturar.mjs",
+    "medir": "node tools/medir.mjs"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "sharp": "^0.35.5"
+  }
+}
