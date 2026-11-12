@@ -7,7 +7,8 @@
 # - <pasta-de-trabalho> fica FORA do repositório (por exemplo /root/arte-codex/<tarefa>).
 #   O Codex roda no sandbox dele em modo "workspace-write": só escreve nessa pasta e os
 #   comandos que ele executa não têm rede. O que for aprovado é copiado para arte/ por quem chamou.
-# - <pedido.md> é o texto do pedido. As imagens de referência são anexadas ao pedido.
+# - <pedido.md> é o texto do pedido. As imagens de referência são anexadas ao pedido e copiadas
+#   para <pasta-de-trabalho>/referencias/, onde o Codex consegue abri-las.
 # - A resposta final do Codex fica em <pasta-de-trabalho>/ultima-resposta.md e o registro
 #   completo em <pasta-de-trabalho>/codex.log.
 #
@@ -33,10 +34,15 @@ case "$(cd "$trabalho" && pwd)/" in
   "$raiz_repo"/*) echo "A pasta de trabalho precisa ficar fora do repositório: $trabalho" >&2; exit 2 ;;
 esac
 
+# As imagens de referência são copiadas para <pasta-de-trabalho>/referencias/ e anexadas pelo
+# caminho completo: o Codex só enxerga a pasta de trabalho, e procura lá o arquivo que foi anexado.
 imagens=()
 for img in "$@"; do
   [ -f "$img" ] || { echo "Imagem de referência não encontrada: $img" >&2; exit 2; }
-  imagens+=("--image=$img")
+  mkdir -p "$trabalho/referencias"
+  copia="$(cd "$trabalho/referencias" && pwd)/$(basename "$img")"
+  cp -f "$img" "$copia"
+  imagens+=("--image=$copia")
 done
 
 "$CODEX_BIN" exec \
