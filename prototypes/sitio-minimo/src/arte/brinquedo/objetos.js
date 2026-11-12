@@ -2,27 +2,35 @@
 // Só o DESENHO mora aqui. Os esqueletos (nomes e posições dos ossos) e toda a animação são os de ../codigo/objetos.js:
 // cada função abaixo desenha as peças de um osso, em coordenadas locais do osso, com as formas arredondadas do kit.
 // Referências: arte/estilo/rodada-02/folha-construcoes.png, folha-plantio.png e notas-de-construcao.md.
+import * as THREE from 'three';
 import { TIPOS } from '../../jogo/contrato.js';
-import { acaso } from '../codigo/base.js';
 import { P } from './kit.js';
 
 const GRAUS = 180 / Math.PI;
 
-// Telhado de duas águas com telhas gordas: fileiras de meias cápsulas descendo a água, cada telha um pouco por cima da de baixo.
-// A cumeeira corre ao longo de Z, na altura yCume.
+// Telhado de duas águas com telhas gordas: em cada coluna, cilindros compridos de pontas redondas descem a água, o de
+// cima um pouco mais alto e por cima do de baixo. A cumeeira corre ao longo de Z, na altura yCume.
 function telhado(b, { yCume, corre, sobe, beiral, fundo, colunas, fiadas, raio = 0.2 }) {
   const k2 = (corre + beiral) / corre, ang = Math.atan2(sobe, corre) * GRAUS, comp = Math.hypot(corre + beiral, sobe * k2);
-  const lw = fundo / colunas, lf = comp / fiadas;
+  const lw = fundo / colunas, lf = comp / fiadas, passa = 0.16;
   for (const s of [-1, 1]) {
     b.group({ p: [0, yCume, 0], r: [0, 0, -s * ang] }, () => {
       b.box(comp + 0.04, 0.12, fundo - 0.16, P.telhaEscura, { p: [(s * comp) / 2, -0.2, 0], q: 0.05, seg: 1 });
       for (let i = 0; i < colunas; i++) for (let j = 0; j < fiadas; j++) {
-        b.cap(raio, lf + raio * 1.25, (i * 3 + j * 2) % 7 === 0 ? P.telhaClara : P.telha, { p: [s * (j * lf - raio * 0.15), -0.1, -fundo / 2 + (i + 0.5) * lw], r: [0, 0, -s * 85.5], s: [0.78, 1, lw / (2 * raio) * 1.04] });
+        const cima = fiadas - 1 - j, ini = j * lf - (j ? passa : 0), len = lf + (j ? passa : 0) + raio * 0.35;
+        b.cap(raio, len, P.telha, { p: [s * ini, -0.11 + cima * 0.035, -fundo / 2 + (i + 0.5) * lw], r: [0, 0, -s * 88.2], s: [0.8, 1, (lw / (2 * raio)) * 1.03], n: 8, nc: 3 });
       }
     });
   }
   // cumeeira: uma telha gorda deitada
-  b.cap(raio * 1.05, fundo + 0.24, P.telha, { p: [0, yCume + 0.02, -(fundo + 0.24) / 2], r: [90, 0, 0] });
+  b.cap(raio * 1.02, fundo + 0.24, P.telha, { p: [0, yCume + 0.03, -(fundo + 0.24) / 2], r: [90, 0, 0], n: 10 });
+}
+
+// bloco de pedra curvo (um pedaço de anel de cantos arredondados): raios r0..r1, alturas y0..y1, ângulos a0..a1
+function blocoCurvo(b, r0, r1, y0, y1, a0, a1, cor, q = 0.05) {
+  const pts = [], canto = (cx, cy, g0) => { for (let i = 0; i <= 2; i++) { const g = (g0 + i * 45) / GRAUS; pts.push(new THREE.Vector2(cx + Math.cos(g) * q, cy + Math.sin(g) * q)); } };
+  canto(r0 + q, y0 + q, 180); canto(r1 - q, y0 + q, 270); canto(r1 - q, y1 - q, 0); canto(r0 + q, y1 - q, 90); pts.push(pts[0].clone());
+  return b.add(new THREE.LatheGeometry(pts, 3, a0, a1 - a0), cor);
 }
 
 // ---------------- celeiro ----------------
@@ -67,7 +75,7 @@ export function celeiro(b, nome) {
     b.box(0.2, 0.24, D + 0.2, P.base, { p: [-W / 2 - 0.02, 0, 0], q: 0.08, seg: 1 });
     b.box(W + 0.2, 0.24, 0.2, P.base, { p: [0, 0, -fz - 0.02], q: 0.08, seg: 1 });
     for (const s of [-1, 1]) b.box(W / 2 - hw - 0.02, 0.24, 0.2, P.base, { p: [s * (hw + 0.13 + (W / 2 - hw - 0.02) / 2), 0, fz + 0.02], q: 0.08, seg: 2 });
-    telhado(b, { yCume: H + sobe + 0.1, corre, sobe, beiral: 0.36, fundo: D + 0.74, colunas: 8, fiadas: 3, raio: 0.22 });
+    telhado(b, { yCume: H + sobe + 0.12, corre, sobe, beiral: 0.36, fundo: D + 0.74, colunas: 7, fiadas: 2, raio: 0.26 });
   } else {
     // folha da porta: moldura creme, almofada verde e travessas em X, igual dos dois lados
     const s = nome === 'folhaE' ? 1 : -1, lw = hw - 0.012, alt = Pt.altura - 0.04, cx = (s * lw) / 2;
@@ -86,20 +94,23 @@ export function celeiro(b, nome) {
 const RAIO_MANIVELA = 0.26;
 export function poco(b, nome) {
   if (nome === 'raiz') {
-    // anel de pedra grosso e arredondado, com a água lá dentro
-    b.lathe([[0.72, 0], [0.82, 0.05], [0.84, 0.2], [0.84, 0.66], [0.8, 0.77], [0.7, 0.82], [0.62, 0.8], [0.57, 0.73], [0.57, 0.2]], 20, P.pedra, {});
+    // anel de pedra: duas fiadas de blocos curvos e gordos, com a junta escura aparecendo entre eles, e a água lá dentro
+    b.lathe([[0.6, 0], [0.815, 0], [0.815, 0.76], [0.6, 0.76], [0.6, 0.3]], 20, P.pedraEscura, { n: 18 });
+    const NB = 8, passo = (Math.PI * 2) / NB, vao = 0.035, tons = [P.pedra, P.pedraClara, P.pedra, P.pedraMedia];
+    for (let f = 0; f < 2; f++) for (let i = 0; i < NB; i++) {
+      const a0 = (i + f * 0.5) * passo + 0.3;
+      blocoCurvo(b, 0.57, 0.845, f * 0.405, f * 0.405 + 0.39, a0 + vao / 2, a0 + passo - vao / 2, tons[(i * 3 + f * 5) % tons.length], 0.06);
+    }
     b.cyl(0.6, 0.6, 0.02, 16, P.aguaFunda, { p: [0, 0.4, 0], q: 0.002 });
     b.cyl(0.32, 0.32, 0.006, 12, P.agua, { p: [0.08, 0.42, -0.06], q: 0.001 });
-    // poucos blocos grandes, um pouco saltados
-    for (let i = 0; i < 6; i++) { const a = i * 1.05 + 0.4, alto = i % 2; b.box(0.36, 0.2, 0.08, alto ? P.pedraEscura : P.pedraClara, { p: [Math.sin(a) * 0.815, alto ? 0.42 : 0.14, Math.cos(a) * 0.815], r: [0, a * GRAUS, 0], q: 0.04, seg: 1 }); }
     // esteios, travessa e telhadinho (alto, para não esconder o balde)
     for (const s of [-1, 1]) b.cyl(0.085, 0.095, 2.42, 10, P.tronco, { p: [0, 0, s * 0.74] });
     b.cap(0.06, 1.7, P.tronco, { p: [0, 2.3, -0.85], r: [90, 0, 0] });
-    telhado(b, { yCume: 2.66, corre: 0.5, sobe: 0.312, beiral: 0.2, fundo: 2.1, colunas: 5, fiadas: 2, raio: 0.2 });
+    telhado(b, { yCume: 2.68, corre: 0.52, sobe: 0.33, beiral: 0.24, fundo: 2.2, colunas: 5, fiadas: 1, raio: 0.22 });
   } else if (nome === 'eixo') {
     b.cap(0.05, 1.9, P.tronco, { p: [0, 0, -0.84], r: [90, 0, 0] });
     b.cyl(0.11, 0.11, 0.9, 12, P.madeira, { p: [0, 0, -0.45], r: [90, 0, 0], q: 0.03 });
-    for (let i = 0; i < 5; i++) b.cyl(0.128, 0.128, 0.075, 12, i % 2 ? P.corda : P.cordaEscura, { p: [0, 0, -0.19 + i * 0.076], r: [90, 0, 0], q: 0.03 });
+    for (let i = 0; i < 5; i++) b.add(new THREE.TorusGeometry(0.1, 0.04, 5, 10), i % 2 ? P.corda : P.cordaEscura, { p: [0, 0, -0.152 + i * 0.076] });
     // manivela: braço e pegador
     b.box(0.09, RAIO_MANIVELA + 0.1, 0.07, P.metalEscuro, { p: [0, -0.05, 1.0], q: 0.03, seg: 1 });
     b.cap(0.05, 0.34, P.madeiraClara, { p: [0, RAIO_MANIVELA, 1.0], r: [90, 0, 0] });
@@ -132,7 +143,10 @@ export function ninho(b, nome) {
 
 // ---------------- laranjeira ----------------
 const PENCAS = [[-0.57, -0.19, 0.86, 0.1], [-0.39, -0.16, 0.82, 0.13], [-0.5, -0.13, 1.0, 0.12]]; // as mesmas de ../codigo/objetos.js
-const RAIO_LARANJA = 0.13;
+const RAIO_LARANJA = 0.155;
+const COPA = [[0.05, 1.62, -0.1, 1.12], [0.98, 0.92, 0.3, 0.74], [-0.95, 0.95, -0.25, 0.78], [0.2, 0.95, -1.0, 0.76], [0.1, 0.8, 0.85, 0.6]]; // [x, y, z, raio] a partir do osso da copa
+// penduradas embaixo da copa, as laranjas ficam na sombra: a cor vai um pouco acima da tinta para continuarem vivas
+const LARANJA_NO_PE = new THREE.Color(P.laranja).multiplyScalar(1.22), LARANJA_NO_PE_CLARA = new THREE.Color(P.laranjaClara).multiplyScalar(1.22);
 export function arvore(b, nome) {
   if (nome === 'raiz') {
     // tronco afunilado, com o pé alargado
@@ -141,39 +155,32 @@ export function arvore(b, nome) {
     b.cyl(0.1, 0.15, 0.85, 8, P.tronco, { p: [-0.05, 1.45, -0.05], r: [-22, 0, 30] });
     b.cyl(0.08, 0.12, 1.05, 8, P.tronco, { p: [0, 1.62, 0.05], r: [52, -4, 0] });
   } else if (nome === 'copa') {
-    // copa em poucas massas redondas, mais claras em cima
-    const bolas = [[0, 1.42, -0.05, 1.3], [0.9, 1.0, 0.3, 0.92], [-0.85, 0.98, -0.15, 0.98], [0.1, 1.05, -0.9, 0.9], [-0.25, 1.15, 0.66, 0.8], [0.2, 2.12, 0.0, 0.84]];
-    for (const [x, y, z, r] of bolas) b.sph(r, 0, 0, P.folhaEscura, { p: [x, y, z], s: [1, 0.9, 1], grad: P.folhaClara });
+    // copa em poucas massas redondas bem separadas: um domo grande em cima e bolas menores em volta, mais abaixo
+    for (const [x, y, z, r] of COPA) b.sph(r, 0, 0, P.folhaEscura, { p: [x, y, z], s: [1, 0.92, 1], grad: P.folhaClara, n: 18 });
   } else if (nome === 'galho') {
-    b.sph(0.52, 0, 0, P.folhaEscura, { p: [-0.5, 0.33, 0.8], s: [1, 0.86, 1], grad: P.folhaClara });
-    b.sph(0.32, 0, 0, P.folha, { p: [-0.82, 0.2, 1.0], s: [1, 0.8, 1], grad: P.folhaClara });
+    b.sph(0.5, 0, 0, P.folhaEscura, { p: [-0.5, 0.36, 0.8], s: [1, 0.9, 1], grad: P.folhaClara });
   } else {
     const c = PENCAS[+nome[5]][3];
-    b.cyl(0.018, 0.018, c + 0.2, 6, P.troncoEscuro, { p: [0, -c, 0], q: 0.005 });
-    b.sph(RAIO_LARANJA, 0, 0, P.laranja, { p: [0, -c - RAIO_LARANJA * 0.9, 0], grad: P.laranjaClara });
-    b.sph(0.07, 0, 0, P.folhaClara, { p: [0.05, -c + 0.03, 0.02], s: [1, 0.28, 0.6], r: [0, 30, 25] });
+    b.cap(0.02, c + 0.2, P.troncoEscuro, { p: [0, -c, 0], n: 4, nc: 1 });
+    b.sph(RAIO_LARANJA, 0, 0, LARANJA_NO_PE, { p: [0, -c - RAIO_LARANJA * 0.9, 0], grad: LARANJA_NO_PE_CLARA });
+    b.bola(0.07, P.folhaClara, { p: [0.05, -c + 0.03, 0.02], s: [1, 0.28, 0.6], r: [0, 30, 25] });
   }
 }
 
 // ---------------- canteiro e milho ----------------
-// almofada de terra com três leiras largas (os pés de milho ficam em cima das de fora)
+// almofada de terra alta, de borda bem redonda, com três leiras gordas (os pés de milho ficam nas de fora)
 export function canteiroTerra(b) {
-  const [w, d] = TIPOS.canteiro.tamanho, lw = w - 0.2, ld = d - 0.2;
-  b.box(lw, 0.19, ld, P.terraEscura, { q: 0.085, seg: 3 });
-  for (const z of [-0.39, 0, 0.39]) b.cap(0.18, lw - 0.26, P.terra, { p: [-(lw - 0.26) / 2, 0.14, z], r: [0, 0, -90], s: [0.5, 1, 1] });
+  const [w, d] = TIPOS.canteiro.tamanho, lw = w - 0.16, ld = d - 0.16, rl = ld * 0.158;
+  b.box(lw, 0.27, ld, P.terraEscura, { q: 0.13, seg: 3 });
+  for (const k of [-1, 0, 1]) b.cap(rl, lw - 0.26, P.terra, { p: [-(lw - 0.26) / 2, 0.16, k * ld * 0.29], r: [0, 0, -90], s: [0.74, 1, 1], n: 10, nc: 3 });
 }
-// folha gorda: uma cápsula achatada que nasce na origem, sobe inclinada e dobra para fora
-function folha(b, comp, larg, cor, o) {
-  b.group(o, () => {
-    b.cap(larg / 2, comp * 0.62, cor, { s: [1, 1, 0.34] });
-    b.cap(larg / 2 * 0.9, comp * 0.5, cor, { p: [0, comp * 0.5, 0], r: [0, 0, -38], s: [1, 1, 0.34] });
-  });
-}
+// Os pés de milho são de peças baratas (cápsulas de poucos gomos e a folha gorda do kit): as quatro fases dos quatro
+// lugares de cada canteiro moram na mesma malha, e a que não está à vista fica com escala zero.
 function espigaNoPe(b, o) {
   b.group(o, () => {
-    b.cap(0.085, 0.36, P.milhoEspiga, { p: [0, 0.04, 0] });
-    b.cap(0.075, 0.3, P.milhoFolha, { p: [0.045, 0, 0], r: [0, 0, -14], s: [0.5, 1, 1] });
-    b.cap(0.075, 0.3, P.milhoCaule, { p: [-0.045, 0, 0], r: [0, 0, 14], s: [0.5, 1, 1] });
+    b.cap(0.085, 0.36, P.milhoEspiga, { p: [0, 0.04, 0], n: 6, nc: 2 });
+    b.folha(0.34, 0.17, P.milhoFolha, { p: [0.055, 0, 0], r: [0, 0, -8], dobra: 25, esp: 0.5 });
+    b.folha(0.34, 0.17, P.milhoCaule, { p: [-0.055, 0, 0], r: [0, 180, -8], dobra: 25, esp: 0.5 });
   });
 }
 export function canteiroPlantas(b, nome) {
@@ -181,24 +188,46 @@ export function canteiroPlantas(b, nome) {
   const s = +nome[1], i = +nome[3];
   b.group({ r: [0, i * 67 + s * 30, 0] }, () => {
     if (s === 0) { // semente: uma meia bolinha amarela num montinho
-      b.sph(0.13, 0, 0, P.terraClara, { s: [1, 0.42, 1] });
-      b.sph(0.07, 0, 0, P.semente, { p: [0, 0.04, 0], s: [1, 0.8, 1] });
-    } else if (s === 1) { // broto: duas folhinhas gordas
-      b.cyl(0.03, 0.04, 0.12, 7, P.milhoCaule, {});
-      for (const e of [-1, 1]) b.cap(0.075, 0.3, P.milhoFolha, { p: [0, 0.08, 0], r: [0, 0, e * 42], s: [1, 1, 0.4] });
-      b.cap(0.05, 0.2, P.milhoCaule, { p: [0, 0.1, 0], r: [30, 0, 0], s: [1, 1, 0.4] });
+      b.bola(0.13, P.terraClara, { s: [1, 0.42, 1], seg: 7, aneis: 3 });
+      b.bola(0.07, P.semente, { p: [0, 0.04, 0], s: [1, 0.8, 1] });
+    } else if (s === 1) { // broto: duas folhinhas gordas e uma menor no meio
+      b.cap(0.035, 0.14, P.milhoCaule, { n: 5, nc: 1 });
+      for (const e of [0, 1]) b.folha(0.34, 0.16, P.milhoFolha, { p: [0, 0.07, 0], r: [0, e * 180, -32], dobra: 50, esp: 0.45 });
+      b.folha(0.22, 0.1, P.milhoCaule, { p: [0, 0.1, 0], r: [0, 90, -12], dobra: 30, esp: 0.45 });
     } else { // pé crescendo (0,9 de altura) e pé pronto (1,8, com as espigas)
       const h = s === 2 ? 0.9 : 1.8, nf = s === 2 ? 4 : 6;
-      b.cyl(s === 2 ? 0.05 : 0.06, s === 2 ? 0.065 : 0.085, h, 8, P.milhoCaule, {});
-      for (let k = 0; k < nf; k++) folha(b, s === 2 ? 0.5 : 0.72, s === 2 ? 0.17 : 0.21, k % 2 ? P.milhoFolha : P.milhoCaule, { p: [0, h * (0.18 + (k / nf) * 0.66), 0], r: [0, k * 137, -40] });
+      b.cap(s === 2 ? 0.055 : 0.07, h, P.milhoCaule, { n: 6, nc: 1 });
+      for (let k = 0; k < nf; k++) b.folha(s === 2 ? 0.55 : 0.8, s === 2 ? 0.18 : 0.23, k % 2 ? P.milhoFolha : P.milhoCaule, { p: [0, h * (0.16 + (k / nf) * 0.66), 0], r: [0, k * 137, -38], dobra: 75 });
       if (s === 3) {
         espigaNoPe(b, { p: [0.07, h * 0.46, 0.02], r: [0, 0, -24] });
         espigaNoPe(b, { p: [-0.06, h * 0.64, -0.03], r: [-10, 0, 26] });
-        for (let k = 0; k < 3; k++) b.cap(0.022, 0.3, P.milhoPendao, { p: [0, h - 0.03, 0], r: [k ? 28 : 0, k * 150, 0] });
-      } else b.cap(0.05, 0.3, P.milhoFolha, { p: [0, h - 0.06, 0], s: [1, 1, 0.4] });
+        for (let k = 0; k < 3; k++) b.cap(0.022, 0.3, P.milhoPendao, { p: [0, h - 0.03, 0], r: [k ? 28 : 0, k * 150, 0], n: 4, nc: 1 });
+      } else b.folha(0.32, 0.12, P.milhoFolha, { p: [0, h - 0.06, 0], dobra: 20 });
     }
   });
 }
+
+// ---------------- projetores de sombra ----------------
+// Formas simples que fazem a sombra do celeiro, do poço e da laranjeira no mapa de sombra (ver projetorDeSombra no kit).
+// As medidas repetem as dos desenhos de cima, um pouco para dentro.
+export const PROJETORES = {
+  celeiro: (b) => {
+    const [W, D] = TIPOS.celeiro.tamanho, H = 2.75, sobe = 1.45, corre = W / 2, beiral = 0.36, cume = H + sobe + 0.07, meia = corre + beiral - 0.06;
+    b.box(W - 0.12, H, D - 0.12, '#000');
+    b.ext([[-meia, cume - (sobe * meia) / corre], [meia, cume - (sobe * meia) / corre], [0, cume]], D + 0.62, '#000');
+  },
+  poco: (b) => {
+    b.lathe([[0.6, 0.02], [0.82, 0.02], [0.82, 0.78], [0.6, 0.78], [0.6, 0.02]], 12, '#000');
+    for (const s of [-1, 1]) b.box(0.14, 2.4, 0.14, '#000', { p: [0, 0, s * 0.74] });
+    b.ext([[-0.72, 2.63 - (0.33 * 0.72) / 0.52], [0.72, 2.63 - (0.33 * 0.72) / 0.52], [0, 2.63]], 2.1, '#000');
+    b.box(0.16, 0.16, 1.7, '#000', { p: [0, 1.12, 0.1] });
+  },
+  arvore: (b) => {
+    b.cyl(0.21, 0.4, 2.0, 7, '#000');
+    for (const [x, y, z, r] of COPA) b.sph(r * 0.95, 12, 7, '#000', { p: [x, 1.6 + y, z], s: [1, 0.92, 1] });
+    b.sph(0.46, 10, 6, '#000', { p: [-0.5, 0.85 + 0.36, 0.72 + 0.8] });
+  },
+};
 
 // ---------------- objetos de mão ----------------
 function caixote(b, recheio) {
@@ -260,4 +289,3 @@ export const OBJETOS_DE_MAO = {
   ovo: (b) => b.sph(0.07, 0, 0, P.ovo, { s: [1, 1.28, 1] }),
   laranja: (b) => { b.sph(0.104, 0, 0, P.laranja, { grad: P.laranjaClara }); b.sph(0.06, 0, 0, P.folhaClara, { p: [0.03, 0.1, 0], s: [1, 0.28, 0.6], r: [0, 30, 25] }); },
 };
-export { acaso };

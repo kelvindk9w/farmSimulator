@@ -21,20 +21,25 @@ console.log(`  ${'total'.padEnd(12)} bruto ${kb(tot[0])}   gzip ${kb(tot[1])}   
 const amb = await abrirNavegador();
 try {
   console.log('\nDesenho da cena inteira (tela 1280 x 720, enquadramento "tudo")');
-  for (const c of ['codigo', 'molde']) {
+  for (const c of ['codigo', 'molde', 'brinquedo']) {
     const { pagina, contexto } = await abrirPagina(amb, `passo,demo,tudo,arte-${c}`, TELAS.paisagem);
     const r = await pagina.evaluate(() => {
       const S = window.__sitio, ini = S.estatisticas();
+      // ler um pixel obriga o desenho a terminar antes de seguir: sem isso os quadros se acumulam na fila do WebGL em
+      // software e a página seguinte demora mais que o limite para abrir
+      const gl = S.cena.renderer.getContext(), px = new Uint8Array(4);
       let pico = { ...ini }, em = 0, picoTri = { ...ini }, emTri = 0;
       for (let n = 10; n <= 1800; n += 10) {
         S.avancarAte(n);
         const e = S.estatisticas();
+        gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
         if (e.chamadas > pico.chamadas) { pico = e; em = n; }
         if (e.triangulos > picoTri.triangulos) { picoTri = e; emTri = n; }
       }
       return { ini, pico, em, picoTri, emTri };
     });
-    console.log(`  conjunto "${c}":  no começo ${r.ini.chamadas} chamadas de desenho e ${r.ini.triangulos} triângulos;  pico na demonstração: ${r.pico.chamadas} chamadas (aos ${(r.em / 60).toFixed(1)} s) e ${r.picoTri.triangulos} triângulos (aos ${(r.emTri / 60).toFixed(1)} s)`);
+    const sombra = (e) => (e.naSombra ? ` (${e.triangulos - e.naSombra} da cena + ${e.naSombra} da passada do mapa de sombra)` : '');
+    console.log(`  conjunto "${c}":  no começo ${r.ini.chamadas} chamadas de desenho e ${r.ini.triangulos} triângulos${sombra(r.ini)};  pico na demonstração: ${r.pico.chamadas} chamadas (aos ${(r.em / 60).toFixed(1)} s) e ${r.picoTri.triangulos} triângulos${sombra(r.picoTri)} (aos ${(r.emTri / 60).toFixed(1)} s)`);
     await contexto.close();
   }
   // um celular com 3 pixels por ponto, para ver o limite de 2 funcionando

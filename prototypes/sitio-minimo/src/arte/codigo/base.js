@@ -12,6 +12,8 @@ export { THREE, Builder, MAT, C, mix, shade };
 // reaproveitar os mesmos esqueletos e a mesma animação trocando só isso: enquanto a fábrica roda dentro de comEstilo(),
 // o construtor, o material, as cores e as sombras vêm do estilo (ver src/arte/brinquedo/kit.js).
 //   estilo = { Builder, material(), paleta: { nomeDeC: cor }, sombra(rx, rz, x, z, y), sombraRet(w, d, x, z, y), aoCriar(mesh), geoParticula(raio), ... }
+//   estilo.redesenhar(qual, desenhoPadrao) devolve o desenho a usar numa malha (qual = 'malha' | 'articulado'): é por onde o outro
+//   conjunto troca as formas de um objeto e mantém os ossos; estilo.avatar() e estilo.objetosDeMao trocam o boneco e o que ele segura.
 let ESTILO = null;
 export const estilo = () => ESTILO;
 export function comEstilo(e, fn) {
@@ -58,7 +60,7 @@ export class Mola {
 // malha estática feita com o construtor (um desenho = uma chamada de desenho)
 export function malha(desenhar, semente = 7, material = null) {
   const b = construtor(semente);
-  desenhar(b);
+  (ESTILO && ESTILO.redesenhar ? ESTILO.redesenhar('malha', desenhar) : desenhar)(b);
   return pronta(new THREE.Mesh(b.build(), material || materialComum()));
 }
 
@@ -71,6 +73,7 @@ export function articulado(ossos, desenhar, semente = 5) {
   ossos.forEach(([, pai, pos], i) => { bones[i].position.set(pos[0], pos[1], pos[2]); if (pai) bones[indice[pai]].add(bones[i]); });
   bones[0].updateMatrixWorld(true);
   const geos = [];
+  if (ESTILO && ESTILO.redesenhar) desenhar = ESTILO.redesenhar('articulado', desenhar);
   ossos.forEach(([nome], i) => {
     const b = construtor(semente + i * 3);
     desenhar(b, nome);

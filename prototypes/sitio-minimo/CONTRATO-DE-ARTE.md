@@ -12,7 +12,13 @@ Os números do contrato moram em `src/jogo/contrato.js`. Este texto explica esse
 | Arte | `src/arte/` | Um **visual** por objeto: os modelos, as cores e a animação. | Não decide nada do jogo e não guarda estado do jogo. |
 | Ponte | `src/cena/vista.js` | A cada passo lê o estado de cada objeto na lógica, põe o visual no lugar e entrega o estado a ele. | |
 
-A arte é organizada em **conjuntos**. O registro (`src/arte/registro.js`) guarda `conjunto de arte → tipo de objeto → fábrica`. Hoje há dois conjuntos: `codigo` (o de verdade, modelado e animado por código) e `molde` (formas cinza, lisas, só para mostrar a etapa de molde e provar a troca).
+A arte é organizada em **conjuntos**. O registro (`src/arte/registro.js`) guarda `conjunto de arte → tipo de objeto → fábrica`. Hoje há três conjuntos:
+
+| Conjunto | O que é |
+|---|---|
+| `brinquedo` | O que abre. Formas roliças de brinquedo, material fosco, luz quente e mapa de sombra. Reproduz por código o estilo da imagem `arte/estilo/rodada-01/estilo-a.png`. Usa os esqueletos e a animação do `codigo`. |
+| `codigo` | O primeiro conjunto, modelado e animado por código, de formas facetadas. É onde moram os esqueletos e a animação. |
+| `molde` | Formas cinza e lisas, só para mostrar a etapa de molde e provar a troca. |
 
 ## O que é um visual
 
@@ -130,11 +136,48 @@ Tem de dar para ver: um balanço leve sempre; cada laranja madura; a que está c
 
 Um estado só, `normal`. Recebem `sitio` (a planta de `src/jogo/sitio.js`) na fábrica: o tamanho do terreno, os caminhos, o retângulo do pasto com o vão da porteira e a área das galinhas. Não têm pontos.
 
+## O ambiente de um conjunto (ponto novo do contrato)
+
+Um conjunto pode trazer a própria luz. É opcional: `registrarConjunto(nome, rotulo, fabricas, { ambiente })`. A cena aplica o ambiente do conjunto que desenha o tipo `chao`, e troca de ambiente quando a arte do chão é trocada. Um conjunto sem ambiente fica com o padrão da cena, que é a luz do `codigo` e do `molde`, sem mapa de sombra. Nada muda para os conjuntos que já existiam.
+
+| Campo | O que é |
+|---|---|
+| `fundo` | A cor do fundo da tela. |
+| `ceu` | `{ cor, chao, intensidade }`: a luz do céu, que vem de cima com a cor `cor` e de baixo com a cor `chao`. |
+| `sol` | `{ cor, intensidade, direcao }`: a luz direta. `direcao` aponta do sítio para o sol. |
+| `sombra` | Opcional. `{ tamanho, raio, intensidade }`: liga o mapa de sombra do sol, com `tamanho` pontos de lado e a borda borrada em `raio` pontos do mapa. Só há um mapa de sombra na cena. Com sombra ligada, cada malha escolhe se projeta (`castShadow`) e se recebe (`receiveShadow`). |
+| `cabe` | Opcional. `{ tipo: [[dx, y, dz], ...] }`: pontos a mais que têm de caber na tela no enquadramento "tudo", contados a partir do objeto daquele tipo. Serve quando o conjunto tem uma peça mais alta ou mais larga que a dos outros. O `brinquedo` usa para a cumeeira e o beiral do celeiro. |
+
+O ambiente do `brinquedo` é `AMBIENTE`, em `src/arte/brinquedo/kit.js`.
+
+## Vestir um conjunto com outro estilo
+
+O conjunto `brinquedo` não tem esqueleto nem animação próprios. Ele chama as fábricas do `codigo` dentro de `comEstilo(estilo, fn)`, de `src/arte/codigo/base.js`, e o estilo troca só a aparência. Assim os estados, os pontos e os tempos são os mesmos, por construção. Um conjunto novo pode fazer igual.
+
+| Membro do estilo | O que troca |
+|---|---|
+| `Builder` | O construtor de malhas. O do `brinquedo` (`BuilderBrinquedo`) tem os mesmos métodos do construtor de `tools/visual-refs` e faz formas de canto redondo com normais suaves. |
+| `material()` | O material comum das malhas. |
+| `paleta` | Cores que substituem as da paleta `C` do `codigo`, pelo mesmo nome. |
+| `redesenhar(qual, padrao)` | Devolve o desenho de uma malha. `qual` é `malha` (peça parada) ou `articulado` (peças presas a ossos). O `brinquedo` numera as malhas de cada tipo na ordem em que a fábrica as cria, e procura um desenho com a chave `tipo.qualN`, por exemplo `vaca.articulado0` ou `canteiro.malha0`. O desenho de um articulado recebe o nome de cada osso e desenha as peças daquele osso, nas coordenadas dele. Sem desenho para a chave, vale o do `codigo`. |
+| `avatar()` | Só no personagem. Devolve o boneco: `{ group, root, mesh, bones, skeleton, probes }`, com os mesmos ossos do avatar de `tools/visual-refs` (`BONES`). As poses do `codigo` mexem nesses ossos. |
+| `objetosDeMao` | Só no personagem. Os desenhos do que ele segura: regador, caixote, balde, banquinho, espiga, ovo, laranja, saquinho de sementes. |
+| `sombra`, `sombraRet` | A mancha de sombra de contato, redonda ou retangular. |
+| `geoParticula`, `matParticula` | A forma e o material das partículas (água, sementes, folhas). |
+| `aoCriar(mesh)` | Chamado em cada malha criada. O `brinquedo` usa para dizer quais malhas projetam sombra. |
+
+Quem troca a forma tem de manter três coisas: os nomes dos ossos, os pontos de jogo e os pontos de mão. Se a forma nova esconder uma ação, ajusta-se a forma ou o ponto de mão, e não a lógica.
+
+Duas técnicas do `brinquedo` que valem para outros conjuntos:
+
+- **Recorte chapado.** O rosto do personagem e as manchas da vaca são recortes finos de cor lisa, colados na superfície curva (`decalque`, em `kit.js`). Dão um desenho nítido sem textura.
+- **Projetor de sombra.** Tudo o que projeta sombra é desenhado duas vezes por quadro. O celeiro, o poço e a laranjeira não projetam: no lugar deles projeta uma forma simples e invisível, de poucos triângulos (`projetorDeSombra`, em `kit.js`, e `PROJETORES`, em `objetos.js`).
+
 ## Como trocar a arte de um tipo
 
 1. Escreva a fábrica do tipo num arquivo novo, por exemplo `src/arte/pintado/vaca.js`. Ela pode carregar o que quiser (uma malha pintada à mão, um modelo com esqueleto), desde que devolva um visual como descrito acima. Lembre que a publicação só aceita arquivos `.html`, `.js`, `.json` e `.png`.
-2. Registre o conjunto, mesmo que ele só tenha esse tipo: `registrarConjunto('pintado', 'pintado', { vaca })`, e importe o arquivo em `src/main.js`, ao lado dos outros dois conjuntos.
-3. Aponte o tipo para o conjunto em `config/arte.json`: `{ "padrao": "codigo", "porTipo": { "vaca": "pintado" } }`. Os outros tipos continuam no conjunto padrão.
+2. Registre o conjunto, mesmo que ele só tenha esse tipo: `registrarConjunto('pintado', 'pintado', { vaca })`, e importe o arquivo em `src/main.js`, ao lado dos outros conjuntos.
+3. Aponte o tipo para o conjunto em `config/arte.json`: `{ "padrao": "brinquedo", "porTipo": { "vaca": "pintado" } }`. Os outros tipos continuam no conjunto padrão.
 4. Rode `npm run build` e depois `npm run verificar`.
 
 Todo conjunto registrado entra sozinho na roda do botão "Arte" e pode ser pedido no endereço com `#arte-nome`. Os dez tipos são `personagem`, `canteiro`, `poco`, `celeiro`, `vaca`, `galinha`, `ninho`, `arvore`, `chao` e `cerca`. Se o conjunto pedido não tiver algum tipo, esse tipo continua com a arte que estava, e o botão mostra "Arte: misto".
@@ -144,12 +187,18 @@ Para a verificação automática também rodar a demonstração inteira com o co
 ## Como a conformidade é conferida
 
 - `conferirVisual(tipo, visual)` em `src/arte/registro.js` devolve a lista de problemas de um visual: função que falta, ponto de jogo fora do lugar, ponto de mão que falta, valor inválido.
-- `npm run verificar` roda a demonstração inteira com cada conjunto, em passos contados, e exige: nenhum problema de contrato do começo ao fim, cada ação concluída com a mudança certa nos contadores, e o mesmo estado de jogo nos mesmos passos com os dois conjuntos. Também troca a arte no meio da demonstração e confere que o jogo não muda.
+- `npm run verificar` roda a demonstração inteira com cada conjunto, em passos contados, e exige: nenhum problema de contrato do começo ao fim, cada ação concluída com a mudança certa nos contadores, e o mesmo estado de jogo nos mesmos passos com os três conjuntos. Também troca a arte no meio da demonstração e confere que o jogo não muda.
 
 A verificação automática garante que a arte nova não quebra o jogo. Ela não diz se a animação está boa: isso se vê com as folhas de contato de `npm run capturas` e jogando.
 
 ## Limites para rodar bem no celular
 
-- De preferência uma chamada de desenho por objeto. No conjunto `codigo` cada objeto animado é uma malha só com esqueleto, e todos dividem um material.
-- Sombra é uma mancha escura no chão. Não há mapa de sombra.
+O orçamento da cena inteira, no enquadramento "tudo", é de cerca de 80 mil triângulos e 60 chamadas de desenho por quadro, contando a passada do mapa de sombra. `npm run medir` mostra os números de cada conjunto.
+
+- De preferência uma chamada de desenho por objeto. Nos conjuntos `codigo` e `brinquedo` cada objeto animado é uma malha só com esqueleto, e todos dividem um material.
+- No `codigo` e no `molde`, sombra é uma mancha escura no chão, sem mapa de sombra.
+- No `brinquedo` há um mapa de sombra só, de 1024 por 1024 pontos (o limite é 2048), mais a mancha de contato. Uma malha que projeta sombra conta duas vezes nos triângulos; por isso as peças grandes usam projetor de sombra e as pequenas não projetam.
+- Texturas: até 4 MB de memória de vídeo no total. O `brinquedo` usa uma textura só, de 64 por 64 pontos, gerada por código.
+- Nada de efeito em tela cheia depois do desenho.
+- Toda imagem que entrar no jogo tem de ser pequena (até 512 pontos de lado, e até 500 KB somando todas) e estar listada no README, com a origem. Hoje não há nenhuma.
 - O visual libera em `descartar()` o que criou; geometria ou material compartilhado entre visuais não deve ser liberado por um deles.

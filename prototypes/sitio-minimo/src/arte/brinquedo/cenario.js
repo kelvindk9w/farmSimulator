@@ -53,8 +53,8 @@ export function chao({ sitio }) {
   };
   v.raiz.add(malha((b) => {
     // bloco: grama por cima, com a borda rolando para baixo, e uma faixa grossa de terra
-    b.slab(cantosRedondos(-L, -L, L, L, 0.6, 7), 0.3, P.grama, { p: [0, -0.3, 0], q: 0.13 });
-    b.slab(cantosRedondos(-L + 0.02, -L + 0.02, L - 0.02, L - 0.02, 0.6, 7), 0.58, P.faixa, { p: [0, -0.78, 0], q: 0.12, grad: P.terra });
+    b.slab(cantosRedondos(-L, -L, L, L, 0.6, 7), 0.22, P.grama, { p: [0, -0.22, 0], q: 0.1 });
+    b.slab(cantosRedondos(-L + 0.02, -L + 0.02, L - 0.02, L - 0.02, 0.6, 7), 0.46, P.faixa, { p: [0, -0.6, 0], q: 0.12, grad: P.terra });
     // pasto: chão batido claro no ponto de ordenha
     elipse(b, Pa.ordenha.x - 0.2, Pa.ordenha.z + 0.25, 1.0, 0.75, 0.3, 0.004, mix(new THREE.Color(P.grama), new THREE.Color(P.terreiro), 0.28), 14);
     // terreiro das galinhas: areia clara com a beirada um pouco mais escura
@@ -75,23 +75,23 @@ export function chao({ sitio }) {
       }
     }
     // grãos de milho no terreiro (bolinhas baixas)
-    for (let i = 0; i < 9; i++) b.sph(0.035, 0, 0, P.milhoEspiga, { p: [T.x0 + 0.5 + acaso(i + 70) * (T.x1 - T.x0 - 1.0), 0.012, T.z0 + 0.5 + acaso(i + 90) * (T.z1 - T.z0 - 1.0)], s: [1, 0.5, 1] });
+    for (let i = 0; i < 9; i++) b.bola(0.035, P.milhoEspiga, { p: [T.x0 + 0.5 + acaso(i + 70) * (T.x1 - T.x0 - 1.0), 0.012, T.z0 + 0.5 + acaso(i + 90) * (T.z1 - T.z0 - 1.0)], s: [1, 0.5, 1], seg: 5, aneis: 3 });
     // tufos de capim gordinhos (três folhas) e umas florzinhas
     let postos = 0;
     for (let i = 0; i < 400 && postos < 11; i++) {
       const x = (acaso(i * 2 + 300) * 2 - 1) * L, z = (acaso(i * 2 + 301) * 2 - 1) * L;
       if (!livre(x, z, 0.35)) continue;
       const flor = postos % 4 === 3;
-      b.group({ p: [x, 0, z], r: [0, acaso(i) * 360, 0], s: 0.9 + acaso(i + 1) * 0.35 }, () => {
+      b.group({ p: [x, 0, z], r: [0, acaso(i) * 360, 0], s: 1.05 + acaso(i + 1) * 0.4 }, () => {
         if (flor) {
-          b.cyl(0.018, 0.022, 0.16, 6, P.tufo, {});
-          b.sph(0.062, 0, 0, postos % 8 === 3 ? '#fff6dc' : '#ffd9e6', { p: [0, 0.2, 0], s: [1, 0.72, 1] });
-          b.sph(0.03, 0, 0, P.milhoEspiga, { p: [0, 0.235, 0], s: [1, 0.6, 1] });
-          b.cone(0.05, 0.13, 7, P.tufoClaro, { p: [0.03, 0, 0.02], r: [0, 0, -42] });
+          b.cap(0.02, 0.2, P.tufo, { n: 5, nc: 1 });
+          b.bola(0.066, postos % 8 === 3 ? '#fff6dc' : '#ffd9e6', { p: [0, 0.2, 0], s: [1, 0.72, 1], seg: 8, aneis: 5 });
+          b.bola(0.032, P.milhoEspiga, { p: [0, 0.236, 0], s: [1, 0.6, 1], seg: 6, aneis: 3 });
+          b.folha(0.17, 0.09, P.tufoClaro, { p: [0.01, 0, 0], r: [0, 20, -35], dobra: 40, esp: 0.6 });
         } else {
-          b.cone(0.085, 0.34, 8, P.tufo, { p: [0, 0, 0], r: [0, 0, 4] });
-          b.cone(0.075, 0.27, 8, P.tufoClaro, { p: [0.07, 0, 0.03], r: [0, 0, -30] });
-          b.cone(0.075, 0.25, 8, P.tufo, { p: [-0.07, 0, 0.02], r: [0, 0, 32] });
+          // uma folha em pé no meio e três caindo para os lados (em três direções, para o tufo ter corpo de qualquer lado)
+          b.folha(0.42, 0.13, P.tufo, { esp: 0.7, dobra: 14 });
+          for (let k = 0; k < 3; k++) b.folha(0.31 - k * 0.02, 0.12, k === 1 ? P.tufo : P.tufoClaro, { p: [0, 0, 0], r: [0, 35 + k * 120, -34], esp: 0.7, dobra: 38 });
         }
       });
       postos++;
@@ -104,13 +104,13 @@ export function cerca({ sitio }) {
   const v = new Visual('cerca');
   const p = sitio.pasto, g = p.porteira;
   v.raiz.add(malha((b) => {
-    const mourao = (x, z, alt = 1.02, r = 0.115) => b.cap(r, alt + r, P.madeira, { p: [x, -r, z] });
+    const mourao = (x, z, alt = 0.98, r = 0.155) => b.cap(r, alt + r, P.cerca, { p: [x, -r, z], n: 10, nc: 2 });
     // um lance de cerca de (x0, z0) a (x1, z1): mourões a cada ~1,2 e duas réguas roliças por vão
     const lance = (x0, z0, x1, z1, comInicio, comFim) => {
       const c = Math.hypot(x1 - x0, z1 - z0), n = Math.max(1, Math.round(c / 1.2)), giro = (Math.atan2(x1 - x0, z1 - z0) * 180) / Math.PI;
       for (let i = 0; i <= n; i++) { if ((i === 0 && !comInicio) || (i === n && !comFim)) continue; mourao(x0 + ((x1 - x0) * i) / n, z0 + ((z1 - z0) * i) / n); }
       const ux = (x1 - x0) / c, uz = (z1 - z0) / c;
-      for (const y of [0.36, 0.72]) b.cap(0.058, c + 0.1, P.madeiraClara, { p: [x0 - ux * 0.05, y, z0 - uz * 0.05], r: [90, giro, 0] });
+      for (const y of [0.34, 0.68]) b.cap(0.085, c + 0.1, P.regua, { p: [x0 - ux * 0.05, y, z0 - uz * 0.05], r: [90, giro, 0] });
     };
     lance(p.x0, p.z0, p.x1, p.z0, true, true);
     lance(p.x0, p.z0, p.x0, p.z1, false, true);
@@ -118,7 +118,7 @@ export function cerca({ sitio }) {
     lance(p.x0, p.z1, g.x0, p.z1, false, false);
     lance(g.x1, p.z1, p.x1, p.z1, false, false);
     // mourões mais altos na porteira (que fica sempre aberta)
-    for (const x of [g.x0, g.x1]) mourao(x, p.z1, 1.28, 0.13);
+    for (const x of [g.x0, g.x1]) mourao(x, p.z1, 1.2, 0.17);
   }, 31));
   return v;
 }

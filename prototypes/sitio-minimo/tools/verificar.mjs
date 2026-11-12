@@ -14,7 +14,8 @@ import { abrirNavegador, abrirPagina, TELAS, dist, raiz } from './comum.mjs';
 let falhas = 0;
 const ok = (cond, texto, detalhe = '') => { console.log(`  ${cond ? 'ok  ' : 'FALHOU'} ${texto}${!cond && detalhe ? '\n         ' + detalhe : ''}`); if (!cond) falhas++; return cond; };
 const titulo = (t) => console.log('\n' + t);
-const CONJUNTOS = ['codigo', 'molde'];
+const CONJUNTOS = ['codigo', 'molde', 'brinquedo'];
+const INICIAL = 'brinquedo'; // o conjunto de config/arte.json: o que abre quando o endereço não pede outro
 const LIMITE_DEMO = 30 * 60; // a demonstração tem de caber em 30 s
 const S = (f, ...a) => `(${f})(...${JSON.stringify(a)})`;
 
@@ -118,6 +119,8 @@ try {
   {
     const { pagina, contexto, erros } = await abrirPagina(amb, 'passo,demo,tudo');
     const ref = res.codigo;
+    const abriu = await pagina.evaluate(() => window.__sitio.info().conjunto);
+    ok(abriu === INICIAL, `sem "#arte-..." no endereço, a página abre com o conjunto "${INICIAL}" (config/arte.json)`, 'abriu com ' + abriu);
     await pagina.evaluate(() => { window.__marca = Math.random(); });
     const marca = await pagina.evaluate(() => window.__marca);
     const trocas = [];
@@ -126,9 +129,10 @@ try {
       if (n === 780) trocas.push(['só a vaca para codigo', await pagina.evaluate(() => { window.__sitio.definirArte('codigo', 'vaca'); return JSON.stringify(window.__sitio.conjuntos()); })]);
       if (n === 1110) { await pagina.click('#hud .botoes button:nth-child(2)'); trocas.push(['botão "Arte"', await pagina.evaluate(() => window.__sitio.info().conjunto + ' / ' + document.querySelector('#hud .botoes button:nth-child(2)').textContent)]); }
       if (n === 1410) { await pagina.evaluate(() => { location.hash = 'passo,demo,tudo,arte-molde'; }); await pagina.waitForFunction(() => window.__sitio.info().conjunto === 'molde'); trocas.push(['"#arte-molde" no endereço', 'molde']); }
+      if (n === 1560) trocas.push(['tudo para brinquedo (a luz e a sombra do conjunto voltam junto)', await pagina.evaluate(() => window.__sitio.definirArte('brinquedo'))]);
     });
     for (const [o, v] of trocas) console.log(`       troca: ${o} -> ${v}`);
-    ok(trocas.length === 4 && trocas[0][1] === 'molde', 'a arte foi trocada quatro vezes durante a demonstração (tudo, um tipo, botão, endereço)');
+    ok(trocas.length === 5 && trocas[0][1] === 'molde' && trocas[4][1] === 'brinquedo', 'a arte foi trocada cinco vezes durante a demonstração (tudo, um tipo, botão, endereço, de volta ao "brinquedo")');
     ok(/"vaca":"codigo"/.test(trocas[1][1]) && /"galinha":"molde"/.test(trocas[1][1]), 'a troca de um tipo só mudou só aquele tipo (vaca em "codigo", o resto em "molde")', trocas[1][1]);
     ok(await pagina.evaluate(() => window.__marca) === marca, 'a página não recarregou');
     ok(r.trilha.length === ref.trilha.length && r.trilha.every((t, i) => t.resumo === ref.trilha[i].resumo), 'o estado do jogo ficou idêntico ao da demonstração sem trocas, em todos os pontos');
@@ -205,14 +209,15 @@ try {
     }
     // botões: "Arte" troca o conjunto; "Demonstração" começa o roteiro
     const bt = async (n) => { const b = await pagina.locator(`#hud .botoes button:nth-child(${n})`).boundingBox(); await toque(b.x + b.width / 2, b.y + b.height / 2); };
-    await bt(2);
-    const arte = await pagina.evaluate(() => window.__sitio.info().conjunto);
-    ok(arte === 'molde', `botão "Arte": trocou para o conjunto "${arte}"`);
+    const volta = [await pagina.evaluate(() => window.__sitio.info().conjunto)];
+    for (let k = 0; k < CONJUNTOS.length + 1; k++) { await bt(2); volta.push(await pagina.evaluate(() => window.__sitio.info().conjunto)); }
+    const arte = volta[volta.length - 1];
+    ok(volta[0] === INICIAL && volta[CONJUNTOS.length] === INICIAL && new Set(volta).size === CONJUNTOS.length && arte !== INICIAL, `botão "Arte": passa pelos ${CONJUNTOS.length} conjuntos e volta ao primeiro (${volta.join(' > ')})`);
     await bt(1);
     const demo = await pagina.evaluate(() => window.__sitio.info());
     ok(!!demo.demo && demo.passo === 0, 'botão "Demonstração": recomeçou o sítio e ligou o roteiro');
     const meio = await pagina.evaluate(() => window.__sitio.avancarAte(400));
-    ok(meio.contadores.agua === 3 && meio.conjunto === 'molde', 'a demonstração anda com a arte que estava escolhida');
+    ok(meio.contadores.agua === 3 && meio.conjunto === arte, `a demonstração anda com a arte que estava escolhida ("${arte}")`);
     ok(erros.length === 0, 'nenhum erro no console', erros.join(' | '));
     todosErros.push(...erros);
     await contexto.close();

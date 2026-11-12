@@ -37,6 +37,7 @@ export class Cena {
     for (const [x, z] of [[-L, -L], [L, -L], [L, L], [-L, L]]) this.cantos.push(new THREE.Vector3(x, 0, z), new THREE.Vector3(x, -0.6, z));
     const ALTURA = { celeiro: 4.4, arvore: 4.4, poco: 2.5 };
     for (const o of Object.values(sitio.objetos)) if (ALTURA[o.tipo]) this.cantos.push(new THREE.Vector3(o.x, ALTURA[o.tipo], o.z));
+    this.sitio = sitio;
     this.modo = 'tudo'; // 'tudo' | 'perto'
     this.fixo = null;
     this.w = 1; this.h = 1; this.dpr = 1; this.escala = 30; // px (CSS) por unidade de mundo
@@ -44,12 +45,16 @@ export class Cena {
     this.centro = new THREE.Vector2(); // centro da vista no plano da câmera (u = direita, v = cima)
     this.foco = new THREE.Vector3(); // ponto que a vista "perto" acompanha
     this.arrasto = new THREE.Vector2(); // deslocamento manual da vista "perto"
-    this._caixa = { u0: 0, u1: 0, v0: 0, v1: 0 };
-    for (const p of this.cantos) {
-      const u = p.dot(DIREITA), v = p.dot(CIMA), c = this._caixa;
-      if (p === this.cantos[0]) { c.u0 = c.u1 = u; c.v0 = c.v1 = v; }
-      c.u0 = Math.min(c.u0, u); c.u1 = Math.max(c.u1, u); c.v0 = Math.min(c.v0, v); c.v1 = Math.max(c.v1, v);
-    }
+    this._medirTudo(this.ambiente.cabe);
+  }
+
+  // A caixa (no plano da câmera) que tem de caber na tela no enquadramento "tudo": os cantos do terreno, o alto dos
+  // objetos grandes e os pontos a mais do ambiente do conjunto ("cabe": { tipo: [[dx, y, dz], ...] }, a partir do objeto).
+  _medirTudo(cabe) {
+    const pts = [...this.cantos];
+    for (const o of Object.values(this.sitio.objetos)) for (const [dx, y, dz] of (cabe && cabe[o.tipo]) || []) pts.push(new THREE.Vector3(o.x + dx, y, o.z + dz));
+    const c = this._caixa = { u0: Infinity, u1: -Infinity, v0: Infinity, v1: -Infinity };
+    for (const p of pts) { const u = p.dot(DIREITA), v = p.dot(CIMA); c.u0 = Math.min(c.u0, u); c.u1 = Math.max(c.u1, u); c.v0 = Math.min(c.v0, v); c.v1 = Math.max(c.v1, v); }
   }
 
   // Ambiente de um conjunto de arte: fundo, luz do céu, sol e (se o conjunto quiser) um mapa de sombra do sol.
@@ -76,6 +81,7 @@ export class Cena {
       for (const x of [-L, L]) for (const y of [-0.7, 5.2]) for (const z of [-L, L]) { p.set(x, y, z).applyMatrix4(olho); x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); z0 = Math.min(z0, -p.z); z1 = Math.max(z1, -p.z); }
       c.left = x0; c.right = x1; c.bottom = y0; c.top = y1; c.near = Math.max(0.5, z0 - 1); c.far = z1 + 1; c.updateProjectionMatrix();
     }
+    if (this.cantos) { this._medirTudo(a.cabe); if (this.w > 1) this._enquadrar(true); }
   }
 
   redimensionar(w, h, dpr, margens) {
@@ -178,5 +184,12 @@ export class Cena {
   chaoEm(px, py) { const { o, d } = this.raio(px, py); const t = -o.y / d.y; return [o.x + d.x * t, o.z + d.z * t]; }
 
   // chamadas de desenho e triângulos do último quadro
-  estatisticas() { const i = this.renderer.info.render; return { chamadas: i.calls, triangulos: i.triangles }; }
+  // chamadas e triangulos são os do quadro inteiro (com a passada do mapa de sombra, quando o conjunto tem); naSombra diz
+  // quantos dos triângulos são dessa passada (tudo o que projeta sombra é desenhado duas vezes)
+  estatisticas() {
+    const i = this.renderer.info.render;
+    let naSombra = 0;
+    if (this.sol.castShadow) this.scene.traverseVisible((o) => { if (o.isMesh && o.castShadow) { const g = o.geometry; naSombra += (g.index ? g.index.count : g.attributes.position.count) / 3; } });
+    return { chamadas: i.calls, triangulos: i.triangles, naSombra: Math.round(naSombra) };
+  }
 }

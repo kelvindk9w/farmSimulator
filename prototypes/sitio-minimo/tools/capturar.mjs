@@ -9,17 +9,28 @@
 //   capturas/folhas/*.png             uma folha de contato por animação (vários instantes lado a lado)
 //   capturas/demonstracao.webm        a demonstração inteira (30 quadros por segundo, menos de 30 s)
 //   capturas/demonstracao-de-perto.webm  a mesma demonstração de perto, com a câmera acompanhando o personagem
-// Opções: --sem-video (pula os vídeos, que são a parte demorada), --so-video.
+// As de cima são do conjunto "codigo" (e "molde"). Do conjunto "brinquedo", que é o que abre:
+//   capturas/cena-brinquedo.png       o sítio inteiro, tela deitada
+//   capturas/celular-retrato-brinquedo.png  tela de celular em pé, como abre
+//   capturas/acoes-brinquedo.png      os mesmos quadros de cada interação
+//   capturas/comparacao-estilo-a.png  a imagem de referência do estilo (esquerda) e o jogo na mesma câmera (direita)
+//   capturas/folhas/*-brinquedo.png   galinha, vaca e personagem andando
+//   capturas/demonstracao-brinquedo.webm  a demonstração de perto
+// Opções: --sem-video (pula os vídeos, que são a parte demorada), --so-video, --so-brinquedo (só o que é do conjunto "brinquedo").
 // Tudo é tirado em modo passo: a ferramenta manda a simulação andar e fotografa, então o resultado não depende
 // da velocidade desta máquina (aqui o WebGL roda em software).
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { spawnSync } from 'node:child_process';
-import { abrirNavegador, abrirPagina, folhaDeContato, TELAS, capturas } from './comum.mjs';
+import { createRequire } from 'node:module';
+import { abrirNavegador, abrirPagina, folhaDeContato, TELAS, capturas, raiz } from './comum.mjs';
 import { Mundo } from '../src/jogo/mundo.js';
 import { Roteiro } from '../src/jogo/roteiro.js';
 
-const semVideo = process.argv.includes('--sem-video'), soVideo = process.argv.includes('--so-video');
+const semVideo = process.argv.includes('--sem-video'), soVideo = process.argv.includes('--so-video'), soBrinquedo = process.argv.includes('--so-brinquedo');
+const quer = (conjunto) => !soBrinquedo || conjunto === 'brinquedo';
+const REFERENCIA = path.resolve(raiz, '../../arte/estilo/rodada-01/estilo-a.png'); // a imagem do Codex que o conjunto "brinquedo" imita
 fs.mkdirSync(path.join(capturas, 'folhas'), { recursive: true });
 const rel = (p) => path.relative(process.cwd(), p);
 
@@ -58,18 +69,31 @@ try {
   if (!soVideo) {
     // ---------- telas inteiras ----------
     const PASSO_DA_FOTO = 300; // jogo parado há 5 s: vaca pastando, galinha no ninho
-    for (const [arquivo, hash, tela] of [
-      ['cena-paisagem.png', 'passo,tudo', TELAS.paisagem], ['cena-molde.png', 'passo,tudo,arte-molde', TELAS.paisagem],
-      ['celular-retrato.png', 'passo', TELAS.celularRetrato], ['celular-retrato-tudo.png', 'passo,tudo', TELAS.celularRetrato], ['celular-paisagem.png', 'passo', TELAS.celularPaisagem],
+    for (const [arquivo, hash, tela, conjunto] of [
+      ['cena-paisagem.png', 'passo,tudo', TELAS.paisagem, 'codigo'], ['cena-molde.png', 'passo,tudo', TELAS.paisagem, 'molde'],
+      ['celular-retrato.png', 'passo', TELAS.celularRetrato, 'codigo'], ['celular-retrato-tudo.png', 'passo,tudo', TELAS.celularRetrato, 'codigo'], ['celular-paisagem.png', 'passo', TELAS.celularPaisagem, 'codigo'],
+      ['cena-brinquedo.png', 'passo,tudo', TELAS.paisagem, 'brinquedo'], ['celular-retrato-brinquedo.png', 'passo', TELAS.celularRetrato, 'brinquedo'],
     ]) {
-      const { pagina, contexto } = await abrirPagina(amb, hash, tela);
+      if (!quer(conjunto)) continue;
+      const { pagina, contexto } = await abrirPagina(amb, `${hash},arte-${conjunto}`, tela);
       await pagina.evaluate((n) => window.__sitio.avancarAte(n), PASSO_DA_FOTO);
       await pagina.screenshot({ path: path.join(capturas, arquivo) });
       await contexto.close();
       console.log('ok', rel(path.join(capturas, arquivo)));
     }
 
-    // ---------- um quadro do meio de cada interação, nos dois conjuntos ----------
+    // ---------- a referência do estilo e o jogo na mesma câmera, lado a lado ----------
+    if (fs.existsSync(REFERENCIA)) {
+      const sharp = createRequire(import.meta.url)('sharp');
+      const { pagina, contexto } = await abrirPagina(amb, 'passo,sem-hud,tudo,arte-brinquedo', { width: 1920, height: 1080, deviceScaleFactor: 1 });
+      const jogo = await pagina.screenshot();
+      await contexto.close();
+      const ref = await sharp(REFERENCIA).resize(1920, 1080, { fit: 'fill' }).toBuffer(), saida = path.join(capturas, 'comparacao-estilo-a.png');
+      await sharp({ create: { width: 3860, height: 1080, channels: 3, background: '#ffffff' } }).composite([{ input: ref, left: 0, top: 0 }, { input: jogo, left: 1940, top: 0 }]).png().toFile(saida);
+      console.log('ok', rel(saida));
+    } else console.log('sem a imagem de referência (' + rel(REFERENCIA) + '): comparacao-estilo-a.png não foi refeita');
+
+    // ---------- um quadro do meio de cada interação, em cada conjunto ----------
     const quadros = [
       { passo: noTempo('girarManivela', 2.0), rotulo: 'Poço: tirar água' },
       { passo: noTempo('plantar', 0.84), rotulo: 'Canteiro: plantar' },
@@ -80,7 +104,8 @@ try {
       { passo: noTempo('ordenhar', 1.4), rotulo: 'Vaca: ordenhar' },
       { passo: noTempo('colher', 0.92), rotulo: 'Canteiro: colher o milho' },
     ];
-    for (const c of ['codigo', 'molde']) {
+    for (const c of ['codigo', 'molde', 'brinquedo']) {
+      if (!quer(c)) continue;
       const { pagina, contexto } = await abrirPagina(amb, `passo,demo,sem-hud,arte-${c}`, { width: 900, height: 900, deviceScaleFactor: 1 });
       const saida = path.join(capturas, `acoes-${c}.png`);
       await folhaDeContato(amb, pagina, { quadros, foco: 'personagem', seguir: true, meia: 1.95, escala: 165, lado: 420, colunas: 4, titulo: `Sítio mínimo: um quadro do meio de cada interação (conjunto de arte "${c}")`, saida });
@@ -88,8 +113,8 @@ try {
       console.log('ok', rel(saida));
     }
 
-    // ---------- uma folha por animação (conjunto "codigo") ----------
-    const folhas = [];
+    // ---------- uma folha por animação (conjunto "codigo"; as dos bichos e do andar também no "brinquedo") ----------
+    let folhas = [];
     const F = (nome, tit, quadrosDe, foco, meia, escala, opt = {}) => folhas.push({ nome, tit, quadrosDe, foco, meia, escala, ...opt });
     for (const [e, nome, tit, n] of [['girarManivela', 'poco-tirar-agua', 'Poço: tirar água', 12], ['plantar', 'canteiro-plantar', 'Canteiro: plantar milho', 8], ['regar', 'canteiro-regar', 'Canteiro: regar', 8], ['pegarOvo', 'ninho-pegar-ovo', 'Ninho: pegar o ovo', 8], ['colherFruta', 'laranjeira-colher', 'Laranjeira: colher uma laranja', 12], ['ordenhar', 'vaca-ordenhar', 'Vaca: ordenhar', 12], ['colher', 'canteiro-colher', 'Canteiro: colher o milho', 8]]) {
       F(nome, tit, espalhar(acao(e), n), 'personagem', e === 'colherFruta' ? 2.0 : 1.75, e === 'colherFruta' ? 170 : 190);
@@ -117,16 +142,20 @@ try {
     const rega = acao('regar'), colhe = acao('colher');
     F('canteiro-fases', 'Canteiro: vazio, semeado, molhado (mais escuro), broto, crescendo e pronto', [acao('plantar')[0] - 4, rega[0] - 2, rega[1] + 20, rega[1] + 300, rega[1] + 520, rega[1] + 760, rega[1] + 980, colhe[0] - 2], [0.3, 0.6, 4.3], 1.6, 190);
 
-    const paginas = {};
-    for (const f of folhas) {
-      const chave = f.livre ? 'livre' : 'demo';
-      if (!paginas[chave]) paginas[chave] = await abrirPagina(amb, f.livre ? 'passo,sem-hud' : 'passo,demo,sem-hud', { width: 900, height: 900, deviceScaleFactor: 1 });
-    }
+    // andar sem carregar nada (só no conjunto "brinquedo", que não tinha folha do andar simples)
+    const anda = trecho(demo.linha, (x) => x.e === 'andar' && !x.carregando && x.vel > 1.5, 40);
+    const doBrinquedo = folhas.filter((f) => /^(galinha|vaca|personagem)-/.test(f.nome)).map((f) => ({ ...f, nome: f.nome + '-brinquedo', conjunto: 'brinquedo' }));
+    if (anda) doBrinquedo.push({ nome: 'personagem-andar-brinquedo', tit: 'Personagem: andar (ciclo de passada)', quadrosDe: espalhar([anda[0] + 4, anda[0] + 4 + 48], 12), foco: 'personagem', meia: 1.3, escala: 230, seguir: true, conjunto: 'brinquedo' });
+    folhas = [...folhas.map((f) => ({ ...f, conjunto: 'codigo' })), ...doBrinquedo].filter((f) => quer(f.conjunto));
+    for (const f of folhas) if (f.conjunto === 'brinquedo') f.tit += ' (conjunto "brinquedo")';
+
     // a simulação só anda para a frente: tira as folhas na ordem do primeiro quadro; quem precisa voltar no tempo abre outra página
-    const andou = { demo: 0, livre: 0 };
+    const paginas = {}, andou = {};
+    const abrir = (f) => abrirPagina(amb, (f.livre ? 'passo,sem-hud' : 'passo,demo,sem-hud') + ',arte-' + f.conjunto, { width: 900, height: 900, deviceScaleFactor: 1 });
     for (const f of folhas.sort((a, b) => a.quadrosDe[0] - b.quadrosDe[0])) {
-      const chave = f.livre ? 'livre' : 'demo';
-      if (f.quadrosDe[0] < andou[chave]) { await paginas[chave].contexto.close(); paginas[chave] = await abrirPagina(amb, f.livre ? 'passo,sem-hud' : 'passo,demo,sem-hud', { width: 900, height: 900, deviceScaleFactor: 1 }); }
+      const chave = (f.livre ? 'livre' : 'demo') + ':' + f.conjunto;
+      if (paginas[chave] && f.quadrosDe[0] < andou[chave]) { await paginas[chave].contexto.close(); paginas[chave] = null; }
+      if (!paginas[chave]) paginas[chave] = await abrir(f);
       const { pagina } = paginas[chave];
       const saida = path.join(capturas, 'folhas', f.nome + '.png');
       let foco = f.foco;
@@ -135,21 +164,22 @@ try {
       andou[chave] = f.quadrosDe[f.quadrosDe.length - 1];
       console.log('ok', rel(saida));
     }
-    for (const k in paginas) await paginas[k].contexto.close();
+    for (const k in paginas) if (paginas[k]) await paginas[k].contexto.close();
   }
 
   // ---------- vídeos da demonstração: o sítio inteiro e de perto, com a câmera acompanhando o personagem ----------
   if (!semVideo) {
-    const tmp = path.join(capturas, 'tmp');
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'sitio-minimo-video-')); // fora do repositório
     const ultimo = Math.min(demo.fimEm + 30, 30 * 60 - 12); // 30 quadros por segundo: um quadro a cada 2 passos
-    for (const [modo, nome] of [['tudo', 'demonstracao.webm'], ['perto', 'demonstracao-de-perto.webm']]) {
+    for (const [modo, nome, conjunto] of [['tudo', 'demonstracao.webm', 'codigo'], ['perto', 'demonstracao-de-perto.webm', 'codigo'], ['perto', 'demonstracao-brinquedo.webm', 'brinquedo']]) {
+      if (!quer(conjunto)) continue;
       fs.rmSync(tmp, { recursive: true, force: true }); fs.mkdirSync(tmp, { recursive: true });
-      const { pagina, contexto } = await abrirPagina(amb, 'passo,demo,' + modo, { width: 960, height: 540, deviceScaleFactor: 1 });
+      const { pagina, contexto } = await abrirPagina(amb, `passo,demo,${modo},arte-${conjunto}`, { width: 960, height: 540, deviceScaleFactor: 1 });
       let k = 0;
       for (let n = 0; n <= ultimo; n += 2, k++) {
         await pagina.evaluate((p) => window.__sitio.avancarAte(p), n);
         await pagina.screenshot({ path: path.join(tmp, String(k).padStart(5, '0') + '.jpg'), type: 'jpeg', quality: 93 });
-        if (k % 150 === 0) console.log(`   vídeo "${modo}": quadro ${k} de ${Math.floor(ultimo / 2) + 1}`);
+        if (k % 150 === 0) console.log(`   vídeo ${nome}: quadro ${k} de ${Math.floor(ultimo / 2) + 1}`);
       }
       await contexto.close();
       const saida = path.join(capturas, nome);

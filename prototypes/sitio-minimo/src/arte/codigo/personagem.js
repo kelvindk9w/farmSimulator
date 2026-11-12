@@ -190,7 +190,7 @@ function alcancar(av, lado, alvo, peso) {
 function fazerObjetos(material) {
   const E = estilo();
   const feito = (desenhar, semente = 11) => { const b = construtor(semente); desenhar(b); const m = new THREE.Mesh(b.build(), material); if (E && E.aoCriar) E.aoCriar(m); return m; };
-  const emprestado = (tipo) => { if (E && E.objetoDeMao) return feito((b) => E.objetoDeMao(b, tipo)); const m = cenarioPose(tipo); m.material = material; return m; };
+  const emprestado = (tipo) => { const m = cenarioPose(tipo); m.material = material; return m; };
   const caixa = (recheio) => feito((b) => {
     if (recheio === 'laranja' || recheio === 'milho') { caixote(b, { p: [0, -0.16, 0], s: 0.9 }, recheio); return; }
     caixote(b, { p: [0, -0.16, 0], s: 0.9 }, null);
@@ -219,6 +219,7 @@ function fazerObjetos(material) {
     ovo: feito((b) => b.sph(0.07, 8, 6, '#fff6e4', { s: [1, 1.28, 1], smooth: true, grad: '#ffffff' })),
     laranja: feito((b) => { b.ico(0.104, 1, C.orange, { smooth: true, grad: mix(C.orange, '#ffd27a', 0.5) }); b.leaf(0.12, 0.07, 40, C.orangeLeafLight, { p: [0, 0.09, 0], r: [70, 40, 0], steps: 2 }); }),
   };
+  if (E && E.objetosDeMao) for (const n in E.objetosDeMao) if (o[n]) o[n] = feito(E.objetosDeMao[n]); // outro conjunto veste os mesmos objetos
   return o;
 }
 const CAIXA_DO_ITEM = { milho: 'caixaMilho', leite: 'caixaLeite', ovo: 'caixaOvo', laranja: 'caixaLaranja' };
