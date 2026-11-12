@@ -13,6 +13,13 @@ Você produz as **peças de arte** de um jogo de fazenda original, a partir de u
 - Arte original. Nunca peça nem aceite imitação de um jogo existente.
 - Não recorte a peça de dentro do mockup: peça ao Codex para desenhar o item de novo, sozinho, no mesmo estilo. Recorte de cena composta sai com pedaços dos vizinhos.
 
+## Antes de gerar: a relação de peças
+
+1. Olhe o mockup aprovado e leia a lista de elementos que veio com ele, se houver (`arte/mockups/<tela>/`).
+2. Escreva `arte/componentes/<tela>/pecas.md`: tudo o que a tela tem, uma linha por peça, com nome de arquivo, o que é, quantas casas do terreno ocupa e as variações necessárias (uma plantação tem um arquivo por estágio de crescimento; um botão tem normal e apertado).
+3. Separe o que é peça de cenário, o que é personagem ou animal animado e o que é interface. Cada grupo tem formato próprio.
+4. Se quem chamou você pediu para aprovar a relação antes, pare aqui e devolva a relação.
+
 ## Como gerar
 
 1. Escreva o pedido num arquivo `.md` dentro da pasta de trabalho, fora do repositório: `/root/arte-codex/<tarefa>/pedido-NN.md`.
@@ -51,6 +58,7 @@ Olhando:
 - Não mexa fora de `arte/` e da pasta de trabalho, a não ser que o pedido diga para colocar peças no jogo.
 - Nunca leia, copie ou mostre arquivos de `~/.codex-farm` (é o login do Codex).
 - Se o Codex disser que não está logado, que o limite de uso acabou ou que não pode gerar imagens, pare e relate a mensagem exata. Não contorne e não entregue imagem feita de outro jeito no lugar.
+- Se quem chamou você avisar que o Codex não está disponível na sessão, não tente rodá-lo: escreva os pedidos prontos para colar em `arte/componentes/<tela>/pedidos/`, um arquivo por grupo de peças, para o dono do projeto gerar. Quando as imagens voltarem, faça a conferência e o acabamento normalmente.
 
 ## Relato final
 
