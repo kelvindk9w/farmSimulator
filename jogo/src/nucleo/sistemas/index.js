@@ -33,3 +33,5 @@ import './pedidos.js'; // depois de industria.js (o quadro só pede receita de i
 // frente dos animais de trabalho e de estimação: boi de arado, cavalo, jumento com carroça e barril; cachorro e gato
 import './trabalho.js'; // depois de animais.js, de loja.js, de lavoura.js e de poco.js
 import './estimacao.js';
+// versão de teste: atalho para o dono pular de nível (sai quando o jogo for para a loja)
+import './atalho-de-teste.js';

@@ -7,6 +7,7 @@ import { registrarPainel } from './registro.js';
 import { gravacao } from '../../plataforma/gravacao.js';
 import { tela } from '../../plataforma/tela.js';
 import { som } from '../../plataforma/som.js';
+import '../textos/teste.js';
 
 function opcao(titulo, info, ...controles) {
   const o = el('div', 'opcao'), r = el('div', 'rotulo'), c = el('div', 'escolha');
@@ -76,6 +77,22 @@ registrarPainel({
         const l = el('div', 'linha botoes-config'); l.append(nao, sim);
         corpo.append(el('div', 'nota ruim', C.certeza), l);
       }
+      // versão de teste: pular de nível (sai quando o jogo for para a loja)
+      corpo.append(el('div', 'secao', T.teste.secao));
+      corpo.append(el('div', 'nota', T.teste.info));
+      const atalhos = el('div', 'linha botoes-config');
+      const pular = (n, texto) => {
+        const b = botao({ texto, aoClicar: () => {
+          const r = J.mundo.comando({ tipo: 'atalhoDeTeste', nivel: n, soMaterial: !n });
+          if (r.ok) { som.tocar('moeda'); nota = { texto: T.teste.feito(r.dados.nivel, r.dados.ouro), bom: true }; if (n) ctx.fechar(); else desenhar('teste-material'); }
+          else { som.tocar('erro'); nota = { texto: T.teste.jaPassou(J.mundo.progresso.nivel), bom: false }; mostrarNota(); }
+        } });
+        b.dataset.k = 'teste-' + (n || 'material');
+        return b;
+      };
+      for (const n of [5, 9, 12, 16]) if (n > J.mundo.progresso.nivel) atalhos.append(pular(n, T.teste.nivel(n)));
+      atalhos.append(pular(0, T.teste.material));
+      corpo.append(atalhos);
       const n = el('div', 'nota'); n.id = 'nota-config'; n.hidden = true; corpo.append(n);
       mostrarNota();
       corpo.append(el('div', 'nota versao', C.versao));
