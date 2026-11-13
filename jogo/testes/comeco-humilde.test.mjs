@@ -112,6 +112,29 @@ test('a chegada nunca prende: pular, ou qualquer toque, termina a cena na hora; 
   assert.equal(n.comando({ tipo: 'comecarChegada' }).ok, false);
 });
 
+test('a chegada espera a tela de carregando: parada na porteira até soltarChegada; um toque também termina', () => {
+  const m = novo(), p = m.personagem, ev = ouvirTudo(m);
+  assert.equal(m.comando({ tipo: 'comecarChegada', espera: true }).ok, true);
+  const x0 = p.x, z0 = p.z;
+  assert.ok(!m.locais.fazenda.ehPropria(Math.floor(x0), Math.floor(z0)), 'ela já aparece do lado de fora');
+  for (let k = 0; k < 600; k++) m.passo();
+  assert.ok(m.comeco.chegada, 'a cena continua (parada)');
+  assert.deepEqual([p.x, p.z, p.vel], [x0, z0, 0], 'parada na porteira enquanto espera');
+  assert.equal(ev.de('tonhoAcenou').length, 0);
+  assert.equal(m.comando({ tipo: 'soltarChegada' }).ok, true);
+  assert.ok(m.comeco.chegada, 'soltar não termina a cena');
+  assert.equal(m.comando({ tipo: 'soltarChegada' }).ok, false, 'só se solta uma vez');
+  for (let k = 0; k < 60; k++) m.passo();
+  assert.ok(Math.hypot(p.x - x0, p.z - z0) > 1, 'solta, ela anda');
+  for (let k = 0; k < 60 * 15 && m.comeco.chegada; k++) m.passo();
+  assert.ok(m.comeco.chegou && ev.de('tonhoAcenou').length === 1, 'e a cena acaba sozinha, com o aceno');
+  // parada, um toque também termina a cena (nada fica preso esperando a tela)
+  const n = novo();
+  n.comando({ tipo: 'comecarChegada', espera: true }); n.passo();
+  assert.equal(n.comando({ tipo: 'tocarCasa', x: 35, z: 53 }).dados.pulouChegada, true);
+  assert.ok(n.comeco.chegou && !n.comeco.chegada);
+});
+
 test('a primeira missão é conversar com o Seu Tonho; depois, tocar nele de novo é conversa (abre as missões na interface)', () => {
   const m = novo(), ev = ouvirTudo(m);
   m.comando({ tipo: 'pularChegada' });

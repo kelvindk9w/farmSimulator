@@ -6,7 +6,8 @@
 //     conversou). Se construírem em cima do lugar dele, ele dá um passo para o lado.
 //   - a chegada (só no jogo novo, quando a interface pede: comando comecarChegada): ela entra pela porteira de costas
 //     para a câmera, com a trouxa, até perto do Seu Tonho, que acena uma vez. Qualquer ordem do jogador (ou o comando
-//     pularChegada) termina a cena na hora; nada fica preso.
+//     pularChegada) termina a cena na hora; nada fica preso. Com { espera: true } ela fica parada na porteira até o
+//     comando soltarChegada (a interface solta quando a tela de carregando some).
 //   - a cerca: trechos na beira da terra própria (a de arame, caída aqui e ali; depois da reforma, a de madeira),
 //     com o vão da entrada. Não é entidade (não bloqueia nada): o desenho é de render/comeco.js.
 //   - as reformas: comando reformar { entidade | 'cerca', jaJa } (ela vai até lá e martela; o preço sai na martelada).
@@ -124,6 +125,8 @@ function terminarChegada(m, pulou) {
 function andarNaChegada(m) {
   const C = m.comeco, c = C.chegada, p = m.personagem;
   if (!c) return;
+  // (parada na porteira enquanto a interface espera a tela de carregando sumir: comecarChegada { espera })
+  if (c.espera) { noCaminho(c.caminho, c.d, ponto); p.local = 'fazenda'; p.x = ponto.x; p.z = ponto.z; p.rumo = ponto.rumo; p.vel = 0; p.fila.length = 0; p.rota = null; p.tarefa = null; return; }
   c.t += PASSO;
   const antes = c.d;
   c.d = Math.min(c.caminho.total, c.d + VELOCIDADE * PASSO);
@@ -141,7 +144,7 @@ DESLOCAMENTO.visual = (m, out) => {
   if (m.comeco && m.comeco.chegada) out.estado = out.vel > 0.35 ? 'andar-trouxa' : 'parada-trouxa';
 };
 // as ordens que não terminam a cena (a hora do aparelho, a própria cena, o atalho da versão de teste)
-const NAO_TERMINA = { fuso: 1, comecarChegada: 1, pularChegada: 1 };
+const NAO_TERMINA = { fuso: 1, comecarChegada: 1, pularChegada: 1, soltarChegada: 1 };
 // as que são só um toque: terminam a cena e não fazem mais nada (o toque seguinte já vale)
 const SO_TOQUE = { tocarCasa: 1, tocarEntidade: 1, irPara: 1, agir: 1, rumar: 1 };
 
@@ -408,18 +411,20 @@ registrarSistema({
   },
   comandos: {
     // a interface pede no jogo novo: a cena da chegada (só uma vez, só no começo humilde)
-    comecarChegada(m) {
+    comecarChegada(m, c = {}) {
       const C = m.comeco, caminho = caminhoDaChegada(m);
       if (!C.humilde || C.chegou || C.chegada || !caminho) return { ok: false, motivo: 'ja-chegou' };
       const p = m.personagem;
       p.fila.length = 0; p.rota = null; p.tarefa = null; p.acao = null; p.rumando = false; p.local = 'fazenda';
-      C.chegada = { t: 0, d: 0, parada: 0, acenou: false, caminho };
+      C.chegada = { t: 0, d: 0, parada: 0, acenou: false, caminho, espera: !!c.espera };
       andarNaChegada(m);
       const seg = caminho.total / VELOCIDADE + PARADA;
       m.eventos.emitir('comecouChegada', { seg });
       return { ok: true, dados: { seg } };
     },
     pularChegada(m) { if (!m.comeco.chegada) return { ok: false, motivo: 'ja-chegou' }; terminarChegada(m, true); return { ok: true }; },
+    // a cena pedida com { espera: true } fica parada na porteira até este comando (a tela de carregando sumiu)
+    soltarChegada(m) { const c = m.comeco.chegada; if (!c || !c.espera) return { ok: false, motivo: 'sem-espera' }; c.espera = false; return { ok: true }; },
     // reformar { entidade, jaJa }: entidade = o id da construção velha ("casa", "poco", "banca") ou "cerca"
     reformar(m, c) {
       const alvo = c.entidade, loc = m.locais.fazenda, p = m.personagem, q = !c.quieto;

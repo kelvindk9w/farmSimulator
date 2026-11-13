@@ -2,10 +2,10 @@
 // verdade: ela entra pela porteira de costas para a câmera, com a trouxa, até perto do Seu Tonho; ele acena quando ela
 // passa da cerca e dá as boas-vindas; o botão "Pular" fica no canto e o balão do vizinho só aparece depois do aceno;
 // pular (botão ou toque no chão) termina a cena na hora, e nada fica preso; no jogo de verdade (sem #teste) a cena
-// começa sozinha e não volta depois de gravar. Também a fazenda do começo: casa e poço velhos, caixote, baú, cerca de
-// arame, sem celeiro, banca nem quadro; e a gravação de antes (testes/gravacoes) abrindo com a fazenda de antes. Em
-// 1280x720 (mouse) e 844x390 (celular deitado, dedo). Fotos h-*.jpg (a chegada quadro a quadro). Termina com
-// "Tudo certo." ou com a lista das falhas.
+// começa sozinha (parada na porteira enquanto a tela de carregando estiver à vista) e não volta depois de gravar.
+// Também a fazenda do começo: casa e poço velhos, caixote, baú, cerca de arame, sem celeiro, banca nem quadro; e a
+// gravação de antes (testes/gravacoes) abrindo com a fazenda de antes. Em 1280x720 (mouse) e 844x390 (celular
+// deitado, dedo). Fotos h-*.jpg (a chegada quadro a quadro). Termina com "Tudo certo." ou com a lista das falhas.
 //   JOGO_DIST=dist-x JOGO_CAPTURAS=capturas-x node tools/verificar-chegada.mjs     (monte antes: npm run build)
 import fs from 'node:fs';
 import path from 'node:path';
@@ -25,6 +25,7 @@ const nav = await abrirNavegador();
 
 async function abrir(w, h, opc = {}) {
   const ctx = await nav.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: opc.dpr || 1, hasTouch: !!opc.toque, isMobile: !!opc.toque });
+  if (opc.antes) await ctx.addInitScript(opc.antes);
   const pg = await ctx.newPage();
   const erros = [];
   pg.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()); });
@@ -181,6 +182,39 @@ try {
   c = await cena(pg);
   confere(!c.chegada && !c.pular, 'aberto de novo, a cena não volta');
   semErros(a, 'jogo de verdade');
+  await a.ctx.close();
+
+  // =====================================================================================================
+  console.log('a tela de carregando: a chegada espera parada na porteira e só anda quando a tela some');
+  // (a ferramenta segura a tela: <html data-carregando> fica e o evento "jogo-carregou" não passa até ela soltar)
+  a = await abrir(1280, 720, {
+    endereco: '', arte: false,
+    antes: () => {
+      window.__segurar = true;
+      window.addEventListener('jogo-carregou', (e) => { if (window.__segurar) e.stopImmediatePropagation(); }, true);
+      // (o script entra antes de existir o <html>: marca assim que ele aparecer)
+      const marcar = () => {
+        const h = document.documentElement;
+        if (!h) return false;
+        h.dataset.carregando = '1';
+        new MutationObserver(() => { if (window.__segurar && !h.dataset.carregando) h.dataset.carregando = '1'; }).observe(h, { attributes: true, attributeFilter: ['data-carregando'] });
+        return true;
+      };
+      if (!marcar()) new MutationObserver((_, o) => { if (marcar()) o.disconnect(); }).observe(document, { childList: true });
+    },
+  }); pg = a.pg;
+  await esperar(300);
+  const naPorteira = await J(pg, () => { const p = window.__jogo.mundo.personagem; return [p.x, p.z]; });
+  await esperar(2500);
+  c = await cena(pg);
+  confere(c.chegada && !c.dentro && Math.hypot(c.x - naPorteira[0], c.z - naPorteira[1]) < 0.01 && !c.acenou, `com a tela de carregando, ela espera parada do lado de fora (em ${c.x.toFixed(2)}, ${c.z.toFixed(2)})`);
+  await J(pg, () => { window.__segurar = false; delete document.documentElement.dataset.carregando; window.dispatchEvent(new Event('jogo-carregou')); });
+  await esperar(1200);
+  c = await cena(pg);
+  confere(c.chegada && Math.hypot(c.x - naPorteira[0], c.z - naPorteira[1]) > 1, 'a tela sumiu: ela entra');
+  await pg.waitForFunction(() => window.__jogo.mundo.comeco.chegou, null, { timeout: 15000 }).catch(() => {});
+  confere((await cena(pg)).chegou, 'e a cena acaba sozinha');
+  semErros(a, 'tela de carregando');
   await a.ctx.close();
 
   // =====================================================================================================

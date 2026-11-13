@@ -17,6 +17,8 @@ import { avisar } from './avisos.js';
 import { som } from '../plataforma/som.js';
 
 const DOURADO = '#ffe07a';
+const ESPERA_MAX = 12000; // ms: a chegada não espera a tela de carregando mais do que isso
+const carregando = () => !!document.documentElement.dataset.carregando;
 let pular = null;
 
 function esconderBalao(ctx, esconder) {
@@ -64,7 +66,23 @@ aoInstalarMundo((m, ctx) => {
     Object.assign(pular.style, { position: 'absolute', right: 'max(16px, env(safe-area-inset-right))', bottom: `max(${baixo}px, env(safe-area-inset-bottom))`, zIndex: '30', minWidth: '112px' });
     document.getElementById('ui').append(pular);
   });
-  // a chegada começa sozinha no jogo novo do começo humilde (no modo #teste, quem pede é a ferramenta)
+  // a chegada começa sozinha no jogo novo do começo humilde (no modo #teste, quem pede é a ferramenta). Com a tela de
+  // carregando à vista (<html data-carregando>), ela já aparece na porteira, parada, e só anda quando a tela some
+  // (o atributo sai e vem o evento "jogo-carregou"); se o sinal se perder, anda sozinha depois de ESPERA_MAX.
   const C = m.comeco;
-  if (!J.teste && C && C.humilde && !C.chegou && !C.chegada) m.comando({ tipo: 'comecarChegada' });
+  if (!J.teste && C && C.humilde && !C.chegou && !C.chegada) {
+    const espera = carregando();
+    m.comando({ tipo: 'comecarChegada', espera });
+    if (espera) {
+      let solta = false, olho = 0;
+      const soltar = () => {
+        if (solta) return;
+        solta = true; clearInterval(olho); window.removeEventListener('jogo-carregou', soltar);
+        if (m.comeco.chegada) m.comando({ tipo: 'soltarChegada' });
+      };
+      const t0 = Date.now();
+      window.addEventListener('jogo-carregou', soltar);
+      olho = setInterval(() => { if (!carregando() || Date.now() - t0 > ESPERA_MAX || !m.comeco.chegada) soltar(); }, 200);
+    }
+  }
 });
