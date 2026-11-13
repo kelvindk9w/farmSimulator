@@ -38,6 +38,8 @@ const ARQUIVOS = {
   pedidos: ['../../src/nucleo/sistemas/pedidos.js', () => temSistema('pedidos')],
   trabalho: ['../../src/nucleo/sistemas/trabalho.js', () => temSistema('trabalho')],
   estimacao: ['../../src/nucleo/sistemas/estimacao.js', () => temSistema('estimacao')],
+  comeco: ['../../src/nucleo/sistemas/comeco.js', () => temSistema('comeco')],
+  banca: ['../../src/nucleo/sistemas/banca.js', () => temSistema('banca')],
 };
 
 export const X = {};

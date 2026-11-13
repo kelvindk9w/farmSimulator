@@ -68,7 +68,7 @@ test('o quadro já vem na fazenda; antes do nível o toque explica que ele abre 
   assert.equal(r.ok, false); assert.equal(r.motivo, 'quadro-fechado'); assert.deepEqual(r.dados, { nivel: 2 });
   assert.deepEqual(ev.de('informou').map((d) => d.motivo), ['quadro-fechado']); assert.equal(ev.de('faltou').length, 0, 'é só uma informação, sem som de erro');
   pular(m, 10);
-  assert.deepEqual(quadroDePedidos(m), { aberto: false, nivel: 2, vagas: [], trancada: { nivel: 2, vagas: 2 }, trocaGratis: true, trocaGratisEm: 0, esperaDaTroca: 220 });
+  assert.deepEqual(quadroDePedidos(m), { aberto: false, semQuadro: false, nivel: 2, vagas: [], trancada: { nivel: 2, vagas: 2 }, trocaGratis: true, trocaGratisEm: 0, esperaDaTroca: 220 });
   assert.equal(m.comando({ tipo: 'entregarPedido', vaga: 0, quieto: true }).motivo, 'quadro-fechado');
   noNivel(m, 2); m.avancar(1.1);
   const Q = quadroDePedidos(m);
@@ -321,14 +321,34 @@ function dadosDeVerdade() {
   assert.deepEqual(problemas.filter((p) => p.grave), []);
   return dados;
 }
-function mundoDeVerdade(dados, nivel, semente) {
+// (no começo humilde o quadro se constrói: "comQuadro" já o põe no ponto dele, pronto)
+function mundoDeVerdade(dados, nivel, semente, comQuadro = true) {
   const m = new Mundo(dados, { agora: 1_700_000_000_000, semente });
   m.progresso.nivel = nivel; m.progresso.xp = dados.niveis.limiar[nivel];
+  if (comQuadro) porConstrucao(m, QUADRO, ...dados.terras.pontos[QUADRO].map(Math.floor));
   m.posses.celeiro.capacidade = 5000;
   return m;
 }
 
-test('dados de verdade: o quadro está na fazenda, abre no nível 3 com 2 vagas e o primeiro pedido é de alface ou milho', () => {
+test('dados de verdade: o quadro não vem pronto (começo humilde); sem ele não chega pedido; construído, chegam', () => {
+  const dados = dadosDeVerdade();
+  assert.ok(!dados.construcoes[QUADRO].inicial && dados.construcoes[QUADRO].custo.ouro > 0, 'o quadro é construção com preço');
+  const m = mundoDeVerdade(dados, 3, 1, false);
+  assert.equal(m.local.porId[QUADRO], undefined);
+  pular(m, 5);
+  assert.equal(m.pedidos.vagas.length, 0, 'sem quadro, nada de vaga');
+  assert.equal(quadroDePedidos(m).aberto, false); assert.equal(quadroDePedidos(m).semQuadro, true);
+  m.posses.ouro += 100;
+  const [x, z] = dados.terras.pontos[QUADRO].map(Math.floor);
+  assert.equal(m.comando({ tipo: 'construir', id: QUADRO, x, z, jaJa: true }).ok, true);
+  assert.equal(m.local.porId[QUADRO].tipo, QUADRO, 'o id do quadro construído é o de sempre');
+  pular(m, 3);
+  assert.equal(m.pedidos.vagas.length, 0, 'em obra, ainda não');
+  pular(m, dados.construcoes[QUADRO].obraSeg + 2);
+  assert.equal(pedidos(m).filter(Boolean).length, 2, 'pronto, as 2 vagas do nível 3 já têm pedido');
+});
+
+test('dados de verdade: o quadro construído abre no nível 3 com 2 vagas e o primeiro pedido é de alface ou milho', () => {
   const dados = dadosDeVerdade(), cfg = pedidosDe(dados);
   assert.ok(cfg); assert.equal(cfg.nivel, 3);
   for (let s = 1; s <= 30; s++) {

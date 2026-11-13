@@ -97,10 +97,12 @@ registrarSistema({
     m.terras = { lotes: [], limpos: [] }; // lotes já comprados; casas (índices) de onde o mato, a pedra ou o toco já saiu
     marcar(loc, T.inicial, 'propria', 1);
     for (const c of T.caminhos) marcar(loc, c, 'chao', CAMINHO);
+    // as construções com que a fazenda nasce (dados.js: terras.iniciais): a casa, o poço, o celeiro e a banca de
+    // sempre, ou, no começo humilde (terras.json "comeco"), a casa e o poço velhos, o caixote de venda e o baú
     const construcoes = [];
-    for (const tipo of ['casa', 'celeiro', 'poco', 'banca']) {
-      const p = T.pontos[tipo], casas = T.casas[tipo];
-      if (p) construcoes.push(loc.por({ id: tipo, tipo, x: Math.round(p[0]), z: Math.round(p[1]), l: casas ? casas[0] : 0, p: casas ? casas[1] : 0 }));
+    for (const c of T.iniciais) {
+      const casas = T.casas[c.tipo];
+      construcoes.push(loc.por({ id: c.id, tipo: c.tipo, x: c.x, z: c.z, l: casas ? casas[0] : 0, p: casas ? casas[1] : 0 }));
     }
     marcarCampoInicial(m, loc); // depois das construções: casa ocupada não vira campo
     loc.entrada = T.pontos.personagem ? [T.pontos.personagem[0], T.pontos.personagem[1]] : [T.inicial[0] + 0.5, T.inicial[1] + 0.5];

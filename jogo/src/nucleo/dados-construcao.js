@@ -3,6 +3,7 @@
 //   { id, nome, tipo, onde, casas: [l, p], nivel, descricao, inicial, bloqueia, plano, chao,
 //     custo: { ouro, cash, itens } | null, obraSeg, exige: [id], limite (0 = sem limite), xp,
 //     ampliacoes: [{ nome, nivel, custo: { ouro, cash, itens }, cash, obraSeg, xp, ...o que muda }],
+//     reforma: { para, nome, nivel, custo: { ouro, cash, itens }, obraSeg, xp, ganho } | null (a velha que vira a nova),
 //     ...e o que mais vier no arquivo (vagas, cocho, bebedouro, fila, guarda, capacidade, interior, efeito) }
 
 export const TIPOS_DE_CONSTRUCAO = ['abrigo', 'industria', 'armazem', 'util', 'movel', 'decoracao'];
@@ -42,9 +43,15 @@ export function prepararConstrucoes(bruto, itens, erro, aviso) {
       if (!obj(a)) return;
       n.ampliacoes.push({ ...a, nome: a.nome || `${n.nome} ${k + 2}`, nivel: num(a.nivel) ? a.nivel : 1, custo: custoDe(a.custo, itens, erro, `${onde}, ampliação ${k + 1}`) || { ouro: 0, cash: 0, itens: {} }, cash: a.cash > 0 ? a.cash : 0, obraSeg: a.obraSeg > 0 ? a.obraSeg : 0, xp: num(a.xp) ? a.xp : 0 });
     });
+    // a reforma (o começo humilde: a casa velha, o poço velho, o caixote, a cerca de arame): vira a construção "para"
+    if (obj(c.reforma)) {
+      const r = c.reforma;
+      n.reforma = { ...r, nome: r.nome || '', nivel: num(r.nivel) ? r.nivel : 1, custo: custoDe(r.custo, itens, erro, `${onde}, reforma`) || { ouro: 0, cash: 0, itens: {} }, obraSeg: r.obraSeg > 0 ? r.obraSeg : 0, xp: num(r.xp) ? r.xp : 0, ganho: obj(r.ganho) ? r.ganho : {} };
+    } else n.reforma = null;
     out[id] = n;
   }
   for (const c of Object.values(out)) {
+    if (c.reforma && !out[c.reforma.para]) { erro('construcoes.json', `construção "${c.id}": a reforma vira "${c.reforma.para}", que não existe`); c.reforma = null; }
     for (const e of c.exige) if (!out[e]) erro('construcoes.json', `construção "${c.id}": exige "${e}", que não existe`);
     if (c.interior && obj(c.interior)) for (const mv of c.interior.moveis || []) if (!out[mv.id]) erro('construcoes.json', `construção "${c.id}": o móvel inicial "${mv.id}" não existe`);
   }

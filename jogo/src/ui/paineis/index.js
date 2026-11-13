@@ -22,3 +22,4 @@ import './abrigo.js';
 import './animais.js';
 // frente dos animais de trabalho e de estimação: botões do cavalo e do jumento, carroça e barril no HUD, o estábulo
 import '../trabalho.js';
+import '../comeco.js'; // o começo humilde: a chegada (botão Pular), as boas-vindas do Seu Tonho e o caixote de venda

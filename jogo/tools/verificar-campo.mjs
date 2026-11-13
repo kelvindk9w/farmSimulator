@@ -138,6 +138,14 @@ try {
   igual(await ferramentas(pg), { 'enxada-velha': 'cinto', 'regador-velho': 'lugar', agua: 0 }, 'a enxada no cinto e o regador no lugar dele');
   igual(await J(pg, () => { const e = window.__jogo.mundo.local.porId['lugar:regador-velho']; return e ? [e.x, e.z] : null; }), [33, 51], 'o regador fica ao lado do poço');
   confere(/po[çc]o/i.test(await J(pg, () => { const c = document.querySelector('.chip[title="Regador"]'); return c ? c.textContent : ''; })), 'o chip do regador diz que ele está no poço');
+  // a primeira missão é conversar com o Seu Tonho: o clique nele faz ela ir até lá (o guia aponta para ele)
+  igual((await estado(pg)).missao.id, 'falar-com-tonho', 'a primeira missão é conversar com o Seu Tonho');
+  igual(await J(pg, () => { const g = window.__jogo.guia(); return g.tipo + ':' + g.id; }), 'entidade:vizinho', 'o guia aponta o Seu Tonho');
+  await J(pg, () => { const v = window.__jogo.mundo.local.porId.vizinho; window.__jogo.olhar(v.x + 0.5, v.z + 0.5); });
+  const tonho = await J(pg, () => window.__jogo.daEntidade('vizinho', 0.9));
+  await pg.mouse.click(tonho.x, tonho.y);
+  await ateParar(pg);
+  igual((await estado(pg)).missao.id, 'preparar-a-terra', 'o clique no Seu Tonho cumpre a conversa');
   await olharCampo(pg);
   await foto(pg, 'g-1280-0-comeco.jpg');
   await pg.mouse.click(...Object.values(await centroDe(pg, '.modo[data-modo="enxada"]')));
@@ -269,6 +277,12 @@ try {
   pg = a.pg;
   const cdp = await a.ctx.newCDPSession(pg);
   igual((await campo(pg)).campo, 12, 'no celular também começa com o campo pequeno');
+  // o dedo no Seu Tonho: a conversa da primeira missão
+  await J(pg, () => { const v = window.__jogo.mundo.local.porId.vizinho; window.__jogo.olhar(v.x + 0.5, v.z + 0.5); });
+  const tonho2 = await J(pg, () => window.__jogo.daEntidade('vizinho', 0.9));
+  await dedo(cdp, tonho2.x, tonho2.y);
+  await ateParar(pg);
+  igual((await estado(pg)).missao.id, 'preparar-a-terra', 'o toque no Seu Tonho cumpre a conversa');
   await olharCampo(pg);
   await foto(pg, 'g-844-0-comeco.jpg');
   let b = await centroDe(pg, '.modo[data-modo="enxada"]');

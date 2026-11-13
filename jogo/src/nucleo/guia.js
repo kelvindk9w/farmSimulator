@@ -6,7 +6,8 @@
 // (a interface marca a fileira toda; null quando é uma casa só).
 import { GRAMA, ARADA, CAMPO, deLavoura } from './local.js';
 import { missaoAtual } from './sistemas/missoes.js';
-import { noCesto, espacoNoCesto, noCeleiro, ferramentaNoCinto, ferramentaGuardada } from './sistemas/posses.js';
+import { noCesto, espacoNoCesto, noCeleiro, espacoNoCeleiro, ferramentaNoCinto, ferramentaGuardada } from './sistemas/posses.js';
+import { espacoNoCaixote } from './sistemas/banca.js';
 import { estadoDaPlanta, segundosDeAgua, sementesLivres, regaPrometida, podeArar, casasDaFileira } from './sistemas/lavoura.js';
 import { filaTem, contarNaFila } from './sistemas/personagem.js';
 
@@ -123,7 +124,7 @@ function passoRegar(m, cultura, out) {
 function passoColher(m, cultura, out) {
   if (plantaPerto(m, 'pronta', cultura, out)) {
     const x = out.x, z = out.z;
-    if (espacoNoCesto(m) < m.dados.culturas[m.local.plantas[m.local.i(x, z)].cultura].rende) return entidade(out, 'banca');
+    if (espacoNoCesto(m) < m.dados.culturas[m.local.plantas[m.local.i(x, z)].cultura].rende) return entidade(out, ondeVender(m));
     if (m.modo.id !== 'mao') return modo(out, 'mao');
     naFileira(m, x, z, (l, i, cx, cz) => !!l.plantas[i] && estadoDaPlanta(m, l.plantas[i]) === 'pronta' && (!cultura || l.plantas[i].cultura === cultura) && !filaTem(m, 'colher', cx, cz), out);
     return casa(out, x, z);
@@ -134,6 +135,18 @@ function passoColher(m, cultura, out) {
   return passoPlantar(m, cultura ? sementeDa(m, cultura) : null, out);
 }
 
+// onde se guarda a colheita: o celeiro pronto; antes dele (o começo humilde), o baú ao lado da casa
+function armazem(m) {
+  const loc = m.locais.fazenda, c = loc.porId.celeiro;
+  if (c && !(c.obraAte > 0)) return 'celeiro';
+  return loc.porId['bau-da-casa'] ? 'bau-da-casa' : 'celeiro';
+}
+// onde se vende: a banca (ou o caixote da porteira); com o caixote cheio e espaço no estoque, guardar
+function ondeVender(m) {
+  const e = m.locais.fazenda.porId.banca, d = e && m.dados.construcoes[e.tipo];
+  if (d && d.vagas > 0 && !(espacoNoCaixote(m, d) > 0) && espacoNoCeleiro(m) > 0) return armazem(m);
+  return 'banca';
+}
 const passo = { tipo: null, x: 0, z: 0, id: null, modo: null, item: null, painel: null, seg: 0, casas: null };
 export function guiaDaMissao(m, out = passo) {
   out.tipo = null; out.item = null; out.casas = null;
@@ -154,8 +167,8 @@ export function guiaDoEvento(m, evento, f = {}, out = passo) {
     case 'encheu': return entidade(out, 'poco');
     case 'regou': return passoRegar(m, um(f.cultura), out) || passoPlantar(m, sementeDa(m, um(f.cultura)), out);
     case 'colheu': return passoColher(m, um(f.cultura) || culturaDoItem(um(f.item)), out);
-    case 'vendeu': return noCesto(m) > 0 ? entidade(out, 'banca') : noCeleiro(m) > 0 ? entidade(out, 'celeiro') : passoColher(m, null, out);
-    case 'guardou': return noCesto(m) > 0 ? entidade(out, 'celeiro') : passoColher(m, null, out);
+    case 'vendeu': return noCesto(m) > 0 ? entidade(out, 'banca') : noCeleiro(m) > 0 ? entidade(out, armazem(m)) : passoColher(m, null, out);
+    case 'guardou': return noCesto(m) > 0 ? entidade(out, um(f.construcao) || armazem(m)) : passoColher(m, null, out);
     case 'comprou': out.tipo = 'painel'; out.painel = 'loja'; out.item = um(f.item) || null; out.classe = um(f.classe) || null; return out;
     default: return nada(out);
   }
@@ -163,6 +176,6 @@ export function guiaDoEvento(m, evento, f = {}, out = passo) {
 // sem missão valendo: o que rende agora (colher, regar, vender o cesto cheio, plantar)
 export function guiaLivre(m, out = passo) {
   out.casas = null;
-  if (espacoNoCesto(m) <= 0) return entidade(out, 'banca');
+  if (espacoNoCesto(m) <= 0) return entidade(out, ondeVender(m));
   return passoColher(m, null, out);
 }

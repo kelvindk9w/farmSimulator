@@ -122,6 +122,12 @@ export function prepararDados(bruto) {
     natureza: obj(T.natureza) ? T.natureza : {}, // o que cobre a terra fora dos lotes: { mata: 0.03, mato: 0.05, pedra: 0.02, toco: 0.01 } (chance por casa); cada lote pode ter a sua
     lugares: {}, // o lugar de cada ferramenta no sítio: { item: [x, z] } (a enxada velha na estaca do campo, o regador velho ao lado do poço)
     casas: {}, // tamanho da base de cada construção inicial, de construcoes.json: { celeiro: [5, 4], ... }
+    // as construções com que a fazenda nasce: [{ id, tipo, x, z }]. Sem "comeco" em terras.json, as de sempre
+    // (casa, celeiro, poço e banca, cada uma no seu ponto, com o id igual ao tipo)
+    iniciais: [],
+    // o começo humilde (terras.json "comeco"): casa e poço velhos, caixote de venda, baú, cerca de arame e a chegada.
+    // null = a fazenda nasce pronta, como antes (e é assim que abre a gravação de antes do começo humilde)
+    comeco: null,
   };
   if (obj(bruto.construcoes)) for (const [id, c] of Object.entries(bruto.construcoes)) {
     if (obj(c) && Array.isArray(c.casas) && c.casas.length === 2 && c.casas[0] >= 1 && c.casas[1] >= 1) terras.casas[id] = [Math.round(c.casas[0]), Math.round(c.casas[1])];
@@ -158,6 +164,27 @@ export function prepararDados(bruto) {
       else terras.lugares[id] = [Math.round(v[0]), Math.round(v[1])];
     }
   }
+  // ---------- o começo: as construções com que a fazenda nasce ----------
+  const ehConstrucao = (id) => obj(bruto.construcoes) && obj(bruto.construcoes[id]);
+  const pontoOk = (v) => Array.isArray(v) && v.length >= 2 && num(v[0]) && num(v[1]);
+  const classicas = () => ['casa', 'celeiro', 'poco', 'banca'].filter((t) => ehConstrucao(t) && pontoOk(terras.pontos[t])).map((t) => ({ id: t, tipo: t, x: Math.round(terras.pontos[t][0]), z: Math.round(terras.pontos[t][1]) }));
+  terras.classicas = classicas(); // (a gravação de antes do começo humilde abre com estas)
+  if (obj(T.comeco)) {
+    const C = T.comeco, lista = [];
+    for (const c of Array.isArray(C.construcoes) ? C.construcoes : []) {
+      if (!obj(c) || typeof c.id !== 'string' || !ehConstrucao(c.tipo)) { erro('terras.json', `comeco.construcoes: "${obj(c) ? c.tipo : c}" não é uma construção de construcoes.json`); continue; }
+      const em = pontoOk(c.em) ? c.em : terras.pontos[c.ponto || c.id];
+      if (!pontoOk(em)) { erro('terras.json', `comeco.construcoes: "${c.id}" sem lugar ("em": [x, z])`); continue; }
+      lista.push({ id: c.id, tipo: c.tipo, x: Math.round(em[0]), z: Math.round(em[1]) });
+    }
+    const cerca = obj(C.cerca) && ehConstrucao(C.cerca.de) ? { de: C.cerca.de, vao: Array.isArray(C.cerca.vao) ? C.cerca.vao.filter(pontoOk).map((v) => [Math.round(v[0]), Math.round(v[1])]) : [] } : null;
+    if (obj(C.cerca) && !cerca) aviso('terras.json', 'comeco.cerca: "de" tem de ser uma construção de construcoes.json (a cerca de arame); sem ela, a fazenda nasce sem cerca');
+    const chegada = Array.isArray(C.chegada) ? C.chegada.filter(pontoOk).map((v) => [v[0], v[1]]) : [];
+    terras.comeco = { construcoes: lista, cerca, vizinho: pontoOk(C.vizinho) ? [Math.round(C.vizinho[0]), Math.round(C.vizinho[1])] : pontoOk(terras.pontos.vizinho) ? [Math.round(terras.pontos.vizinho[0]), Math.round(terras.pontos.vizinho[1])] : null, chegada: chegada.length >= 2 ? chegada : null };
+    terras.iniciais = lista;
+  } else terras.iniciais = terras.classicas;
+  for (const c of terras.iniciais) terras.casas[c.tipo] = terras.casas[c.tipo] || [1, 1];
+
   for (const f of regras.inicio.noLugar) if (itens[f] && !terras.lugares[f]) aviso('regras.json', `inicio.noLugar: "${f}" não tem lugar em terras.json "lugares" (fica no suporte do celeiro)`);
 
   // ---------- níveis ----------

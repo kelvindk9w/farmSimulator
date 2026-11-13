@@ -4,7 +4,7 @@
 // no que mais rende: bicho para encher o abrigo, a indústria seguinte, prateleira, pomar, lote, vaga de fila.
 // Também aqui: o "quer" (o que guardar em vez de vender, e o que plantar), refeito a cada 2 segundos.
 import { X } from './jogo.mjs';
-import { passo, nota, evitado, evitar, naFazenda, nivel, comando, cmd, livre, tem, querer, fazenda } from './contexto.mjs';
+import { passo, nota, evitado, evitar, naFazenda, nivel, comando, cmd, livre, tem, querer, fazenda, filaTem } from './contexto.mjs';
 import { zona, campoAlvo, sementesLiberadas } from './lavoura.mjs';
 import { fontesDe, limpavel, quantosHa, limpar, lotePossivel, comprarLote, plantarMuda, arvoresDe } from './terras.mjs';
 import { def, temPronta, quantas, emObra, obraFalta, construir, ampliar, montarMovel } from './construir.mjs';
@@ -117,6 +117,23 @@ export function projetoAmpliacao(J, e) {
   if (a.nivel > nivel(J)) return nota(J, `${d.nome}: a ampliação pede o nível ${a.nivel}`);
   if (J.P.ouro < a.custo.ouro) return nota(J, `juntando ouro para ${a.nome.toLowerCase()} (${a.custo.ouro})`);
   return ampliar(J, e);
+}
+// reforma do que veio com a fazenda (o começo humilde: poço, caixote, casa, cerca): o nível, o material, o ouro;
+// depois ela vai até lá e martela (o preço sai na martelada)
+export function projetoReforma(J, de, prep) {
+  if (!X.comeco || !comando(J, 'reformar')) return null;
+  const r = X.comeco.reformas(J.m).find((x) => x.de === de);
+  if (!r) return null;
+  if (r.obra > 0) return nota(J, `obra de ${r.nome.toLowerCase()}: falta ${Math.ceil(r.obra / 60)} min`);
+  const custo = r.custo || {};
+  J.reserva = Math.max(J.reserva, (custo.ouro || 0) + custoDoQueFalta(J, custo.itens));
+  J.reservaPara = r.nome;
+  for (const k in custo.itens || {}) { const s = obter(J, k, custo.itens[k]); if (s) return s; }
+  if (prep || r.nivel > nivel(J)) return nota(J, `${r.nome}: espera o nível ${r.nivel}`);
+  if (J.P.ouro < (custo.ouro || 0)) return nota(J, `juntando ouro para ${r.nome.toLowerCase()} (${custo.ouro})`);
+  if (X.posses.oQueFalta(J.m, custo.itens || {})) return nota(J, `juntando material para ${r.nome.toLowerCase()}`);
+  if (filaTem(J, 'reformarConstrucao') || evitado(J, 'reformar:' + de)) return null;
+  return cmd(J, { tipo: 'reformar', entidade: r.alvo }, 3, 'reformar:' + de);
 }
 // bicho: o abrigo (construir ou ampliar), o ouro, a compra
 export function projetoAnimal(J, especie) {
@@ -247,6 +264,13 @@ export function passoDaMissao(J) {
       return null; // a lavoura planta a semente da meta
     }
     case 'entregou': return null; // pedidos.mjs (o "quer" já guarda o que o quadro pede)
+    case 'conversou': {
+      // o Seu Tonho: tocar nele (ela vai até ele e conversam)
+      if (prep || !J.m.locais.fazenda.porId.vizinho || filaTem(J, 'conversar') || evitado(J, 'conversar')) return null;
+      evitar(J, 'conversar', 5);
+      return passo(J, 'entidade', { id: 'vizinho' });
+    }
+    case 'reformou': return projetoReforma(J, um(f.construcao), prep);
     case 'arou': {
       if (f.com !== 'boi') return null;
       const esp = especieDoPapel(J, 'arar');
@@ -330,6 +354,13 @@ export function investir(J) {
     const custo = (d.custo.ouro || 0) + custoDoQueFalta(J, d.custo.itens);
     if (livre(J) < custo + mg) continue;
     return novo('obra: ' + d.nome, () => projetoConstrucao(J, id), () => quantas(J, id) > 0);
+  }
+  // 2b. a reforma seguinte (o começo humilde: poço, caixote, casa, cerca), quando o bolso deixa com folga
+  if (X.comeco) for (const r of X.comeco.reformas(m)) {
+    if (r.obra > 0 || r.nivel > nivel(J)) continue;
+    const custo = (r.custo.ouro || 0) + custoDoQueFalta(J, r.custo.itens);
+    if (livre(J) < custo + mg) continue;
+    return novo('reforma: ' + r.nome, () => projetoReforma(J, r.de), () => !X.comeco.reformas(m).some((x) => x.de === r.de && !(x.obra > 0)));
   }
   // 3. prateleira quando o celeiro anda cheio
   const cap = J.P.celeiro.capacidade, ocup = X.posses.noCeleiro(m);

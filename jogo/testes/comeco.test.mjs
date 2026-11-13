@@ -75,7 +75,9 @@ test('o campo do começo: 12 casas, duas fileiras de 6 ao longo de X, ao lado do
   for (const z of zs) assert.ok(z >= poco.z && z < poco.z + poco.p);
   const L = m.dados.terras.pontos.lavoura;
   assert.equal(chao(m, L[0], L[1]), CAMPO, 'o ponto da lavoura é do campo');
-  // a primeira missão: are a primeira fileira (6 casas)
+  // a primeira missão é conversar com o Seu Tonho; depois, arar a primeira fileira (6 casas)
+  assert.equal(missaoAtual(m).missao.id, 'falar-com-tonho');
+  m.comando({ tipo: 'tocarEntidade', id: 'vizinho' }); ateParar(m);
   const a = missaoAtual(m);
   assert.equal(a.missao.id, 'preparar-a-terra'); assert.equal(a.n, 6);
   // e dá para arar a grama em volta (o campo cresce)
@@ -83,15 +85,17 @@ test('o campo do começo: 12 casas, duas fileiras de 6 ao longo de X, ao lado do
   assert.equal(podeSegurar(m, L[0], L[1]), true);
 });
 
-test('o terreiro do começo: nada de mato, toco ou pedra em volta da casa, do celeiro, do poço e do campo; a beirada tem o que as missões pedem', () => {
+test('o terreiro do começo: nada de mato, toco ou pedra em volta da casa, do lugar do celeiro, do poço e do campo; a beirada tem o que as missões pedem', () => {
   const m = novo(), loc = m.locais.fazenda, T = m.dados.terras, ini = T.inicial;
   const proprios = obstaculos(m).filter((e) => loc.propria[loc.i(e.x, e.z)]);
   // só na beirada de fora da área inicial (a fileira de trás, a coluna do leste e a fileira da porteira)
   for (const e of proprios) assert.ok(e.x === ini[0] || e.x === ini[2] - 1 || e.z === ini[1] || e.z === ini[3] - 1, `${e.id} fora da beirada`);
   // nada a até 1 casa da casa, do poço e do campo (fora a beirada de trás da casa, que já é a cerca do sítio)
   const perto = (x, z) => proprios.some((e) => Math.abs(e.x - x) <= 1 && Math.abs(e.z - z) <= 1 && !(e.z === ini[1] || e.x === ini[0]));
+  // (o celeiro ainda não existe no começo humilde: vale o lugar dele em terras.json, que o atalho de teste usa)
+  const celeiro = { x: T.pontos.celeiro[0], z: T.pontos.celeiro[1], l: T.casas.celeiro[0], p: T.casas.celeiro[1] };
   for (const id of ['casa', 'poco', 'celeiro']) {
-    const c = loc.porId[id];
+    const c = loc.porId[id] || (id === 'celeiro' ? celeiro : null);
     for (let z = c.z; z < c.z + c.p; z++) for (let x = c.x; x < c.x + c.l; x++) assert.ok(!perto(x, z), `${id}: obstáculo colado em (${x}, ${z})`);
   }
   for (let z = T.campo[1]; z < T.campo[3]; z++) for (let x = T.campo[0]; x < T.campo[2]; x++) assert.ok(!perto(x, z), `campo: obstáculo colado em (${x}, ${z})`);

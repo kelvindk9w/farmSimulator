@@ -312,6 +312,15 @@ async function cenario(a, f) {
   await tocarEm('.modo[data-modo="mao"]');
   await tocarEntidade('poco', 0.7);
   await ateParar();
+  // o poço velho do começo humilde tira no máximo 8 regas de uma vez; consertado (a reforma), enche o crivo inteiro
+  if (await J(() => window.__jogo.mundo.local.porId.poco.tipo === 'poco-velho')) {
+    igual(await J(() => window.__jogo.estado().ferramentas['regador-de-crivo'].agua), 8, 'o poço velho enche só 8 regas de uma vez');
+    igual(await J(() => window.__jogo.comando({ tipo: 'reformar', entidade: 'poco', jaJa: true }).ok), true, 'a reforma do poço');
+    await J(() => { window.__jogo.pular(window.__jogo.mundo.dados.construcoes['poco-velho'].reforma.obraSeg + 1); window.__jogo.avancar(0.1); });
+    igual(await J(() => window.__jogo.mundo.local.porId.poco.tipo), 'poco', 'o poço consertado');
+    await tocarEntidade('poco', 0.7);
+    await ateParar();
+  }
   const agua = await J(() => window.__jogo.estado().ferramentas['regador-de-crivo'].agua);
   igual(agua, 16, 'o regador de crivo enche no poço');
   await tocarEm('.modo[data-modo="regar"]');

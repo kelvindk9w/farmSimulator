@@ -8,9 +8,15 @@ import { registrarSistema, registrarEvento, EVENTOS } from '../registro.js';
 import { darRecompensa } from './posses.js';
 import { darXp } from './niveis.js';
 
+// (missão com "comeco": "humilde" só vale na fazenda que começou humilde: a gravação de antes, que já tem celeiro,
+// banca e quadro prontos, pula as de construir o celeiro, guardar no baú e reformar; "comeco": "classico" é o
+// contrário: a fala de antes, que fala da banca pronta)
+export const fazendaHumilde = (m) => !!(m.comeco && m.comeco.humilde);
+export const missaoDoComeco = (m, mi) => !mi.comeco || (mi.comeco === 'humilde') === fazendaHumilde(m);
 export function missaoPossivel(m, mi) {
   const ev = EVENTOS[mi.objetivo.evento], f = mi.objetivo.filtro;
   if (!ev) return false;
+  if (!missaoDoComeco(m, mi)) return false;
   if (f) { for (const k in f) if (!ev.campos.includes(k)) return false; if (ev.aceita && !ev.aceita(m.dados, f)) return false; }
   return true;
 }
@@ -28,7 +34,7 @@ export function missaoAtual(m) {
   const M = m.missoes;
   atual.missao = mi; atual.n = mi.objetivo.n; atual.conta = M.de === mi.id ? M.conta : 0;
   atual.esperaNivel = (mi.nivel || 1) > m.progresso.nivel ? mi.nivel : 0;
-  atual.feitas = M.feitas.length; atual.total = m.dados.missoes.vizinho.length;
+  atual.feitas = M.feitas.length; atual.total = m.dados.missoes.vizinho.filter((x) => missaoDoComeco(m, x)).length;
   return atual;
 }
 

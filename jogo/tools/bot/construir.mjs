@@ -62,6 +62,9 @@ export function lugarPara(J, id) {
   if (J.lugar && J.lugar.chave === chave) return J.lugar.r;
   const cs = d.casas, giros = d.gira && cs[0] !== cs[1] ? [0, 1] : [0];
   let r = null;
+  // o lugar de sempre (terras.json pontos: o celeiro e o quadro do começo humilde), se está livre: é onde o jogo sugere
+  const P = J.D.terras.pontos[id];
+  if (P && C.lugarServe(J.m, id, Math.floor(P[0]), Math.floor(P[1]), { local: 'fazenda' }).ok) { J.lugar = { chave, r: { x: Math.floor(P[0]), z: Math.floor(P[1]), giro: 0, nota: 0 } }; return J.lugar.r; }
   for (const giro of giros) {
     const l = giro ? cs[1] : cs[0], p = giro ? cs[0] : cs[1];
     let testados = 0;

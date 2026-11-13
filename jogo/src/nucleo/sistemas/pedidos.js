@@ -1,5 +1,7 @@
 // O quadro de pedidos: clientes da vizinhança pedem o que a fazenda produz, pagam mais que a banca e dão experiência.
-// O quadro (objeto "quadro-de-pedidos") já vem na fazenda, no ponto de terras.json, e abre no nível de pedidos.json.
+// O quadro (objeto "quadro-de-pedidos") abre no nível de pedidos.json. Se é "inicial" em construcoes.json, já vem na
+// fazenda, no ponto de terras.json; senão (o começo humilde), é uma construção como as outras, que o Seu Tonho pede
+// numa missão, e os pedidos só começam a chegar depois que ele fica pronto.
 //
 //   mundo.pedidos = {
 //     vagas: [{ pedido: { cliente, itens: { item: n }, ouro, xp, desde } | null, livreEm }],
@@ -187,10 +189,14 @@ function novoPedido(m, cfg, evita) {
   return { cliente: cliente.id, itens, ouro, xp: Math.round(ouro * cfg.xpPorOuro), desde: Math.round(m.agora) };
 }
 
+// o quadro já está na fazenda (o que vem pronto, ou o construído)?
+export const temQuadro = (m) => (m.dados.construcoes[QUADRO] && m.dados.construcoes[QUADRO].inicial) || temPronta(m, QUADRO);
+// a espera das vagas encolhe com a cerca nova (o começo humilde: comeco.js põe o fator em mundo.comeco)
+const fatorDaEspera = (m) => (m.comeco && m.comeco.esperaDosPedidos > 0 ? m.comeco.esperaDosPedidos : 1);
 // abre as vagas que o nível dá e traz pedido novo para as vagas cuja espera acabou
 function conferir(m, evita) {
   const cfg = pedidosDe(m.dados), P = m.pedidos;
-  if (!cfg) return;
+  if (!cfg || !temQuadro(m)) return;
   const n = vagasNoNivel(cfg, m.progresso.nivel);
   while (P.vagas.length < n) P.vagas.push({ pedido: null, livreEm: m.agora });
   for (let i = 0; i < P.vagas.length; i++) {
@@ -219,9 +225,9 @@ export function quadroDePedidos(m) {
   });
   const prox = cfg.vagas.find((v) => v.nivel > L && v.vagas > P.vagas.length);
   return {
-    aberto: L >= cfg.nivel, nivel: cfg.nivel, vagas, trancada: prox ? { nivel: prox.nivel, vagas: prox.vagas } : null,
+    aberto: L >= cfg.nivel && temQuadro(m), semQuadro: !temQuadro(m), nivel: cfg.nivel, vagas, trancada: prox ? { nivel: prox.nivel, vagas: prox.vagas } : null,
     trocaGratis: cfg.trocaGratisAposSeg > 0 && P.trocaGratisEm <= m.agora, trocaGratisEm: Math.max(0, (P.trocaGratisEm - m.agora) / 1000),
-    esperaDaTroca: cfg.esperaVezes * esperaDaVaga(cfg, L),
+    esperaDaTroca: cfg.esperaVezes * esperaDaVaga(cfg, L) * fatorDaEspera(m),
   };
 }
 // quantos pedidos dá para entregar agora
@@ -278,8 +284,8 @@ registrarSistema({
     const D = m.dados, cfg = pedidosDe(D), pt = D.terras.pontos[QUADRO], loc = m.locais.fazenda;
     if (!cfg) return;
     comportamento(QUADRO, { acaoPossivel: toque });
-    // o quadro já vem na fazenda, no ponto de terras.json (a frente de construir cuida dele dali em diante)
-    if (Array.isArray(pt) && loc && !loc.porId[QUADRO]) {
+    // o quadro que já vem na fazenda fica no ponto de terras.json (a frente de construir cuida dele dali em diante)
+    if (D.construcoes[QUADRO].inicial && Array.isArray(pt) && loc && !loc.porId[QUADRO]) {
       const x = Math.floor(pt[0]), z = Math.floor(pt[1]), c = D.construcoes[QUADRO].casas;
       if (loc.areaLivre(x, z, x + c[0], z + c[1])) adotar(m, loc.por({ id: QUADRO, tipo: QUADRO, x, z }), 'fazenda');
     }
@@ -298,7 +304,7 @@ registrarSistema({
       if (!v || !v.pedido) return falha(m, 'sem-pedido', { vaga: i }, q);
       const f = oQueFalta(m, v.pedido.itens);
       if (f) return falha(m, 'falta-para-o-pedido', { ...f, vaga: i }, q);
-      const p = v.pedido, seg = esperaDaVaga(cfg, m.progresso.nivel);
+      const p = v.pedido, seg = esperaDaVaga(cfg, m.progresso.nivel) * fatorDaEspera(m);
       gastarItens(m, p.itens);
       v.pedido = null; v.livreEm = m.agora + seg * 1000;
       P.entregues++;
@@ -316,7 +322,7 @@ registrarSistema({
       const i = Math.floor(c.vaga), v = P.vagas[i];
       if (!v || !v.pedido) return falha(m, 'sem-pedido', { vaga: i }, q);
       const gratis = cfg.trocaGratisAposSeg > 0 && P.trocaGratisEm <= m.agora, velhos = Object.keys(v.pedido.itens);
-      const seg = gratis ? 0 : cfg.esperaVezes * esperaDaVaga(cfg, m.progresso.nivel);
+      const seg = gratis ? 0 : cfg.esperaVezes * esperaDaVaga(cfg, m.progresso.nivel) * fatorDaEspera(m);
       v.pedido = null; v.livreEm = m.agora + seg * 1000;
       if (gratis) P.trocaGratisEm = m.agora + cfg.trocaGratisAposSeg * 1000;
       m.eventos.emitir('trocouPedido', { vaga: i, gratis, seg });

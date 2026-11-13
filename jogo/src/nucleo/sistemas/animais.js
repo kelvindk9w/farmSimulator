@@ -344,7 +344,7 @@ export function podeEncherBebedouro(m, e) {
 }
 // quantas regas faltam para encher o bebedouro
 export const regasParaEncher = (m, e) => Math.ceil(Math.max(0, capacidadeDoBebedouro(m, e) - nivelDoBebedouro(m, e)) / m.dados.trato.aguasPorRega);
-const pocoDe = (m, loc) => loc.entidades.find((e) => e.tipo === 'poco') || null;
+const pocoDe = (m, loc) => loc.entidades.find((e) => e.tipo === 'poco' || e.tipo === 'poco-velho') || null;
 const naFila = (m, acao, entidade) => { const p = m.personagem, s = (t) => t && t.tipo === 'agir' && t.acao === acao && t.entidade === entidade; return s(p.tarefa) || p.fila.some(s); };
 
 registrarAcao({

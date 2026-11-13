@@ -209,6 +209,22 @@ for (const [id, c] of entradas(construcoes)) {
       else if (c.interior.piso && (mv.x < 0 || mv.z < 0 || mv.x + mo.casas[0] > c.interior.piso[0] || mv.z + mo.casas[1] > c.interior.piso[1])) erro('construcoes', `${onde}: o móvel inicial "${mv.id}" não cabe no piso`);
     }
   }
+  // a reforma (o começo humilde): a velha vira "para", com preço, obra e um ganho
+  if (c.reforma !== undefined) {
+    const r = c.reforma, o2 = `${onde}, reforma`;
+    if (!obj(r)) erro('construcoes', `${o2}: devia ser { para, nome, nivel, custo, obraSeg, xp }`);
+    else {
+      if (!construcoes[r.para]) erro('construcoes', `${o2}: vira "${r.para}", que não existe`);
+      else if (r.para === id) erro('construcoes', `${o2}: vira ela mesma`);
+      if (!c.inicial) erro('construcoes', `${o2}: só o que já vem no terreno se reforma (ponha "inicial": true)`);
+      campo('construcoes', o2, r, 'nome', txt, 'um texto');
+      campo('construcoes', o2, r, 'nivel', inteiroPos, 'um inteiro');
+      campo('construcoes', o2, r, 'obraSeg', naoNegativo, 'um número de segundos');
+      if (campo('construcoes', o2, r, 'custo', obj, '{ ouro, itens }')) custo('construcoes', o2, r.custo);
+      if (r.custo && r.custo.cash) erro('construcoes', `${o2}: reforma não se paga em cash`);
+      if (r.xp !== undefined && !naoNegativo(r.xp)) erro('construcoes', `${o2}: "xp" devia ser um número`);
+    }
+  }
   let nAnt = c.nivel, ouroAnt = -1, pisoAnt = c.interior && c.interior.piso, vagasAnt = c.vagas, filaAnt = c.fila;
   (c.ampliacoes || []).forEach((a, k) => {
     const o2 = `${onde}, ampliação ${k + 1}`;
@@ -339,7 +355,7 @@ for (const c of missoes.conquistas || []) for (const r of c.recompensas || []) f
 const usado = new Set();
 for (const k of Object.keys(entraEmReceita)) usado.add(k);
 for (const [, a] of entradas(animais)) { for (const k of Object.keys(a.come || {})) usado.add(k); for (const k of a.exige || []) usado.add(k); }
-for (const [, c] of entradas(construcoes)) { for (const k of Object.keys((c.custo || {}).itens || {})) usado.add(k); for (const a of c.ampliacoes || []) for (const k of Object.keys((a.custo || {}).itens || {})) usado.add(k); }
+for (const [, c] of entradas(construcoes)) { for (const k of Object.keys((c.custo || {}).itens || {})) usado.add(k); for (const a of c.ampliacoes || []) for (const k of Object.keys((a.custo || {}).itens || {})) usado.add(k); if (obj(c.reforma)) for (const k of Object.keys((c.reforma.custo || {}).itens || {})) usado.add(k); }
 for (const [id, it] of entradas(itens)) {
   const temOrigem = nivelDaOrigem[id] !== undefined || dado.has(id) || (loja.cash && (loja.cash.ofertas || []).some((o) => o.item === id));
   if (!temOrigem) erro('itens', `item "${id}": não há como conseguir (não se compra, não se planta, não se produz, não vem de presente)`);
@@ -354,6 +370,7 @@ for (const [id, a] of entradas(animais)) for (const k of Object.keys(a.come || {
 for (const [id, c] of entradas(construcoes)) {
   for (const k of Object.keys((c.custo || {}).itens || {})) if (nivelDaOrigem[k] > c.nivel) erro('construcoes', `construção "${id}" (nível ${c.nivel}) pede "${k}", que só existe no nível ${nivelDaOrigem[k]}`);
   for (const a of c.ampliacoes || []) for (const k of Object.keys((a.custo || {}).itens || {})) if (nivelDaOrigem[k] > a.nivel) erro('construcoes', `ampliação de "${id}" (nível ${a.nivel}) pede "${k}", que só existe no nível ${nivelDaOrigem[k]}`);
+  if (obj(c.reforma)) for (const k of Object.keys((c.reforma.custo || {}).itens || {})) if (nivelDaOrigem[k] > c.reforma.nivel) erro('construcoes', `reforma de "${id}" (nível ${c.reforma.nivel}) pede "${k}", que só existe no nível ${nivelDaOrigem[k]}`);
 }
 // conta: a receita tem de valer mais que os insumos (senão é melhor vender cru)
 for (const [id, r] of entradas(receitas)) {
@@ -436,18 +453,41 @@ const encosta = (a, b) => (a[0] <= b[2] && b[0] <= a[2] && a[1] < b[3] && b[1] <
     const c = construcoes[p] ? construcoes[p].casas : [1, 1];
     if (area(ini.area) && !dentro([v[0], v[1], v[0] + c[0], v[1] + c[1]], ini.area)) erro('terras', `o ponto "${p}" (${v}) fica fora da área inicial`);
   }
-  // construções que já vêm no terreno: têm ponto, não se sobrepõem
-  const postas = [];
-  for (const [id, c] of entradas(construcoes)) {
-    if (!c.inicial) continue;
-    const v = pontos[id];
-    if (!v) { erro('terras', `a construção inicial "${id}" não tem ponto em "pontos"`); continue; }
-    const a = [v[0], v[1], v[0] + c.casas[0], v[1] + c.casas[1]];
-    for (const o of postas) if (cruza(a, o.a)) erro('terras', `"${id}" e "${o.id}" nascem uma em cima da outra`);
-    if (ini.limpo && !dentro(a, ini.area)) erro('terras', `"${id}" nasce fora da área inicial`);
-    postas.push({ id, a });
+  // construções que já vêm no terreno: têm lugar, não se sobrepõem. Com "comeco" (o começo humilde), são as de
+  // comeco.construcoes, cada uma no seu "em"; as de antes (casa, celeiro, poço, banca e quadro, nos pontos) seguem
+  // valendo para a gravação de antes do começo humilde, e também não podem se sobrepor.
+  const C0 = obj(terras.comeco) ? terras.comeco : null;
+  function semSobrepor(lista, qual) {
+    const postas = [];
+    for (const { id, tipo, v } of lista) {
+      const c = construcoes[tipo];
+      if (!c) { erro('terras', `${qual}: "${tipo}" não é uma construção de construcoes.json`); continue; }
+      if (!(Array.isArray(v) && v.length >= 2 && num(v[0]) && num(v[1]))) { erro('terras', `${qual}: "${id}" sem lugar [x, z]`); continue; }
+      const a = [v[0], v[1], v[0] + c.casas[0], v[1] + c.casas[1]];
+      for (const o of postas) if (cruza(a, o.a)) erro('terras', `${qual}: "${id}" e "${o.id}" nascem uma em cima da outra`);
+      if (ini.limpo && !dentro(a, ini.area)) erro('terras', `${qual}: "${id}" nasce fora da área inicial`);
+      postas.push({ id, a });
+    }
+    for (const pn of ['personagem', 'vizinho']) { const v = pontos[pn]; if (v) for (const o of postas) if (v[0] >= o.a[0] && v[0] < o.a[2] && v[1] >= o.a[1] && v[1] < o.a[3]) erro('terras', `${qual}: o ponto "${pn}" cai dentro de "${o.id}"`); }
   }
-  for (const pn of ['personagem', 'vizinho']) { const v = pontos[pn]; if (v) for (const o of postas) if (v[0] >= o.a[0] && v[0] < o.a[2] && v[1] >= o.a[1] && v[1] < o.a[3]) erro('terras', `o ponto "${pn}" cai dentro de "${o.id}"`); }
+  const classicas = ['casa', 'celeiro', 'poco', 'banca', 'quadro-de-pedidos'].filter((id) => construcoes[id]).map((id) => ({ id, tipo: id, v: pontos[id] }));
+  semSobrepor(classicas, 'a fazenda de antes');
+  if (C0) {
+    const lista = (Array.isArray(C0.construcoes) ? C0.construcoes : []).map((c) => ({ id: c.id, tipo: c.tipo, v: c.em || pontos[c.ponto || c.id] }));
+    semSobrepor(lista, 'o começo humilde');
+    for (const c of lista) if (construcoes[c.tipo] && !construcoes[c.tipo].inicial) erro('terras', `comeco: "${c.tipo}" nasce no terreno; ponha "inicial": true em construcoes.json`);
+    const ids = new Set(lista.map((c) => c.id));
+    for (const id of ['casa', 'poco', 'banca']) if (!ids.has(id)) aviso('terras', `comeco: sem "${id}" (a gravação e o guia contam com esse id)`);
+    if (C0.cerca !== undefined) {
+      const ce = C0.cerca;
+      if (!obj(ce) || !construcoes[ce.de]) erro('terras', 'comeco.cerca: "de" devia ser a cerca de construcoes.json (a de arame)');
+      else if (!obj(construcoes[ce.de].reforma)) aviso('terras', `comeco.cerca: "${ce.de}" não tem reforma (a cerca nunca melhora)`);
+    }
+    if (!Array.isArray(C0.chegada) || C0.chegada.length < 2) aviso('terras', 'comeco: sem "chegada" (o jogo novo abre sem a cena da chegada)');
+    // o que é inicial e não nasce em lugar nenhum é só alvo de reforma (casa, poço, banca) ou a cerca
+    const alvos = new Set(entradas(construcoes).filter(([, c]) => obj(c.reforma)).map(([, c]) => c.reforma.para));
+    for (const [id, c] of entradas(construcoes)) if (c.inicial && !lista.some((x) => x.tipo === id) && !alvos.has(id) && !(obj(C0.cerca) && C0.cerca.de === id)) erro('terras', `a construção inicial "${id}" não nasce no começo humilde nem é o fim de uma reforma`);
+  } else for (const [id, c] of entradas(construcoes)) if (c.inicial && !pontos[id]) erro('terras', `a construção inicial "${id}" não tem ponto em "pontos"`);
   for (const c of terras.caminhos || []) if (!area(c)) erro('terras', 'caminho inválido: esperava [x0, z0, x1, z1]');
 }
 
@@ -481,7 +521,7 @@ const encosta = (a, b) => (a[0] <= b[2] && b[0] <= a[2] && a[1] < b[3] && b[1] <
   for (const [id, c] of entradas(culturas)) marca(c.nivel, id);
   for (const [id, a] of entradas(arvores)) marca(a.nivel, id);
   for (const [id, a] of entradas(animais)) if (a.preco && a.preco.ouro) marca(a.nivel, id);
-  for (const [id, c] of entradas(construcoes)) { if (!(c.custo && c.custo.cash)) marca(c.nivel, id); for (const a of c.ampliacoes || []) marca(a.nivel, id + '+'); }
+  for (const [id, c] of entradas(construcoes)) { if (!(c.custo && c.custo.cash)) marca(c.nivel, id); for (const a of c.ampliacoes || []) marca(a.nivel, id + '+'); if (obj(c.reforma)) marca(c.reforma.nivel, 'reforma:' + id); }
   for (const [id, r] of entradas(receitas)) marca(r.nivel, id);
   for (const l of terras.lotes || []) marca(l.nivel, l.id);
   for (const v of pedidos.vagas || []) marca(v.nivel, 'pedidos');
@@ -553,7 +593,12 @@ const encosta = (a, b) => (a[0] <= b[2] && b[0] <= a[2] && a[1] < b[3] && b[1] <
     if (!obj(o)) { erro('missoes', `${onde}: falta "objetivo"`); return 1; }
     if (!eventos[o.evento]) erro('missoes', `${onde}: o evento "${o.evento}" não está em eventos.lista`);
     if (!inteiroPos(o.n)) erro('missoes', `${onde}: objetivo.n devia ser um inteiro maior que zero`);
-    return filtro(onde, o.filtro);
+    let n = filtro(onde, o.filtro);
+    if (o.evento === 'reformou' && obj(o.filtro)) for (const v of [].concat(o.filtro.construcao || [])) {
+      const r = construcoes[v] && construcoes[v].reforma;
+      if (!obj(r)) erro('missoes', `${onde}: pede a reforma de "${v}", que não se reforma`); else n = Math.max(n, r.nivel);
+    }
+    return n;
   }
   const ids = new Set();
   const viz = Array.isArray(missoes.vizinho) ? missoes.vizinho : [];
@@ -586,7 +631,10 @@ const encosta = (a, b) => (a[0] <= b[2] && b[0] <= a[2] && a[1] < b[3] && b[1] <
     // o bicho dado nesta recompensa também (o boi do nível 4, antes de se poder comprar outro)
     for (const a of Object.keys((mi.recompensa || {}).animais || {})) if (animais[a] && !(presente[a] <= mi.nivel)) presente[a] = mi.nivel;
   });
-  if (viz.length < 25 || viz.length > 40) aviso('missoes', `são ${viz.length} missões do vizinho; o plano fala em cerca de 30`);
+  for (const mi of viz) if (mi.comeco !== undefined && !['humilde', 'classico'].includes(mi.comeco)) erro('missoes', `missão "${mi.id}": "comeco" devia ser "humilde" ou "classico"`);
+  // (o começo humilde soma a conversa, o baú, o caixote, o celeiro, o quadro e as reformas: umas 45 no jogo novo)
+  const doJogoNovo = viz.filter((mi) => mi.comeco !== 'classico').length;
+  if (doJogoNovo < 25 || doJogoNovo > 50) aviso('missoes', `são ${doJogoNovo} missões do vizinho no jogo novo; o plano fala em 30 a 50`);
   // conquistas
   const cqs = Array.isArray(missoes.conquistas) ? missoes.conquistas : [];
   if (!cqs.length) erro('missoes', 'falta a lista "conquistas"');

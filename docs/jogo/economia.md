@@ -48,20 +48,22 @@ A curva de níveis foi ajustada para o **regular**. Os outros dois são consequ�
 | Dia | Meta do regular | Casual | Regular | Engajado |
 |---|---|---|---|---|
 | 1ª sessão (15 min) | 4 | - | 4 | - |
-| D1 | 6 | 4 | 6 | 8 |
-| D3 | 8 | 6 | 8 | 12 |
+| D1 | 6 | 5 | 6 | 8 |
+| D3 | 8 | 6 | 8 | 11 |
 | D7 | 11 | 8 | 11 | 16 |
 | D14 | 14 | 11 | 14 | 20 |
 | D30 | 19 | 13 | 19 | 26 |
-| D60 | 23 | 18 | 23 | 34 |
-| D90 | 26 | 20 | 26 | 43 |
+| D60 | 23 | 17 | 23 | 34 |
+| D90 | 26 | 20 | 26 | 42 |
 | D120 | - | 21 | 29 | 50 |
 
 Com o começo humilde (campo de 12 casas, miolo limpo maior, boi no nível 4) a conta continua nas metas do regular. Para isso ela aprendeu três coisas: a beirada com mato, pedra e toco é contada casa por casa, como o jogo faz (a conta velha tirava 32 casas fixas e, com o miolo limpo maior, achava só 7 obstáculos em vez de uns 25); o bicho dado de presente por missão entra na fazenda (sem isso o boi velho nunca chegava e a missão de arar com o boi travava até o nível 12); e a madeira da tábua é comprada quando a terra não dá mais. O casual fecha o D1 no nível 4, a 3 pontos de experiência do 5 (417 de 420); o jogo medido dá 5 (`ritmo-medido.md`).
 
+Com o **começo humilde, parte 2** (a fazenda nasce com casa e poço velhos, baú, caixote de venda e cerca de arame; o celeiro e o quadro de pedidos se constroem por missão, nos níveis 2 e 3; quatro reformas: poço no 2, caixote → banca no 5, casa no 7, cerca no 9) a conta continua nas metas do regular. Ela aprendeu: as missões novas (conversar com o Seu Tonho, guardar no baú, vender no caixote, construir o celeiro e o quadro, as reformas); o baú de 40 enquanto não há celeiro; o poço velho (cada enchida demora o dobro e enche no máximo 8 regas); o caixote (cabe 12 e o freguês leva uma coisa a cada 0,8 s; o modelo põe no caixote só o que cabe); pedido só com o quadro pronto; e as reformas como compras (com o ganho de cada uma: o poço enche normal, a banca vende na hora, a casa guarda 40, a cerca encurta a espera dos pedidos para 0,8). O casual da conta passa a fechar o D1 no nível 5 (os pontos das missões novas), e a primeira sessão do regular da conta termina no nível 5 com 4 pontos de folga (424 de 420): o jogo medido termina no 4, como antes.
+
 O que cada marco quer dizer para o regular:
 
-- **Fim da 1ª sessão (nível 4):** plantou alface e milho, vendeu, entregou um pedido, comprou o regador de lata e o cesto grande, limpou mato e tocos (a madeira da bancada de carpintaria). Falta pouco para o nível 5 (362 de 420 de experiência), que abre o galinheiro: é o motivo para voltar.
+- **Fim da 1ª sessão (nível 4):** conversou com o Seu Tonho, plantou alface e milho, guardou no baú, vendeu no caixote, consertou o poço, construiu o celeiro e o quadro de pedidos, comprou o regador de lata, limpou mato. Falta pouco para o nível 5, que abre o galinheiro e a banca (a reforma do caixote): é o motivo para voltar. (A conta chega ao 5 no último minuto, por 4 pontos; o jogo medido fica no 4.)
 - **D1 (nível 6):** o boi velho do Seu Tonho (nível 4, na segunda sessão: bancada de carpintaria, tábuas, pedras, a baia barata do estábulo e a primeira fileira arada com ele, uns 12 minutos depois de entrar), galinheiro com galinhas, tomate, bancada de embalar, regador grande. O primeiro lote fica para o dia 2.
 - **D7 (nível 11):** moinho, cozinha, curral com vacas, bananal, três lotes, regador de crivo. O laticínio e o arroz acabaram de abrir.
 - **D30 (nível 19):** arado de ferro, jumento com carroça e barril, cavalo, ovelhas, os primeiros aspersores, seis lotes. Faltam as quatro últimas receitas.
@@ -71,27 +73,28 @@ Dia em que cada perfil chega ao nível (conta; "~" é projeção):
 
 | Nível | Casual | Regular | Engajado |
 |---|---|---|---|
-| 5 | 2 | 1 | 1 |
-| 10 | 11 | 6 | 2 |
+| 5 | 1 | 1 | 1 |
+| 10 | 10 | 5 | 2 |
 | 15 | 39 | 16 | 6 |
-| 20 | 82 | 33 | 13 |
-| 25 | ~219 | 72 | 26 |
-| 30 | ~408 | ~124 | 44 |
-| 50 | ~1.208 | ~350 | 118 |
+| 20 | 85 | 33 | 13 |
+| 25 | ~240 | 73 | 26 |
+| 30 | ~456 | ~125 | 44 |
+| 50 | ~1.372 | ~353 | 120 |
 
 ### A primeira sessão, minuto a minuto (conta, regular)
 
 | Minuto | O que acontece |
 |---|---|
-| 0:00 a 1:27 | Ara a primeira fileira do campo pequeno (6 casas, com a enxada que trouxe), planta a alface que ganhou, pega o regador velho no chão ao lado do poço, enche e rega (quatro missões curtas do Seu Tonho) |
-| 3:16 | Primeira colheita; **nível 2** |
-| 4:39 a 5:06 | Vende na banca e compra sementes (milho liberado no nível 2) |
-| ~8:26 | Colhe o milho; **níveis 3 e 4** quase juntos (o modelo carimba os dois no fim da colheita; no jogo o 3 vem no meio dela) |
-| 8:33 | **Primeira melhoria:** regador de lata (45 de ouro, o dobro de água). Em seguida o cesto grande (90) |
-| 8:59 | Roça o mato com a foice que ganhou |
-| 10:45 | Entrega o primeiro pedido do quadro |
-| 12:09 a 13:02 | Guarda no celeiro, corta tocos (a madeira da bancada de carpintaria, que ela monta no começo da sessão seguinte) |
-| 15:00 | Termina no nível 4, com 393 de ouro e 362 de 420 de experiência |
+| 0:00 a 0:11 | A chegada (no jogo, uns 5 s de cena, ou um toque para pular) e a conversa com o Seu Tonho: um toque nele |
+| 0:11 a 1:33 | Ara a primeira fileira do campo pequeno (6 casas, com a enxada que trouxe), planta a alface que ganhou, pega o regador velho no chão ao lado do poço, enche no poço velho (devagar) e rega (quatro missões curtas do Seu Tonho) |
+| 3:18 | Primeira colheita; **nível 2** |
+| 4:40 | Guarda as alfaces no baú da casa |
+| 6:27 a 6:34 | Põe no caixote da porteira (o freguês leva uma por vez), conserta o poço (40 de ouro) e compra sementes |
+| 8:24 | Colhe o milho; **nível 3** |
+| 10:23 a 10:31 | Constrói o celeiro (80), compra o regador de lata (45) e prega o quadro de pedidos (40) |
+| 11:53 | O celeiro fica pronto; **nível 4**. Em seguida o cesto grande (90) e roça o mato |
+| 14:46 | Entrega o primeiro pedido do quadro; **nível 5** por 4 pontos (no jogo medido, o 5 vem na sessão seguinte) |
+| 15:00 | Termina com 136 de ouro, depois de comprar a bancada de carpintaria |
 
 Os níveis 2, 3 e 4 têm experiência fixada à mão (20, 60 e 130) para que isso aconteça seja qual for o resto da curva. Sempre há algo para fazer agora (alface de 1 minuto, mato para roçar) e algo para esperar (milho de 3 minutos, depois feijão de 8, pedido que renova em 20 minutos, galinha que bota a cada 20).
 
@@ -321,7 +324,7 @@ Sem comida ou sem água o animal rende a metade; nenhum morre. A ração se comp
 
 Toda indústria começa com 2 vagas de fila e chega a 5. O jogador cancela e reordena a fila; receita que não começou devolve os ingredientes.
 
-Armazém (não é trava): a prateleira simples guarda 60 produtos e custa 60 de ouro, 4 tábuas e 6 pregos (nível 5); a reforçada guarda 150 (nível 13); o baú guarda 300 materiais de obra; o suporte guarda ferramentas. Produto, material e ferramenta não disputam o mesmo lugar. Não há limite por dia para montar móvel nem para ampliar. Mudar construção de lugar é grátis. Cerca (15) e caminho de pedra (10) têm preço fixo: a centésima custa o mesmo que a primeira.
+Armazém (não é trava): no começo humilde, antes do celeiro, o baú da casa guarda 40 produtos (e continua guardando depois); o celeiro é a primeira construção grande (nível 2, 80 de ouro, missão do Seu Tonho); a casa reformada (nível 7) guarda mais 40; colheita nunca se perde com o armazém cheio (fica no cesto). A prateleira simples guarda 60 produtos e custa 60 de ouro, 4 tábuas e 6 pregos (nível 5); a reforçada guarda 150 (nível 13); o baú guarda 300 materiais de obra; o suporte guarda ferramentas. Produto, material e ferramenta não disputam o mesmo lugar. Não há limite por dia para montar móvel nem para ampliar. Mudar construção de lugar é grátis. Cerca (15) e caminho de pedra (10) têm preço fixo: a centésima custa o mesmo que a primeira.
 
 ### Receitas
 

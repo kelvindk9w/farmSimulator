@@ -108,6 +108,20 @@ function tipoPadrao(def) {
   };
 }
 
+// o tipo que outra frente registrou para uma construção dos dados (casa, poço, banca, celeiro, baú do começo): em obra
+// (a reforma), o desenho é o da obra subindo; e o toque que não tem o que fazer abre o cartão da obra
+function ligarObra(t) {
+  if (t.comObra) return;
+  t.comObra = true;
+  const visual = t.visual, acao = t.acaoPossivel;
+  t.visual = (m, e, v) => { visual(m, e, v); if (DESENHO.visual) DESENHO.visual(m, e, v); return v; };
+  t.acaoPossivel = (m, e) => {
+    const r = acao(m, e);
+    if (!(e.obraAte > 0) || (r && (r.acao || r.painel))) return r;
+    return { painel: 'construcao', arg: { entidade: e.id }, texto: 'em-obra', dados: { construcao: e.tipo, seg: faltaDaObra(m, e) } };
+  };
+}
+
 // ---------- o celeiro por dentro: um local próprio, do tamanho do piso ----------
 // piso de L por P casas, mais uma fileira na frente (z = P) só com a soleira da porta, de duas casas, no meio
 function fazerInterior(piso) {
@@ -360,7 +374,9 @@ export function colocar(m, tipo, x, z, opc = {}) {
   const local = opc.local || def.onde, loc = m.locais[local];
   if (!loc) throw new Error(`a construção "${tipo}" pede o local "${local}", que não existe`);
   const giro = opc.giro && def.gira ? 1 : 0, cs = casasDe(def, giro);
-  const e = loc.por({ id: opc.id || `${tipo}-${++C.seq}`, tipo, local, x, z, l: cs[0], p: cs[1], giro, nivel: opc.nivel || 1, obraAte: 0, ampliaAte: 0, obraDur: 0 });
+  // (a construção de "idFixo" nos dados, como o celeiro e o quadro de pedidos, ganha o próprio id como nome, se estiver livre)
+  const id = opc.id || (def.idFixo && !loc.porId[tipo] ? tipo : `${tipo}-${++C.seq}`);
+  const e = loc.por({ id, tipo, local, x, z, l: cs[0], p: cs[1], giro, nivel: opc.nivel || 1, obraAte: 0, ampliaAte: 0, obraDur: 0 });
   C.todas.push(e);
   assentar(m, e);
   desviarPersonagem(m, e);
@@ -388,12 +404,18 @@ export function darConstrucao(m, id, n = 1) {
 }
 
 function ficarPronta(m, e, quieto) {
-  const def = defDe(m, e.tipo);
-  e.obraAte = 0;
+  const def = defDe(m, e.tipo), de = e.reforma || null;
+  e.obraAte = 0; e.reforma = null;
   if (!(e.ampliaAte > 0)) e.obraDur = 0;
   const f = gancho(e, 'aoPronta');
   if (f) f(m, e);
   if (quieto) return;
+  if (de) { // a reforma acabou: a velha virou a nova (não conta como construção nova)
+    const r = defDe(m, de) && defDe(m, de).reforma;
+    if (r && r.xp > 0) darXp(m, r.xp, 'reformar');
+    m.eventos.emitir('reformou', { construcao: de, para: e.tipo, entidade: e.id, n: 1, x: e.x, z: e.z });
+    return;
+  }
   if (def.xp > 0) darXp(m, def.xp, 'construir');
   const dados = { construcao: e.tipo, entidade: e.id, classe: def.tipo, onde: e.local, n: 1, x: e.x, z: e.z };
   // enfeite (cerca, calçamento, canteiro) não é obra: tem o seu próprio evento, para a conquista de carpinteiro
@@ -462,6 +484,68 @@ function pontoDeObra(m, loc, x, z, l, p) {
 }
 
 const falha = (m, r, emite = true) => { if (emite) m.eventos.emitir('faltou', { motivo: r.motivo, dados: r.dados }); return { ok: false, motivo: r.motivo, dados: r.dados }; };
+
+// ---------- reforma: a construção velha vira a nova, com obra, no mesmo lugar (o começo humilde) ----------
+// Na construção velha, construcoes.json traz "reforma": { para, nome, nivel, custo: { ouro, itens }, obraSeg, xp, ganho }.
+// Reformar troca o tipo da entidade (o id fica: "casa", "poco", "banca") e começa a obra da nova; durante a obra,
+// e.reforma guarda o tipo velho. Pronta, sai o evento reformou { construcao (a velha), para, entidade, n }.
+// Se a nova é maior que a velha (o caixote que vira banca), ela vai para o lugar livre mais perto do ponto dela em
+// terras.json (ou da velha), sem fechar caminho.
+export function reformaDe(m, tipo) { const d = defDe(m, tipo), r = d && d.reforma; return r && typeof r === 'object' && defDe(m, r.para) ? r : null; }
+export function lugarDaReforma(m, e) {
+  const r = reformaDe(m, e.tipo), nova = r && defDe(m, r.para);
+  if (!nova) return null;
+  const cs = casasDe(nova, 0);
+  if (cs[0] === e.l && cs[1] === e.p) return [e.x, e.z];
+  const P = m.dados.terras.pontos[r.para], cx = P ? Math.round(P[0]) : e.x, cz = P ? Math.round(P[1]) : e.z, loc = m.locais[e.local];
+  // primeiro, as áreas que cobrem a velha (a banca no lugar do caixote); depois, em volta do ponto
+  const cand = [];
+  for (let z = e.z - cs[1] + 1; z <= e.z; z++) for (let x = e.x - cs[0] + 1; x <= e.x; x++) cand.push([Math.abs(x - cx) + Math.abs(z - cz), x, z]);
+  cand.sort((a, b) => a[0] - b[0]);
+  for (const [, x, z] of cand) if (lugarServe(m, r.para, x, z, { local: e.local, mudando: e }).ok) return [x, z];
+  for (let raio = 0; raio < Math.max(loc.l, loc.p); raio++) for (let dz = -raio; dz <= raio; dz++) for (let dx = -raio; dx <= raio; dx++) {
+    if (Math.max(Math.abs(dx), Math.abs(dz)) !== raio) continue;
+    if (lugarServe(m, r.para, cx + dx, cz + dz, { local: e.local, mudando: e }).ok) return [cx + dx, cz + dz];
+  }
+  return null;
+}
+// dá para reformar agora? Motivos: sem-reforma, em-obra, nivel-baixo { nivel }, sem-ouro { falta },
+// falta-material { item, precisa, tem, falta }, sem-lugar
+export function podeReformar(m, e) {
+  const r = e && reformaDe(m, e.tipo);
+  if (!r) return { ok: false, motivo: 'sem-reforma', dados: { construcao: e && e.tipo } };
+  if (e.obraAte > 0 || e.ampliaAte > 0) return { ok: false, motivo: 'em-obra', dados: { construcao: e.tipo, seg: faltaDaObra(m, e) } };
+  if ((r.nivel || 1) > m.progresso.nivel) return { ok: false, motivo: 'nivel-baixo', dados: { nivel: r.nivel, construcao: e.tipo } };
+  const custo = r.custo || {};
+  if (m.posses.ouro < (custo.ouro || 0)) return { ok: false, motivo: 'sem-ouro', dados: { falta: custo.ouro - m.posses.ouro, construcao: e.tipo } };
+  const f = oQueFalta(m, custo.itens || {});
+  if (f) return { ok: false, motivo: 'falta-material', dados: { ...f, construcao: e.tipo } };
+  if (!lugarDaReforma(m, e)) return { ok: false, motivo: 'sem-lugar', dados: { construcao: r.para } };
+  return { ok: true };
+}
+// troca a velha pela nova. opc.gratis: sem cobrar; opc.pronta: sem obra (e sem evento: o atalho de teste, a gravação de antes)
+export function reformarJa(m, e, opc = {}) {
+  const r = reformaDe(m, e.tipo);
+  if (!r) return false;
+  const lugar = lugarDaReforma(m, e);
+  if (!lugar) return false;
+  if (!opc.gratis) { const c = r.custo || {}; if (c.ouro > 0) gastarOuro(m, c.ouro, 'reforma'); gastarItens(m, c.itens || {}); }
+  const loc = m.locais[e.local], de = e.tipo, nova = defDe(m, r.para), cs = casasDe(nova, 0), antes = { x: e.x, z: e.z, l: e.l, p: e.p };
+  loc.tirar(e.id);
+  desassentar(m, e, antes.x, antes.z, antes.l, antes.p);
+  e.tipo = r.para; e.x = lugar[0]; e.z = lugar[1]; e.l = cs[0]; e.p = cs[1]; e.giro = 0; e.nivel = 1; e.ampliaAte = 0;
+  loc.por(e);
+  assentar(m, e);
+  desviarPersonagem(m, e);
+  const seg = opc.pronta ? 0 : r.obraSeg || 0;
+  if (seg > 0) {
+    e.reforma = de; e.obraAte = m.agora + seg * 1000; e.obraDur = seg;
+    marcarProxima(m, e.obraAte);
+    m.eventos.emitir('comecouObra', { entidade: e.id, construcao: e.tipo, local: e.local, seg, reforma: de, x: e.x, z: e.z });
+  } else { e.reforma = de; ficarPronta(m, e, !!opc.pronta); }
+  m.eventos.emitir('trocouConstrucao', { entidade: e.id, de, para: e.tipo, antes });
+  return true;
+}
 
 // ---------- as ações da personagem ----------
 // martelar no lugar escolhido: é no efeito que o preço é cobrado e a obra nasce (cancelar antes não custa nada)
@@ -544,6 +628,7 @@ registrarSistema({
       const t = TIPOS[def.id];
       if (!t) registrarTipo(tipoPadrao(def));
       else if (t.construcao) { t.casas = def.casas; t.bloqueia = def.bloqueia; t.plano = def.plano; } // outro mundo, outros dados (testes)
+      else ligarObra(t);
     }
     m.construcao.chaoBase.fazenda = Uint8Array.from(m.locais.fazenda.chao); // o chão do mapa, antes de qualquer calçamento
     // as construções que já vêm na fazenda (casa, celeiro, poço, banca) entram na lista como estão
@@ -651,7 +736,11 @@ registrarSistema({
     const C = m.construcao;
     return {
       seq: C.seq, guardadas: { ...C.guardadas },
-      lista: C.todas.map((e) => ({ id: e.id, tipo: e.tipo, local: e.local, x: e.x, z: e.z, nivel: e.nivel || 1, giro: e.giro ? 1 : 0, obraAte: Math.round(e.obraAte || 0), ampliaAte: Math.round(e.ampliaAte || 0), obraDur: e.obraDur || 0 })),
+      lista: C.todas.map((e) => {
+        const g = { id: e.id, tipo: e.tipo, local: e.local, x: e.x, z: e.z, nivel: e.nivel || 1, giro: e.giro ? 1 : 0, obraAte: Math.round(e.obraAte || 0), ampliaAte: Math.round(e.ampliaAte || 0), obraDur: e.obraDur || 0 };
+        if (e.reforma) g.reforma = e.reforma; // em obra de reforma: o tipo velho
+        return g;
+      }),
     };
   },
   // Uma gravação do M1 não traz este sistema: aí vale o que iniciar() montou (o celeiro com os móveis do começo).
@@ -668,6 +757,8 @@ registrarSistema({
     refazerInterior(m, Math.max(1, Math.min(D.celeiro ? D.celeiro.ampliacoes.length + 1 : 1, (cel && Math.round(cel.nivel)) || 1)));
     const repor = (g, x, z) => {
       const def = D[g.tipo], e = antes.get(g.id) || { id: g.id, tipo: g.tipo };
+      e.tipo = g.tipo; // (a entidade de antes pode ser a velha de uma reforma: a casa velha que já é casa)
+      e.reforma = g.obraAte > 0 && typeof g.reforma === 'string' && D[g.reforma] ? g.reforma : null;
       e.giro = g.giro && def.gira ? 1 : 0;
       const cs = casasDe(def, e.giro);
       e.local = g.local; e.x = x; e.z = z; e.l = cs[0]; e.p = cs[1];

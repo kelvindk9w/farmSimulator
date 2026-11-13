@@ -31,6 +31,9 @@ import { comecarColocacao, comecarMudanca, comecarArrumacao, colocando } from '.
 import { defDe, podePagar, quantasGuardadas, construcoesDe, construcaoPorId, faltaDaObra, andamentoDaObra, proximaAmpliacao, guardavel, valorDe } from '../../nucleo/sistemas/construcao.js';
 import { quantoTem, listaDeFerramentas } from '../../nucleo/sistemas/posses.js';
 import { capacidadeDe, ocupacaoDe, guardaDoItem, moveisDe, pertoDaPorta } from '../../nucleo/sistemas/celeiro-dentro.js';
+import { reformas } from '../../nucleo/sistemas/comeco.js';
+import { guiaDaMissao } from '../../nucleo/guia.js';
+import '../textos/comeco.js';
 
 const TRAVADAS_A_MOSTRA = 2;
 // não há "icone/<id>" para construção: o ícone é a própria peça do cenário, encaixada na caixa (ui/dom.js já encaixa
@@ -58,6 +61,30 @@ function custo(m, c) {
   return linha;
 }
 function trava(texto) { const t = el('div', 'info trava'); t.append(icone('ui/cadeado', 18), el('span', '', texto)); return t; }
+
+// ---------- as reformas (o começo humilde): o que já veio com a fazenda e fica melhor ----------
+// r = um item de reformas(m) (nucleo/sistemas/comeco.js); o cartão mostra a figura da nova, o ganho e o preço
+const guia = { tipo: null };
+function cartaoDeReforma(m, r) {
+  const travada = r.nivel > m.progresso.nivel, c = el('div', 'oferta cons-oferta' + (travada ? ' travada' : ''));
+  c.dataset.item = 'reforma:' + r.de;
+  c.append(iconeDaConstrucao(r.para, 52), el('div', 'nome', r.nome));
+  if (travada) { c.append(trava(T.construir.nivel(r.nivel))); return c; }
+  c.append(el('div', 'info', T.comeco.ganho[r.de] || ''));
+  const pe = el('div', 'cons-pe');
+  if (r.obra > 0) { c.append(el('div', 'info', T.comeco.emObra(r.obra))); c.append(pe); return c; }
+  c.append(el('div', 'info', T.comeco.obra(r.obraSeg)));
+  pe.append(custo(m, { ouro: r.custo.ouro || 0, itens: r.custo.itens || {} }));
+  const b = botao({ texto: T.comeco.reformar, classe: 'verde' + (r.pode.ok ? '' : ' sem'), aoClicar: () => {
+    const mm = J.mundo, res = mm.comando({ tipo: 'reformar', entidade: r.alvo, quieto: true });
+    if (!res.ok) { som.tocar('erro'); avisar(frase(res.motivo, res.dados, mm.dados)); return; }
+    som.tocar('toque'); fecharPainel();
+  } });
+  b.dataset.k = 'r-' + r.de;
+  pe.append(b);
+  c.append(pe);
+  return c;
+}
 
 // ---------- o catálogo ----------
 registrarPainel({
@@ -115,11 +142,17 @@ registrarPainel({
       for (const def of Object.values(D)) if (constroi(def) || quantasGuardadas(m, def.id) > 0) (porAba[categoriaDe(def)] || (porAba[categoriaDe(def)] = [])).push(def);
       if (daLoja) porAba.enfeites = [...(porAba.cerca || []), ...(porAba.decoracao || [])];
       const abas = CATEGORIAS.filter((k) => porAba[k]);
+      // a aba das reformas vem primeiro, enquanto houver o que reformar (só no painel Construir, não na loja)
+      const lr = daLoja || dentro ? [] : reformas(m);
+      if (lr.length) abas.unshift('reforma');
       const caixa = el('div', 'cons');
       if (!abas.length) { caixa.append(el('div', 'vazio', T.construir.vazio)); corpo.append(caixa); return; }
-      if (pediu && D[pediu] && !daLoja) { aba = categoriaDe(D[pediu]); }
+      if (!pediu && !aba && lr.length) { const g = guiaDaMissao(m, guia); if (g.tipo === 'painel' && g.painel === 'construir' && typeof g.item === 'string') pediu = g.item; }
+      if (pediu && pediu.startsWith('reforma:') && lr.length && !daLoja) aba = 'reforma';
+      else if (pediu && D[pediu] && !daLoja) { aba = categoriaDe(D[pediu]); }
       if (daLoja) { if (!porAba.enfeites.length) { caixa.append(el('div', 'vazio', T.construir.vazio)); corpo.append(caixa); return; } }
-      else if (!abas.includes(aba)) aba = dentro ? 'armazem' : abas.find((k) => porAba[k].some((d) => d.onde === 'fazenda' && podePagar(m, d.id).ok)) || abas.find((k) => k !== 'armazem') || abas[0];
+      // (sem pedido: a primeira aba com algo que dá para pagar agora; a das reformas conta quando há reforma possível)
+      else if (!abas.includes(aba)) aba = dentro ? 'armazem' : abas.find((k) => (k === 'reforma' ? lr.some((r) => r.pode.ok) : (porAba[k] || []).some((d) => d.onde === 'fazenda' && podePagar(m, d.id).ok))) || abas.find((k) => k !== 'armazem') || abas[0];
       if (!daLoja && !abas.includes(aba)) aba = abas[0];
       const linha = el('div', 'abas'); linha.hidden = daLoja;
       for (const k of abas) {
@@ -128,8 +161,14 @@ registrarPainel({
         linha.append(b);
       }
       caixa.append(linha);
-      if (!daLoja && !dentro && !construcoesDe(m, 'bancada-de-carpintaria').length && D['bancada-de-carpintaria']) caixa.append(el('div', 'nota', T.construir.semBancada));
+      if (!daLoja && !dentro && aba !== 'reforma' && !construcoesDe(m, 'bancada-de-carpintaria').length && D['bancada-de-carpintaria']) caixa.append(el('div', 'nota', T.construir.semBancada));
       const grade = el('div', 'grade');
+      if (aba === 'reforma') {
+        caixa.append(el('div', 'nota', T.comeco.nota));
+        for (const r of lr) grade.append(cartaoDeReforma(m, r));
+        caixa.append(grade); corpo.append(caixa);
+        return;
+      }
       // primeiro o que está guardado, depois por nível e preço
       const lista = porAba[aba].slice().sort((a, b) => (quantasGuardadas(m, b.id) > 0) - (quantasGuardadas(m, a.id) > 0) || a.nivel - b.nivel || (a.custo ? a.custo.ouro : 0) - (b.custo ? b.custo.ouro : 0));
       let travadas = 0;
@@ -272,13 +311,17 @@ SECOES.celeiro = (m, caixa, a) => {
   const P = m.posses, materiais = {};
   for (const k in P.bolsa) if (guardaDoItem(m, k) === 'materiais') materiais[k] = P.bolsa[k];
   const ocupa = (g) => { const tem = ocupacaoDe(m, g), cabe = capacidadeDe(m, g); return `${tem}/${cabe}${tem >= cabe ? ' · ' + T.celeiro.cheio : ''}`; };
-  const s1 = a.secao(T.celeiro.produtos, ocupa('produtos')); if (ocupacaoDe(m, 'produtos') >= capacidadeDe(m, 'produtos')) s1.classList.add('cons-cheio');
+  const s1 = a.secao(rotuloDosProdutos(m), ocupa('produtos')); if (ocupacaoDe(m, 'produtos') >= capacidadeDe(m, 'produtos')) s1.classList.add('cons-cheio');
   caixa.append(s1, a.itens(m, P.celeiro.itens));
   const s2 = a.secao(T.celeiro.materiais, ocupa('materiais')); if (ocupacaoDe(m, 'materiais') >= capacidadeDe(m, 'materiais')) s2.classList.add('cons-cheio');
   caixa.append(s2, a.itens(m, materiais));
   caixa.append(a.secao(T.celeiro.ferramentas, moveisDe(m, 'ferramentas').length ? ocupa('ferramentas') : ''), a.ferramentas(m, listaDeFerramentas(m, 'suporte')));
 };
-T.mochila.dica = T.celeiro.dica;
+// no começo humilde, antes do celeiro ficar pronto, quem guarda é o baú da casa
+const celeiroPronto = (m) => construcoesDe(m, 'celeiro').some((e) => !(e.obraAte > 0));
+const temBau = (m) => !!m.locais.fazenda.porId['bau-da-casa'];
+function rotuloDosProdutos(m) { return !celeiroPronto(m) && temBau(m) ? T.celeiro.produtosNoBau : temBau(m) ? T.celeiro.produtosGuardados : T.celeiro.produtos; }
+Object.defineProperty(T.mochila, 'dica', { configurable: true, enumerable: true, get: () => (J.mundo && !celeiroPronto(J.mundo) && temBau(J.mundo) ? T.celeiro.dicaDoBau : T.celeiro.dica) });
 
 // ---------- o botão da porta do celeiro: "Entrar" quando ela está perto dele, "Sair" lá dentro ----------
 // Fica na fileira dos modos, embaixo, com a cara deles: não tapa o celeiro (o toque nele continua guardando o cesto),

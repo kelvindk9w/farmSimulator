@@ -7,11 +7,16 @@ import { somar } from '../util.js';
 import { noCesto, espacoNoCesto, noCeleiro, espacoNoCeleiro, ferramentaNoCinto, ferramentaNoSuporte, pegarGuardada, cestoECargas, naCarga } from './posses.js';
 import { filaTem } from './personagem.js';
 
+// antes do celeiro (o começo humilde), o estoque é o baú ao lado da casa: cheio, a saída é vender no caixote
+const temCeleiro = (m) => !!m.construcao && m.construcao.todas.some((e) => e.tipo === 'celeiro' && e.local === 'fazenda' && !(e.obraAte > 0));
+export const motivoDoCheio = (m) => (temCeleiro(m) ? 'celeiro-cheio' : 'bau-sem-espaco');
+const tipoDoAlvo = (m, alvo) => { const e = alvo && alvo.entidade !== undefined ? m.local.porId[alvo.entidade] : null; return e ? e.tipo : null; };
+
 registrarAcao({
   id: 'guardar', dur: 0.9, efeitoEm: 0.5, estadoVisual: 'entregar',
   pode(m) {
     if (!(noCesto(m) + naCarga(m) > 0)) return { ok: false, motivo: 'cesto-vazio' };
-    if (!(espacoNoCeleiro(m) > 0)) return { ok: false, motivo: 'celeiro-cheio' };
+    if (!(espacoNoCeleiro(m) > 0)) return { ok: false, motivo: motivoDoCheio(m) };
     return { ok: true };
   },
   aoEfeito(m, alvo) {
@@ -23,8 +28,9 @@ registrarAcao({
       somar(c, item, -vai); somar(cel, item, vai);
       somar(itens, item, vai); cabe -= vai; n += vai;
     }
-    m.eventos.emitir('guardou', { itens, n, entidade: alvo.entidade });
-    if (noCesto(m) + naCarga(m) > 0) m.eventos.emitir('faltou', { motivo: 'celeiro-cheio', entidade: alvo.entidade });
+    m.eventos.emitir('guardou', { itens, n, entidade: alvo.entidade, construcao: tipoDoAlvo(m, alvo) });
+    // (a colheita nunca se perde: o que não coube fica no cesto, e o aviso diz onde vender)
+    if (noCesto(m) + naCarga(m) > 0) m.eventos.emitir('faltou', { motivo: motivoDoCheio(m), entidade: alvo.entidade });
   },
 });
 
@@ -45,7 +51,7 @@ registrarAcao({
       somar(cel, item, -vai); somar(c, item, vai);
       itens[item] = vai; cabe -= vai; n += vai;
     }
-    m.eventos.emitir('pegou', { itens, n, entidade: alvo.entidade });
+    m.eventos.emitir('pegou', { itens, n, entidade: alvo.entidade, construcao: tipoDoAlvo(m, alvo) });
   },
 });
 
@@ -66,14 +72,25 @@ registrarAcao({
   },
 });
 
+// o toque no celeiro (e no baú do começo): com o cesto cheio, guarda; vazio, pega de volta o que se vende
+function guardarOuPegar(m) {
+  if (noCesto(m) + naCarga(m) > 0 || filaTem(m, 'colher')) return espacoNoCeleiro(m) > 0 ? { acao: 'guardar', dados: { n: noCesto(m) + naCarga(m), livre: espacoNoCeleiro(m) } } : { acao: null, texto: motivoDoCheio(m) };
+  if (noCeleiro(m) > 0) return { acao: 'pegar', dados: { n: noCeleiro(m) } };
+  return { acao: null, texto: temCeleiro(m) ? 'celeiro-vazio' : 'bau-vazio' };
+}
 registrarTipo({
   tipo: 'celeiro', casas: [5, 4], bloqueia: true, suporte: true,
   pontos: { ficar: (e) => [[e.l / 2, e.p + 0.5]] }, // diante da porta, no meio da face de +Z (a que olha para a câmera, à esquerda)
-  acaoPossivel(m) {
-    if (noCesto(m) + naCarga(m) > 0 || filaTem(m, 'colher')) return espacoNoCeleiro(m) > 0 ? { acao: 'guardar', dados: { n: noCesto(m) + naCarga(m), livre: espacoNoCeleiro(m) } } : { acao: null, texto: 'celeiro-cheio' };
-    if (noCeleiro(m) > 0) return { acao: 'pegar', dados: { n: noCeleiro(m) } };
-    return { acao: null, texto: 'celeiro-vazio' };
-  },
+  acaoPossivel: guardarOuPegar,
+});
+// O baú do começo humilde, ao lado da casa: o estoque pequeno de antes do celeiro (a capacidade é a de
+// construcoes.json, somada à das prateleiras quando o celeiro fica pronto: celeiro-dentro.js). É também onde ficam
+// as ferramentas sem lugar no sítio enquanto não há celeiro (a foice que o Seu Tonho dá, o regador de lata).
+registrarTipo({
+  tipo: 'bau-da-casa', casas: [2, 1], bloqueia: true, suporte: true, altura: 1.2,
+  pontos: { ficar: (e) => [[e.l / 2, e.p + 0.55]] },
+  acaoPossivel: guardarOuPegar,
+  visual(m, e, v) { v.chave = 'objeto/bau'; v.variante = 0; return v; },
 });
 
 registrarTipo({
@@ -81,7 +98,13 @@ registrarTipo({
   pontos: { ficar: (e) => [[e.l / 2, e.p + 0.5]] },
   acaoPossivel: () => ({ acao: null, texto: 'sua-casa' }),
 });
+// a casa velha do começo humilde: a mesma base e o mesmo quadro da casa (a reforma troca uma pela outra)
+registrarTipo({
+  tipo: 'casa-velha', casas: [4, 3], bloqueia: true,
+  pontos: { ficar: (e) => [[e.l / 2, e.p + 0.5]] },
+  acaoPossivel: () => ({ acao: null, texto: 'casa-velha' }),
+});
 
-registrarEvento('guardou', { campos: ['itens', 'n', 'entidade'] });
-registrarEvento('pegou', { campos: ['itens', 'n', 'entidade'] });
+registrarEvento('guardou', { campos: ['itens', 'n', 'entidade', 'construcao'] });
+registrarEvento('pegou', { campos: ['itens', 'n', 'entidade', 'construcao'] });
 registrarEvento('pegouFerramenta', { campos: ['item', 'guardou', 'entidade', 'lugar'] });

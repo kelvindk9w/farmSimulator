@@ -174,8 +174,9 @@ async function cenario(a, f) {
     return null;
   }
 
-  // ---- começo: ouro, nível e materiais pelo gancho de teste
-  await J(() => { const m = window.__jogo.mundo; m.posses.ouro = 60000; m.progresso.nivel = 12; m.progresso.xp = m.dados.niveis.limiar[12] + 100; Object.assign(m.posses.bolsa, { madeira: 40, tabua: 50, prego: 60, pedra: 30, fibra: 20 }); });
+  // ---- começo: ouro, nível e materiais pelo gancho de teste (e, no começo humilde, o que um jogador do nível 12 já
+  // teria: o celeiro, o quadro e as reformas, como no atalho de teste)
+  await J(() => { const m = window.__jogo.mundo; m.posses.ouro = 60000; m.progresso.nivel = 12; m.progresso.xp = m.dados.niveis.limiar[12] + 100; m.eventos.emitir('usouAtalhoDeTeste', { nivel: 12 }); Object.assign(m.posses.bolsa, { madeira: 40, tabua: 50, prego: 60, pedra: 30, fibra: 20 }); });
   await quadro();
 
   // ---- o catálogo: categorias, o que falta, o que está travado
@@ -435,6 +436,8 @@ async function cenario(a, f) {
   await foto('catalogo-moveis');
   await tocarEm('[data-k="aba-abrigo"]');
   confere(await J(() => { const o = document.querySelector('.oferta[data-item="curral"]'); return !!o && /Só lá fora/.test(o.textContent) && o.querySelector('.bt').classList.contains('sem'); }), 'lá dentro, as construções da fazenda dizem que são lá fora');
+  // (no começo humilde o baú da casa e a casa reformada também guardam produtos: a conta parte do que já cabe)
+  const capAntes = await J(() => window.__jogo.mundo.posses.celeiro.capacidade);
   md = await escolher('armazem', 'prateleira-simples');
   alvo = await lugar(0);
   if (!confere(!!alvo, 'há lugar para a prateleira dentro do celeiro')) return;
@@ -446,16 +449,16 @@ async function cenario(a, f) {
   let prats = await de('prateleira-simples');
   igual(prats.length, 2, 'a prateleira nova nasce (em obra) dentro do celeiro');
   confere(prats.some((e) => e.obra && e.local === 'celeiro'), 'ela começa em obra');
-  igual(await J(() => window.__jogo.mundo.posses.celeiro.capacidade), 60, 'em obra, a prateleira ainda não guarda nada');
+  igual(await J(() => window.__jogo.mundo.posses.celeiro.capacidade), capAntes, 'em obra, a prateleira ainda não guarda nada');
   await foto('prateleira-em-obra');
   await J(() => { window.__jogo.pular(31); window.__jogo.avancar(0.2); });
-  igual(await J(() => window.__jogo.mundo.posses.celeiro.capacidade), 120, 'montada, o celeiro passa a guardar 120 produtos');
+  igual(await J(() => window.__jogo.mundo.posses.celeiro.capacidade), capAntes + 60, 'montada, a prateleira guarda mais 60 produtos');
   await foto('prateleira-montada');
 
   // ---- a mochila mostra o celeiro por móvel
   await tocarEm('.topo-dir [data-painel="mochila"]');
   const moch = await J(() => document.querySelector('.veu').textContent);
-  confere(/Produtos nas prateleiras\s*5\/120/.test(moch) && /Materiais nos baús\s*\d+\/300/.test(moch) && /Ferramentas no suporte/.test(moch), 'a mochila mostra produtos, materiais e ferramentas, cada um com a sua ocupação');
+  confere(new RegExp(`Produtos (nas prateleiras|guardados)\\s*5\\/${capAntes + 60}`).test(moch) && /Materiais nos baús\s*\d+\/300/.test(moch) && /Ferramentas no suporte/.test(moch), 'a mochila mostra produtos, materiais e ferramentas, cada um com a sua ocupação');
   ruins = await J(() => window.__c.textoPequeno(document.querySelector('.veu')));
   confere(ruins.length === 0, 'mochila: ' + ruins.slice(0, 4).join('; '));
   await foto('mochila');

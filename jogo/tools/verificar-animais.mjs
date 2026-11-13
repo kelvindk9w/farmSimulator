@@ -199,8 +199,9 @@ async function cenario(a, f) {
   }
   const vender = async () => { const antes = await A('ouro'); await tocarEntidade('banca'); await ateParar(); await fecharTelas(); return (await A('ouro')) - antes; };
 
-  // ================= começo: terra, ouro e materiais pelo gancho de teste =================
-  await J(() => { const a = window.__a; window.__jogo.mundo.posses.ouro = 120000; a.nivel(16); a.terreno(); a.nivel(7); window.__jogo.mundo.posses.ouro = 90000; a.dar({ madeira: 80, tabua: 160, prego: 260, pedra: 60, fibra: 60 }); a.missoes('galinheiro'); });
+  // ================= começo: terra, ouro e materiais pelo gancho de teste (no começo humilde, também o que um
+  // jogador do nível 16 já teria: celeiro, quadro, banca e as reformas, como no atalho de teste) =================
+  await J(() => { const a = window.__a; window.__jogo.mundo.posses.ouro = 120000; a.nivel(16); a.terreno(); a.nivel(7); window.__jogo.mundo.eventos.emitir('usouAtalhoDeTeste', { nivel: 16 }); window.__jogo.mundo.posses.ouro = 90000; a.dar({ madeira: 80, tabua: 160, prego: 260, pedra: 60, fibra: 60 }); a.missoes('galinheiro'); });
   await quadro();
   if (!comDedo) {
     // um controle de videogame de mentira: o jogo lê navigator.getGamepads() a cada quadro

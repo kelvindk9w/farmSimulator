@@ -87,7 +87,7 @@ function encherDepois(m, d) {
   if (!d.lugar || !it || it.funcao !== 'regador' || !f || f.agua >= it.capacidade || filaTem(m, 'encher')) return;
   const loc = m.locais[p.local];
   let poco = null, dm = Infinity;
-  for (const e of loc.entidades) if (e.tipo === 'poco') { const dd = Math.hypot(e.x + 1 - p.x, e.z + 1 - p.z); if (dd < dm) { dm = dd; poco = e; } }
+  for (const e of loc.entidades) if (e.tipo === 'poco' || e.tipo === 'poco-velho') { const dd = Math.hypot(e.x + 1 - p.x, e.z + 1 - p.z); if (dd < dm) { dm = dd; poco = e; } }
   if (poco) p.fila.unshift({ tipo: 'agir', acao: 'encher', entidade: poco.id, args: null, auto: true });
 }
 

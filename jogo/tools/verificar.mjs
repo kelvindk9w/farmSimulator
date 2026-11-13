@@ -90,6 +90,15 @@ try {
   confere(await J(pg, () => { const m = window.__jogo.medidas(); return m.figuras > 20 && m.blocosDoChao > 4; }), 'o mundo é desenhado (chão em blocos e figuras)');
   await foto(pg, '01-comeco.jpg');
 
+  // ---- no começo humilde a primeira missão é conversar com o Seu Tonho: um clique nele
+  if (e.missao.id === 'falar-com-tonho') {
+    await J(pg, () => { const v = window.__jogo.mundo.local.porId.vizinho; window.__jogo.olhar(v.x + 0.5, v.z + 0.5); });
+    const tonho = await J(pg, () => window.__jogo.daEntidade('vizinho', 0.9));
+    await pg.mouse.click(tonho.x, tonho.y);
+    await ateParar(pg);
+    igual((await estado(pg)).missao.id, 'preparar-a-terra', 'o clique no Seu Tonho é a conversa, e vem a missão de arar');
+  }
+
   // ---- arar: botão da enxada e seis casas, com o mouse
   await J(pg, () => window.__jogo.olhar(27.5, 52));
   await clicarEm('.modo[data-modo="enxada"]');
@@ -189,6 +198,8 @@ try {
   const banca = await pontoDaEntidade(pg, 'banca');
   await pg.mouse.click(banca.x, banca.y);
   await ateParar(pg);
+  // (no começo humilde a "banca" é o caixote: ela põe o cesto nele e quem passa leva, uma coisa de cada vez)
+  if (await J(pg, () => window.__jogo.mundo.local.porId.banca.tipo === 'caixote-de-venda')) await J(pg, () => window.__jogo.avancar(8));
   e = await estado(pg);
   confere(e.ouro > ouroAntes, `vender na banca dá ouro (tinha ${ouroAntes}, ficou com ${e.ouro})`);
   igual(e.noCesto, 0, 'o cesto fica vazio depois da venda');

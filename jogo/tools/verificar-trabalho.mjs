@@ -325,7 +325,7 @@ async function cenario(a, f) {
   await J(() => {
     const t = window.__t, m = window.__jogo.mundo;
     m.posses.ouro = 400000; m.posses.cash = 50;
-    t.nivel(16); t.terreno();
+    t.nivel(16); m.eventos.emitir('usouAtalhoDeTeste', { nivel: 16 }); t.terreno(); // (no começo humilde: o que o nível 16 já teria)
     t.dar({ madeira: 120, tabua: 300, prego: 400, pedra: 120, fibra: 60, racao: 40, 'semente-alface': 60 });
     t.missoes('companheiro');
   });

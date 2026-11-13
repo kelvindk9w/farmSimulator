@@ -25,7 +25,8 @@ export const GESTO_PARECIDO = {};
 export const SOLTAS = [];
 // o que uma camada desenha por cima de tudo e recebe toque (a etiqueta de um lote): (mundo, px, py, cena) → id da entidade | null
 export const ALVOS_DE_CIMA = [];
-const PASSADA = { andar: true, correr: true, carregar: true }; // estados em que os quadros seguem o passo, não o relógio
+const PASSADA = { andar: true, correr: true, carregar: true, 'andar-trouxa': true }; // estados em que os quadros seguem o passo, não o relógio
+const PARADA = { parada: true, 'parada-trouxa': true }; // parada (com ou sem a trouxa da chegada): os quadros seguem o relógio
 const FOLGA = 0.25; // folga para a figura não ficar trocando de lado quando o rumo está na divisa
 
 export class Cena {
@@ -72,13 +73,13 @@ export class Cena {
     if (R[k]) return R[k];
     const A = this.atlas, dir = lado ? 'costas' : 'frente';
     const tenta = [[estado, dir]];
-    if (estado === 'correr' || estado === 'carregar') tenta.push(['andar', dir]);
+    if (estado === 'correr' || estado === 'carregar' || estado === 'andar-trouxa') tenta.push(['andar', dir]);
     if (GESTO_PARECIDO[estado]) tenta.push([estado, 'frente'], [GESTO_PARECIDO[estado], dir], [GESTO_PARECIDO[estado], 'frente']);
-    if (!PASSADA[estado] && estado !== 'parada') tenta.push([estado, 'frente'], ['trabalhar', dir], ['trabalhar', 'frente']);
+    if (!PASSADA[estado] && !PARADA[estado]) tenta.push([estado, 'frente'], ['trabalhar', dir], ['trabalhar', 'frente']);
     let achou = null;
     for (const [e, d] of tenta) if (A.tem('personagem/' + e + '-' + d)) { achou = { chave: 'personagem/' + e + '-' + d, deFrente: d === 'frente', reserva: false, estado: e }; break; }
     if (!achou && !PASSADA[estado] && A.tem('personagem/parada-' + dir)) achou = { chave: 'personagem/parada-' + dir, deFrente: !lado, reserva: false, estado: 'parada' };
-    if (!achou) achou = { chave: 'personagem/' + (PASSADA[estado] ? 'andar' : estado) + '-' + dir, deFrente: !lado, reserva: true, estado: PASSADA[estado] ? 'andar' : estado };
+    if (!achou) achou = { chave: 'personagem/' + (PASSADA[estado] ? 'andar' : PARADA[estado] ? 'parada' : estado) + '-' + dir, deFrente: !lado, reserva: true, estado: PASSADA[estado] ? 'andar' : PARADA[estado] ? 'parada' : estado };
     R[k] = achou;
     return achou;
   }
@@ -222,7 +223,7 @@ export class Cena {
     const nq = def ? def.q.length : quadrosDaReserva(peca.chave);
     let quadro = 0, respiro = 1;
     if (PASSADA[peca.estado]) { const f = pv.fase - Math.floor(pv.fase); quadro = Math.min(nq - 1, Math.floor(f * nq)); }
-    else if (peca.estado === 'parada') { if (nq > 1) quadro = Math.floor(this.tempo * ((def && def.qps) || 6)) % nq; else if (pv.estado === 'parada') respiro = 1 + 0.012 * Math.sin(this.tempo * 2.4); else respiro = 1 - 0.05 * Math.abs(Math.sin(pv.t * 7)); }
+    else if (PARADA[peca.estado]) { if (nq > 1) quadro = Math.floor(this.tempo * ((def && def.qps) || 6)) % nq; else if (PARADA[pv.estado]) respiro = 1 + 0.012 * Math.sin(this.tempo * 2.4); else respiro = 1 - 0.05 * Math.abs(Math.sin(pv.t * 7)); }
     else if (nq > 1) quadro = def && def.laco === false ? Math.min(nq - 1, Math.floor(pv.p * nq)) : Math.floor(pv.t * ((def && def.qps) || 6)) % nq;
     if (peca.reserva || !this.atlas.desenhar(g, peca.chave, quadro, sx, sy, S, espelhar, respiro)) desenharReserva(g, figuraDeReserva(peca.chave, quadro), sx, sy, S, espelhar, respiro);
   }

@@ -4,10 +4,12 @@ O `economia.md` diz o ritmo que a conta (o modelo de `tools/economia/ritmo.mjs`)
 **o jogo de verdade** dá: um jogador automático (`jogo/tools/bot.mjs`) joga sem tela, com os mesmos comandos do toque,
 a mesma lógica e os mesmos dados de `dados/`, do nível 1 até onde o conteúdo vai.
 
-Medido de novo em 13/11/2026, depois do **começo humilde** (campo de 12 casas ao lado do poço, mais espaço livre em
-volta da casa, o boi velho do Seu Tonho no nível 4, a fileira do boi para o lado com mais casas, as ferramentas no
-mundo). A medida de antes, do mesmo dia, aparece como "antes" nas tabelas. O bot é determinístico: a mesma linha de
-comando dá sempre o mesmo resultado (até alguém mudar o jogo).
+Medido de novo em 13/11/2026, depois do **começo humilde, parte 2**: a chegada (a cena dela entrando com a trouxa), a
+fazenda que nasce com a casa velha, o poço velho, o baú, o caixote de venda na porteira e a cerca de arame caída; o
+celeiro e o quadro de pedidos que se constroem por missão do Seu Tonho (níveis 2 e 3); e as quatro reformas (poço,
+caixote → banca, casa, cerca). A medida de antes (o código anterior a esta parte, do mesmo dia, com celeiro, banca e
+quadro prontos desde o começo) aparece como "antes" nas tabelas. O bot é determinístico: a mesma linha de comando dá
+sempre o mesmo resultado (até alguém mudar o jogo).
 
 ## Como rodar
 
@@ -30,52 +32,73 @@ Tempo de máquina: 720 h do casual em cerca de 10 s; do regular, cerca de 25 s; 
 
 ## 1. Nível no fim do dia: antes, agora e a meta
 
-Antes → **agora** / meta do `economia.md` (a conta).
+Antes → **agora** / meta do `economia.md` (a conta). Entre parênteses, a experiência de agora quando ela fica perto
+da linha do nível (nível 12 = 24.000, 15 = 57.520).
 
 | Dia | Casual | Regular | Engajado |
 |---|---|---|---|
-| 1ª sessão (15 min) | - | 4 → **4** / 4 | - |
-| D1 | 5 → **5** / 4 | 6 → **6** / 6 | 8 → **8** / 8 |
-| D3 | 7 → **7** / 6 | 8 → **8** / 8 | 11 → **11** / 12 |
-| D7 | 9 → **9** / 8 | 11 → **12** / 11 | 15 → **14** / 16 |
-| D14 | 11 → **11** / 11 | 14 → **15** / 14 | 19 → **19** / 20 |
-| D30 | 15 → **15** / 13 | 18 → **19** / 19 | 23 → **23** / 26 |
+| 1ª sessão (15 min) | - | 4 → **4** / 5 | - |
+| D1 | 5 → **5** / 5 | 6 → **6** / 6 | 8 → **8** / 8 |
+| D3 | 7 → **7** / 6 | 8 → **8** / 8 | 11 → **11** / 11 |
+| D7 | 9 → **9** / 8 | 12 → **11** / 11 (22.711) | 14 → **15** / 16 (59.506) |
+| D14 | 11 → **11** / 11 | 15 → **14** / 14 (55.815) | 19 → **19** / 20 |
+| D30 | 15 → **14** / 13 (55.684) | 19 → **19** / 19 | 23 → **23** / 26 |
 
-(A conta também foi refeita com o começo humilde: as metas do regular não mudaram; o casual da conta caiu de 5 para 4
-no D1, a 3 pontos de experiência do 5, e o engajado subiu de 7 para 8. O que mudou na conta está no `economia.md`.)
+(A conta também foi refeita com o começo humilde: as metas do regular não mudaram; o casual da conta fecha o D1 no 5
+em vez do 4, e a primeira sessão do regular da conta termina no nível 5 com 4 pontos de folga, 424 de 420; o jogo
+medido termina no 4, como antes. O que mudou na conta está no `economia.md`.)
 
 Leitura:
 
-- **O começo humilde, sozinho, não mudou o ritmo.** Com o bot de antes (que só usava o boi na missão), o jogo novo dá
-  exatamente a tabela de antes no regular (6, 8, 11, 14, 18).
-- **O que mudou foi usar o boi.** Agora o bot ara com ele sempre que a fileira tem 3 casas ou mais (como um jogador de
-  verdade faria: um toque ara a fileira inteira). O regular ganha um nível no D7 e no D14 (12 e 15 contra a meta de 11 e
-  14) e chega à meta no D30 (19; antes ficava em 18). O ganho vem dos toques que o boi poupa (um toque por fileira em vez
-  de um por casa), não da velocidade da passada: com a passada 60% mais lenta (4 s em vez de 2,5 s), a tabela fica igual.
-- O **casual** não mudou (continua 1 a 2 níveis à frente da conta: os pedidos rendem para ele mais do que a conta
-  supõe). O **engajado** fica um nível atrás no D7 e segue atrás da conta do D7 em diante, pelo limite do bot (ele não
-  compra aspersores além do da missão; o campo dele no D30 tem 240 casas plantadas, a conta fala em cerca de 1.000).
-- Recomendação: **não mexer na curva agora.** Um nível à frente no D7 e no D14 é a folga que o boi dá, e o D30 bate.
-  Se o teste com gente mostrar a semana rápida demais, o boi chegar com o cocho vazio (só 3 casas até o primeiro trato) é
-  a alavanca mais suave.
+- **O regular, que é o perfil da curva, bate a meta nos cinco dias** (6, 8, 11, 14, 19). Antes ficava um nível à
+  frente no D7 e no D14 (a folga do boi): o começo humilde come uns 4 minutos da primeira sessão (conversar, guardar no
+  baú, vender no caixote, construir o celeiro e o quadro) e segura o D7.
+- O **casual** é o de antes até o D14; no D30 fica um nível atrás (14 contra 15), 1.800 pontos abaixo da linha do 15 e
+  ainda um acima da conta. O **engajado** é o de antes, menos o D7, que passa da linha do 15 por 2.000 pontos (antes
+  ficava 1.900 abaixo dela).
+- **O que mais pesa é a cerca.** A cerca nova (nível 9) encurta a espera dos pedidos (×0,8). Com a reforma a 800 de
+  ouro, o regular passava da linha do 15 no D14 por 400 pontos; a 1.500 (o preço que ficou), bate 14. O bot é sensível
+  a mudanças pequenas perto da linha de um nível: com a reforma a 1.200 o regular cai para 18 no D30; mudando só o
+  nível da cerca de 9 para 12, o engajado vai a 16 no D7. Por isso não vale afinar mais pelo bot; vale o teste com gente.
+- Recomendação: **não mexer na curva.** O regular bate; casual e engajado ficam a um nível do que eram, cada um num
+  dia só, e do lado da conta.
 
-Missões do Seu Tonho cumpridas (38 no total, com "baia-do-boi" e "arado-de-ferro"): casual 34 no D30 (faltam ovelhas,
-barril, cavalo e irrigação); regular **as 38 no D26** (antes: as 36 no D30); engajado **as 38 no D12**.
+Missões do Seu Tonho cumpridas (46 no total, agora com "falar-com-tonho", "guardar-no-bau", "vender-no-caixote",
+"celeiro", "quadro" e as quatro reformas; "vender-na-banca" fica só para a gravação de antes): casual 42 no D30
+(faltam ovelhas, barril, cavalo e irrigação); regular **as 46 no D25**; engajado **as 46 no D12**.
 
 ### O tempo até o boi
 
 | Perfil | A baia pronta e o boi no estábulo | A primeira fileira arada com o boi (missão "boi-de-arado") |
 |---|---|---|
-| Casual | D1, 2ª sessão (20h), 17 min de jogo | 20 min de jogo |
-| **Regular** | **D1, 2ª sessão (12h30), 21 min de jogo** (6 min depois de abrir a sessão) | **22 min de jogo** |
-| Engajado | D1, 2ª sessão (9h30), 25 min de jogo | 29 min de jogo |
+| Casual | D2, 1ª sessão (8h), 25 min de jogo (antes: D1, 20h, 17 min) | 27 min de jogo (antes: 20 min) |
+| **Regular** | **D1, 2ª sessão (12h30), 26 min de jogo** (antes: 21 min) | **30 min de jogo** (antes: 22 min) |
+| Engajado | D1, 2ª sessão (9h30), 22 min de jogo (antes: 25 min) | 22 min de jogo (antes: 29 min) |
 
-Antes, o boi era do nível 12: no regular, a missão "boi-de-arado" saía no D12, com 8 h 45 de jogo. Agora o regular tem o
-boi na segunda sessão do primeiro dia (a do almoço). Em 30 dias ele arou 5.377 casas com o boi (2.054 passadas)
-e 2.905 com a enxada; o arado de ferro (10 casas por passada) entra no D7, com a missão dele.
+O regular continua com o boi na segunda sessão do primeiro dia (a do almoço), uns 4 minutos mais tarde. O casual, com
+sessões de 10 minutos, passa da segunda sessão do D1 para a primeira do D2. Em 30 dias o regular arou 5.402 casas com o
+boi (2.071 passadas) e 2.929 com a enxada; o arado de ferro (10 casas por passada) entra no D8, com a missão dele.
 
-A primeira sessão do regular segue igual: termina no **nível 4**, com 11 missões (até "primeiro-pedido"), como a conta
-prevê.
+A primeira sessão do regular termina no **nível 4**, como antes, com 15 missões (até "quadro"): o nível 4 vem aos
+9:43 de jogo, e o 5 na sessão seguinte.
+
+### O começo humilde, no regular
+
+| O quê | Quando (tempo de jogo) |
+|---|---|
+| A conversa com o Seu Tonho | 0:10 |
+| A primeira colheita, guardada no baú | 3:42 e 4:43 |
+| A primeira venda no caixote (6 coisas) | 6:26 |
+| O celeiro pronto (missão, nível 2; 80 de ouro e 45 s de obra) | 8:33 |
+| O poço consertado (nível 2; 40 de ouro) | 11:17 |
+| O quadro de pedidos pronto (missão, nível 3; 40 de ouro) | 12:49 |
+| O primeiro pedido entregue | 15:44 (D1, 2ª sessão) |
+| O caixote vira banca (nível 5; 200 de ouro, 6 tábuas, 10 pregos) | 48:39 (D2) |
+| A casa reformada (nível 7; 600 de ouro, 12 tábuas, 8 pedras, 20 pregos) | 1 h 45 (D3) |
+| A cerca nova (nível 9; 1.500 de ouro, 24 madeiras, 30 pregos) | 4 h 00 (D6) |
+
+No casual o celeiro fica pronto aos 8:44 e o quadro aos 12:15 (D1, 2ª sessão); a cerca nova, no D10. No engajado, as
+quatro reformas saem até o D2.
 
 ## 2. Quando cada missão saiu (regular)
 
@@ -84,33 +107,40 @@ quanto tempo de jogo aberto a missão levou desde a anterior.
 
 | Missão | Dia | Jogado | Espera |
 |---|---|---|---|
-| preparar-a-terra | D1 (1ª) | 0:20 | - |
-| plantar-alface | D1 (1ª) | 1:34 | 1 min |
-| agua-do-poco (pegar o regador ao lado do poço e encher) | D1 (1ª) | 1:43 | - |
-| regar | D1 (1ª) | 2:23 | 1 min |
-| primeira-colheita | D1 (1ª) | 3:15 | 1 min |
-| vender-na-banca, comprar-sementes | D1 (1ª) | 3:37 a 3:46 | - |
-| plantar-milho | D1 (1ª) | 7:02 | 3 min |
-| rocar-o-mato, regador-novo | D1 (1ª) | 8:32 a 8:53 | 1 min |
-| primeiro-pedido | D1 (1ª) | 11:19 | 2 min |
-| guardar-no-celeiro | D1 (2ª) | 15:42 | 4 min |
-| lenha, bancada-de-carpintaria, tabuas, pedras | D1 (2ª) | 16 a 19 min | 0 a 1 min |
-| **baia-do-boi** (o estábulo simples; o boi chega com o arado) | D1 (2ª) | 21:01 | 2 min |
-| **boi-de-arado** (12 casas com o boi) | D1 (2ª) | 22:21 | 1 min |
-| galinheiro, galinhas, trato | D1 (2ª) | 22 a 23 min | - |
-| ovos, prateleira | D1 (3ª) | 30 a 31 min | 7 min |
-| terra-nova | D2 (1ª) | 45 min | 14 min |
-| embalar, bananal | D2 (2ª) | 1 h 02 a 1 h 03 | 17 min |
-| moinho | D2 (2ª) | 1 h 14 | 11 min |
-| cozinha, companheiro | D3 (3ª) | 2 h 00 | 45 min (espera o nível 8) |
-| curral | D4 (2ª) | 2 h 30 | 30 min |
-| leite | D5 (1ª) | 3 h 01 | 32 min |
-| queijo | D7 (1ª) | 4 h 30 | 1 h 28 (espera o nível 11) |
-| arado-de-ferro | D7 (3ª) | 5 h 02 | 32 min (espera o nível 12) |
-| jumento | D13 (1ª) | 9 h 03 | 4 h 01 (espera o nível 14) |
-| ovelhas, barril | D15 e D16 | 11 h 04 a 11 h 17 | 2 h (espera o nível 15; aprisco de 15 mil) |
-| cavalo | D20 (1ª) | 14 h 18 | 3 h 01 (espera o nível 16; cavalo 15 mil e sela 4 mil) |
-| irrigacao | D26 (1ª) | 18 h 50 | 4 h 32 (espera o nível 18) |
+| falar-com-tonho (tocar no Seu Tonho) | D1 (1ª) | 0:10 | - |
+| preparar-a-terra | D1 (1ª) | 0:45 | 1 min |
+| plantar-alface | D1 (1ª) | 2:14 | 1 min |
+| agua-do-poco (pegar o regador ao lado do poço e encher) | D1 (1ª) | 2:35 | - |
+| regar | D1 (1ª) | 3:03 | - |
+| primeira-colheita | D1 (1ª) | 3:42 | 1 min |
+| guardar-no-bau | D1 (1ª) | 4:43 | 1 min |
+| vender-no-caixote, comprar-sementes | D1 (1ª) | 6:26 a 6:27 | 2 min |
+| plantar-milho | D1 (1ª) | 7:26 | 1 min |
+| **celeiro** (construir) | D1 (1ª) | 8:33 | 1 min |
+| rocar-o-mato | D1 (1ª) | 10:09 | 2 min |
+| reformar-o-poco, regador-novo | D1 (1ª) | 11:17 | 1 min |
+| **quadro** (construir) | D1 (1ª) | 12:49 | 2 min |
+| primeiro-pedido | D1 (2ª) | 15:44 | 3 min |
+| guardar-no-celeiro | D1 (2ª) | 20:42 | 5 min |
+| lenha, bancada-de-carpintaria, tabuas, pedras | D1 (2ª) | 21 a 24 min | 0 a 1 min |
+| **baia-do-boi** (o estábulo simples; o boi chega com o arado) | D1 (2ª) | 25:45 | 2 min |
+| **boi-de-arado** (12 casas com o boi) | D1 (2ª) | 29:55 | 4 min |
+| galinheiro, galinhas, trato | D1 (3ª) | 31 a 32 min | 1 min |
+| ovos | D2 (1ª) | 45:48 | 13 min |
+| reformar-a-banca, prateleira | D2 (1ª) | 48:39 a 49:43 | 3 min |
+| terra-nova | D2 (2ª) | 1 h 00 | 11 min |
+| embalar, bananal | D2 (2ª) | 1 h 02 a 1 h 03 | 2 min |
+| moinho | D3 (1ª) | 1 h 30 | 27 min |
+| reformar-a-casa | D3 (2ª) | 1 h 45 | 15 min |
+| cozinha, companheiro | D4 (2ª) | 2 h 30 | 45 min (espera o nível 8) |
+| curral | D5 (2ª) | 3 h 15 | 45 min |
+| leite | D6 (1ª) | 3 h 48 | 33 min |
+| reformar-a-cerca | D6 (2ª) | 4 h 00 | 12 min |
+| queijo, arado-de-ferro | D8 (1ª) | 5 h 15 a 5 h 22 | 1 h 15 (espera o nível 11) |
+| jumento | D13 (2ª) | 9 h 19 | 4 h (espera o nível 14) |
+| ovelhas, barril | D16 (2ª) | 11 h 34 | 2 h 15 (espera o nível 15; aprisco de 15 mil) |
+| cavalo | D21 (1ª) | 15 h 03 | 3 h 29 (espera o nível 16; cavalo 15 mil e sela 4 mil) |
+| irrigacao | D25 (3ª) | 18 h 36 | 3 h 33 (espera o nível 18) |
 
 A ordem "pedras" antes de "baia-do-boi" é de propósito: com a baia antes, a obra do estábulo (e a limpeza em volta dela)
 gastava as 5 pedras do começo, e a missão das pedras esperava o primeiro lote comprado (no regular, 42 min de jogo
@@ -122,47 +152,43 @@ Quase nunca. Tempo com o jogo aberto em que a personagem ficou sem tarefa e sem 
 
 | Perfil | Parada sem ter o que fazer | Com a meta da vez travada por ouro | Os motivos |
 |---|---|---|---|
-| Casual (10 h jogadas) | 6 min 24 s (1,1%) | 2 min 17 s | lavoura crescendo 2 min 39 s; o laticínio espera o nível 11 (2 min 21 s); ouro para o lote "Pasto do Fundo" (1 min) |
-| Regular (22 h 30) | 9 min 06 s (0,7%) | 5 min 04 s | lavoura crescendo 3 min 34 s; cozinha, laticínio e curral esperam o nível (4 min 16 s no total); ouro para o lote (47 s) |
-| Engajado (60 h) | 44 min 30 s (1,2%) | 12 min 09 s | o aspersor espera o nível 18 (18 min); lavoura crescendo 9 min 37 s; laticínio e curral esperam o nível; ouro para o lote |
+| Casual (10 h jogadas) | 4 min 13 s (0,7%) | 2 min 22 s | ouro para a cozinha (1 min); lavoura crescendo (1 min); ouro para o lote "Pasto do Fundo" (42 s); o laticínio espera o nível 11 (40 s) |
+| Regular (22 h 30) | 8 min 58 s (0,7%) | 3 min 45 s | ouro para a cozinha (2 min 42 s); lavoura crescendo (2 min 35 s); ouro para o lote (43 s); a obra da cozinha |
+| Engajado (60 h) | 39 min 46 s (1,1%) | 5 min 24 s | lavoura crescendo 20 min; o aspersor espera o nível 18 (9 min 38 s); ouro para o lote (3 min 18 s); esperando ovo (3 min) |
 
 Os trechos "sem ouro" são todos curtos (segundos a 1 minuto cada) e no começo. Nenhum perfil ficou travado por ouro ou
-por falta do que fazer. O ouro no fim do dia fica baixo o mês todo no casual e no regular (o bot gasta o que sobra da
-reserva da missão): ver a coluna "ouro" de `--resumo`.
+por falta do que fazer. O caixote cheio (12 coisas) recusou o cesto 13 vezes no regular, todas antes da banca: o bot
+guarda no baú ou no celeiro e volta depois; nada se perde.
 
 ## 4. Ouro, cash e tempo (30 dias, agora)
 
 | | Casual | Regular | Engajado |
 |---|---|---|---|
-| Ouro ganho | 176 mil | 562 mil | 1,92 milhão |
-| da banca | 77% | 83% | 90% |
-| de pedido | 14% | 12% | 8% |
+| Ouro ganho | 163 mil | 555 mil | 1,91 milhão |
+| da banca (e do caixote) | 76% | 83% | 89% |
+| de pedido | 14% | 12% | 9% |
 | de conquista, missão, nível, diária | 10% | 5% | 2% |
-| Ouro gasto: loja (sementes, mudas, ferramentas, material) | 94 mil | 240 mil | 552 mil |
-| obra / ampliação / lote / bicho | 31 / 19 / 18 / 11 mil | 36 / 126 / 116 / 37 mil | 43 / 514 / 316 / 49 mil |
-| Cash ganho (guardado) | 127 | 162 | 192 |
-| Lotes comprados | 4 | 7 | 9 |
-| Lavoura no fim (casas plantadas) | 86 | 165 | 240 |
-| Casas aradas com o boi / com a enxada | 2.412 / 1.279 | 5.377 / 2.905 | 17.037 / 7.207 |
-| Idas ao poço por sessão | 6,1 | 6,9 | 8,0 |
-| Pedidos entregues / trocados | 69 / 2 | 128 / 11 | 190 / 27 |
-| Toques por minuto jogado | 37 | 34 | 34 |
-| Tempo dela: andando, correndo, trabalhando, parada | 26, 33, 39, 2% | 35, 27, 36, 1% | 47, 15, 36, 2% |
+| Ouro gasto: loja (sementes, mudas, ferramentas, material) | 79 mil | 237 mil | 562 mil |
+| obra / ampliação / lote / bicho | 15 / 16 / 18 / 11 mil | 38 / 125 / 116 / 37 mil | 43 / 564 / 316 / 49 mil |
+| reformas (as quatro) | 2.340 | 2.340 | 2.340 |
+| Cash ganho (guardado) | 122 | 159 | 192 |
+| Lavoura: casas aradas com o boi / com a enxada | 2.307 / 1.375 | 5.402 / 2.929 | 18.262 / 7.117 |
+| Idas ao poço por sessão | 6,0 | 7,0 | 8,0 |
+| Pedidos entregues / trocados | 66 / 4 | 124 / 11 | 210 / 25 |
+| Toques por minuto jogado | 37 | 34 | 35 |
+| Tempo dela: andando, correndo, trabalhando, parada | 27, 33, 38, 2% | 34, 28, 36, 1% | 49, 12, 37, 2% |
 
-Comparando com a conta do regular no `economia.md`: o ouro ganho em 30 dias é cerca de **79% do da conta** (562 mil
-contra uns 713 mil; antes do boi no nível 4, o bot ganhava 402 mil) e o campo no D30 é **menos da metade** (165 casas
-contra 371). A experiência fecha porque o
-pedido dá muita experiência (81 mil, mais que a colheita, 74 mil). Com o boi, os toques por minuto caíram de 39 para
-34 no regular. As idas ao poço não caem como a conta espera (a conta diz 0,3 por sessão do dia 15 em diante; o bot faz
-cerca de 7): o bot comprou o barril (missão), mas só um aspersor. Metade do tempo dela é andando ou correndo.
+Antes desta parte: ouro ganho 176 mil, 562 mil e 1,92 milhão; pedidos 69, 128 e 190. O regular ganha quase o mesmo
+(99%); o casual, 7% menos (o caixote vende devagar e a cerca de 1.500 sai do bolso dele no D10). A experiência do
+regular vem dos pedidos (79 mil) e da colheita (71 mil), como antes.
 
-Bichos (regular): 12 galinhas, 4 vacas, 3 ovelhas, gato, boi, jumento e cavalo; nenhum chegou ao fim da vida em 30 dias
-(o engajado vendeu 12 galinhas ao fazendeiro). Receitas que mais saíram: tábua, garrafa de leite, fubá, manteiga, pamonha.
+Bichos (regular): 12 galinhas, 4 vacas, 3 ovelhas, gato, boi, jumento e cavalo; nenhum chegou ao fim da vida em 30 dias.
 
 ## 5. Defeitos e travas achados (do mais grave ao mais leve)
 
-Nada travou o jogo para qualquer jogador: nenhum perfil quebrou com exceção, e todas as 38 missões foram cumpridas pelo
-regular e pelo engajado. O que achei (a lista é da medida de antes; o item 0 é do começo humilde, já corrigido):
+Nada travou o jogo para qualquer jogador: nenhum perfil quebrou com exceção, e todas as 46 missões foram cumpridas pelo
+regular e pelo engajado (o começo humilde não trouxe trava nova; o gato que às vezes fica parado sem caminho, item 3,
+já aparecia antes). O que achei (a lista é da medida de antes; o item 0 é do começo humilde, já corrigido):
 
 0. **(Corrigido.) A missão das pedras esperava um lote.** Com "baia-do-boi" logo depois de "tabuas", a obra do estábulo
    e a limpeza em volta gastavam as 5 pedras da terra do começo; a missão "pedras", que vinha depois, só andava com o
@@ -200,9 +226,9 @@ regular e pelo engajado. O que achei (a lista é da medida de antes; o item 0 é
 
 ## 6. Ajustes de número recomendados (nenhum aplicado)
 
-O regular, que é o perfil da curva, bate com a meta até o D3, fica 1 nível à frente no D7 e no D14 (a folga do boi) e
-bate de novo no D30; o casual fica um pouco à frente; o engajado atrás por limite do bot. Por isso **não recomendo mexer
-na curva de níveis nem nos preços agora.**
+O regular, que é o perfil da curva, bate com a meta nos cinco dias depois do começo humilde (antes ficava 1 nível à
+frente no D7 e no D14); o casual fica um pouco à frente da conta; o engajado atrás por limite do bot. Por isso **não
+recomendo mexer na curva de níveis nem nos preços agora.**
 Só três ajustes pequenos (um de número, um de código, um da conta), para conferir no teste com gente:
 
 | Arquivo | Campo | De → para | Por quê |
@@ -213,7 +239,9 @@ Só três ajustes pequenos (um de número, um de código, um da conta), para con
 
 ## 7. O que o bot joga e o que não joga
 
-Joga: as 38 missões; lavoura (arar no campo antes da grama, `podeArar` com reserva, semear a cultura que mais rende por
+Joga: as 46 missões; o começo humilde (conversar com o Seu Tonho, guardar no baú enquanto não há celeiro, vender no
+caixote e esperar os fregueses quando ele enche, construir o celeiro e o quadro no lugar de sempre, as quatro reformas
+quando o nível e o ouro deixam, `tools/bot/metas.mjs`, `projetoReforma`); lavoura (arar no campo antes da grama, `podeArar` com reserva, semear a cultura que mais rende por
 trabalho quando sobra terra, regar, colher, crescer o campo no fim da sessão para o tempo fora); o boi no arado no
 trabalho de todo dia (`tools/bot/lavoura.mjs`, `passadaDoBoi`: com o boi pronto, a casa a arar vira um toque no modo
 Arado quando a fileira dali tem 3 casas ou mais e cabe toda na lavoura; uma passada por vez na fila); as ferramentas no
@@ -230,4 +258,5 @@ o mesmo, só conta mais toques; com o boi, o toque simples já faz a fileira int
 cosméticos, convite e compartilhar (não mudam o ritmo); nada que gaste cash.
 
 Não verificado: o que acontece depois do nível 23 e do D30; ovelha, vaca e cavalo chegando ao fim da vida; mais de um
-aspersor; o celeiro ampliado; a casa reformada.
+aspersor; o celeiro ampliado; a casa ampliada (varanda e além). A cena da chegada não entra no bot (é só da interface:
+no jogo novo ela dura uns 5 s ou um toque); quem confere a cena é `tools/verificar-chegada.mjs`.

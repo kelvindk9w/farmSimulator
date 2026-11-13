@@ -161,14 +161,18 @@ try {
   let o = jogador(a, 'c'), { pg, J } = o;
   await o.fecharTelas();
 
-  // ---- antes do nível 3, o toque no quadro explica que ele abre depois
-  await o.tocarConstrucao('quadro-de-pedidos');
-  igual(await o.painel(), null, 'antes do nível 3 o quadro não abre');
-  await o.avisou(/quadro de pedidos abre no nível 3/i, 'o toque no quadro fechado diz em que nível ele abre');
-  await o.foto('01-quadro-fechado', true);
+  // ---- antes do nível 3, o toque no quadro explica que ele abre depois (na fazenda de antes; no começo humilde o
+  // quadro nem existe no começo: ele se constrói pela missão do Seu Tonho, no nível 3)
+  if (await J(() => !!window.__i.de('quadro-de-pedidos'))) {
+    await o.tocarConstrucao('quadro-de-pedidos');
+    igual(await o.painel(), null, 'antes do nível 3 o quadro não abre');
+    await o.avisou(/quadro de pedidos abre no nível 3/i, 'o toque no quadro fechado diz em que nível ele abre');
+    await o.foto('01-quadro-fechado', true);
+  } else confere(await J(() => window.__jogo.mundo.comeco.humilde), 'sem quadro no começo, só no começo humilde');
 
-  // ---- começo: nível 12, ouro, cash e materiais pelo gancho de teste; a missão da vez é construir a bancada
-  await J(() => { const m = window.__jogo.mundo; window.__i.nivel(12); m.posses.ouro = 9000; m.posses.cash = 40; window.__i.dar({ madeira: 20, tabua: 30, prego: 40, pedra: 30 }); window.__i.missoes('bancada-de-carpintaria'); window.__jogo.avancar(1.2); });
+  // ---- começo: nível 12, ouro, cash e materiais pelo gancho de teste; a missão da vez é construir a bancada (no
+  // começo humilde, o nível 12 vem com o que o jogador já teria: celeiro, quadro e reformas, como no atalho de teste)
+  await J(() => { const m = window.__jogo.mundo; window.__i.nivel(12); m.eventos.emitir('usouAtalhoDeTeste', { nivel: 12 }); m.posses.ouro = 9000; m.posses.cash = 40; window.__i.dar({ madeira: 20, tabua: 30, prego: 40, pedra: 30 }); window.__i.missoes('bancada-de-carpintaria'); window.__jogo.avancar(1.2); });
   await o.quadro();
   igual(await J(() => window.__jogo.estado().missao.id), 'bancada-de-carpintaria', 'a missão da vez é construir a bancada');
 
@@ -484,7 +488,10 @@ try {
   for (const k in peds[0].itens) igual(await o.tem(k), 0, `o pedido leva ${k}`);
   confere(await J(() => window.__jogo.estado().feitas.includes('primeiro-pedido')), 'a missão "primeiro-pedido" foi cumprida');
   await o.fecharTelas();
-  confere(await J(() => { const b = document.querySelector('.ped-bilhete[data-vaga="0"]'); return b.classList.contains('espera') && /Pedido novo em/.test(b.textContent) && /1 h 20 min|45 min/.test(b.textContent); }), 'a vaga entregue mostra quanto falta para o pedido novo (45 min no nível 12)');
+  // (a cerca nova do começo humilde encurta a espera dos pedidos: esperaDosPedidos, 1 sem ela)
+  const fatorDaEspera = await J(() => (window.__jogo.mundo.comeco && window.__jogo.mundo.comeco.esperaDosPedidos) || 1);
+  const emMin = (min) => { const t = Math.round(min * fatorDaEspera), h = Math.floor(t / 60), r = t % 60; return h ? (r ? `${h} h ${r} min` : `${h} h`) : `${t} min`; };
+  confere(await J((txt) => { const b = document.querySelector('.ped-bilhete[data-vaga="0"]'); return b.classList.contains('espera') && /Pedido novo em/.test(b.textContent) && txt.some((t) => b.textContent.includes(t)); }, [emMin(80), emMin(45)]), `a vaga entregue mostra quanto falta para o pedido novo (${emMin(45)} no nível 12)`);
   igual(await J(() => (document.querySelector('.ind-dica') || { dataset: {} }).dataset.dica), 'entregar', 'depois da primeira entrega o Seu Tonho explica a espera e a troca');
   await o.avisou(/Pedido entregue/i, 'o jogo avisa que o pedido foi entregue');
   await o.foto('20-quadro-entregue');
@@ -499,7 +506,7 @@ try {
   confere(!!novos[1] && JSON.stringify(Object.keys(novos[1].itens)) !== JSON.stringify(Object.keys(peds[1].itens)), 'a troca grátis traz na hora um pedido de outra coisa');
   confere(await J(() => /Próxima troca grátis em (23 h 60 min|24 h|1 dia)/i.test(document.querySelector('.ped-troca').textContent)), 'o quadro diz quando volta a troca grátis');
   await o.tocarEm('[data-k="trocar-2"]');
-  confere(await J(() => /fica vazia por 1 h 30 min/.test((document.querySelector('.dialogo') || { textContent: '' }).textContent)), 'sem a troca grátis, a pergunta diz quanto a vaga fica vazia (o dobro da espera)');
+  confere(await J((t) => ((document.querySelector('.dialogo') || { textContent: '' }).textContent).includes('fica vazia por ' + t), emMin(90)), `sem a troca grátis, a pergunta diz quanto a vaga fica vazia (o dobro da espera: ${emMin(90)})`);
   await o.tocarEm('.dialogo [data-k="sim"]');
   confere(await J(() => document.querySelector('.ped-bilhete[data-vaga="2"]').classList.contains('espera')), 'a vaga trocada sem a grátis fica esperando');
   // os nomes mais compridos que um pedido pode trazer cabem no bilhete (o pedido da vaga 3 é trocado só para a foto)
@@ -537,7 +544,7 @@ try {
   o = jogador(a, 'c-cel'); ({ pg, J } = o);
   await o.fecharTelas();
   // nível 6, a um ponto de experiência do nível 7; a bancada já está de pé; a missão da vez é serrar tábuas
-  await J(() => { const m = window.__jogo.mundo; window.__i.nivel(6); m.posses.ouro = 3000; m.posses.cash = 30; window.__i.dar({ madeira: 12, tabua: 10, prego: 10, pedra: 10 }); window.__i.missoes('tabuas'); window.__jogo.avancar(1.2); });
+  await J(() => { const m = window.__jogo.mundo; window.__i.nivel(6); m.eventos.emitir('usouAtalhoDeTeste', { nivel: 6 }); m.posses.ouro = 3000; m.posses.cash = 30; window.__i.dar({ madeira: 12, tabua: 10, prego: 10, pedra: 10 }); window.__i.missoes('tabuas'); window.__jogo.avancar(1.2); });
   const eu = await J(() => window.__jogo.estado().personagem);
   banc = await J((p) => window.__i.erguer('bancada-de-carpintaria', p), [eu.x, eu.z + 2]);
   if (!confere(!!banc && !banc.obra, 'celular: a bancada foi erguida')) throw new Error('sem bancada no celular');

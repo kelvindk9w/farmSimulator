@@ -18,7 +18,7 @@
     "banca": [30, 57],
     "quadro-de-pedidos": [34, 58],
     "personagem": [32, 55],
-    "vizinho": [28, 57],
+    "vizinho": [30, 55],
     "porteira": [32, 59],
     "lavoura": [24, 51]
   },
@@ -26,6 +26,17 @@
     "nota": "O lugar de cada ferramenta no sítio: [x, z] da casa. Fora do cinto, ela fica ali, desenhada no chão, e a personagem vai buscar sozinha. A enxada velha fica escorada na estaca do canto da frente do campo (o canto mais perto do poço); o regador velho, no chão ao lado do poço. Construção, caminho ou terra arada em cima: o lugar muda para a casa de grama livre mais perto. Ferramenta sem lugar fica no suporte do celeiro.",
     "enxada-velha": [30, 53],
     "regador-velho": [33, 51]
+  },
+  "comeco": {
+    "nota": "O começo humilde: a fazenda nasce com a casa velha, o poço velho, o caixote de venda na entrada, o baú ao lado da casa e a cerca de arame caída em volta da terra própria. Sem celeiro, sem banca e sem quadro de pedidos: o celeiro e o quadro se constroem (missões do Seu Tonho), e o que é velho se reforma (construcoes.json \"reforma\"). Cada construção: id (o mesmo da de antes: a reforma troca o tipo e mantém o id), tipo e o canto [x, z] em \"em\". \"vizinho\": onde o Seu Tonho fica (sem ponto aqui, vale pontos.vizinho). \"cerca.vao\": os trechos da beira da frente que ficam abertos (a entrada, [x, z] da linha da beira). \"chegada\": o caminho dela na cena do jogo novo, de fora da porteira até perto do Seu Tonho (termina em pontos.personagem). Gravação de antes do começo humilde abre com a fazenda de antes (pontos casa, celeiro, poco, banca e quadro-de-pedidos).",
+    "construcoes": [
+      { "id": "casa", "tipo": "casa-velha", "em": [25, 45] },
+      { "id": "poco", "tipo": "poco-velho", "em": [31, 51] },
+      { "id": "banca", "tipo": "caixote-de-venda", "em": [32, 58] },
+      { "id": "bau-da-casa", "tipo": "bau-da-casa", "em": [29, 47] }
+    ],
+    "cerca": { "de": "cerca-de-arame", "vao": [[32, 60], [33, 60]] },
+    "chegada": [[33.2, 62.6], [33.2, 57.8], [32, 55]]
   },
   "caminhos": [
     [31, 53, 33, 57],

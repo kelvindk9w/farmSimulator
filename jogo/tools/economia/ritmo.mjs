@@ -21,6 +21,15 @@ const PASTA = args.find((a) => !a.startsWith('--')) || join(dirname(fileURLToPat
 const D = {};
 for (const a of ['regras', 'itens', 'culturas', 'arvores', 'animais', 'construcoes', 'receitas', 'terras', 'niveis', 'pedidos', 'missoes', 'loja']) D[a] = JSON.parse(readFileSync(join(PASTA, a + '.json'), 'utf8'));
 const R = D.regras, A = R.acoes, DIA = 86400;
+// o começo humilde (terras.json "comeco"): a fazenda nasce com a casa e o poço velhos, o caixote de venda, o baú e a
+// cerca de arame; o celeiro e o quadro de pedidos se constroem, e o que é velho se reforma (construcoes.json
+// "reforma"). As missões marcadas "comeco" só valem no começo delas (como no jogo: missoes.js missaoDoComeco).
+const COMECO = D.terras.comeco || null;
+D.missoes.vizinho = D.missoes.vizinho.filter((mi) => !mi.comeco || mi.comeco === (COMECO ? 'humilde' : 'classico'));
+// as construções com que a fazenda nasce: as do começo humilde (e a cerca), ou as marcadas "inicial" (o de antes)
+const INICIAIS = COMECO ? [...new Set([...COMECO.construcoes.map((c) => c.tipo), ...(COMECO.cerca ? [COMECO.cerca.de] : [])])] : Object.keys(D.construcoes).filter((id) => D.construcoes[id].inicial);
+const ehInicial = (id) => INICIAIS.includes(id) || (!!COMECO && !!D.construcoes[id].inicial && Object.values(D.construcoes).some((c) => c.reforma && c.reforma.para === id));
+const PONTO = (id) => { const p = D.terras.pontos[id]; if (p) return p; const c = COMECO && COMECO.construcoes.find((x) => x.tipo === id); return c ? c.em : null; };
 const REARAR = tem('sem-rearar') ? false : !!(R.lavoura && R.lavoura.reararAposColher);
 
 // ---------- os três perfis (hipóteses do modelo) ----------
@@ -51,13 +60,13 @@ function sorteador(semente) { let a = semente >>> 0; return () => { a = (a + 0x6
 function novoEstado(perfil) {
   const I = R.inicio, T = D.terras, a = T.inicial.area, lim = T.inicial.limpo;
   const area = (a[2] - a[0]) * (a[3] - a[1]);
-  let predios = 0; for (const c of Object.values(D.construcoes)) if (c.inicial) predios += c.casas[0] * c.casas[1];
+  let predios = 0; for (const id of INICIAIS) if (D.construcoes[id].tipo !== 'decoracao') predios += D.construcoes[id].casas[0] * D.construcoes[id].casas[1];
   const caminhos = (T.caminhos || []).reduce((s, c) => s + (c[2] - c[0]) * (c[3] - c[1]), 0);
   // a beirada que nasce com mato, pedra e toco: as casas da área inicial fora do miolo limpo, tirando as construções,
   // os caminhos e o campo (a mesma conta que o jogo faz ao criar o sítio, em src/nucleo/sistemas/terras.js)
   const dentro = (r, x, z) => x >= r[0] && x < r[2] && z >= r[1] && z < r[3];
   const tapado = [...(T.caminhos || []), ...(T.inicial.campo ? [T.inicial.campo] : [])];
-  for (const [id, c] of Object.entries(D.construcoes)) { const p = T.pontos[id]; if (c.inicial && p) tapado.push([p[0], p[1], p[0] + c.casas[0], p[1] + c.casas[1]]); }
+  for (const id of INICIAIS) { const c = D.construcoes[id], p = PONTO(id); if (p && c.tipo !== 'decoracao') tapado.push([p[0], p[1], p[0] + c.casas[0], p[1] + c.casas[1]]); }
   let borda = 0;
   for (let z = a[1]; z < a[3]; z++) for (let x = a[0]; x < a[2]; x++) if (!dentro(lim, x, z) && !tapado.some((r) => dentro(r, x, z))) borda++;
   const S = {
@@ -66,12 +75,15 @@ function novoEstado(perfil) {
     terra: area - predios - caminhos, obst: {}, construido: 0, pomar: 0, lotes: 0,
     constr: {}, obras: [], filas: {}, abr: {}, trab: {}, pets: {}, arv: [], ped: [],
     mi: 0, miConta: 0, conq: {}, conqMarco: {}, diaria: { casa: 0, dia: -1 }, repos: 0, alvoMat: null, apertado: false,
+    reformado: {}, esperaDosPedidos: 1,
     nivelEm: { 1: 0 }, quando: {}, log: [], porDia: [], primeira: false, sorte: sorteador(11),
     c: { ouroDe: {}, ouroPara: {}, xpDe: {}, cashDe: {}, tempo: {}, toques: 0, poco: 0, colhidas: 0 },
   };
   for (const [k, f] of Object.entries(T.inicial.natureza || {})) S.obst[k] = Math.round(borda * f);
   for (const id of [...I.cinto, ...I.suporte, ...(I.noLugar || []), I.cesto]) S.ferr[D.itens[id].funcao] = id;
-  for (const [id, c] of Object.entries(D.construcoes)) if (c.inicial) { S.constr[id] = { n: 1, degrau: 0 }; for (const mv of (c.interior || {}).moveis || []) S.constr[mv.id] = { n: 1, degrau: 0 }; }
+  for (const id of INICIAIS) S.constr[id] = { n: 1, degrau: 0 };
+  // os móveis do celeiro já estão lá dentro desde o começo (no começo humilde, valem quando o celeiro fica pronto)
+  for (const mv of (D.construcoes.celeiro.interior || {}).moveis || []) S.constr[mv.id] = { n: 1, degrau: 0 };
   return S;
 }
 
@@ -141,6 +153,7 @@ function jaTem(S, mi) { // "valeJaTer": o jogador se adiantou e já tem o que a 
   const o = mi.objetivo, f = o.filtro || {};
   if (!mi.valeJaTer || mi.nivel > S.nivel) return false;
   if (o.evento === 'construiu') return !!S.constr[f.construcao];
+  if (o.evento === 'reformou') return !!S.reformado[f.construcao];
   if (o.evento !== 'comprou') return false;
   if (f.item) { const x = D.itens[f.item]; return !!x.funcao && !!S.ferr[x.funcao] && D.itens[S.ferr[x.funcao]].degrau >= x.degrau; }
   if (f.animal) return !!S.trab[f.animal] || Object.values(S.abr).some((a) => a.animal === f.animal && a.n >= o.n);
@@ -163,7 +176,8 @@ const vagasLivres = (S, ab) => grau(S, ab, 'vagas') - (ab === 'estabulo' ? Objec
 function geo(S) { // distâncias médias do campo ao poço e à banca: o campo é um quadrado que cresce a partir de pontos.lavoura
   const P = D.terras.pontos, lado = Math.sqrt(Math.max(16, S.pico)), c = [P.lavoura[0] + lado / 2, P.lavoura[1] + lado / 2];
   const d = (p) => Math.hypot(c[0] - p[0], c[1] - p[1]) + lado / 3;
-  return { poco: d(P.poco), banca: (d(P.banca) + d(P.celeiro)) / 2, celeiro: d(P.celeiro) };
+  const banca = PONTO('banca') || PONTO('caixote-de-venda'), celeiro = S.constr.celeiro ? P.celeiro : PONTO('bau-da-casa') || P.celeiro;
+  return { poco: d(P.poco), banca: (d(banca) + d(celeiro)) / 2, celeiro: d(celeiro) };
 }
 function trajeto(S, d) { // segundos para andar d casas: corre nos trechos longos enquanto tem fôlego; o cavalo dispensa o fôlego
   if (trabAtivo(S, 'cavalo') && S.ferr.sela && d > 14) return d / D.animais.cavalo.efeito.velocidade + (A.montar || 1) + (A.apear || 1);
@@ -184,14 +198,19 @@ function custos(S, c) {
   let arar = A.arar * ((it(S, 'enxada') || {}).rapidez || 1) + passo, tArar = 1, boi = false;
   if (trabAtivo(S, 'boi') && S.ferr.arado) { const e = D.animais.boi.efeito, tb = (e.seg + 2 * passo) / e.casas; if (tb < arar) { arar = tb; tArar = 1 / e.casas; boi = true; } }
   const pl = it(S, 'plantadeira'), semear = A.semear * (pl ? pl.rapidez || 1 : 1) + passo;
-  const rg = it(S, 'regador'), ar = rg.area || 1, porEnchida = rg.capacidade * ar;
+  // o poço velho (antes da reforma): enche devagar ("demora") e no máximo "aguaMax" regas de cada vez
+  const pv = S.constr['poco-velho'] && !S.reformado['poco-velho'] ? D.construcoes['poco-velho'] : null;
+  const rg = it(S, 'regador'), ar = rg.area || 1, porEnchida = Math.min(rg.capacidade, pv && pv.aguaMax > 0 ? pv.aguaMax : Infinity) * ar;
+  const tEncher = A.encher * (pv && pv.demora > 0 ? pv.demora : 1);
   const barril = trabAtivo(S, 'jumento') && S.ferr.carroca && S.ferr.barril ? it(S, 'barril') : null;
   const idaAoPoco = 2 * trajeto(S, G.poco);
-  const encher = barril ? (2 * trajeto(S, 3) + (A.encherNoBarril || A.encher)) / porEnchida + (idaAoPoco + (A.encherBarril || A.encher)) / (barril.capacidade * ar) : (idaAoPoco + A.encher) / porEnchida;
+  const encher = barril ? (2 * trajeto(S, 3) + (A.encherNoBarril || A.encher)) / porEnchida + (idaAoPoco + (A.encherBarril || A.encher)) / (barril.capacidade * ar) : (idaAoPoco + tEncher) / porEnchida;
   const asp = S.constr.aspersor ? S.constr.aspersor.n : 0, raio = D.construcoes.aspersor ? D.construcoes.aspersor.efeito.raio : 0;
   const seco = 1 - Math.min(1, asp * ((2 * raio + 1) ** 2 - 1) / Math.max(S.pico, 1)); // parte do campo sem irrigação fixa
   const regar = (A.regar / ar + passo + encher) * seco;
-  const carga = trabAtivo(S, 'jumento') && S.ferr.carroca ? it(S, 'carroca').capacidade : it(S, 'cesto').capacidade;
+  // o caixote de venda (antes de virar banca) leva no máximo "vagas" coisas por ida
+  const cx = S.constr['caixote-de-venda'] && !S.reformado['caixote-de-venda'] ? D.construcoes['caixote-de-venda'].vagas || Infinity : Infinity;
+  const carga = Math.min(cx, trabAtivo(S, 'jumento') && S.ferr.carroca ? it(S, 'carroca').capacidade : it(S, 'cesto').capacidade);
   const colher = A.colher + passo + c.rende * (2 * trajeto(S, G.banca) + A.vender) / carga;
   return {
     arar, semear, regar, colher, boi, tArar, total: (REARAR ? arar : 0) + semear + c.regas * regar + colher,
@@ -431,7 +450,7 @@ function novoPedido(S) {
   return { itens, ouro, banca: valorTotal, xp: Math.round(ouro * P.xpPorOuro), desde: S.t };
 }
 function cuidarDosPedidos(S) {
-  const P = D.pedidos; if (S.nivel < P.nivel) return;
+  const P = D.pedidos; if (S.nivel < P.nivel || (COMECO && !S.constr['quadro-de-pedidos'])) return;
   const vagas = [...P.vagas].reverse().find((v) => S.nivel >= v.nivel).vagas;
   while (S.ped.length < vagas) S.ped.push({ livreEm: S.t });
   for (let i = 0; i < S.ped.length; i++) {
@@ -442,7 +461,7 @@ function cuidarDosPedidos(S) {
     for (const [k, n] of Object.entries(p.itens)) S.est[k] -= n;
     ganhar(S, p.banca, 'pedidos (valor de banca)'); ganhar(S, p.ouro - p.banca, 'pedidos (bônus)'); darXp(S, p.xp, 'pedidos');
     emitir(S, 'entregou', { ouro: p.ouro, xp: p.xp }); usar(S, A.entregarPedido + trajeto(S, 6), 'pedidos', 1);
-    S.ped[i] = { livreEm: S.t + Math.min(P.esperaSeg.max, P.esperaSeg.base + P.esperaSeg.porNivel * S.nivel) };
+    S.ped[i] = { livreEm: S.t + S.esperaDosPedidos * Math.min(P.esperaSeg.max, P.esperaSeg.base + P.esperaSeg.porNivel * S.nivel) };
   }
 }
 
@@ -454,6 +473,7 @@ function alvoDaMissao(S) { // o que a missão do vizinho pede agora (vira priori
   const animal = (id) => { const a = D.animais[id]; P.add(id); if (a.abrigo) { P.add(a.abrigo); P.add('vaga:' + a.abrigo); } for (const x of porFuncao[a.ferramenta] || []) P.add(x.id); for (const e of a.exige || []) P.add(e); };
   if (o.evento === 'comprou') { for (const k of ['item', 'lote']) for (const v of [].concat(f[k] || [])) P.add(v); for (const v of [].concat(f.animal || [])) animal(v); if (f.familia) for (const [id, a] of Object.entries(D.animais)) if (a.familia === f.familia && a.preco.ouro) P.add(id); }
   if (o.evento === 'construiu' || o.evento === 'montou') P.add(f.construcao);
+  if (o.evento === 'reformou') P.add('reforma:' + f.construcao);
   if (o.evento === 'produziu' && f.item) for (const rid of receitasDoItem[f.item] || []) { P.add(D.receitas[rid].onde); for (const e of Object.keys(D.receitas[rid].entra)) { if (animalDoItem[e]) animal(animalDoItem[e]); for (const r2 of receitasDoItem[e] || []) P.add(D.receitas[r2].onde); } }
   if (o.evento === 'recolheu' && animalDoItem[f.item]) animal(animalDoItem[f.item]);
   if (o.evento === 'arou' && f.com === 'boi') animal('boi');
@@ -467,8 +487,9 @@ function serveAgora(S, f) { // ferramenta de trato ou de animal de trabalho só 
 }
 function quantasQuero(S, id, c) {
   if (id === 'aspersor') return Math.ceil(S.pico / 24);
+  if (c.onde === 'celeiro' && !S.constr.celeiro) return 0; // móvel só com o celeiro pronto
   const moveis = Object.entries(S.constr).reduce((s, [k, v]) => s + (D.construcoes[k].tipo === 'movel' ? v.n : 0), 0), piso = grau(S, 'celeiro', 'interior') || {};
-  const p = (() => { let v = D.construcoes.celeiro.interior.piso; const g = S.constr.celeiro.degrau; for (let k = 0; k < g; k++) if (D.construcoes.celeiro.ampliacoes[k].piso) v = D.construcoes.celeiro.ampliacoes[k].piso; return v; })();
+  const p = (() => { let v = D.construcoes.celeiro.interior.piso; const g = S.constr.celeiro ? S.constr.celeiro.degrau : 0; for (let k = 0; k < g; k++) if (D.construcoes.celeiro.ampliacoes[k].piso) v = D.construcoes.celeiro.ampliacoes[k].piso; return v; })();
   if (c.tipo === 'movel') {
     S.querPiso = moveis >= Math.floor(p[0] * p[1] / 6); if (S.querPiso) return 0;
     const cap = (k) => (S.constr[k] ? S.constr[k].n : 0) * D.construcoes[k].capacidade, tenho = S.constr[id] ? S.constr[id].n : 0;
@@ -486,7 +507,8 @@ function candidatos(S) {
     out.push({ id: x.id, prio: pr(x.id, 2), ouro: x.compra, para: 'ferramentas', fazer: () => { S.ferr[f] = x.id; S.usos[f] = 0; emitir(S, 'comprou', { item: x.id, n: 1, ouro: x.compra, classe: x.tipo }); } });
   }
   for (const [id, c] of Object.entries(D.construcoes)) {
-    if (c.inicial || !c.custo || c.custo.cash || c.nivel > L || (c.exige || []).some((e) => !S.constr[e])) continue;
+    if (ehInicial(id) || !c.custo || c.custo.cash || c.nivel > L || (c.exige || []).some((e) => !S.constr[e])) continue;
+    if (c.onde === 'celeiro' && !S.constr.celeiro) continue;
     const tenho = (S.constr[id] ? S.constr[id].n : 0) + S.obras.filter((o) => o.id === id && o.degrau === undefined).length, enfeite = c.tipo === 'decoracao';
     const quero = P.has(id) ? (S.constr[id] && c.tipo !== 'movel' ? S.constr[id].n : tenho + 1) : enfeite ? 1 : quantasQuero(S, id, c);
     if (tenho >= Math.min(c.limite || 9999, quero)) continue;
@@ -496,7 +518,12 @@ function candidatos(S) {
     const c = D.construcoes[id], a = (c.ampliacoes || [])[st.degrau]; if (!a || a.nivel > L || S.obras.some((o) => o.id === id && o.degrau !== undefined)) continue;
     const cheio = c.tipo === 'abrigo' && vagasLivres(S, id) <= 0;
     const prio = P.has('vaga:' + id) && cheio ? 0 : id === 'casa' ? 6 : c.tipo === 'abrigo' ? (cheio ? 3 : 9) : id === 'celeiro' ? (S.querPiso ? 3 : 6) : 4;
-    if (prio < 9) out.push({ id: `${id}+${st.degrau + 1}`, prio, ouro: a.custo.ouro || 0, itens: a.custo.itens, folga: prio === 6 ? 3 : 1, para: a.fila ? 'vagas de fila' : id === 'casa' ? 'reforma da casa' : 'ampliações', fazer: () => obra(S, id, st.degrau) });
+    if (prio < 9) out.push({ id: `${id}+${st.degrau + 1}`, prio, ouro: a.custo.ouro || 0, itens: a.custo.itens, folga: prio === 6 ? 3 : 1, para: a.fila ? 'vagas de fila' : id === 'casa' ? 'ampliação da casa' : 'ampliações', fazer: () => obra(S, id, st.degrau) });
+  }
+  for (const de of Object.keys(S.constr)) { // reformas do que veio com a fazenda (o começo humilde)
+    const r = D.construcoes[de].reforma; if (!r || S.reformado[de] || (r.nivel || 1) > L || S.obras.some((o) => o.reforma === de)) continue;
+    const k = r.custo || {};
+    out.push({ id: 'reforma:' + de, prio: pr('reforma:' + de, 4), ouro: k.ouro || 0, itens: k.itens, para: 'reformas', fazer: () => { S.obras.push({ id: de, reforma: de, pronto: S.t + (r.obraSeg || 0) }); usar(S, A.colocarConstrucao || 2, 'construir', 2); concluirObras(S); } });
   }
   const comprou = (id, a) => emitir(S, 'comprou', { animal: id, n: 1, ouro: a.preco.ouro, classe: 'animal', familia: a.familia });
   for (const [id, a] of Object.entries(D.animais)) {
@@ -527,8 +554,16 @@ function concluirObras(S) {
     if (o.pronto > S.t) continue;
     S.obras.splice(S.obras.indexOf(o), 1);
     const c = D.construcoes[o.id];
+    if (o.reforma) { reformar(S, o.reforma); continue; }
     if (o.degrau === undefined) { const st = S.constr[o.id] = S.constr[o.id] || { n: 0, degrau: 0 }; st.n++; if (c.tipo === 'industria') S.filas[o.id] = S.filas[o.id] || []; emitir(S, c.tipo === 'movel' ? 'montou' : 'construiu', { construcao: o.id }); darXp(S, c.xp || 0, 'construções'); } else { S.constr[o.id].degrau = o.degrau + 1; emitir(S, 'ampliou', { construcao: o.id, degrau: o.degrau + 1 }); darXp(S, c.ampliacoes[o.degrau].xp || 0, 'construções'); }
   }
+}
+// a reforma pronta: a velha vira a nova (o que é da nova passa a valer) e o ganho dela entra
+function reformar(S, de) {
+  const r = D.construcoes[de].reforma;
+  S.reformado[de] = true; delete S.constr[de]; S.constr[r.para] = S.constr[r.para] || { n: 1, degrau: 0 };
+  if (r.ganho && r.ganho.esperaDosPedidos > 0) S.esperaDosPedidos = r.ganho.esperaDosPedidos;
+  emitir(S, 'reformou', { construcao: de, para: r.para }); darXp(S, r.xp || 0, 'reformas');
 }
 function comprar(S) {
   const m = melhorCultura(S), reserva = m ? 12 * D.itens[D.culturas[m].semente].compra : 0;
@@ -562,7 +597,7 @@ function vender(S, plano) {
     if (sobra <= 0) continue;
     S.est[k] -= sobra; ouro += sobra * x.venda; n += sobra; emitir(S, 'vendeu', { item: k, n: sobra, ouro: sobra * x.venda });
   }
-  if (guardado) { emitir(S, 'guardou', { n: guardado }); usar(S, A.guardar, 'vender e guardar', 1); }
+  if (guardado) { emitir(S, 'guardou', { n: guardado, construcao: S.constr.celeiro || !S.constr['bau-da-casa'] ? 'celeiro' : 'bau-da-casa' }); usar(S, A.guardar, 'vender e guardar', 1); }
   if (n) { ganhar(S, ouro, 'banca'); usar(S, A.vender, 'vender e guardar', 1); }
   S.picoEst = Math.max(S.picoEst * 0.999, Object.entries(S.est).reduce((s, [k, q]) => s + (['colheita', 'produto'].includes(D.itens[k].tipo) ? q : 0), 0));
 }
@@ -578,6 +613,8 @@ function proximoEvento(S) {
   return p;
 }
 function passo(S) {
+  const mi = D.missoes.vizinho[S.mi];
+  if (mi && mi.objetivo.evento === 'conversou' && mi.nivel <= S.nivel) { usar(S, (A.conversar || 1.1) + 4, 'missões', 1); emitir(S, 'conversou', { n: 1 }); }
   conferirMissao(S); concluirObras(S); retirarProntos(S); cuidarDaLavoura(S); cuidarDosAnimais(S); cuidarDoPomar(S); cuidarDosPedidos(S);
   comprar(S);
   const plano = planejar(S);
@@ -692,7 +729,7 @@ function relatorio(dias) {
   const coisas = [];
   const linha = (rot, nivel, chave) => coisas.push([rot, nivel, ...ids.map((id) => { const S = Ss[id], lib = S.nivelEm[nivel], c = S.quando[chave]; return lib === undefined ? '-' : c === undefined ? `libera dia ${diaDe(S, lib)}, não comprou` : `dia ${diaDe(S, c)} (+${diaDe(S, c) - diaDe(S, lib)})`; })]);
   for (const [id, x] of Object.entries(D.itens)) if (x.compra >= 300 && (x.tipo === 'ferramenta' || x.tipo === 'recipiente')) linha(x.nome, x.nivel, id);
-  for (const [id, c] of Object.entries(D.construcoes)) { if (!c.inicial && c.custo && !c.custo.cash && c.tipo !== 'decoracao' && c.tipo !== 'movel') linha(c.nome, c.nivel, id); (c.ampliacoes || []).forEach((a, k) => linha(`${c.nome}: ${a.nome}`, a.nivel, `${id}+${k + 1}`)); }
+  for (const [id, c] of Object.entries(D.construcoes)) { if (!ehInicial(id) && c.custo && !c.custo.cash && c.tipo !== 'decoracao' && c.tipo !== 'movel') linha(c.nome, c.nivel, id); (c.ampliacoes || []).forEach((a, k) => linha(`${c.nome}: ${a.nome}`, a.nivel, `${id}+${k + 1}`)); }
   for (const [id, a] of Object.entries(D.animais)) if (a.preco.ouro) linha(a.nome, a.nivel, id);
   for (const l of D.terras.lotes) linha(`Lote: ${l.nome} (${f0(l.preco)})`, l.nivel, l.id);
   coisas.sort((a, b) => a[1] - b[1]);

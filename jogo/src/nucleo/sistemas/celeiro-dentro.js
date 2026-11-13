@@ -46,9 +46,18 @@ export function moveisDe(m, guarda, out = []) {
   return out;
 }
 const lista = [];
+// O estoque de produtos é o das prateleiras do celeiro (só com o celeiro pronto na fazenda: no começo humilde ele
+// ainda não existe) mais o que as construções da fazenda guardam ("guarda" e "capacidade" em construcoes.json: o baú
+// ao lado da casa, a casa reformada). Sem nada disso, vale a capacidade inicial de regras.json.
+const celeiroPronto = (m) => m.construcao.todas.some((e) => e.tipo === 'celeiro' && e.local === 'fazenda' && estaPronta(e));
 function soma(m, guarda, menos) {
   let n = 0, tem = false;
-  for (const e of moveisDe(m, guarda, lista)) { if (e === menos) continue; tem = true; n += valorDe(m, e, 'capacidade') || 0; }
+  if (guarda !== 'produtos' || celeiroPronto(m)) for (const e of moveisDe(m, guarda, lista)) { if (e === menos) continue; tem = true; n += valorDe(m, e, 'capacidade') || 0; }
+  for (const e of m.construcao.todas) {
+    if (e.local !== 'fazenda' || e === menos || !estaPronta(e)) continue;
+    const d = defDe(m, e.tipo);
+    if (d && d.tipo !== 'movel' && d.guarda === guarda) { tem = true; n += valorDe(m, e, 'capacidade') || 0; }
+  }
   return tem ? n : m.dados.regras.celeiro.capacidade;
 }
 export const capacidadeDe = (m, guarda) => soma(m, guarda, null);
@@ -70,8 +79,8 @@ export function enchimento(m, e) {
   const cap = valorDe(m, e, 'capacidade') || 1;
   return Math.max(0, Math.min(1, (ocupacaoDe(m, def.guarda) - antes) / cap));
 }
-// o limite do estoque do celeiro é o das prateleiras
-function acertarCapacidade(m) { if (m.posses && m.construcao) m.posses.celeiro.capacidade = capacidadeDe(m, 'produtos'); }
+// o limite do estoque do celeiro é o das prateleiras (e o do baú do começo, e o da casa reformada)
+export function acertarCapacidade(m) { if (m.posses && m.construcao) m.posses.celeiro.capacidade = capacidadeDe(m, 'produtos'); }
 
 // ---------- os móveis: figura conforme o que guardam, e só saem se o que guardam couber no resto ----------
 const CHAVES = {};
@@ -197,6 +206,8 @@ registrarSistema({
     m.celeiroDentro = { empurra: 0, avisou: -Infinity };
     ligarMoveis(m);
     acertarCapacidade(m);
+    // o celeiro que fica pronto (no começo humilde ele se constrói), a reforma e a construção guardada mudam o estoque
+    for (const ev of ['construiu', 'reformou', 'trocouConstrucao', 'guardouConstrucao', 'recolocou']) m.eventos.ouvir(ev, () => acertarCapacidade(m));
     // material nunca se perde; se passou do que os baús guardam, avisa (de vez em quando) que falta baú
     m.eventos.ouvir('ganhouItem', (d) => {
       const S = m.celeiroDentro;

@@ -116,6 +116,13 @@ try {
   confere(await J(pg, () => { const b = document.querySelector('.topo-dir [data-painel="fazenda"]'); return !!b && !!b.querySelector('.ponto') && !b.querySelector('.ponto').hidden; }), 'o botão "Minha fazenda" mostra o ponto de "tem prêmio"');
   igual((await P(pg, 'correio')).map((c) => c.classe).join(','), 'diaria', 'no correio de uma fazenda nova só há o presente do dia');
 
+  // ---- a primeira missão: conversar com o Seu Tonho (um clique nele)
+  if (await J(pg, () => !!window.__jogo.mundo.local.porId.vizinho)) {
+    await J(pg, () => { const v = window.__jogo.mundo.local.porId.vizinho; window.__jogo.olhar(v.x + 0.5, v.z + 0.5); });
+    const t = await J(pg, () => window.__jogo.daEntidade('vizinho', 0.9));
+    await pg.mouse.click(t.x, t.y);
+    await J(pg, () => window.__jogo.ateParar(60));
+  }
   // ---- joga um pouco: ara seis casas com o mouse (a conquista "Terra arada" conta o evento)
   await J(pg, () => window.__jogo.olhar(27.5, 52));
   await clicarEm('.modo[data-modo="enxada"]');

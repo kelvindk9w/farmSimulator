@@ -46,7 +46,7 @@ Object.assign(T.motivos, {
 T.botoes.construir = 'Construir';
 T.construir = {
   titulo: 'Construir',
-  categorias: { abrigo: 'Abrigos', industria: 'Indústrias', armazem: 'Armazém', util: 'Úteis', cerca: 'Cercas', decoracao: 'Decoração' },
+  categorias: { reforma: 'Reformas', abrigo: 'Abrigos', industria: 'Indústrias', armazem: 'Armazém', util: 'Úteis', cerca: 'Cercas', decoracao: 'Decoração' },
   enfeites: 'Enfeites: cercas, caminhos e decoração',
   vazio: 'Nada para construir aqui ainda.',
   escolher: 'Construir', montar: 'Montar', colocar: 'Colocar', guardada: (n) => `no depósito: ${n}`, tem: (n, lim) => (lim ? `${n}/${lim}` : `tem ${n}`),
@@ -76,6 +76,9 @@ T.ganhos.construiu = (d, D) => `${nomeC(D, d.construcao)}: ${d.classe === 'movel
 T.ganhos.ampliou = (d) => `${d.nome}: pronto!`;
 T.celeiro = {
   titulo: 'O celeiro por dentro', produtos: 'Produtos nas prateleiras', materiais: 'Materiais nos baús', ferramentas: 'Ferramentas no suporte',
+  // (começo humilde: antes do celeiro quem guarda é o baú da casa; depois, o baú e a casa reformada somam com as prateleiras)
+  produtosNoBau: 'Produtos no baú da casa', produtosGuardados: 'Produtos guardados',
+  dicaDoBau: 'Toque no baú da casa para guardar o cesto. O celeiro, quando o Seu Tonho pedir, guarda muito mais.',
   cheio: 'cheio', semMovel: (o) => `sem ${o}: vale o espaço do começo`,
   dica: 'Toque no celeiro para guardar o cesto. Entre nele para montar prateleiras (produtos), baús (materiais) e suportes (ferramentas).',
   entrar: 'Entrar', sair: 'Sair',

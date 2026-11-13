@@ -171,6 +171,17 @@ export function regar(J) {
 export function esperaDaLavoura(J) { const t = L.proximoAcontecimento(J.m); return t === null ? null : Math.max(0.5, (t - J.m.agora) / 1000); }
 
 // ---------- esvaziar o cesto: guardar o que se quer ter, vender o resto ----------
+// onde guardar: o celeiro pronto; antes dele (o começo humilde), o baú ao lado da casa
+export function armazem(J) {
+  const loc = fazenda(J), C = X.construcao, c = loc.porId.celeiro;
+  if (c && (!C || C.estaPronta(c))) return 'celeiro';
+  return loc.porId['bau-da-casa'] ? 'bau-da-casa' : 'celeiro';
+}
+// a banca ainda é o caixote de venda (começo humilde) e está cheio: os fregueses ainda não levaram
+function caixoteCheio(J) {
+  const e = fazenda(J).porId.banca, d = e && J.D.construcoes[e.tipo];
+  return !!(d && d.vagas > 0 && X.banca && X.banca.espacoNoCaixote(J.m, d) <= 0);
+}
 export function cestoTemQuerido(J) {
   const c = J.P.cesto.itens;
   for (const k in c) if (c[k] > 0 && (J.quer[k] || 0) > (J.P.celeiro.itens[k] || 0) + (J.P.bolsa[k] || 0)) return true;
@@ -200,7 +211,12 @@ export function esvaziar(J, forcar) {
   const daMissao = Object.keys(J.reservados || {}).some((k) => (J.P.cesto.itens[k] || 0) > 0);
   if (guardar && J.metaCesto !== 'guardar' && !cocho && !(daMissao && PO.espacoNoCeleiro(m) >= n)) { const sobra = sobraNoCesto(J); if (sobra > 0 && PO.espacoNoCeleiro(m) < sobra + 0.25 * J.P.celeiro.capacidade) guardar = false; }
   if (guardar && !(PO.espacoNoCeleiro(m) > 0)) { guardar = false; nota(J, 'celeiro cheio: vendeu o que queria guardar'); J.S && (J.S.celeiroCheio = (J.S.celeiroCheio || 0) + 1); }
-  return passo(J, 'entidade', { id: guardar ? 'celeiro' : 'banca' });
+  // o caixote cheio: guarda (se cabe) ou espera os fregueses levarem
+  if (!guardar && caixoteCheio(J)) {
+    if (J.metaCesto !== 'vender' && PO.espacoNoCeleiro(m) > 0) guardar = true;
+    else { J.S && (J.S.caixoteCheio = (J.S.caixoteCheio || 0) + 1); return nota(J, 'o caixote está cheio: esperando os fregueses'); }
+  }
+  return passo(J, 'entidade', { id: guardar ? armazem(J) : 'banca' });
 }
 // o celeiro tem coisa a mais (o que não serve a pedido, trato, receita nem missão) e está enchendo: pega para vender
 export function venderDoCeleiro(J, forcar) {
@@ -215,10 +231,10 @@ export function venderDoCeleiro(J, forcar) {
   if (daMissao && forcar !== 'cheio') return null;
   if (forcar === 'cheio') { if (espaco > 0.1 * cap || sobra < Math.min(20, 0.1 * cap)) return null; }
   else if (sobra <= 0 || (!forcar && espaco > 0.25 * cap && sobra < 0.3 * cap)) return null;
-  if (evitado(J, 'pegar')) return null;
+  if (evitado(J, 'pegar') || caixoteCheio(J)) return null;
   evitar(J, 'pegar', 20);
   J.vendaDoCeleiro = true; // o que vier no cesto vai para a banca
-  return passo(J, 'entidade', { id: 'celeiro' });
+  return passo(J, 'entidade', { id: armazem(J) });
 }
 
 // ---------- o boi no arado: a fileira inteira de uma passada ----------
