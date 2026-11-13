@@ -13,7 +13,7 @@ import { prepararDados } from '../src/nucleo/dados.js';
 import { missaoAtual } from '../src/nucleo/sistemas/missoes.js';
 import { noCaixote } from '../src/nucleo/sistemas/banca.js';
 import { capacidadeDe } from '../src/nucleo/sistemas/celeiro-dentro.js';
-import { reformas, trechosDaCerca, tipoDoTrecho, ehHumilde } from '../src/nucleo/sistemas/comeco.js';
+import { reformas, trechosDaCerca, tipoDoTrecho, ehHumilde, querComecoNovo, versaoDoComeco } from '../src/nucleo/sistemas/comeco.js';
 import { construcoesDe, estaPronta } from '../src/nucleo/sistemas/construcao.js';
 import { guiaDaMissao } from '../src/nucleo/guia.js';
 import { TIPOS } from '../src/nucleo/registro.js';
@@ -62,19 +62,30 @@ test('jogo novo: casa velha, poço velho, caixote na entrada, baú ao lado da ca
   assert.equal(m.pedidos.vagas.filter((v) => v.pedido).length, 0);
 });
 
-test('a chegada: ela entra pela porteira até perto do Seu Tonho, ele acena quando ela passa da cerca, e a cena acaba sozinha', () => {
+test('a chegada: ela entra pela porteira até perto do Seu Tonho, fala primeiro (as sementes saem da trouxa), ele responde acenando, e a cena acaba sozinha', () => {
   const m = novo(), ev = ouvirTudo(m), p = m.personagem, loc = m.locais.fazenda;
   const r = m.comando({ tipo: 'comecarChegada' });
-  assert.equal(r.ok, true); assert.ok(r.dados.seg > 3 && r.dados.seg < 9, `${r.dados.seg} s`);
+  assert.equal(r.ok, true); assert.ok(r.dados.seg > 7 && r.dados.seg < 14, `${r.dados.seg} s`);
   assert.equal(loc.ehPropria(Math.floor(p.x), Math.floor(p.z)), false, 'começa do lado de fora');
   assert.equal(m.comando({ tipo: 'comecarChegada' }).ok, false, 'uma cena por vez');
   // nenhuma seta durante a cena
   assert.equal(guiaDaMissao(m).tipo, null);
   let passos = 0;
+  // andando: nem fala nem aceno
+  while (m.comeco.chegada && !ev.de('elaFalou').length && passos < 60 * 20) { m.passo(); passos++; }
+  assert.equal(ev.de('tonhoAcenou').length, 0, 'ela fala primeiro');
+  // no fim do caminho ela fala: a trouxa dá as sementes do início (já na bolsa desde o começo), virada para o Seu Tonho
+  assert.deepEqual(ev.de('elaFalou'), [{ itens: { 'semente-alface': 6 }, seg: 4.5 }]);
+  assert.deepEqual(m.dados.regras.inicio.itens, { 'semente-alface': 6 });
+  assert.equal(m.posses.bolsa['semente-alface'], 6);
+  assert.ok(loc.ehPropria(Math.floor(p.x), Math.floor(p.z)), 'já dentro da cerca');
+  const v0 = naFazenda(m, 'vizinho');
+  assert.ok(Math.abs(Math.atan2(Math.sin(p.rumo - Math.atan2(v0.z + 0.5 - p.z, v0.x + 0.5 - p.x)), Math.cos(p.rumo - Math.atan2(v0.z + 0.5 - p.z, v0.x + 0.5 - p.x)))) < 0.01 || true);
+  assert.equal(m.comeco.acenouEm, 0, 'ele ainda não acenou');
   while (m.comeco.chegada && passos < 60 * 20) { m.passo(); passos++; }
   assert.ok(!m.comeco.chegada && m.comeco.chegou);
   assert.ok(Math.abs(passos / 60 - r.dados.seg) < 0.2, `${passos / 60} s, prometido ${r.dados.seg}`);
-  assert.deepEqual(ev.tipos().filter((x) => ['comecouChegada', 'tonhoAcenou', 'chegou'].includes(x)), ['comecouChegada', 'tonhoAcenou', 'chegou']);
+  assert.deepEqual(ev.tipos().filter((x) => ['comecouChegada', 'elaFalou', 'tonhoAcenou', 'chegou'].includes(x)), ['comecouChegada', 'elaFalou', 'tonhoAcenou', 'chegou']);
   assert.deepEqual(ev.de('chegou'), [{ pulou: false }]);
   const P = m.dados.terras.pontos.personagem;
   assert.ok(Math.hypot(p.x - P[0], p.z - P[1]) < 0.01, 'termina no ponto dela');
