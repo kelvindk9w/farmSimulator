@@ -47,6 +47,8 @@ Exemplo: `http://localhost:8090/#demo,arte-molde`.
 - O botão **Demonstração** recomeça o sítio e faz um passeio fixo que executa cada ação uma vez. Durante o passeio a tela não aceita comandos. Quando o passeio acaba, o controle volta sozinho. Tocar no botão antes do fim interrompe o passeio e recomeça o sítio.
 - O botão **Arte** troca o conjunto de arte de todos os objetos de uma vez, sem recarregar a página e sem parar o que está acontecendo. Ele roda pelos três conjuntos: `brinquedo`, `codigo` e `molde`.
 - O botão **Ver de perto / Ver tudo** troca o enquadramento. De perto, a câmera acompanha o personagem, e dá para arrastar o dedo para olhar em volta.
+- O botão **Medidor** mostra, no pé da tela, quantos quadros por segundo o aparelho está desenhando (a leitura de agora, a menor desde que o medidor foi aberto e o quadro mais demorado do último segundo), mais as chamadas de desenho e os triângulos do conjunto de arte atual. Serve para testar o mesmo sítio num celular fraco ou numa TV.
+- O botão **Ver alvo** aparece nos conjuntos que têm uma imagem-alvo (a imagem do Codex que o conjunto tenta reproduzir). Ele abre a imagem ao lado do jogo, na tela deitada, ou embaixo dele, na tela em pé. Tocar na imagem fecha.
 
 No alto ficam três contadores: a água no regador, o que o personagem leva na mão e o que já está guardado no celeiro.
 
@@ -160,6 +162,8 @@ A única textura do conjunto é a mancha da sombra de contato, de 64 por 64 pont
 | `npm run verificar` | A verificação completa, descrita abaixo. Leva alguns minutos. |
 | `npm run capturas` | Refaz tudo o que está em `capturas/`. Os vídeos são a parte demorada; `node tools/capturar.mjs --sem-video` pula os vídeos, `--so-video` faz só os vídeos e `--so-brinquedo` faz só o que é do conjunto `brinquedo`. |
 | `npm run medir` | Mede o tamanho do download, as chamadas de desenho e os triângulos dos três conjuntos. |
+| `node tools/comparar.mjs <conjunto> <alvo.png> <saída>` | Leva o sítio ao estado das imagens de referência (sementes num canteiro, milho pronto no outro, ovo no ninho, leite pronto) e grava o alvo e o jogo lado a lado. |
+| `node tools/alvos.mjs` | Refaz as imagens reduzidas de `alvos/`, que o botão "Ver alvo" mostra. A lista de conjuntos com alvo está em `config/alvos.json`. |
 | `node tools/olhar.mjs` e `node tools/folha.mjs` | Ferramentas de trabalho: uma foto num passo qualquer e uma folha com vários instantes lado a lado. O modo de usar está no começo de cada arquivo. |
 
 As ferramentas que abrem o navegador usam o Chromium e o Playwright que já estão instalados na máquina. O Playwright não está no `package.json`.

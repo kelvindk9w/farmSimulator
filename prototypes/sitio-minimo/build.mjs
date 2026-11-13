@@ -21,9 +21,11 @@ const r = await build({
   alias: { three: path.join(aqui, 'node_modules/three') },
 });
 fs.copyFileSync(path.join(aqui, 'index.html'), path.join(dist, 'index.html'));
+// as imagens-alvo do botão "Ver alvo" (feitas por tools/alvos.mjs); só são baixadas quando alguém pede para ver
+if (fs.existsSync(path.join(aqui, 'alvos'))) fs.cpSync(path.join(aqui, 'alvos'), path.join(dist, 'alvos'), { recursive: true });
 
 let total = 0, gz = 0, br = 0;
-for (const f of fs.readdirSync(dist).sort()) {
+for (const f of fs.readdirSync(dist).sort().filter((f) => fs.statSync(path.join(dist, f)).isFile())) {
   const buf = fs.readFileSync(path.join(dist, f));
   const g = zlib.gzipSync(buf, { level: 9 }).length, b = zlib.brotliCompressSync(buf, { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 11 } }).length;
   total += buf.length; gz += g; br += b;

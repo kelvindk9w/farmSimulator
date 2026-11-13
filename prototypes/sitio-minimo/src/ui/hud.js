@@ -28,11 +28,22 @@ export class Hud {
     this.btDemo = el('button', '', 'Demonstração'); this.btDemo.type = 'button';
     this.btArte = el('button', '', 'Arte'); this.btArte.type = 'button';
     this.btZoom = el('button', '', 'Ver de perto'); this.btZoom.type = 'button';
-    bot.append(this.btDemo, this.btArte, this.btZoom);
+    // teste de estilos: o medidor de desempenho e a imagem-alvo do conjunto de arte atual (os dois ficam depois dos três
+    // botões de sempre, para a ordem deles não mudar)
+    this.btMedidor = el('button', '', 'Medidor'); this.btMedidor.type = 'button';
+    this.btAlvo = el('button', '', 'Ver alvo'); this.btAlvo.type = 'button'; this.btAlvo.hidden = true;
+    bot.append(this.btDemo, this.btArte, this.btZoom, this.btMedidor, this.btAlvo);
     this.topo.append(cont, bot);
+    this.medidor = el('div', 'chip medidor'); this.medidor.hidden = true;
+    this.medidorQps = el('span', '', ''); this.medidorCena = el('span', '', '');
+    this.medidor.append(this.medidorQps, this.medidorCena);
     this.rodape = el('div', 'rodape');
     this.dica = el('div', 'dica', '');
-    this.rodape.append(this.dica);
+    // a imagem-alvo divide a tela com o jogo: embaixo dele na tela em pé, à direita na tela deitada; tocar nela fecha
+    this.alvo = el('div', 'alvo'); this.alvo.hidden = true;
+    this.alvoImg = el('img'); this.alvoImg.alt = 'Imagem-alvo do estilo';
+    this.alvo.append(el('b', '', 'O alvo deste estilo (toque para fechar)'), this.alvoImg);
+    this.rodape.append(this.alvo, this.medidor, this.dica);
     this.camada = el('div', 'rotulos');
     raiz.append(this.camada, this.topo, this.rodape);
     this.rotulos = [];
@@ -56,12 +67,28 @@ export class Hud {
   definirDemo(ligada) { this.btDemo.classList.toggle('ligado', ligada); this._por(this.btDemo, 'demo', ligada ? 'Parar demonstração' : 'Demonstração'); }
   definirArte(rotulo) { this._por(this.btArte, 'arte', 'Arte: ' + rotulo); }
   definirZoom(perto) { this._por(this.btZoom, 'zoom', perto ? 'Ver tudo' : 'Ver de perto'); }
+  // medidor: m = { qps, menor, pior (ms), chamadas, triangulos } ou null para esconder
+  definirMedidor(m) {
+    this.medidor.hidden = !m; this.btMedidor.classList.toggle('ligado', !!m);
+    if (!m) return;
+    this._por(this.medidorQps, 'qps', m.qps === null ? 'Medindo…' : `${m.qps} quadros por segundo (menor: ${m.menor}; pior quadro: ${m.pior} ms)`);
+    this._por(this.medidorCena, 'cena', `${m.chamadas} chamadas de desenho · ${m.triangulos >= 10000 ? Math.round(m.triangulos / 1000) + ' mil' : m.triangulos} triângulos`);
+  }
+  // imagem-alvo do conjunto atual: endereco = arquivo da imagem, ou null quando o conjunto não tem alvo
+  definirAlvo(endereco) { this.enderecoDoAlvo = endereco || null; this.btAlvo.hidden = !endereco; if (!endereco) this.mostrarAlvo(false); else if (!this.alvo.hidden) this.alvoImg.src = endereco; }
+  mostrarAlvo(mostra) {
+    const m = !!(mostra && this.enderecoDoAlvo);
+    if (m) this.alvoImg.src = this.enderecoDoAlvo; // só baixa a imagem quando alguém pede para ver
+    this.alvo.hidden = !m; this.raiz.classList.toggle('com-alvo', m); this.btAlvo.classList.toggle('ligado', m); this._por(this.btAlvo, 'alvo', m ? 'Fechar alvo' : 'Ver alvo');
+  }
 
   // espaço que a interface ocupa em cima e embaixo (px), para a câmera enquadrar o sítio no que sobra
   margens() {
     if (document.body.classList.contains('sem-hud')) return { cima: 6, baixo: 6, esq: 6, dir: 6 };
     const t = this.topo.getBoundingClientRect(), r = this.rodape.getBoundingClientRect();
-    return { cima: Math.round(t.bottom) + 6, baixo: Math.round(innerHeight - r.top) + 6, esq: 6, dir: 6 };
+    // com a imagem-alvo aberta na tela deitada, o jogo fica com a parte da tela à esquerda dela
+    const a = !this.alvo.hidden && getComputedStyle(this.alvo).position === 'fixed' ? this.alvo.getBoundingClientRect() : null;
+    return { cima: Math.round(t.bottom) + 6, baixo: Math.round(innerHeight - r.top) + 6, esq: 6, dir: a ? Math.round(innerWidth - a.left) + 6 : 6 };
   }
 
   // aviso que nasce num ponto do mundo e sobe (animado pelos passos da simulação, não pelo relógio)

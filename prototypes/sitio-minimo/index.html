@@ -30,6 +30,16 @@
   .anel { position: absolute; width: 36px; height: 36px; margin: -18px 0 0 -18px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(74, 47, 27, .6); animation: anel .45s ease-out forwards; }
   @keyframes anel { from { transform: scale(.3); opacity: 1; } to { transform: scale(1.2); opacity: 0; } }
   .erro { position: fixed; inset: auto 8px 8px 8px; background: #7a1f1f; color: #fff; padding: 10px 14px; border-radius: 10px; font-weight: 500; }
+  .rodape { flex-direction: column; align-items: center; gap: 6px; }
+  .medidor { flex-direction: column; align-items: center; gap: 1px; white-space: normal; text-align: center; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .alvo { width: min(100%, 560px); box-sizing: border-box; pointer-events: auto; cursor: pointer; background: #fff9ec; border: 2px solid #4a2f1b; border-radius: 12px; box-shadow: 0 3px 0 rgba(74, 47, 27, .35); padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+  @media (orientation: landscape) {
+    .alvo { position: fixed; right: max(8px, env(safe-area-inset-right)); bottom: max(8px, env(safe-area-inset-bottom)); width: min(46vw, 640px); }
+    .com-alvo .rodape { padding-right: calc(min(46vw, 640px) + 12px); }
+  }
+  .alvo b { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: #8a6a4c; text-align: center; }
+  .alvo img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 7px; background: #e9dcc3; }
+  [hidden] { display: none !important; }
   body.sem-hud #hud { display: none; }
   @media (max-width: 520px) { body { font-size: 13px; } .chip { padding: 4px 8px; } button { padding: 7px 10px; } }
 </style>

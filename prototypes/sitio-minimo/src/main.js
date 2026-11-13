@@ -11,6 +11,7 @@ import './arte/lowpoly/index.js';
 import './arte/contorno/index.js';
 import './arte/pintado/index.js';
 import { listarConjuntos, rotuloDoConjunto } from './arte/registro.js';
+import ALVOS from '../config/alvos.json';
 import { PASSO } from './jogo/util.js';
 import { NOME_ITEM, TIPOS } from './jogo/contrato.js';
 import { Mundo } from './jogo/mundo.js';
@@ -46,7 +47,9 @@ function iniciar() {
   let dicaFixa = mundo.dica;
   let passosDemo = 0; // passos dados desde que a demonstração começou (as ferramentas de captura contam por aqui)
 
-  const lerArte = () => { const a = vista.conjuntoAtual(); hud.definirArte(a === 'misto' ? 'misto' : rotuloDoConjunto(a)); };
+  const lerArte = () => { const a = vista.conjuntoAtual(); hud.definirArte(a === 'misto' ? 'misto' : rotuloDoConjunto(a)); hud.definirAlvo(ALVOS[a] || null); medida.menor = null; if (cena.w > 1) redimensionar(); };
+  // medidor de desempenho (botão "Medidor"): quadros por segundo de verdade, contados no laço de desenho
+  const medida = { ligado: false, desde: 0, quadros: 0, pior: 0, menor: null, qps: null, piorMs: 0 };
   const redimensionar = () => { cena.redimensionar(innerWidth, innerHeight, devicePixelRatio || 1, hud.margens()); };
 
   function recomecar(comDemo) {
@@ -142,6 +145,14 @@ function iniciar() {
   hud.btDemo.addEventListener('click', () => recomecar(!roteiro));
   hud.btArte.addEventListener('click', () => { vista.definirConjunto(vista.proximoConjunto()); lerArte(); });
   hud.btZoom.addEventListener('click', () => { cena.definirModo(cena.modo === 'perto' ? 'tudo' : 'perto'); hud.definirZoom(cena.modo === 'perto'); });
+  const mostrarMedidor = () => { const e = cena.estatisticas(); hud.definirMedidor({ qps: medida.qps, menor: medida.menor, pior: medida.piorMs, chamadas: e.chamadas, triangulos: e.triangulos }); };
+  hud.btMedidor.addEventListener('click', () => {
+    medida.ligado = !medida.ligado; medida.desde = 0; medida.quadros = 0; medida.pior = 0; medida.menor = null; medida.qps = null;
+    if (medida.ligado) mostrarMedidor(); else hud.definirMedidor(null);
+    redimensionar();
+  });
+  hud.btAlvo.addEventListener('click', () => { hud.mostrarAlvo(hud.alvo.hidden); redimensionar(); });
+  hud.alvo.addEventListener('click', () => { hud.mostrarAlvo(false); redimensionar(); });
   addEventListener('hashchange', () => { const o = opcoes(); if (o.arte) { vista.definirConjunto(o.arte); lerArte(); } if (o.demo && !roteiro) recomecar(true); });
   addEventListener('resize', redimensionar);
 
@@ -165,6 +176,19 @@ function iniciar() {
       let n = 0;
       while (sobra >= PASSO && n < 6) { umPasso(); sobra -= PASSO; n++; }
       if (n === 6) sobra = 0;
+    }
+    if (medida.ligado) {
+      // uma leitura por segundo: quadros desenhados nesse segundo, o quadro mais demorado e a menor leitura até agora
+      if (!medida.desde) { medida.desde = agora; medida.quadros = 0; medida.pior = 0; }
+      else {
+        medida.quadros++; medida.pior = Math.max(medida.pior, agora - ultimo);
+        if (agora - medida.desde >= 1000) {
+          medida.qps = Math.round((medida.quadros * 1000) / (agora - medida.desde)); medida.piorMs = Math.round(medida.pior);
+          medida.menor = medida.menor === null ? medida.qps : Math.min(medida.menor, medida.qps);
+          medida.desde = agora; medida.quadros = 0; medida.pior = 0;
+          mostrarMedidor();
+        }
+      }
     }
     ultimo = agora;
     desenhar();
