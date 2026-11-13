@@ -192,6 +192,32 @@ async function cenario(a, f) {
     await tocarXY(p.x, p.y);
     await quadro();
   }
+  // a roda de ações (o alvo com mais de uma ação): as opções dela, a principal primeiro; null = fechada
+  const roda = () => J(() => (window.__jogo.acoes.rodaAberta ? [...document.querySelectorAll('.roda-acoes .bt-roda')].map((b) => b.dataset.opcao) : null));
+  // escolhe uma opção da roda aberta (depois do tempo em que o clique fantasma do toque não vale)
+  async function naRoda(id) { await esperar(450); return tocarEm(`.roda-acoes [data-opcao="${id}"]`); }
+  // toca no abrigo e, se a roda abrir, escolhe "Abrir": o painel
+  async function abrirAbrigo(tipo, onde) {
+    if (!(await tocarAbrigo(tipo))) return;
+    const r = await roda();
+    if (r) { confere(r.includes('abrir'), `${onde}: a roda tem "Abrir" (${r.join(', ')})`); await naRoda('abrir'); }
+  }
+  // o abrigo com coisa pronta: o toque abre a roda (a ação e "Abrir") e a principal faz a ação, sem painel
+  async function principalDoAbrigo(tipo, esperado, onde) {
+    if (!(await tocarAbrigo(tipo))) return;
+    const r = await roda();
+    if (confere(!!r, `${onde}: o toque abre a roda de ações`)) { igual(r[0], esperado, `${onde}: a principal da roda é a ação certa`); await naRoda(r[0]); }
+  }
+  // põe a personagem de pé num lado livre do abrigo, de frente para ele (teclado e controle agem no que está à frente)
+  const deFrentePara = (id) => J((id) => {
+    const j = window.__jogo, m = j.mundo, loc = m.local, e = loc.porId[id], p = m.personagem, lados = [];
+    for (let x = e.x; x < e.x + e.l; x++) { lados.push([x, e.z - 1, 0, 1]); lados.push([x, e.z + e.p, 0, -1]); }
+    for (let z = e.z; z < e.z + e.p; z++) { lados.push([e.x - 1, z, 1, 0]); lados.push([e.x + e.l, z, -1, 0]); }
+    for (const [x, z, dx, dz] of lados) if (loc.dentro(x, z) && loc.andavel(x, z) && !loc.entidadeEm(x, z)) { p.x = x + 0.5; p.z = z + 0.5; p.rumo = Math.atan2(dx, dz); p.rota = null; p.vel = 0; j.seguir(); return [x, z]; }
+    return null;
+  }, id);
+  const segurarTecla = async (k, ms = 700) => { await pg.keyboard.down(k); await esperar(ms); await pg.keyboard.up(k); await quadro(120); };
+  const segurarBotao = async (b, ms = 700) => { await J((i) => { window.__pad.buttons[i].pressed = true; window.__pad.buttons[i].value = 1; }, b); await esperar(ms); await J((i) => { window.__pad.buttons[i].pressed = false; window.__pad.buttons[i].value = 0; }, b); await esperar(160); };
   async function abrirAbaAnimais() {
     if ((await painel()) !== 'loja' && (await painel()) !== 'animais') await tocarEm('.topo-dir [data-painel="loja"]');
     if ((await painel()) === 'loja') await tocarEm('[data-k="aba-animais"]');
@@ -277,9 +303,28 @@ async function cenario(a, f) {
   let abriu = false;
   if (comDedo) {
     const p = await J(([gid]) => { const j = window.__jogo, m = j.mundo, cam = j.cena.cam; for (const b of window.__bichos()) { if (b.abrigo !== gid) continue; const id = j.cena.entidadeEm(m, cam.cssX(b.x, b.z), cam.cssY(b.x, 0.25, b.z)), q = j.naTela(b.x, b.z, 0.25), n = document.elementFromPoint(q.x, q.y); if (id === gid && n && n.id === 'tela') return q; } return null; }, [gal.id]);
-    if (confere(!!p, 'há uma galinha solta onde o dedo alcança')) { await tocarXY(p.x, p.y); await quadro(); abriu = (await painel()) === 'abrigo'; confere(abriu, 'tocar numa galinha solta abre o painel do galinheiro'); }
+    if (confere(!!p, 'há uma galinha solta onde o dedo alcança')) {
+      // o dedo na galinha vale o galinheiro: com fome e sede, abre a roda (dar comida é a principal) e não age sozinho
+      const fila0 = (await A('fila')).length;
+      await tocarXY(p.x, p.y); await quadro();
+      let r = await roda();
+      confere(!!r && r[0] === 'abastecerCocho' && r.includes('abastecerBebedouro') && r.includes('abrir'), `tocar numa galinha solta abre a roda do galinheiro: comida (a principal), água e abrir (veio ${JSON.stringify(r)})`);
+      igual((await A('fila')).length, fila0, 'abrir a roda não manda ela fazer nada');
+      const rr = await J(() => { const R = [...document.querySelectorAll('.roda-acoes .bt-roda')].map((b) => b.getBoundingClientRect()), pr = document.querySelector('.roda-acoes .principal .roda-circ').getBoundingClientRect(), ou = document.querySelector('.roda-acoes .bt-roda:not(.principal) .roda-circ').getBoundingClientRect(); return { dentro: R.every((q) => q.left >= 0 && q.top >= 0 && q.right <= innerWidth && q.bottom <= innerHeight), grandes: R.every((q) => q.width >= 44 && q.height >= 44), maior: pr.width > ou.width }; });
+      confere(rr.dentro && rr.grandes && rr.maior, `os botões da roda cabem na tela, têm 44 px ou mais, e a principal é maior (${JSON.stringify(rr)})`);
+      confere(await J(() => { const c = document.querySelector('.vaga-mao canvas').dataset.chave; return !/semente/.test(c) && /×/.test(document.querySelector('.vaga-mao').textContent); }), 'com a roda do galinheiro aberta, a vaga mostra a comida que ela vai dar e quanto há');
+      await foto('roda-do-galinheiro');
+      // tocar fora fecha a roda, e esse toque não vira ordem
+      const fora = await J(() => { const j = window.__jogo, m = j.mundo, loc = m.local, p = m.personagem; for (let r = 3; r < 9; r++) for (let dx = -r; dx <= r; dx++) { const x = Math.floor(p.x) + dx, z = Math.floor(p.z) + r; if (loc.dentro(x, z) && loc.andavel(x, z) && !loc.entidadeEm(x, z)) { const q = j.naTela(x + 0.5, z + 0.5), n = document.elementFromPoint(q.x, q.y); if (n && n.id === 'tela') return q; } } return null; });
+      if (fora) { await esperar(450); await tocarXY(fora.x, fora.y); await quadro(); confere(!(await roda()), 'tocar fora da roda fecha a roda'); igual((await A('fila')).length, fila0, 'o toque que fechou a roda não vira ordem'); confere(!(await J(() => window.__jogo.ocupada())), 'nem anda'); }
+      await tocarXY(p.x, p.y); await quadro();
+      r = await roda();
+      if (r) await naRoda('abrir');
+      abriu = (await painel()) === 'abrigo';
+      confere(abriu, '"Abrir" na roda abre o painel do galinheiro');
+    }
   }
-  if (!abriu) await tocarAbrigo('galinheiro');
+  if (!abriu) await abrirAbrigo('galinheiro', 'o galinheiro com fome');
   igual(await painel(), 'abrigo', 'tocar no galinheiro abre o painel do abrigo');
   const ab = await J(() => { const v = document.querySelector('.veu'); return { titulo: v.querySelector('header .titulo').textContent, topo: v.querySelector('.abr-topo') ? v.querySelector('.abr-topo').textContent : '', cartoes: v.querySelectorAll('.abr-bicho').length, cocho: !!v.querySelector('[data-k="encher-cocho"]'), bebedouro: !!v.querySelector('[data-k="encher-bebedouro"]'), alvo: !!v.querySelector('[data-k="encher-cocho"].alvo-tutorial'), comprar: !!v.querySelector('[data-k="comprar-galinha"]'), ampliar: !!v.querySelector('[data-k="ampliar"]'), mover: !!v.querySelector('[data-k="mover"]') }; });
   igual(ab.titulo, 'Galinheiro', 'o painel tem o nome do abrigo');
@@ -330,9 +375,12 @@ async function cenario(a, f) {
     const livre = await J(([x, y]) => { const n = document.elementFromPoint(x, y); return !!n && n.id === 'tela'; }, [b.x, b.y]);
     confere(livre, 'o balão do ovo está livre para o toque');
     await tocarXY(b.x, b.y);
-  } else await tocarAbrigo('galinheiro');
+    await quadro();
+    const r = await roda();
+    if (confere(!!r, 'o toque no balão do ovo abre a roda do galinheiro')) { igual(r[0], 'recolherOvo', 'a principal da roda do galinheiro com ovo é pegar os ovos'); await naRoda(r[0]); }
+  } else await principalDoAbrigo('galinheiro', 'recolherOvo', 'o galinheiro com ovo');
   await quadro();
-  igual(await painel(), null, 'com a Mão, o toque no galinheiro com ovo recolhe direto (sem abrir o painel)');
+  igual(await painel(), null, 'pegar os ovos pela roda não abre o painel');
   await ateParar();
   await fecharTelas();
   igual(await A('cesto', 'ovo'), 4, 'os quatro ovos vão para a caixa de ovos');
@@ -373,8 +421,34 @@ async function cenario(a, f) {
   confere(vacas.length === 2 && vacas.every((b) => b.cercado && b.x > cur.x + 0.5 && b.x < cur.x + cur.l - 0.5 && b.z > cur.z + 0.5 && b.z < cur.z + cur.p - 0.5), `as vacas ficam dentro do curral (${vacas.map((b) => `${b.x.toFixed(1)},${b.z.toFixed(1)}`).join(' / ')})`);
   await foto('vacas-no-curral', true);
   await pular(3600 + 5);
-  await tocarAbrigo('curral');
-  igual(await painel(), null, 'com leite pronto, o toque no curral ordenha direto');
+  if (!comDedo) {
+    // teclado e controle: de frente para o curral, o contorno dourado fica nele e o botão de agir mostra o leite; segurar
+    // Espaço abre a roda, as setas andam por ela, Esc fecha sem fazer nada; segurar o A do controle abre, o A escolhe
+    const lado = await deFrentePara(cur.id);
+    if (confere(!!lado, 'há um lado livre do curral para ficar de frente')) {
+      await segurarTecla('Space');
+      let r = await roda();
+      confere(!!r && r[0] === 'ordenhar' && r.includes('abrir'), `segurar Espaço de frente para o curral abre a roda: ordenhar (a principal) e abrir (veio ${JSON.stringify(r)})`);
+      igual(await J(() => document.activeElement && document.activeElement.dataset.opcao), 'ordenhar', 'soltar o Espaço deixa o foco na principal da roda');
+      const dt = await J((id) => { const d = window.__jogo.cena.destaque, a = document.querySelector('.agir'); return { ent: d.entidade, cor: d.cor, agir: !a.hidden, ic: a.querySelector('canvas').dataset.chave }; }, cur.id);
+      confere(dt.ent === cur.id && dt.cor === '#ffe07a', `no teclado, o curral à frente fica com o contorno dourado (${JSON.stringify(dt)})`);
+      confere(dt.agir && dt.ic === 'icone/leite', `o botão de agir mostra o desenho da ordenha (veio "${dt.ic}")`);
+      await foto('roda-no-teclado');
+      await pg.keyboard.press('ArrowRight'); await quadro();
+      const foc = await J(() => document.activeElement && document.activeElement.dataset.opcao);
+      confere(!!foc && foc !== 'ordenhar', `a seta leva o foco a outra ação da roda (veio "${foc}")`);
+      await pg.keyboard.press('Escape'); await quadro();
+      confere(!(await roda()), 'Esc fecha a roda');
+      igual((await A('fila')).length, 0, 'fechar a roda não faz nada');
+      igual((await A('bichos', 'curral')).reduce((n, b) => n + b.pronto, 0), 2, 'o leite segue esperando');
+      await segurarBotao(0);
+      r = await roda();
+      confere(!!r && r[0] === 'ordenhar', `segurar o A do controle abre a roda (veio ${JSON.stringify(r)})`);
+      await controle(0);
+      confere(!(await roda()), 'o A escolhe a ação focada e a roda fecha');
+    } else await principalDoAbrigo('curral', 'ordenhar', 'o curral com leite');
+  } else await principalDoAbrigo('curral', 'ordenhar', 'o curral com leite');
+  igual(await painel(), null, 'com leite pronto, a principal ordenha (sem abrir o painel)');
   await ateParar();
   await fecharTelas();
   igual(await A('cesto', 'leite'), 2, 'as duas ordenhas vão para o balde');
@@ -382,8 +456,8 @@ async function cenario(a, f) {
   confere(await J(() => { const c = document.querySelector('.chip.recipiente[data-produto="leite"]'); return !!c && !c.hidden && c.textContent === '2/2' && c.classList.contains('cheio'); }), 'o HUD mostra o balde cheio: 2/2');
   // o balde cheio: o toque abre o painel, que explica; vender esvazia; o botão do painel recolhe
   await pular(3600 + 5);
-  await tocarAbrigo('curral');
-  igual(await painel(), 'abrigo', 'com o balde cheio, o toque no curral abre o painel');
+  await abrirAbrigo('curral', 'o curral com o balde cheio');
+  igual(await painel(), 'abrigo', 'com o balde cheio, o toque no curral abre o painel (ordenhar não está na roda)');
   confere(await J(() => { const v = document.querySelector('.veu .abr-aviso'); return !!v && /Balde está cheio/i.test(v.textContent); }), 'o painel diz que o balde está cheio e o que fazer');
   confere(await J(() => document.querySelector('[data-k="recolher"]').classList.contains('sem')), 'o botão de ordenhar fica apagado com o balde cheio');
   await tamanhos('painel do curral (balde cheio)');
@@ -391,7 +465,7 @@ async function cenario(a, f) {
   await fecharPainel();
   await vender();
   igual(await A('cesto', 'leite'), 0, 'o leite se vende na banca');
-  await tocarAbrigo('curral');
+  await abrirAbrigo('curral', 'o curral com leite');
   if ((await painel()) === 'abrigo') await apertar('recolher');
   igual(await painel(), null, 'ordenhar pelo botão do painel fecha o painel');
   await ateParar();
@@ -408,8 +482,8 @@ async function cenario(a, f) {
   igual((await A('bichos', 'aprisco')).length, 3, 'a aba da loja vende três ovelhas para o aprisco');
   confere(await J(() => { const c = document.querySelector('.oferta[data-item="ovelha"]'); return !!c && !!c.querySelector('[data-k="ver-ovelha"]'); }), 'com o aprisco cheio, a ovelha leva ao aprisco (onde está a ampliação)');
   await fecharPainel();
-  await tocarAbrigo('aprisco');
-  igual(await painel(), 'abrigo', 'tocar no aprisco abre o painel');
+  await abrirAbrigo('aprisco', 'o aprisco com fome');
+  igual(await painel(), 'abrigo', 'tocar no aprisco (e "Abrir", quando vem a roda) abre o painel');
   await apertar('encher-cocho');
   await apertar('encher-bebedouro');
   await fecharPainel();
@@ -418,8 +492,8 @@ async function cenario(a, f) {
   await pular(4 * 3600 + 5);
   igual((await A('bichos', 'aprisco')).reduce((n, b) => n + b.pronto, 0), 3, 'em 4 horas a lã das três ovelhas cresce');
   confere((await A('tem', 'tesoura-de-tosquia')) === 0, '(sem tesoura ainda)');
-  await tocarAbrigo('aprisco');
-  igual(await painel(), 'abrigo', 'sem tesoura, o toque no aprisco abre o painel');
+  await abrirAbrigo('aprisco', 'o aprisco sem tesoura');
+  igual(await painel(), 'abrigo', 'sem tesoura, o toque no aprisco abre o painel (tosquiar não está na roda)');
   confere(await J(() => { const v = document.querySelector('.veu .abr-aviso'); return !!v && /tesoura/i.test(v.textContent) && !!v.querySelector('[data-k="ir-comprar"]'); }), 'o painel diz que falta a tesoura e oferece comprar na loja');
   await tamanhos('painel do aprisco (sem tesoura)');
   await foto('aprisco-sem-tesoura');
@@ -428,8 +502,15 @@ async function cenario(a, f) {
   await tocarEm('[data-k="c1-tesoura-de-tosquia"]');
   igual(await A('tem', 'tesoura-de-tosquia'), 1, 'a loja vende a tesoura de tosquia');
   await fecharPainel();
-  await tocarAbrigo('aprisco');
-  igual(await painel(), null, 'com a tesoura, o toque no aprisco tosquia direto');
+  if (!comDedo) {
+    // apertar e soltar o Espaço (sem segurar) de frente para o aprisco faz a principal direto, sem a roda
+    if (await deFrentePara(apr.id)) {
+      await pg.keyboard.press('Space'); await quadro();
+      confere(!(await roda()), 'o Espaço curto não abre a roda');
+      confere((await A('fila')).some((x) => /tosquiar/.test(x)) || (await J(() => window.__jogo.mundo.personagem.acao && window.__jogo.mundo.personagem.acao.id === 'tosquiar')), `o Espaço curto faz a principal: tosquiar (fila: ${(await A('fila')).join(', ')})`);
+    } else await principalDoAbrigo('aprisco', 'tosquiar', 'o aprisco com lã');
+  } else await principalDoAbrigo('aprisco', 'tosquiar', 'o aprisco com lã');
+  igual(await painel(), null, 'com a tesoura, a principal tosquia (sem abrir o painel)');
   await ateParar();
   await fecharTelas();
   igual(await A('cesto', 'la'), 3, 'a lã das três ovelhas vai para o cesto');
@@ -457,11 +538,11 @@ async function cenario(a, f) {
   igual(foto2, foto1, 'recarregar traz os bichos, o que está pronto, o cocho, o bebedouro e o que o Seu Tonho já explicou');
   confere(JSON.parse(foto2).vistos.length >= 4, 'as explicações do Seu Tonho ficam gravadas (não se repetem)');
   // recolhe o que juntou e vende (para a caixa de ovos não encher no fim de vida)
-  for (const t of ['galinheiro', 'curral', 'aprisco']) { await tocarAbrigo(t); if ((await painel()) !== null) await fecharPainel(); await ateParar(); await fecharTelas(); }
+  for (const t of ['galinheiro', 'curral', 'aprisco']) { await tocarAbrigo(t); const r = await roda(); if (r) await naRoda(r[0]); if ((await painel()) !== null) await fecharPainel(); await ateParar(); await fecharTelas(); }
   await vender();
 
   // ================= ampliar o galinheiro (o comando é da frente de construir; o botão é deste painel) =================
-  await tocarAbrigo('galinheiro');
+  await abrirAbrigo('galinheiro', 'o galinheiro para ampliar');
   igual(await painel(), 'abrigo', 'o painel do galinheiro abre');
   await apertar('comprar-galinha');
   await apertar('comprar-galinha');
@@ -496,9 +577,10 @@ async function cenario(a, f) {
   await J(([x, z]) => window.__jogo.olhar(x, z), [gal.x + 1.5, gal.z + 1.5]);
   confere((await J(() => window.__baloes().map((b) => b.icone))).includes('ui/relogio'), 'o balão do galinheiro mostra que um bicho espera o destino');
   await foto('fim-de-vida-balao', true);
-  await tocarAbrigo('galinheiro'); // a Mão recolhe os últimos ovos
+  await tocarAbrigo('galinheiro'); // a principal da roda recolhe os últimos ovos
+  { const r = await roda(); if (r) await naRoda(r[0]); if ((await painel()) !== null) await fecharPainel(); }
   await ateParar(); await fecharTelas();
-  await tocarAbrigo('galinheiro');
+  await abrirAbrigo('galinheiro', 'o galinheiro no fim de vida');
   igual(await painel(), 'abrigo', 'o painel do galinheiro abre');
   confere(await J(() => document.querySelectorAll('.veu .abr-bicho.fim').length === 3), 'o painel mostra as três galinhas paradas');
   confere(await J(() => /Só mais/.test(document.querySelector('.veu .abr-bicho:not(.fim)') ? document.querySelector('.veu .abr-grade, .veu .abr-bichos').textContent : '')), 'a galinha quase no fim avisa quantos ovos faltam');

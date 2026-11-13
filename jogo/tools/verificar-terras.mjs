@@ -140,7 +140,7 @@ async function cenario(a, f) {
   let matoSem = (await J(() => window.__t.obst('mato')))[0];
   if (matoSem) {
     const o = await principalDe({ x: matoSem.x, z: matoSem.z });
-    confere(!!o && !o.ok && o.texto === 'sem-ferramenta', `sem ferramenta de limpar, o mato diz que falta a ferramenta (veio ${JSON.stringify(o)})`);
+    confere(!!o && !o.ok && /^sem-ferramenta/.test(o.texto || ''), `sem ferramenta de limpar, o mato diz que falta a ferramenta (veio ${JSON.stringify(o)})`);
   }
 
   // ---- comprar a foice e roçar: um toque no mato faz a cadeia (busca a foice no celeiro, vai e roça)

@@ -149,8 +149,18 @@ function jogador(a, prefixo) {
       await quadro(200);
     }
   }
+  // a roda de ações (a indústria com produto pronto: retirar e abrir): as opções, a principal primeiro; null = fechada
+  const roda = () => J(() => (window.__jogo.acoes.rodaAberta ? [...document.querySelectorAll('.roda-acoes .bt-roda')].map((b) => b.dataset.opcao) : null));
+  // escolhe uma opção da roda (depois do tempo em que o clique fantasma do toque não vale)
+  const naRoda = async (id) => { await esperar(450); return tocarEm(`.roda-acoes [data-opcao="${id}"]`); };
+  // a construção com coisa pronta: o toque abre a roda; a principal retira
+  async function retirarPelaRoda(tipo, alto, onde) {
+    await tocarConstrucao(tipo, alto);
+    const r = await roda();
+    if (confere(!!r && r[0] === 'retirarProduto' && r.includes('abrir'), `${onde}: o toque abre a roda com retirar (a principal) e abrir (veio ${JSON.stringify(r)})`)) await naRoda('retirarProduto');
+  }
   const tamanhos = async (onde, seletor = '.veu') => { const r = await J((s) => window.__i.pequenos(s), seletor); confere(r.length === 0, `${onde}: ${r.slice(0, 5).join('; ')}`); const c = await J(() => window.__i.cabe()); if (seletor === '.veu') confere(!c, `${onde}: ${c}`); };
-  return { pg, cdp, J, quadro, tocarXY, foto, painel, tem, ind, avisos, avisou, tocarEm, tocarConstrucao, ateParar, fecharPainel, fecharTelas, tamanhos };
+  return { pg, cdp, J, quadro, tocarXY, foto, painel, tem, ind, avisos, avisou, tocarEm, tocarConstrucao, ateParar, fecharPainel, fecharTelas, tamanhos, roda, naRoda, retirarPelaRoda };
 }
 const semErros = (a, onde) => confere(a.erros.length === 0, `${onde}: erro no console: ${a.erros.slice(0, 3).join(' | ')}`);
 
@@ -326,16 +336,25 @@ try {
   igual((await o.ind('bancada-de-carpintaria')).saida.length, 1, 'a segunda tábua ficou pronta e espera na saída');
   await o.avisou(/Bancada de carpintaria: saiu tábua/i, 'o jogo avisa que a receita ficou pronta');
   await o.foto('10-balao-pronto');
-  igual(await J(() => window.__jogo.estado().modo.id), 'mao', 'ela está no modo mão');
   await o.tocarConstrucao('bancada-de-carpintaria', 0.3);
-  igual(await o.painel(), null, 'no modo mão, o toque na bancada com coisa pronta não abre o painel');
-  confere(await J(() => window.__jogo.ocupada()), 'ela vai até a bancada retirar');
+  igual(await o.painel(), null, 'o toque na bancada com coisa pronta não abre o painel');
+  let rd = await o.roda();
+  confere(!!rd && rd[0] === 'retirarProduto' && rd.includes('abrir'), `o toque na bancada com coisa pronta abre a roda: retirar (a principal) e abrir (veio ${JSON.stringify(rd)})`);
+  confere(!(await J(() => window.__jogo.ocupada())), 'abrir a roda não manda ela fazer nada');
+  await o.foto('10b-roda-da-bancada');
+  await o.naRoda('retirarProduto');
+  confere(await J(() => window.__jogo.ocupada()), '"Retirar" na roda: ela vai até a bancada retirar');
   await o.ateParar();
-  igual(await o.tem('tabua'), tab0 + 2, 'o toque retira a tábua pronta');
+  igual(await o.tem('tabua'), tab0 + 2, 'a principal da roda retira a tábua pronta');
   await J(() => window.__jogo.avancar(21));
+  // "Abrir" na roda abre o painel, mesmo com coisa pronta
   await o.tocarConstrucao('bancada-de-carpintaria', 0.3);
+  if (await o.roda()) await o.naRoda('abrir');
+  igual(await o.painel(), 'industria', '"Abrir" na roda abre o painel da bancada');
+  await o.fecharPainel();
+  await o.retirarPelaRoda('bancada-de-carpintaria', 0.3, 'a terceira tábua');
   await o.ateParar();
-  igual(await o.tem('tabua'), tab0 + 3, 'a terceira tábua também sai com um toque');
+  igual(await o.tem('tabua'), tab0 + 3, 'a terceira tábua também sai pela roda');
   // sem nada pronto, o toque abre o painel; a quarta tábua fica pronta com o jogo fechado
   await o.tocarConstrucao('bancada-de-carpintaria', 0.3);
   igual(await o.painel(), 'industria', 'sem nada pronto, o toque abre o painel');
@@ -407,9 +426,9 @@ try {
   igual(JSON.stringify(await o.ind('moinho')), '{"fila":[],"fazendo":false,"saida":["fuba","fuba","racao"]}', 'três horas depois as duas receitas estão prontas, na ordem, junto com a que já esperava');
   await J(([x, z]) => window.__jogo.olhar(x, z), [moinho.x + 1.5, moinho.z + 1.5]);
   await o.foto('15-de-volta-horas-depois');
-  await o.tocarConstrucao('moinho', 0.6);
+  await o.retirarPelaRoda('moinho', 0.6, 'o moinho com fubá e ração prontos');
   await o.ateParar();
-  igual(await o.tem('fuba'), 2, 'o toque no moinho retira os 2 fubás');
+  igual(await o.tem('fuba'), 2, '"Retirar" na roda do moinho retira os 2 fubás');
   igual(await o.tem('racao'), 2, 'e as 2 rações');
   confere(await J(() => window.__jogo.estado().feitas.includes('moinho')), 'a missão "moinho" foi cumprida com 2 fubás');
   await o.fecharTelas();
@@ -579,7 +598,7 @@ try {
   await o.quadro(200);
   await o.foto('06-balao-pronto');
   const tabCel = await o.tem('tabua');
-  await o.tocarConstrucao('bancada-de-carpintaria', 0.3);
+  await o.retirarPelaRoda('bancada-de-carpintaria', 0.3, 'celular, a bancada com tábua pronta');
   await o.ateParar();
   // (a subida para o nível 7 também dá tábuas de prêmio: por isso "pelo menos uma a mais")
   confere((await o.tem('tabua')) >= tabCel + 1 && (await o.ind('bancada-de-carpintaria')).saida.length === 0, 'celular: o dedo na bancada retira a tábua pronta');

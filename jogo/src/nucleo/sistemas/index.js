@@ -34,6 +34,8 @@ import './pedidos.js'; // depois de industria.js (o quadro só pede receita de i
 // frente dos animais de trabalho e de estimação: boi de arado, cavalo, jumento com carroça e barril; cachorro e gato
 import './trabalho.js'; // depois de animais.js, de loja.js, de lavoura.js e de poco.js
 import './estimacao.js';
+// o campo de plantação que cresce preparando a terra (a enxada e o boi só aram no campo; depois de trabalho.js: a ajuda do boi)
+import './campo.js';
 // o começo humilde: o Seu Tonho na fazenda, a chegada, a cerca e as reformas (depois de trabalho.js: soma à figura dela)
 import './comeco.js';
 // as ações por toque: a ação natural de cada alvo, a roda de ações e a vaga "na mão" (depois de todas as frentes)

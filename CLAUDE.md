@@ -71,28 +71,41 @@ Este arquivo é o ponto de partida de qualquer sessão nova (gente ou agente). L
   - pergunta de começo novo para gravação antiga.
 - **Materiais:** "Onde conseguir?" em todo custo; o Seu Tonho explica cada material uma vez; prêmios que dizem para que servem.
 
-## Em andamento (frentes abertas no fim de 13/11/2026)
+## Em andamento: pausado em 13/11/2026 (limite semanal)
+
+Todas as frentes foram paradas no meio e o que fizeram está nos commits "Andamento" do branch. Os 331 testes passam, mas **o branch ainda não foi conferido no navegador nem publicado**. A versão publicada (artefato versão `1794596238-c4f6`) é a do commit `2ecd24f`: começo humilde, tela de carregando, "Resetar: conta nova".
+
+**Para retomar:**
+1. Ler este arquivo e `git log --oneline -15`.
+2. Rodar `npm run testar` e `node tools/validar.mjs` em `jogo/`, para ver o estado.
+3. Reabrir as frentes abaixo, uma por subagente, cada uma lendo o próprio pedaço daqui.
+
+**As frentes e onde cada uma parou:**
 
 - **Ações por toque** (aprovado; veja `arte/mockups/acoes/LEIA.md`):
-  - sai a barra Mão/Enxada/Semear/Regar;
-  - o toque faz a ação natural do alvo, com balãozinho do que vai acontecer;
-  - vaga "Na mão" para escolher semente e ração;
-  - roda de ações em bichos e árvores.
-- **Área de plantio:**
-  - arar só no campo (antes dava para arar qualquer grama: defeito achado pelo dono);
-  - ampliar o campo por fileira encostada nele, "preparando a terra" com ouro e **adubo**;
-  - limite do campo por nível.
-- **Bancada simples:** o caixote vira bancada simples (só o balcão, sem postes nem toldo), e a bancada vira a banca completa. Arte no Codex, depois ligar a cadeia de reformas.
-- **Completar com cash** (fase A): em todo lugar em que falta item, botão turquesa "Completar com N de cash", com o caminho de graça ("Onde conseguir?") sempre junto.
-- **Fase B** (depois da área de plantio, que cuida do ritmo):
+  - o que muda: sai a barra Mão/Enxada/Semear/Regar; o toque faz a ação natural do alvo, com balãozinho do que vai acontecer; vaga "Na mão" para escolher semente e ração; roda de ações em bichos e árvores; arrastar repete a primeira ação;
+  - parou: a lógica (`src/nucleo/sistemas/acoes.js`, `testes/acoes.test.mjs`) está feita em boa parte; estava reescrevendo as verificações do navegador (`tools/verificar-terras.mjs`, `verificar-animais.mjs`, `verificar-industria.mjs`, `verificar-campo.mjs`) para o jeito novo;
+  - falta: terminar as 9 verificações, olhar as fotos e conferir o ritmo (com essa frente o regular caiu para nível 18 no dia 30; a meta é 19).
+- **Área de plantio**:
+  - o que muda: arar só no campo (antes dava para arar qualquer grama, defeito achado pelo dono); ampliar o campo por fileira encostada nele, "preparando a terra" com ouro e **adubo**; limite do campo por nível;
+  - parou: começou `src/nucleo/sistemas/campo.js` e a ligação em `sistemas/index.js`; ainda não estão nos dados: o item `adubo` (material, nível 3, compra 3, venda 1, provisório), o campo em `regras.json`, a missão nova "ampliar-o-campo" (nível 3, +6 adubos), +6 adubos na missão "regador-novo" e o mimo do gato que sorteia 3 adubos (nível 6);
+  - já pronto, na frente de materiais: `nucleo/fontes.js` já cobra fonte para o adubo e mostra "Onde conseguir?". Quando os dados entrarem, `node tools/validar.mjs` tem de listar o adubo em "Materiais com fontes";
+  - falta também: tela "Preparar a terra"; tirar o "arar grama" de `podeArar` em `src/nucleo/sistemas/lavoura.js`; ajustar o jogador automático (`tools/bot/`); acertar o ritmo para 6, 8, 11, 14, 19.
+- **Bancada simples** (o caixote vira bancada simples, só o balcão, sem postes nem toldo; a bancada vira a banca completa):
+  - parou: o Codex já gerou as 4 imagens brutas, guardadas em `arte/jogo/folhas/`: `bancada-de-venda.png`, `bancada-de-venda-cheia.png`, `obra-reforma-bancada.png`, `icone-reforma-bancada.png`; os pedidos estão em `arte/jogo/pedidos/72` a `75`;
+  - falta: conferir as imagens, recortar as peças (`jogo/tools/arte/peca.mjs`, catálogo `jogo/arte/catalogo/`), ligar a cadeia caixote → bancada → banca em `jogo/dados/construcoes.json` (campo `reforma`) e mostrar ao dono.
+- **Completar com cash** (fase A):
+  - o que muda: em todo lugar em que falta item, botão turquesa "Completar com N de cash", com o caminho de graça ("Onde conseguir?") sempre junto; o preço em cash acompanha o tempo de fazer o item; as missões nunca mandam gastar cash;
+  - parou: **nada ficou salvo**; começar do zero, escrevendo primeiro a proposta em `docs/jogo/economia-cash-e-producao.md`.
+- **Fase B** (depois da área de plantio, que mexe no ritmo):
   - item processado (tábua, prego, produtos) sai da loja de ouro e passa a ser produzido;
-  - material bruto pode continuar na loja, mais caro;
-  - definir de onde vem o prego (proposta em `docs/jogo/economia-cash-e-producao.md`);
+  - material bruto (madeira, pedra) fica na loja, mais caro;
+  - prego feito numa forja, de ferro velho (proposta a detalhar);
   - acertar o ritmo de novo.
+  - Hoje os materiais de obra são baratos e sem conta de complexidade (prego 4, tábua 36, madeira 14, pedra 16 de ouro), enquanto colheitas e receitas seguem as fórmulas de `docs/jogo/economia.md` ("Regras de formação de preço").
 
 ## Pendências conhecidas
 
-- **Ritmo:** com as ações por toque em andamento, o regular caiu para nível 18 no dia 30 (a meta é 19).
 - **Gato:** às vezes fica parado sem caminho.
 - **Animais:** o pet passa por cima de construção; filas de bebedouro e cocho; cocho e bebedouro sem desenho de "vazio"; galinheiro e aprisco sem camadas.
 - **Arte que falta:**

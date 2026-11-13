@@ -60,10 +60,11 @@ export const soNoCampo = (m) => !!campoInicial(m);
 // quantas casas de campo (sem sulco, aradas ou plantadas) a fazenda tem. A conta se refaz quando o chão muda.
 export function tamanhoDoCampo(m) {
   const C = m.campo;
-  if (C.tamanho >= 0) return C.tamanho;
+  if (C.tamanho >= 0 && C.passo === m.n) return C.tamanho;
   const loc = m.locais.fazenda;
   let n = 0;
   for (let i = 0; i < loc.chao.length; i++) if (deLavoura(loc.chao[i])) n++;
+  C.passo = m.n;
   return (C.tamanho = n);
 }
 // o maior campo que o nível deixa ter (Infinity sem tabela)
@@ -165,9 +166,8 @@ function fileiraCrua(m, loc, x, z, ja) {
 // corta a fileira em n casas, numa janela que contém a tocada (a ponta de menor X/Z quando ela cabe)
 function cortar(casas, x, z, n) {
   if (casas.length <= n) return casas;
-  const k = casas.findIndex(([cx, cz]) => cx === x && cz === z);
-  const ini = Math.max(0, Math.min(k, casas.length - n), k - n + 1 > 0 ? k - n + 1 : 0);
-  return casas.slice(Math.min(ini, k), Math.min(ini, k) + n);
+  const k = Math.max(0, casas.findIndex(([cx, cz]) => cx === x && cz === z)), ini = Math.max(0, k - n + 1);
+  return casas.slice(ini, ini + n);
 }
 
 const NA_FILA = { acao: null, texto: 'na-fila' };
@@ -262,7 +262,7 @@ registrarGuia('preparou', (m, f, out) => {
 registrarSistema({
   id: 'campo',
   iniciar(m) {
-    m.campo = { tamanho: -1, avisou: false };
+    m.campo = { tamanho: -1, passo: -1, avisou: false }; // (o tamanho vale pelo passo e até o chão mudar)
     m.eventos.ouvir('chaoMudou', () => { m.campo.tamanho = -1; });
   },
   comandos: {
