@@ -23,10 +23,11 @@ const LISTA = [
     ...duas('animal/jumento', ['parado', 'andar', 'andar-barril']), ...duas('animal/cachorro', ['parada', 'andar', 'sentado']), ...duas('animal/gato', ['parada', 'andar', 'sentado']),
   ]],
   ['5. Acréscimos da coordenação: bichos especiais e Seu Tonho', [
-    ...duas('animal/cao-boiadeiro', ['parada', 'andar']), ...duas('animal/gato-siames', ['parada', 'andar']),
+    ...duas('animal/cao-boiadeiro', ['parada', 'andar', 'sentado']), ...duas('animal/gato-siames', ['parada', 'andar', 'sentado']),
     ...duas('animal/cavalo-mangalarga', ['parado', 'andar', 'galope']), ...duas('personagem', ['montada-mangalarga-andar', 'montada-mangalarga-galope']),
     'animal/seu-tonho/parado-frente',
   ]],
+  ['6. Acréscimos da frente de terras', duas('personagem', ['foice', 'plantar-muda'])],
 ];
 
 const nomePlano = (k) => k.replace(/^animal\//, 'animal-').replace(/\//g, '-');

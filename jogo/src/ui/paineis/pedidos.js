@@ -56,7 +56,7 @@ registrarPainel({
       const m = J.mundo, Q = quadroDePedidos(m);
       if (!Q.aberto) { ctx.fechar(); return; }
       // depois da primeira entrega, a dica seguinte
-      if (!dica && m.pedidos.entregues > 0 && !viuDica(m, 'entregar')) dica = 'entregar';
+      if (dica !== 'entregar' && m.pedidos.entregues > 0 && !viuDica(m, 'entregar')) dica = 'entregar'; // (quem já entregou não precisa mais da dica do quadro)
       if (dica === 'entregar' && viuDica(m, 'entregar')) dica = null;
       const a = missaoAtual(m), daMissao = !!a && !a.esperaNivel && a.missao.objetivo.evento === 'entregou';
       // só refaz quando muda o que o quadro mostra (os relógios andam sem refazer)

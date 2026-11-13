@@ -77,7 +77,7 @@ registrarPainel({
       if (guardadas) nome.append(el('small', '', ' ' + T.construir.guardada(guardadas))); else if (tem > 0 || def.limite > 1) nome.append(el('small', '', ' ' + T.construir.tem(tem, def.limite)));
       c.append(iconeDaConstrucao(def.id, 52), nome);
       if (travada) { c.append(trava(T.construir.nivel(def.nivel))); return c; }
-      c.append(el('div', 'info', `${T.construir.casas(def.casas)} · ${def.obraSeg > 0 ? T.construir.obra(def.obraSeg) : T.construir.naHora}`));
+      c.append(el('div', 'info', `${T.construir.casas(def.casas)} · ${def.obraSeg > 0 ? (def.tipo === 'movel' ? T.construir.montagem : T.construir.obra)(def.obraSeg) : T.construir.naHora}`));
       const pe = el('div', 'cons-pe');
       if (guardadas) pe.append(el('div', 'cons-custo'));
       else if (def.custo.cash > 0) { const l = el('div', 'cons-custo'), f = el('span', 'cons-ficha'); f.append(icone('icone/cash', 18), el('span', '', T.construir.cash(def.custo.cash))); l.append(f); pe.append(l); }
@@ -87,7 +87,7 @@ registrarPainel({
       else if (!r.ok && r.motivo === 'limite') c.append(el('div', 'info', frase('limite', r.dados, m.dados)));
       else if (fora) c.append(el('div', 'info', def.onde === 'celeiro' ? T.construir.soDentro : T.construir.soFora));
       if (!(def.custo.cash > 0) || guardadas) {
-        const b = botao({ texto: guardadas ? T.construir.colocar : T.construir.escolher, classe: 'verde' + (r.ok && !fora ? '' : ' sem'), aoClicar: () => escolher(def.id) });
+        const b = botao({ texto: guardadas ? T.construir.colocar : def.tipo === 'movel' ? T.construir.montar : T.construir.escolher, classe: 'verde' + (r.ok && !fora ? '' : ' sem'), aoClicar: () => escolher(def.id) });
         b.dataset.k = 'c-' + def.id;
         pe.append(b);
       }
@@ -266,17 +266,17 @@ SECOES.celeiro = (m, caixa, a) => {
 T.mochila.dica = T.celeiro.dica;
 
 // ---------- o botão da porta do celeiro: "Entrar" quando ela está perto dele, "Sair" lá dentro ----------
-// Fica na linha de baixo do HUD, ao lado da dica: não tapa o celeiro (o toque nele continua guardando o cesto), o
-// dedo alcança e, no teclado e no controle remoto, o foco cai nele assim que o menu abre.
+// Fica na fileira dos modos, embaixo, com a cara deles: não tapa o celeiro (o toque nele continua guardando o cesto),
+// o dedo alcança e, no teclado e no controle remoto, o foco cai nele assim que o menu abre.
 let bPorta = null, tPorta = null, noMenu = false;
 function montarPorta(hud) {
   if (!bPorta) {
-    bPorta = botao({ icone: 'objeto/celeiro-aberto', tamanho: 30, texto: T.celeiro.entrar, classe: 'cons-porta', aoClicar: () => { const m = J.mundo; som.tocar('toque'); foco.sairDoMenu(); m.comando({ tipo: m.personagem.local === 'celeiro' ? 'sair' : 'entrar' }); bPorta.blur(); } });
+    bPorta = botao({ icone: 'objeto/celeiro-aberto', tamanho: 30, texto: T.celeiro.entrar, classe: 'modo cons-porta', aoClicar: () => { const m = J.mundo; som.tocar('toque'); foco.sairDoMenu(); m.comando({ tipo: m.personagem.local === 'celeiro' ? 'sair' : 'entrar' }); bPorta.blur(); } });
     bPorta.dataset.k = 'porta-do-celeiro';
     tPorta = bPorta.lastChild;
     bPorta.hidden = true;
   }
-  const linha = hud.rodape.querySelector('.linha-info') || hud.rodape;
+  const linha = hud.rodape.querySelector('.modos') || hud.rodape;
   if (bPorta.parentNode !== linha) linha.append(bPorta);
   hud.paineis['porta-do-celeiro'] = bPorta; // (é por este nome que o guia das missões manda a seta para cá)
 }
@@ -315,9 +315,9 @@ aoInstalarMundo((m, ctx) => {
   const acertarCamera = () => { const loc = m.local, p = m.personagem, cam = cena.cam; cam.limites = [0, 0, loc.l, loc.p]; cam.seguindo = true; cam.pular(p.x, p.z); cena.chao.sujarTudo(); cena.destaque.x = -1; cena.destaque.entidade = null; };
   ev.ouvir('mudouDeLocal', () => { acertarCamera(); som.tocar('abrir'); });
   if (m.local.interior) acertarCamera(); // a gravação abriu com ela lá dentro
-  ev.ouvir('comecouObra', (d) => { if (!aqui(d)) return; const c = centro(d); part.terra(c[0] - 0.5, c[1] - 0.5, 14); som.tocar('martelo'); });
+  ev.ouvir('comecouObra', (d) => { if (!aqui(d)) return; const c = centro(d); if (!m.local.interior) part.terra(c[0] - 0.5, c[1] - 0.5, 14); som.tocar('martelo'); });
   ev.ouvir('construiu', (d) => { if (aqui(d)) { const c = centro(d); part.brilho(c[0], 0.9, c[1], 16); } avisar(T.ganhos.construiu(d, D), 'bom', 3600); som.tocar('pronto'); });
-  ev.ouvir('enfeitou', (d) => { if (!aqui(d)) return; part.terra(d.x, d.z, 6); som.tocar('martelo'); });
-  ev.ouvir('recolocou', (d) => { if (!aqui(d)) return; part.terra(d.x, d.z, 6); som.tocar('guardar'); });
+  ev.ouvir('enfeitou', (d) => { if (!aqui(d)) return; if (!m.local.interior) part.terra(d.x, d.z, 6); som.tocar('martelo'); });
+  ev.ouvir('recolocou', (d) => { if (!aqui(d)) return; if (!m.local.interior) part.terra(d.x, d.z, 6); som.tocar('guardar'); });
   ev.ouvir('ampliou', (d) => { const e = construcaoPorId(m, d.entidade); if (e && e.local === m.personagem.local) part.brilho(e.x + e.l / 2, 1.2, e.z + e.p / 2, 18); avisar(T.ganhos.ampliou(d), 'bom', 3600); som.tocar('pronto'); });
 });

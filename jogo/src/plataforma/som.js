@@ -169,6 +169,8 @@ export const POR_EVENTO = {
   encheu: 'encher',
   colheu: 'colher',
   recolheu: 'colher',
+  tratou: 'guardar',
+  vendeuAnimal: 'moeda',
   guardou: 'guardar',
   retirou: 'guardar',
   limpou: 'cortar',

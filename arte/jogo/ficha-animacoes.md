@@ -23,6 +23,8 @@ Como é feito: o pedido (`arte/jogo/pedidos/<nome>.md`) vai ao Codex com a cena 
 | boi | `arte/jogo/modelos/boi.png` | `modelo-boi.md` | Boi de trabalho caramelo com coalheira, tirantes de corrente e o arado de madeira atrás: frente, costas e perfil. O arado faz parte da figura. Uma rodada. |
 | cavalo | `arte/jogo/modelos/cavalo.png` | `modelo-cavalo.md` | Cavalo castanho com sela de couro sobre manta vermelha, estribos, cabeçada e rédeas; ninguém montado: frente, costas e perfil. Uma rodada. |
 | montaria | `arte/jogo/modelos/montaria.png` | `modelo-montaria.md` | Folha de modelo da INTERAÇÃO: a personagem montada no cavalo selado (pés nos estribos, mãos nas rédeas), de frente, de costas e de perfil. Anexada aos pedidos da personagem montada. A folha veio com um véu de sujeira quase transparente no fundo, que foi limpo antes de guardar. Uma rodada. |
+| jumento | `arte/jogo/modelos/jumento.png` | `modelo-jumento.md` | Jumento cinza atrelado à carroça de madeira de duas rodas, vazia: frente, costas e perfil. A carroça faz parte da figura. Uma rodada. |
+| cachorro | `arte/jogo/modelos/cachorro.png` | `modelo-cachorro.md` | Vira-lata caramelo de coleira vermelha, peito, patas e ponta do rabo brancos: frente, costas e perfil. Uma rodada. |
 
 ## 1. Personagem: movimento e lavoura
 
@@ -109,22 +111,61 @@ Como é feito: o pedido (`arte/jogo/pedidos/<nome>.md`) vai ao Codex com a cena 
 | `personagem/montada-andar-costas` | Pronta | 8 | 352x480 | 176,439 | 8 | 1 | `personagem-montada-andar-costas.md` | Par da de frente. Figura inteira com 458 pontos: o cavalo fica uns 5% maior que o solto e a cabeça dela do tamanho da de a pé. Tamanho pela massa 263. O pedido foi com seis referências e a ferramenta do Codex só aceita cinco (ele mesmo descartou uma). |
 | `personagem/montada-galope-frente` | Pronta | 8 | 520x488 | 260,446 | 12 | 1 | `personagem-montada-galope-frente.md` | Cavalo e personagem num desenho só, no galope da folha do cavalo; ela vai inclinada para a frente, o lenço voando. Em duas fileiras de 4; ampliada 1,09 vez. Mesma escala da montada andando (tamanho pela massa 291). |
 | `personagem/montada-galope-costas` | Pronta | 8 | 456x456 | 228,415 | 12 | 1 | `personagem-montada-galope-costas.md` | Par da de frente, na escala da montada andando de costas (tamanho pela massa 263). Pedido com cinco referências (sem a folha de modelo do cavalo, que a da montaria já mostra). |
-| `animal/jumento/parado-frente` | Falta | | | | |  |  |  |
-| `animal/jumento/parado-costas` | Falta | | | | |  |  |  |
-| `animal/jumento/andar-frente` | Falta | | | | |  |  |  |
-| `animal/jumento/andar-costas` | Falta | | | | |  |  |  |
-| `animal/cachorro/parado-frente` | Falta | | | | |  |  |  |
-| `animal/cachorro/parado-costas` | Falta | | | | |  |  |  |
-| `animal/cachorro/andar-frente` | Falta | | | | |  |  |  |
-| `animal/cachorro/andar-costas` | Falta | | | | |  |  |  |
-| `animal/cachorro/sentado-frente` | Falta | | | | |  |  |  |
-| `animal/cachorro/sentado-costas` | Falta | | | | |  |  |  |
-| `animal/gato/parado-frente` | Falta | | | | |  |  |  |
-| `animal/gato/parado-costas` | Falta | | | | |  |  |  |
+| `animal/jumento/parado-frente` | Pronta | 8 (4 desenhos) | 424x280 | 212,245 | 4 | 1 | `jumento-parado-frente.md` | Jumento com a carroça atrás (um desenho só): mexe as orelhas compridas, respira, pisca, balança o rabo; a carroça não se mexe. 255 pontos de altura (fora da tabela de escala); apoio sob o corpo do jumento (--apoio-dx -55). Tamanho pela massa 219. |
+| `animal/jumento/parado-costas` | Pronta | 8 (4 desenhos) | 464x352 | 232,257 | 4 | 1 | `jumento-parado-costas.md` | Carroça em primeiro plano, jumento adiante; mexe as orelhas e o rabo e pisca. Preparada a 330 px (jumento mais carroça) para a roda bater com a da vista de frente; apoio levado para baixo do jumento. |
+| `animal/jumento/andar-frente` | Pronta | 8 | 384x280 | 192,245 | 8 | 1 | `jumento-andar-frente.md` | Passo de quatro tempos com a carroça vazia atrás; as rodas mudam os raios de posição. Em duas fileiras de 4. O Codex avisou de um halo no fundo: era o véu de alfa baixo, que a limpeza tira. |
+| `animal/jumento/andar-costas` | Pronta | 8 | 504x352 | 252,257 | 8 | 1 | `jumento-andar-costas.md` | Passo de quatro tempos visto por trás, com a carroça vazia em primeiro plano; em duas fileiras de 4. Mesmo tamanho e apoio da espera. |
+| `animal/jumento/andar-barril-frente` | Pronta | 8 | 384x280 | 192,245 | 8 | 1 | `jumento-andar-barril-frente.md` | A mesma folha do andar com um barril em pé na carroça; mesmos quadros, tamanho e apoio da carroça vazia, para o jogo trocar uma pela outra sem pulo. |
+| `animal/jumento/andar-barril-costas` | Pronta | 8 | 520x352 | 260,257 | 8 | 1 | `jumento-andar-barril-costas.md` | A mesma folha do andar de costas com o barril em pé na carroça; mesmos quadros, tamanho e apoio da carroça vazia. A madeira saiu um tom mais alaranjada que na carroça vazia. |
+| `animal/cachorro/parada-frente` | Pronta | 8 (4 desenhos) | 136x184 | 68,158 | 5 | 1 | `cachorro-parada-frente.md` | Vira-lata caramelo de coleira vermelha: descanso, ofega, abana o rabo e pisca; 4 desenhos em 8 quadros. |
+| `animal/cachorro/parada-costas` | Pronta | 8 (4 desenhos) | 144x192 | 72,165 | 5 | 1 | `cachorro-parada-costas.md` | O mesmo, visto por trás: abana o rabo, vira a cabeça e ofega; 4 desenhos em 8 quadros. |
+| `animal/cachorro/andar-frente` | Pronta | 6 | 144x192 | 72,166 | 9 | 1 | `cachorro-andar-frente.md` | Trote alegre de 6 quadros, língua de fora e rabo erguido; mesmo tamanho da espera (pela massa). |
+| `animal/cachorro/andar-costas` | Pronta | 6 | 152x200 | 76,173 | 9 | 1 | `cachorro-andar-costas.md` | Trote de 6 quadros visto por trás; mesmo tamanho da espera (pela massa); um quadro com as patas no ar. |
+| `animal/cachorro/sentado-frente` | Pronta | 8 (4 desenhos) | 176x192 | 88,170 | 5 | 1 | `cachorro-sentado-frente.md` | Sentado, para quando a personagem para: ofega, varre o chão com o rabo, inclina a cabeça e pisca; 4 desenhos em 8 quadros; cabeça do mesmo tamanho da figura em pé. |
+| `animal/cachorro/sentado-costas` | Pronta | 8 (4 desenhos) | 136x192 | 68,170 | 5 | 1 | `cachorro-sentado-costas.md` | Sentado visto por trás: varre o chão com o rabo, levanta uma orelha, ofega e pisca; 4 desenhos em 8 quadros. |
+| `animal/gato/parada-frente` | Falta | | | | |  |  |  |
+| `animal/gato/parada-costas` | Falta | | | | |  |  |  |
 | `animal/gato/andar-frente` | Falta | | | | |  |  |  |
 | `animal/gato/andar-costas` | Falta | | | | |  |  |  |
 | `animal/gato/sentado-frente` | Falta | | | | |  |  |  |
 | `animal/gato/sentado-costas` | Falta | | | | |  |  |  |
+
+## 5. Acréscimos da coordenação: bichos especiais e Seu Tonho
+
+| Chave | Estado | Quadros | Casa | Apoio | qps | Rodadas | Pedido | Nota |
+|---|---|---|---|---|---|---|---|---|
+| `animal/cao-boiadeiro/parada-frente` | Pronta | 8 | 136x184 | 68,158 | 5 | 1 | `recolorida de animal/cachorro/parada-frente` | Mesmo desenho do cachorro com o pelo cinza-azulado no lugar do caramelo, por código (recolorir.mjs --receita boiadeiro); peito, patas e ponta do rabo brancos e coleira vermelha iguais; mesma casa e apoio. |
+| `animal/cao-boiadeiro/parada-costas` | Pronta | 8 | 144x192 | 72,165 | 5 | 1 | `recolorida de animal/cachorro/parada-costas` | Mesmo desenho do cachorro com o pelo cinza-azulado no lugar do caramelo, por código (recolorir.mjs --receita boiadeiro); peito, patas e ponta do rabo brancos e coleira vermelha iguais; mesma casa e apoio. |
+| `animal/cao-boiadeiro/andar-frente` | Pronta | 6 | 144x192 | 72,166 | 9 | 1 | `recolorida de animal/cachorro/andar-frente` | Mesmo desenho do cachorro com o pelo cinza-azulado no lugar do caramelo, por código (recolorir.mjs --receita boiadeiro); peito, patas e ponta do rabo brancos e coleira vermelha iguais; mesma casa e apoio. |
+| `animal/cao-boiadeiro/andar-costas` | Pronta | 6 | 152x200 | 76,173 | 9 | 1 | `recolorida de animal/cachorro/andar-costas` | Mesmo desenho do cachorro com o pelo cinza-azulado no lugar do caramelo, por código (recolorir.mjs --receita boiadeiro); peito, patas e ponta do rabo brancos e coleira vermelha iguais; mesma casa e apoio. |
+| `animal/cao-boiadeiro/sentado-frente` | Pronta | 8 | 176x192 | 88,170 | 5 | 1 | `recolorida de animal/cachorro/sentado-frente` | Fora do pedido (a coordenação pediu parada e andar): o sentado do cachorro com o pelo do boiadeiro, para ele também sentar quando a personagem para. |
+| `animal/cao-boiadeiro/sentado-costas` | Pronta | 8 | 136x192 | 68,170 | 5 | 1 | `recolorida de animal/cachorro/sentado-costas` | Fora do pedido (a coordenação pediu parada e andar): o sentado do cachorro com o pelo do boiadeiro, para ele também sentar quando a personagem para. |
+| `animal/gato-siames/parada-frente` | Falta | | | | |  |  |  |
+| `animal/gato-siames/parada-costas` | Falta | | | | |  |  |  |
+| `animal/gato-siames/andar-frente` | Falta | | | | |  |  |  |
+| `animal/gato-siames/andar-costas` | Falta | | | | |  |  |  |
+| `animal/gato-siames/sentado-frente` | Falta | | | | |  |  |  |
+| `animal/gato-siames/sentado-costas` | Falta | | | | |  |  |  |
+| `animal/cavalo-mangalarga/parado-frente` | Pronta | 8 | 344x368 | 172,326 | 4 | 1 | `recolorida de animal/cavalo/parado-frente` | Mesmo desenho do cavalo comum com a pelagem baia (dourada) no lugar da alazã, por código (jogo/tools/arte/recolorir.mjs --receita mangalarga); crina, rabo, meias e arreios iguais; mesma casa e apoio. |
+| `animal/cavalo-mangalarga/parado-costas` | Pronta | 8 | 288x376 | 144,332 | 4 | 1 | `recolorida de animal/cavalo/parado-costas` | Mesmo desenho do cavalo comum com a pelagem baia (dourada) no lugar da alazã, por código (jogo/tools/arte/recolorir.mjs --receita mangalarga); crina, rabo, meias e arreios iguais; mesma casa e apoio. |
+| `animal/cavalo-mangalarga/andar-frente` | Pronta | 8 | 352x352 | 176,310 | 8 | 1 | `recolorida de animal/cavalo/andar-frente` | Mesmo desenho do cavalo comum com a pelagem baia (dourada) no lugar da alazã, por código (jogo/tools/arte/recolorir.mjs --receita mangalarga); crina, rabo, meias e arreios iguais; mesma casa e apoio. |
+| `animal/cavalo-mangalarga/andar-costas` | Pronta | 8 | 288x376 | 144,332 | 8 | 1 | `recolorida de animal/cavalo/andar-costas` | Mesmo desenho do cavalo comum com a pelagem baia (dourada) no lugar da alazã, por código (jogo/tools/arte/recolorir.mjs --receita mangalarga); crina, rabo, meias e arreios iguais; mesma casa e apoio. |
+| `animal/cavalo-mangalarga/galope-frente` | Pronta | 8 | 472x352 | 236,310 | 12 | 1 | `recolorida de animal/cavalo/galope-frente` | Mesmo desenho do cavalo comum com a pelagem baia (dourada) no lugar da alazã, por código (jogo/tools/arte/recolorir.mjs --receita mangalarga); crina, rabo, meias e arreios iguais; mesma casa e apoio. |
+| `animal/cavalo-mangalarga/galope-costas` | Pronta | 8 | 392x344 | 196,300 | 12 | 1 | `recolorida de animal/cavalo/galope-costas` | Mesmo desenho do cavalo comum com a pelagem baia (dourada) no lugar da alazã, por código (jogo/tools/arte/recolorir.mjs --receita mangalarga); crina, rabo, meias e arreios iguais; mesma casa e apoio. |
+| `personagem/montada-mangalarga-andar-frente` | Pronta | 8 | 392x504 | 196,462 | 8 | 1 | `recolorida de personagem/montada-andar-frente` | A mesma folha da montada com o cavalo de pelagem baia (dourada), por código (recolorir.mjs --receita mangalarga); a personagem, a sela e as botas não mudam; mesma casa e apoio. |
+| `personagem/montada-mangalarga-andar-costas` | Pronta | 8 | 352x480 | 176,439 | 8 | 1 | `recolorida de personagem/montada-andar-costas` | A mesma folha da montada com o cavalo de pelagem baia (dourada), por código (recolorir.mjs --receita mangalarga); a personagem, a sela e as botas não mudam; mesma casa e apoio. |
+| `personagem/montada-mangalarga-galope-frente` | Pronta | 8 | 520x488 | 260,446 | 12 | 1 | `recolorida de personagem/montada-galope-frente` | A mesma folha da montada com o cavalo de pelagem baia (dourada), por código (recolorir.mjs --receita mangalarga); a personagem, a sela e as botas não mudam; mesma casa e apoio. |
+| `personagem/montada-mangalarga-galope-costas` | Pronta | 8 | 456x456 | 228,415 | 12 | 1 | `recolorida de personagem/montada-galope-costas` | A mesma folha da montada com o cavalo de pelagem baia (dourada), por código (recolorir.mjs --receita mangalarga); a personagem, a sela e as botas não mudam; mesma casa e apoio. |
+| `animal/seu-tonho/parado-frente` | Falta | | | | |  |  |  |
+
+## 6. Acréscimos da frente de terras
+
+| Chave | Estado | Quadros | Casa | Apoio | qps | Rodadas | Pedido | Nota |
+|---|---|---|---|---|---|---|---|---|
+| `personagem/foice-frente` | Falta | | | | |  |  |  |
+| `personagem/foice-costas` | Falta | | | | |  |  |  |
+| `personagem/plantar-muda-frente` | Falta | | | | |  |  |  |
+| `personagem/plantar-muda-costas` | Falta | | | | |  |  |  |
 
 ## Como cada folha foi preparada
 
@@ -136,6 +177,12 @@ A folha crua de cada chave e as opções passadas a `folha.mjs` (para refazer ig
 | `animal/boi/parado-frente` | `parado-frente.png` (2172x724) | `--altura 290 --quadros 4 --qps 4 --alinhar molde --molde 0.4-1 --em-pe-quadro 1 --faixa-pes 0.25 --chao 0.09 --sequencia 1,2,2,3,3,1,4,1 --altura-livre --apoio-dx -55` | 3.1% | altura varia 3.1% entre quadros (290 290 297 288), esperado nesta ação |
 | `animal/boi/puxar-costas` | `puxar-costas.png` (1536x1024) | `--altura 358 --quadros 8 --qps 8 --eixo massa --base linha --chao 0.19 --tamanho-massa 226 --altura-livre --apoio-dx 30` | 1.8% | a folha crua é menor que a saída (figura em pé com 327 pontos para 358): a figura foi ampliada 1.09 vezes |
 | `animal/boi/puxar-frente` | `puxar-frente.png` (1536x1024) | `--altura 290 --quadros 8 --qps 8 --eixo massa --base linha --chao 0.09 --tamanho-massa 227 --altura-livre --apoio-dx -20` | 5.4% | a folha crua é menor que a saída (figura em pé com 257 pontos para 290): a figura foi ampliada 1.07 vezes; altura varia 5.4% entre quadros (276 273 272 268 276 269 261 264), esperado nesta ação |
+| `animal/cachorro/andar-costas` | `andar-costas.png` (2172x724) | `--altura 165 --quadros 6 --qps 9 --eixo massa --base linha --chao 0.09 --tamanho-massa 106 --altura-livre` | 4.9% | altura varia 4.9% entre quadros (172 164 165 172 164 165), esperado nesta ação |
+| `animal/cachorro/andar-frente` | `andar-frente.png` (2172x724) | `--altura 160 --quadros 6 --qps 9 --eixo massa --base linha --chao 0.09 --tamanho-massa 106 --altura-livre` | 5% | altura varia 5.0% entre quadros (159 155 163 163 160 159), esperado nesta ação |
+| `animal/cachorro/parada-costas` | `parada-costas.png` (2172x724) | `--altura 165 --quadros 4 --qps 5 --alinhar molde --molde 0.5-1 --em-pe-quadro 1 --faixa-pes 0.25 --chao 0.09 --sequencia 1,2,3,2,3,1,4,1 --altura-livre` | 2.4% |  |
+| `animal/cachorro/parada-frente` | `parada-frente.png` (2172x724) | `--altura 160 --quadros 4 --qps 5 --alinhar molde --molde 0.5-1 --em-pe-quadro 1 --faixa-pes 0.25 --chao 0.09 --sequencia 1,2,3,2,3,1,4,1 --altura-livre` | 2.5% |  |
+| `animal/cachorro/sentado-costas` | `sentado-costas.png` (2172x724) | `--altura 163 --quadros 4 --qps 5 --alinhar molde --molde 0.35-0.9 --em-pe-quadro 1 --faixa-pes 0.2 --chao 0.06 --sequencia 1,2,3,2,3,1,4,1 --altura-livre` | 3.3% | altura varia 3.3% entre quadros (163 163 169 163), esperado nesta ação |
+| `animal/cachorro/sentado-frente` | `sentado-frente.png` (2172x724) | `--altura 160 --quadros 4 --qps 5 --alinhar molde --molde 0.35-0.9 --em-pe-quadro 1 --faixa-pes 0.2 --chao 0.06 --sequencia 1,2,3,2,3,1,4,1 --altura-livre` | 5% | altura varia 5.0% entre quadros (160 160 169 160), esperado nesta ação |
 | `animal/cavalo/andar-costas` | `andar-costas.png` (1536x1024) | `--altura 354 --quadros 8 --qps 8 --eixo massa --base linha --chao 0.09 --tamanho-massa 210 --altura-livre` | 2.9% |  |
 | `animal/cavalo/andar-frente` | `andar-frente.png` (1536x1024) | `--altura 335 --quadros 8 --qps 8 --eixo massa --base linha --chao 0.09 --tamanho-massa 229 --altura-livre` | 5.2% | altura varia 5.2% entre quadros (327 326 326 314 326 328 331 319), esperado nesta ação |
 | `animal/cavalo/galope-costas` | `galope-costas.png` (1536x1024) | `--altura 354 --quadros 8 --qps 12 --eixo massa --base linha --chao 0.09 --tamanho-massa 210 --altura-livre` | 15.3% | altura varia 15.3% entre quadros (267 315 308 304 289 285 272 268), esperado nesta ação |
@@ -148,6 +195,12 @@ A folha crua de cada chave e as opções passadas a `folha.mjs` (para refazer ig
 | `animal/galinha/ciscar-frente` | `ciscar-frente.png` (2172x724) | `--altura 129 --quadros 6 --qps 7 --alinhar molde --molde 0.78-1 --em-pe-quadro 1 --faixa-pes 0.12 --chao 0.05 --tamanho-massa 84 --altura-livre` | 17.5% | altura varia 17.5% entre quadros (128 106 114 115 120 129), esperado nesta ação |
 | `animal/galinha/parada-costas` | `parada-costas.png` (2172x724) | `--altura 129 --quadros 4 --qps 4 --alinhar molde --molde 0-1 --em-pe-quadro 1 --faixa-pes 0.12 --chao 0.05 --cor-ref 236,40,40 --altura-livre --sequencia 1,2,2,1,3,3,1,4` | 10.1% | altura varia 10.1% entre quadros (129 138 131 124), esperado nesta ação |
 | `animal/galinha/parada-frente` | `parada-frente.png` (2172x724) | `--altura 129 --quadros 4 --qps 4 --alinhar molde --molde 0-1 --em-pe-quadro 1 --faixa-pes 0.12 --chao 0.05 --cor-ref 236,40,40 --altura-livre --sequencia 1,2,2,1,3,3,1,4` | 12.3% | altura varia 12.3% entre quadros (129 138 129 121), esperado nesta ação; tamanho pela cor de referência varia 13% entre quadros (24 21 21 24): confira se a figura muda de tamanho |
+| `animal/jumento/andar-barril-costas` | `andar-barril-costas.png` (1536x1024) | `--altura 330 --quadros 8 --qps 8 --eixo massa --base linha --chao 0.25 --tamanho-massa 216 --altura-livre --apoio-dx 90` | 1.7% |  |
+| `animal/jumento/andar-barril-frente` | `andar-barril-frente.png` (1536x1024) | `--altura 255 --quadros 8 --qps 8 --eixo massa --base linha --chao 0.09 --tamanho-massa 222.3 --altura-livre --apoio-dx -23` | 4.2% | altura varia 4.2% entre quadros (253 248 256 252 254 252 258 255), esperado nesta ação |
+| `animal/jumento/andar-costas` | `andar-costas.png` (1536x1024) | `--altura 330 --quadros 8 --qps 8 --eixo massa --base linha --chao 0.25 --tamanho-massa 209 --altura-livre --apoio-dx 85` | 3.7% | altura varia 3.7% entre quadros (325 325 326 323 327 327 323 315), esperado nesta ação |
+| `animal/jumento/andar-frente` | `andar-frente.png` (1536x1024) | `--altura 255 --quadros 8 --qps 8 --eixo massa --base linha --chao 0.09 --tamanho-massa 219 --altura-livre --apoio-dx -20` | 4.9% | altura varia 4.9% entre quadros (251 244 256 251 253 248 254 252), esperado nesta ação |
+| `animal/jumento/parado-costas` | `parado-costas.png` (2172x724) | `--altura 330 --quadros 4 --qps 4 --alinhar molde --molde 0.4-1 --em-pe-quadro 1 --faixa-pes 0.25 --chao 0.25 --sequencia 1,2,2,3,3,1,4,1 --altura-livre --apoio-dx 92` | 2.3% |  |
+| `animal/jumento/parado-frente` | `parado-frente.png` (2172x724) | `--altura 255 --quadros 4 --qps 4 --alinhar molde --molde 0.4-1 --em-pe-quadro 1 --faixa-pes 0.25 --chao 0.09 --sequencia 1,2,2,3,3,1,4,1 --altura-livre --apoio-dx -55` | 2.7% |  |
 | `animal/ovelha-tosquiada/andar-costas` | `andar-costas.png` (2172x724) | `--altura 194 --quadros 6 --qps 9 --eixo massa --base linha --chao 0.09 --tamanho-massa 116 --altura-livre` | 11.5% | altura varia 11.5% entre quadros (198 187 180 197 181 176), esperado nesta ação |
 | `animal/ovelha-tosquiada/andar-frente` | `andar-frente.png` (2172x724) | `--altura 181 --quadros 6 --qps 9 --eixo massa --base linha --chao 0.09 --tamanho-massa 126 --altura-livre` | 9.5% | altura varia 9.5% entre quadros (176 163 171 180 169 168), esperado nesta ação |
 | `animal/ovelha-tosquiada/parada-costas` | `parada-costas.png` (2172x724) | `--altura 194 --quadros 4 --qps 4 --alinhar molde --molde 0.55-1 --em-pe-quadro 1 --faixa-pes 0.25 --chao 0.09 --sequencia 1,2,2,3,3,1,4,1 --altura-livre` | 1.6% |  |
@@ -206,9 +259,10 @@ A folha crua de cada chave e as opções passadas a `folha.mjs` (para refazer ig
 - O tamanho da figura entre folhas é conferido pela área do lenço vermelho (coluna tamanho pela cor de `medidas-animacoes.json`): na folha de modelo, com 294 pontos de altura, dá 47,5 de frente e 48,7 de costas. Com `--tamanho-cor`, a escala é a média entre a da altura e a do lenço, para nem a altura nem a cabeça destoarem de uma folha para a outra. Quando a vista muda (mais de costas, cabeça baixa), o lenço engana e vale só a altura.
 - Bichos: a galinha tem 129 pontos de altura (0,88 unidade de `escala.json`, na mesma proporção que dá 294 pontos à personagem de 2,0 unidades). A vaca tem 226 pontos até o lombo (1,54 unidade); como de frente três quartos a figura inteira (chifres até o casco mais baixo) mede 1,21 vez isso, a figura de frente tem 273 pontos e a de costas 297.
 - Ponto de apoio dos bichos: o meio das patas. Na vaca fica 9% da altura acima do casco mais baixo (as quatro patas se espalham na tela por causa da câmera); na galinha, 5%.
+- Bichos especiais (cão boiadeiro, gato siamês, cavalo mangalarga): feitos por recoloração das folhas do bicho comum com `node jogo/tools/arte/recolorir.mjs --de <chave> --para <chave> --receita <nome>`. A ferramenta divide a figura em regiões pelo traço, classifica cada região pela cor e troca só a pelagem, guiada pela claridade; casa, apoio e quadros ficam iguais. Se a folha do bicho comum for refeita, rode a recoloração de novo.
 
 ## Resumo
 
-64 prontas, 2 pendentes (no catálogo, com defeito anotado) e 16 em falta, de 82 folhas da lista.
+92 prontas, 2 pendentes (no catálogo, com defeito anotado) e 17 em falta, de 111 folhas da lista.
 
 As tiras de conferência (`arte/jogo/folhas/<nome>.png`: os quadros lado a lado, a linha do chão, o ponto de apoio e todos os quadros sobrepostos) e as animações (`.gif`) têm o nome da chave com hífens, por exemplo `personagem-andar-frente.png`.

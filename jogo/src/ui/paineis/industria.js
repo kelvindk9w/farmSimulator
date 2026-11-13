@@ -81,7 +81,14 @@ registrarPainel({
       if (i === 0 && st.inicio) perguntar({ icone: 'icone/' + r.item, titulo: T.industria.cancelar, texto: T.industria.perguntaCancelar(r.nome), sim: T.industria.simCancelar, nao: T.industria.nao, classeSim: 'ruim', aoSim: () => mandar({ tipo: 'cancelarReceita', entidade: id, vaga: 0 }) });
       else mandar({ tipo: 'cancelarReceita', entidade: id, vaga: i });
     }
-    function mover(de, para) { if (mandar({ tipo: 'reordenarFila', entidade: id, de, para }).ok) { som.tocar('toque'); desenhar(); focar((para < de ? 'subir-' : 'descer-') + para); if (!corpo.contains(document.activeElement)) focar('cancelar-' + para); } }
+    // depois de mudar a ordem, o foco acompanha a receita: na seta do mesmo sentido ou, se ela chegou à ponta, na outra
+    // (nunca no X: um Enter a mais tiraria a receita da fila)
+    function mover(de, para) {
+      if (!mandar({ tipo: 'reordenarFila', entidade: id, de, para }).ok) return;
+      som.tocar('toque'); desenhar();
+      const mesma = (para < de ? 'subir-' : 'descer-') + para, outra = (para < de ? 'descer-' : 'subir-') + para;
+      focar(corpo.querySelector(`[data-k="${mesma}"]`) ? mesma : outra);
+    }
     function abrirVaga(cash) {
       const m = J.mundo, e = construcaoPorId(m, id), amp = e && proximaVaga(m, e);
       if (!amp) return;

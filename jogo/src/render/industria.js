@@ -42,13 +42,17 @@ function icone(g, A, chave, cx, cy, t, dados) {
 
 function balao(g, cam, cena, m, e, S, chave, fracao, pronta) {
   const cx = e.x + e.l / 2, cz = e.z + e.p / 2, sx = cam.telaX(cx, cz), chao = cam.telaY(cx, 0, cz);
-  const r = Math.max(15 * cam.dpr, 0.36 * S), W = cena.cv.width, H = cena.cv.height;
+  const r = Math.max(17 * cam.dpr, 0.42 * S), W = cena.cv.width, H = cena.cv.height;
   // o alto da figura: pela caixa da peça no catálogo; sem ela, pela altura do tipo
   let topo = cam.telaY(cx, TIPOS[e.tipo].altura || 1.6 + Math.min(e.l, e.p) * 0.5, cz);
   vis.quadro = 0; vis.variante = 0; vis.desenhar = null;
   TIPOS[e.tipo].visual(m, e, vis);
   if (cena.atlas.pronta(vis.chave) && cena.atlas.caixa(vis.chave, vis.quadro, sx, chao, S, caixa)) topo = caixa[1] + (caixa[3] - caixa[1]) * 0.06;
-  const pulo = pronta ? Math.abs(Math.sin(tempo * 3.2)) * r * 0.28 : 0, sy = topo - r * 1.15 - pulo;
+  // com a seta do tutorial em cima desta construção, o balão desce para a seta apontar para ele (e não tapá-lo)
+  const seta = cena.seta;
+  let base = topo - r * 1.15;
+  if (seta && seta.ligada && Math.abs(seta.x - cx) < 0.05 && Math.abs(seta.z - cz) < 0.05) base = Math.max(base, cam.telaY(cx, seta.alto, cz) + r * 1.45);
+  const pulo = pronta ? Math.abs(Math.sin(tempo * 3.2)) * r * 0.28 : 0, sy = base - pulo;
   if (sx < -r * 2 || sx > W + r * 2 || sy < -r * 2 || sy > H + r * 2) return;
   g.lineJoin = 'round';
   if (pronta) {
@@ -63,12 +67,12 @@ function balao(g, cam, cena, m, e, S, chave, fracao, pronta) {
   g.beginPath(); g.moveTo(sx - r * 0.3, sy + r * 0.9); g.lineTo(sx, sy + r * 1.3); g.lineTo(sx + r * 0.3, sy + r * 0.9); g.closePath(); g.fill(); // (tapa o traço entre o corpo e o bico)
   if (!pronta) {
     // o anel do andamento: trilho claro e o trecho já feito em verde
-    g.lineWidth = r * 0.2; g.lineCap = 'round';
-    g.beginPath(); g.arc(sx, sy, r * 0.8, 0, DUAS_PI); g.strokeStyle = '#eadcbb'; g.stroke();
-    if (fracao > 0.005) { g.beginPath(); g.arc(sx, sy, r * 0.8, -Math.PI / 2, -Math.PI / 2 + DUAS_PI * Math.min(1, fracao)); g.strokeStyle = '#41a85c'; g.stroke(); }
+    g.lineWidth = r * 0.17; g.lineCap = 'round';
+    g.beginPath(); g.arc(sx, sy, r * 0.82, 0, DUAS_PI); g.strokeStyle = '#eadcbb'; g.stroke();
+    if (fracao > 0.005) { g.beginPath(); g.arc(sx, sy, r * 0.82, -Math.PI / 2, -Math.PI / 2 + DUAS_PI * Math.min(1, fracao)); g.strokeStyle = '#41a85c'; g.stroke(); }
     g.lineCap = 'butt';
   }
-  icone(g, cena.atlas, chave, sx, sy, r * (pronta ? 1.5 : 1.12), m.dados);
+  icone(g, cena.atlas, chave, sx, sy, r * (pronta ? 1.5 : 1.16), m.dados);
 }
 
 registrarCamada('cima', (g, cam, m, S, cena, dt) => {

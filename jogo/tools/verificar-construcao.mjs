@@ -323,13 +323,12 @@ async function cenario(a, f) {
   confere((await de('canteiro-de-flores')).length === 0 && (await J(() => window.__c.guardadas('canteiro-de-flores'))) === 1, 'guardar tira o canteiro do mapa e põe no depósito');
   await J(() => window.__jogo.seguir());
   await abrirCatalogo('decoracao');
-  confere(await J(() => /guardada: 1/.test(document.querySelector('.oferta[data-item="canteiro-de-flores"]').textContent)), 'o catálogo mostra o canteiro guardado');
+  confere(await J(() => /no depósito: 1/.test(document.querySelector('.oferta[data-item="canteiro-de-flores"]').textContent)), 'o catálogo mostra o canteiro guardado');
   await foto('catalogo-guardada');
   const ouro1 = await J(() => window.__jogo.mundo.posses.ouro);
   await escolher('decoracao', 'canteiro-de-flores');
   alvo = await lugar(1);
-  await levar(alvo[0], alvo[1], 'toque');
-  if (!comDedo) await confirmar(false);
+  await levar(alvo[0], alvo[1], 'toque'); // (colocando vários, o toque — ou o clique — já põe um)
   await tocarEm('.cons-barra [data-k="cancelar"]', false);
   await ateParar();
   cant = (await de('canteiro-de-flores'))[0];
@@ -373,8 +372,7 @@ async function cenario(a, f) {
   await quadro();
   alvo = await lugar(0);
   if (!confere(!!alvo, 'há lugar livre e à vista para a porteira')) return;
-  await levar(alvo[0], alvo[1], 'toque');
-  if (!comDedo) await confirmar(false);
+  await levar(alvo[0], alvo[1], 'toque'); // (colocando vários, o toque — ou o clique — já põe um)
   await tocarEm('.cons-barra [data-k="cancelar"]', false);
   await ateParar();
   const port = (await de('porteira'))[0];
@@ -384,7 +382,7 @@ async function cenario(a, f) {
   md = await escolher('cerca', 'caminho-de-pedra');
   const pedras = await lugar(0, 0, [3, 1]);
   if (!confere(!!pedras, 'há três casas livres e à vista para o calçamento')) return;
-  for (let k = 0; k < 3; k++) { await levar(pedras[0] + k, pedras[1], 'toque'); if (!comDedo) await confirmar(false); }
+  for (let k = 0; k < 3; k++) { await levar(pedras[0] + k, pedras[1], 'toque'); }
   igual(((await modo()) || {}).postas, 3, 'três toques colocam três pedras de calçamento');
   await tocarEm('.cons-barra [data-k="cancelar"]');
   await ateParar();

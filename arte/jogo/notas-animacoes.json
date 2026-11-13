@@ -64,6 +64,11 @@
    "arquivo": "cachorro.png",
    "pedido": "modelo-cachorro.md",
    "nota": "Vira-lata caramelo de coleira vermelha, peito, patas e ponta do rabo brancos: frente, costas e perfil. Uma rodada."
+  },
+  "gato": {
+   "arquivo": "gato.png",
+   "pedido": "modelo-gato.md",
+   "nota": "Gato rajado laranja, de peito, focinho e patas brancos, olhos verdes e rabo erguido; frente, costas e perfil."
   }
  },
  "folhas": {
@@ -488,6 +493,56 @@
    "pedido": "cachorro-parada-costas.md",
    "rodadas": 1,
    "nota": "O mesmo, visto por trás: abana o rabo, vira a cabeça e ofega; 4 desenhos em 8 quadros."
+  },
+  "animal/cachorro/andar-frente": {
+   "pedido": "cachorro-andar-frente.md",
+   "rodadas": 1,
+   "nota": "Trote alegre de 6 quadros, língua de fora e rabo erguido; mesmo tamanho da espera (pela massa)."
+  },
+  "animal/cachorro/andar-costas": {
+   "pedido": "cachorro-andar-costas.md",
+   "rodadas": 1,
+   "nota": "Trote de 6 quadros visto por trás; mesmo tamanho da espera (pela massa); um quadro com as patas no ar."
+  },
+  "animal/cao-boiadeiro/parada-frente": {
+   "pedido": "recolorida de animal/cachorro/parada-frente",
+   "rodadas": 1,
+   "nota": "Mesmo desenho do cachorro com o pelo cinza-azulado no lugar do caramelo, por código (recolorir.mjs --receita boiadeiro); peito, patas e ponta do rabo brancos e coleira vermelha iguais; mesma casa e apoio."
+  },
+  "animal/cao-boiadeiro/parada-costas": {
+   "pedido": "recolorida de animal/cachorro/parada-costas",
+   "rodadas": 1,
+   "nota": "Mesmo desenho do cachorro com o pelo cinza-azulado no lugar do caramelo, por código (recolorir.mjs --receita boiadeiro); peito, patas e ponta do rabo brancos e coleira vermelha iguais; mesma casa e apoio."
+  },
+  "animal/cao-boiadeiro/andar-frente": {
+   "pedido": "recolorida de animal/cachorro/andar-frente",
+   "rodadas": 1,
+   "nota": "Mesmo desenho do cachorro com o pelo cinza-azulado no lugar do caramelo, por código (recolorir.mjs --receita boiadeiro); peito, patas e ponta do rabo brancos e coleira vermelha iguais; mesma casa e apoio."
+  },
+  "animal/cao-boiadeiro/andar-costas": {
+   "pedido": "recolorida de animal/cachorro/andar-costas",
+   "rodadas": 1,
+   "nota": "Mesmo desenho do cachorro com o pelo cinza-azulado no lugar do caramelo, por código (recolorir.mjs --receita boiadeiro); peito, patas e ponta do rabo brancos e coleira vermelha iguais; mesma casa e apoio."
+  },
+  "animal/cachorro/sentado-frente": {
+   "pedido": "cachorro-sentado-frente.md",
+   "rodadas": 1,
+   "nota": "Sentado, para quando a personagem para: ofega, varre o chão com o rabo, inclina a cabeça e pisca; 4 desenhos em 8 quadros; cabeça do mesmo tamanho da figura em pé."
+  },
+  "animal/cachorro/sentado-costas": {
+   "pedido": "cachorro-sentado-costas.md",
+   "rodadas": 1,
+   "nota": "Sentado visto por trás: varre o chão com o rabo, levanta uma orelha, ofega e pisca; 4 desenhos em 8 quadros."
+  },
+  "animal/cao-boiadeiro/sentado-frente": {
+   "pedido": "recolorida de animal/cachorro/sentado-frente",
+   "rodadas": 1,
+   "nota": "Fora do pedido (a coordenação pediu parada e andar): o sentado do cachorro com o pelo do boiadeiro, para ele também sentar quando a personagem para."
+  },
+  "animal/cao-boiadeiro/sentado-costas": {
+   "pedido": "recolorida de animal/cachorro/sentado-costas",
+   "rodadas": 1,
+   "nota": "Fora do pedido (a coordenação pediu parada e andar): o sentado do cachorro com o pelo do boiadeiro, para ele também sentar quando a personagem para."
   }
  },
  "geral": [

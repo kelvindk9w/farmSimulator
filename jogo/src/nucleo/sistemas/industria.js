@@ -224,7 +224,15 @@ registrarEvento('retirouProduto', { campos: ['entidade', 'construcao', 'itens', 
 registrarEvento('cancelouReceita', { campos: ['entidade', 'construcao', 'receita', 'vaga', 'devolveu'] });
 
 // na tela de subida de nível aparece a receita nova, com a figura do que ela faz
-MOSTRA_LIBERADO.receitas = (m, x) => { const r = receitasDe(m.dados).todas[x.id]; if (!r) return false; x.icone = 'icone/' + r.item; return true; };
+MOSTRA_LIBERADO.receitas = (m, x) => {
+  const r = receitasDe(m.dados).todas[x.id], it = r && m.dados.itens[r.item];
+  if (!r || !it) return false;
+  // o que a loja passa a vender no mesmo nível já aparece como item: não mostra duas vezes (a ração, por exemplo)
+  const comoItem = MOSTRA_LIBERADO[it.tipo] || MOSTRA_LIBERADO.item;
+  if (it.nivel === r.nivel && it.compra > 0 && comoItem && comoItem(m, { tipo: it.tipo, id: it.id })) return false;
+  x.icone = 'icone/' + r.item;
+  return true;
+};
 
 // a loja passa a vender o que as receitas e as obras gastam: material (madeira, prego...) e embalagem (cartela, garrafa, saco)
 const gasta = new WeakMap();

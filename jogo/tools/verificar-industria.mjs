@@ -37,7 +37,7 @@ async function pronto(pg) {
       ind(tipo) { const e = j.mundo.construcao.todas.find((o) => o.tipo === tipo), st = e && j.mundo.industria.de[e.id]; return { fila: st ? [...st.fila] : [], fazendo: !!(st && st.inicio), saida: st ? [...st.saida] : [] }; },
       tem(item) { const P = j.mundo.posses; return (P.bolsa[item] || 0) + (P.celeiro.itens[item] || 0) + (P.cesto.itens[item] || 0); },
       // põe itens no estoque como se tivessem sido colhidos ou comprados: colheita e produto no celeiro, o resto na bolsa
-      dar(itens) { const m = j.mundo; for (const k in itens) { const t = m.dados.itens[k].tipo, onde = t === 'colheita' || t === 'produto' ? m.posses.celeiro.itens : m.posses.bolsa; onde[k] = (onde[k] || 0) + itens[k]; } },
+      dar(itens) { const m = j.mundo; for (const k in itens) { const t = m.dados.itens[k].tipo, onde = t === 'colheita' || t === 'produto' ? m.posses.celeiro.itens : m.posses.bolsa; onde[k] = (onde[k] || 0) + itens[k]; } m.eventos.emitir('verificou', {}); },
       // as missões do vizinho até "ate" (sem ela) ficam cumpridas; com "so", todas menos essa
       missoes(ate, so) { const m = j.mundo, L = m.dados.missoes.vizinho.map((x) => x.id); m.missoes.feitas = so ? L.filter((x) => x !== so) : L.slice(0, L.indexOf(ate)); m.missoes.de = null; m.missoes.conta = 0; },
       nivel(n, menos = 0) { const m = j.mundo; m.progresso.nivel = n; m.progresso.xp = m.dados.niveis.limiar[n] + (menos ? m.dados.niveis.limiar[n + 1] - m.dados.niveis.limiar[n] - menos : 0); },
@@ -109,7 +109,7 @@ function jogador(a, prefixo) {
   const J = (f, arg) => pg.evaluate(f, arg);
   const quadro = async (ms = 90) => { await J(() => window.__jogo.desenhar()); await esperar(ms); };
   const tocarXY = async (x, y) => { if (cdp) await dedo(cdp, x, y); else await pg.mouse.click(x, y); await esperar(70); };
-  const foto = async (nome) => { await J(() => window.__jogo.desenhar()); await esperar(380); await pg.screenshot({ path: path.join(capturas, `${prefixo}-${nome}.jpg`), type: 'jpeg', quality: 84 }); };
+  const foto = async (nome, comAvisos = false) => { if (!comAvisos) await pg.waitForFunction(() => window.__jogo.avisos().length === 0, null, { timeout: 9000 }).catch(() => {}); await J(() => window.__jogo.desenhar()); await esperar(380); await pg.screenshot({ path: path.join(capturas, `${prefixo}-${nome}.jpg`), type: 'jpeg', quality: 84 }); };
   const painel = () => J(() => window.__jogo.painelAberto());
   const tem = (item) => J((k) => window.__i.tem(k), item);
   const ind = (tipo) => J((t) => window.__i.ind(t), tipo);
@@ -142,8 +142,8 @@ function jogador(a, prefixo) {
   async function fecharTelas() {
     for (let k = 0; k < 8 && (await J(() => !!document.querySelector('.subida:not(.dialogo)'))); k++) {
       await esperar(700);
-      const b = await J(() => { const n = document.querySelector('.subida:not(.dialogo) .cartao > .bt, .subida:not(.dialogo) button'); if (!n) return null; const r = n.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
-      if (b) await tocarXY(b.x, b.y); else await pg.keyboard.press('Enter');
+      const b = await J(() => { const n = document.querySelector('.subida:not(.dialogo) .cartao > .bt, .subida:not(.dialogo) button'); if (!n) return null; n.scrollIntoView({ block: 'center' }); const r = n.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2, e = document.elementFromPoint(x, y); return { x, y, livre: !!e && (e === n || n.contains(e)) }; });
+      if (b && b.livre) await tocarXY(b.x, b.y); else await J(() => window.__jogo.fecharSubida());
       await quadro(200);
     }
   }
@@ -163,7 +163,7 @@ try {
   await o.tocarConstrucao('quadro-de-pedidos');
   igual(await o.painel(), null, 'antes do nível 3 o quadro não abre');
   await o.avisou(/quadro de pedidos abre no nível 3/i, 'o toque no quadro fechado diz em que nível ele abre');
-  await o.foto('01-quadro-fechado');
+  await o.foto('01-quadro-fechado', true);
 
   // ---- começo: nível 12, ouro, cash e materiais pelo gancho de teste; a missão da vez é construir a bancada
   await J(() => { const m = window.__jogo.mundo; window.__i.nivel(12); m.posses.ouro = 9000; m.posses.cash = 40; window.__i.dar({ madeira: 20, tabua: 30, prego: 40, pedra: 30 }); window.__i.missoes('bancada-de-carpintaria'); window.__jogo.avancar(1.2); });
@@ -206,7 +206,9 @@ try {
   igual(await J(() => document.querySelector('.veu header .titulo').textContent), 'Bancada de carpintaria', 'o painel leva o nome da construção');
   confere(await J(() => !!document.querySelector('[data-k="ind-aba-produzir"].ativo') && !!document.querySelector('[data-k="ind-aba-construir"]')), 'a bancada tem as abas Produzir (aberta) e Construir');
   igual(await J(() => (document.querySelector('.ind-dica') || { dataset: {} }).dataset.dica), 'fila', 'na primeira vez o Seu Tonho explica como pôr uma receita na fila');
-  confere(await J(() => { const c = document.querySelector('.ind-receita[data-receita="tabua"]'); return !!c && /Tábua/.test(c.textContent) && /20 s/.test(c.textContent) && /Madeira/.test(c.textContent) && /20\/2/.test(c.textContent) && !!c.querySelector('.ind-ficha.tem'); }), 'a receita da tábua mostra o tempo e a madeira (tem 20, precisa 2) em verde');
+  const mad0 = await o.tem('madeira'); // (a obra da bancada gastou 6 das 20)
+  igual(mad0, 14, 'a obra da bancada gastou 6 madeiras');
+  confere(await J((tem) => { const c = document.querySelector('.ind-receita[data-receita="tabua"]'); return !!c && /Tábua/.test(c.textContent) && /20 s/.test(c.textContent) && /Madeira/.test(c.textContent) && c.textContent.includes(tem + '/2') && !!c.querySelector('.ind-ficha.tem'); }, mad0), 'a receita da tábua mostra o tempo e a madeira (tem 14, precisa 2) em verde');
   confere(await J(() => { const b = document.querySelector('[data-k="fazer-tabua"]'); return !b.classList.contains('sem') && b.classList.contains('alvo-tutorial'); }), 'o botão Fazer da tábua está aceso e marcado pela missão');
   confere(await J(() => !!document.querySelector('.veu [data-k="mover"]')), 'o painel oferece "Mudar de lugar"');
   confere(await J(() => document.querySelectorAll('.ind-vaga:not(.trancada)').length === 2 && /0 de 2 vagas/.test(document.querySelector('.ind').textContent)), 'a fila começa com 2 vagas livres');
@@ -222,7 +224,7 @@ try {
 
   // ---- pôr na fila: os ingredientes saem, a primeira anda no relógio, a segunda espera, a terceira não cabe
   await o.tocarEm('[data-k="fazer-tabua"]');
-  igual(await o.tem('madeira'), 18, 'pôr a tábua na fila gasta 2 madeiras');
+  igual(await o.tem('madeira'), mad0 - 2, 'pôr a tábua na fila gasta 2 madeiras');
   confere(await J(() => !!document.querySelector('.ind-fazendo[data-receita="tabua"] .barra') && /falta 20 s/.test(document.querySelector('.ind-falta').textContent)), 'a receita em curso aparece com barra e tempo que falta');
   igual(await J(() => (document.querySelector('.ind-dica') || { dataset: {} }).dataset.dica), 'retirar', 'com a primeira receita na fila, a dica passa a ser a de esperar e retirar');
   await o.tocarEm('[data-k="fazer-tabua"]');
@@ -230,7 +232,7 @@ try {
   confere(await J(() => document.querySelectorAll('.ind-espera').length === 1 && /Espera a vez/.test(document.querySelector('.ind-espera').textContent) && /2 de 2 vagas/.test(document.querySelector('.ind').textContent)), 'a segunda espera a vez e a fila mostra 2 de 2 vagas');
   confere(await J(() => document.querySelector('[data-k="fazer-tabua"]').classList.contains('sem')), 'com a fila cheia o botão Fazer apaga');
   await o.tocarEm('[data-k="fazer-tabua"]');
-  igual(await o.tem('madeira'), 16, 'com a fila cheia nada é gasto');
+  igual(await o.tem('madeira'), mad0 - 4, 'com a fila cheia nada é gasto');
   await o.avisou(/fila está cheia/i, 'o jogo explica que a fila está cheia');
   await J(() => window.__jogo.avancar(5));
   await esperar(450);
@@ -244,7 +246,7 @@ try {
   await o.tocarEm('[data-k="dica-ok"]');
   igual(await J(() => (document.querySelector('.ind-dica') || { dataset: {} }).dataset.dica), 'cancelar', 'depois do "Entendi", vem a dica de tirar da fila e mudar a ordem');
   await o.tocarEm('[data-k="cancelar-1"]');
-  igual(await o.tem('madeira'), 18, 'tirar da fila a que esperava devolve as 2 madeiras');
+  igual(await o.tem('madeira'), mad0 - 2, 'tirar da fila a que esperava devolve as 2 madeiras');
   igual((await o.ind('bancada-de-carpintaria')).fila.length, 1, 'a fila fica com uma receita');
   await o.avisou(/ingredientes voltaram/i, 'o jogo avisa que os ingredientes voltaram');
 
@@ -285,16 +287,28 @@ try {
   await o.quadro();
   igual((await o.ind('bancada-de-carpintaria')).fila.length, 3, 'Enter no botão focado põe outra tábua na fila');
   igual(await J(() => document.activeElement && document.activeElement.dataset.k), 'fazer-tabua', 'o foco continua no botão depois de refazer o painel');
-  await pg.keyboard.press('ArrowUp');
-  const k1 = await J(() => document.activeElement && document.activeElement.dataset.k);
-  confere(!!k1 && k1 !== 'fazer-tabua', `a seta para cima leva o foco a outro botão do painel (foi para "${k1}")`);
-  for (let k = 0; k < 8 && (await J(() => document.activeElement && document.activeElement.dataset.k)) !== 'cancelar-2'; k++) await pg.keyboard.press(k < 4 ? 'ArrowUp' : 'ArrowRight');
-  igual(await J(() => document.activeElement && document.activeElement.dataset.k), 'cancelar-2', 'com as setas se chega ao botão de tirar da fila');
+  const focoK = () => J(() => (document.activeElement && document.activeElement.closest('.veu') && (document.activeElement.dataset.k || document.activeElement.className)) || '');
+  for (let k = 0; k < 4 && !/^cancelar-/.test(await focoK()); k++) await pg.keyboard.press('ArrowRight');
+  for (let k = 0; k < 3 && (await focoK()) !== 'cancelar-2'; k++) await pg.keyboard.press('ArrowDown');
+  igual(await focoK(), 'cancelar-2', 'com as setas se chega ao botão de tirar da fila');
+  await pg.keyboard.press('ArrowLeft');
+  igual(await focoK(), 'subir-2', 'a seta para a esquerda vai ao botão de passar para a frente');
+  await pg.keyboard.press('Enter');
+  await o.quadro();
+  igual(await focoK(), 'descer-1', 'depois de passar para a frente, o foco acompanha a receita (na seta que sobrou, não no X)');
+  await pg.keyboard.press('ArrowRight');
+  igual(await focoK(), 'cancelar-1', 'e a seta para a direita chega ao botão de tirar essa da fila');
   await pg.keyboard.press('Enter');
   await o.quadro();
   igual((await o.ind('bancada-de-carpintaria')).fila.length, 2, 'Enter no botão focado tira a receita da fila');
+  const k0 = await focoK();
+  confere(!!k0, 'depois de tirar da fila, o foco continua dentro do painel');
+  await pg.keyboard.press('ArrowDown');
+  const k1 = await focoK();
+  confere(!!k1 && k1 !== k0, `a seta para baixo leva o foco a outro botão do painel (de "${k0}" para "${k1}")`);
   await pg.keyboard.press('Tab');
-  confere(await J(() => !!document.activeElement && !!document.activeElement.closest('.veu')), 'Tab anda pelos botões do painel');
+  const k2 = await focoK();
+  confere(!!k2 && k2 !== k1, `Tab anda pelos botões do painel (de "${k1}" para "${k2}")`);
   await pg.keyboard.press('Escape');
   igual(await o.painel(), null, 'Esc fecha o painel da indústria');
 
@@ -437,7 +451,8 @@ try {
   }
 
   // ---- o quadro de pedidos: bilhetes, entregar, trocar, a espera
-  await J(() => window.__i.missoes(null, 'primeiro-pedido'));
+  await J(() => { window.__i.missoes(null, 'primeiro-pedido'); window.__jogo.avancar(0.6); });
+  igual(await J(() => { const g = window.__jogo.guia(); return g && g.tipo + ':' + g.id; }), 'entidade:quadro-de-pedidos', 'na missão do primeiro pedido, o guia aponta o quadro');
   await o.tocarConstrucao('quadro-de-pedidos');
   igual(await o.painel(), 'pedidos', 'no nível certo, o toque no quadro abre os pedidos');
   igual(await J(() => (document.querySelector('.ind-dica') || { dataset: {} }).dataset.dica), 'quadro', 'na primeira vez o Seu Tonho explica o quadro');
@@ -454,6 +469,7 @@ try {
   await J((p) => window.__i.dar(p.itens), peds[0]);
   await o.quadro(200);
   confere(await J(() => { const b = document.querySelector('.ped-bilhete[data-vaga="0"]'); return b.classList.contains('pode') && !b.querySelector('.ped-linha.falta') && !b.querySelector('[data-k="entregar-0"]').classList.contains('sem') && b.querySelector('[data-k="entregar-0"]').classList.contains('alvo-tutorial'); }), 'com tudo em mãos o bilhete acende e a missão marca o Entregar');
+  igual(await J(() => window.__jogo.guia().tipo), 'entidade', 'com um pedido completo, o guia da missão aponta o quadro');
   await o.foto('19-quadro-pode-entregar');
   const ouro1 = await J(() => window.__jogo.mundo.posses.ouro), xp1 = await J(() => window.__jogo.mundo.progresso.xp);
   await o.tocarEm('[data-k="entregar-0"]');
@@ -494,7 +510,6 @@ try {
   const q = await J(() => window.__i.de('quadro-de-pedidos'));
   await J(([x, z]) => window.__jogo.olhar(x, z), [q.x + 0.5, q.z + 0.5]);
   await o.foto('23-balao-do-quadro');
-  igual(await J(() => window.__jogo.guia().tipo), 'entidade', 'com pedido pronto, o toque seguinte é no quadro');
 
   // ---- gravar e recarregar no fim: tudo igual
   await J(() => window.__jogo.gravar());
@@ -512,11 +527,13 @@ try {
   o = jogador(a, 'c-cel'); ({ pg, J } = o);
   await o.fecharTelas();
   // nível 6, a um ponto de experiência do nível 7; a bancada já está de pé; a missão da vez é serrar tábuas
-  await J(() => { const m = window.__jogo.mundo; window.__i.nivel(6, 1); m.posses.ouro = 3000; m.posses.cash = 30; window.__i.dar({ madeira: 12, tabua: 10, prego: 10, pedra: 10 }); window.__i.missoes('tabuas'); window.__jogo.avancar(1.2); });
+  await J(() => { const m = window.__jogo.mundo; window.__i.nivel(6); m.posses.ouro = 3000; m.posses.cash = 30; window.__i.dar({ madeira: 12, tabua: 10, prego: 10, pedra: 10 }); window.__i.missoes('tabuas'); window.__jogo.avancar(1.2); });
   const eu = await J(() => window.__jogo.estado().personagem);
   banc = await J((p) => window.__i.erguer('bancada-de-carpintaria', p), [eu.x, eu.z + 2]);
   if (!confere(!!banc && !banc.obra, 'celular: a bancada foi erguida')) throw new Error('sem bancada no celular');
+  await J(() => { window.__i.nivel(6, 1); window.__jogo.avancar(0.3); });
   await o.fecharTelas();
+  igual(await J(() => window.__jogo.estado().nivel), 6, 'celular: começa no nível 6, a um ponto do 7');
   await o.tocarConstrucao('bancada-de-carpintaria', 0.3);
   igual(await o.painel(), 'industria', 'celular: o dedo na bancada abre o painel');
   await o.tamanhos('celular, painel da bancada');
@@ -544,12 +561,15 @@ try {
   await J(() => window.__jogo.avancar(17));
   await o.quadro(200);
   await o.foto('06-balao-pronto');
+  const tabCel = await o.tem('tabua');
   await o.tocarConstrucao('bancada-de-carpintaria', 0.3);
   await o.ateParar();
-  igual(await o.tem('tabua'), 11, 'celular: o dedo na bancada retira a tábua pronta');
+  // (a subida para o nível 7 também dá tábuas de prêmio: por isso "pelo menos uma a mais")
+  confere((await o.tem('tabua')) >= tabCel + 1 && (await o.ind('bancada-de-carpintaria')).saida.length === 0, 'celular: o dedo na bancada retira a tábua pronta');
   await esperar(900);
   confere(await J(() => { const s = document.querySelector('.subida:not(.dialogo)'); return !!s && /Fubá/.test(s.textContent) && /Ração/.test(s.textContent); }), 'a tela de subida para o nível 7 mostra as receitas novas (fubá e ração)');
   await pg.screenshot({ path: path.join(capturas, 'c-cel-07-subida-com-receitas.jpg'), type: 'jpeg', quality: 84 });
+  confere(await J(() => { const s = document.querySelector('.subida:not(.dialogo)'); return (s.textContent.match(/Ração/g) || []).length === 1; }), 'a ração aparece uma vez só na lista do que o nível liberou');
   await o.fecharTelas();
   igual(await J(() => window.__jogo.estado().nivel), 7, 'celular: chegou ao nível 7');
 

@@ -18,7 +18,8 @@ COR_DA_ACAO.entrarNoCeleiro = '#f6e3b5';
 //   id = construção; x, z = canto da base; giro; ok = o lugar serve; ruins = casas [x, z, x, z...] que não servem;
 //   mudando = a entidade que está sendo mudada (some do lugar antigo enquanto o fantasma anda);
 //   cursor = só uma casa marcada, sem figura (modo de arrumar: escolher o que mudar)
-export const FANTASMA = { ligado: false, id: '', x: 0, z: 0, giro: 0, ok: false, ruins: [], nRuins: 0, mudando: null, cursor: false, local: '' };
+// (repouso = está em cima do trecho que acabou de ser posto, no modo de colocar vários: não se desenha nem acusa erro)
+export const FANTASMA = { ligado: false, id: '', x: 0, z: 0, giro: 0, ok: false, ruins: [], nRuins: 0, mudando: null, cursor: false, local: '', repouso: false };
 
 const VERDE = '#3fe24a', VERMELHO = '#ff4a36', MADEIRA = '#c98a45', MADEIRA_CLARA = '#e6b473';
 const caixa = [0, 0, 0, 0];
@@ -55,9 +56,13 @@ function relogio(seg) {
 
 // ---------- a obra: o chão batido, a figura subindo de baixo para cima e o andaime em volta ----------
 function desenharObra(g, cena, m, e, sx, sy, S) {
-  const cam = cena.cam, v = cena.v, A = cena.atlas, alfa = g.globalAlpha, feito = andamentoDaObra(m, e);
-  g.beginPath(); base(g, cam, e.x, e.z, e.l, e.p, 0.06);
-  g.fillStyle = '#d9b98a'; g.fill(); g.lineWidth = Math.max(1.5, 0.03 * S); g.strokeStyle = 'rgba(58,36,18,.55)'; g.stroke();
+  // (a obra já é vazada: quando tapa a personagem, esmaece pouco, senão some de vez)
+  const cam = cena.cam, v = cena.v, A = cena.atlas, alfa = Math.max(g.globalAlpha, 0.72), feito = andamentoDaObra(m, e);
+  g.globalAlpha = alfa;
+  if (!m.locais[e.local].interior) { // (no piso de tábuas do celeiro não há chão batido)
+    g.beginPath(); base(g, cam, e.x, e.z, e.l, e.p, 0.06);
+    g.fillStyle = '#d9b98a'; g.fill(); g.lineWidth = Math.max(1.5, 0.03 * S); g.strokeStyle = 'rgba(58,36,18,.55)'; g.stroke();
+  }
   // a altura do andaime acompanha a da figura
   let alto = 1.4;
   const tem = A.pronta(v.chave) && A.caixa(v.chave, 0, sx, sy, S, caixa);
@@ -66,8 +71,8 @@ function desenharObra(g, cena, m, e, sx, sy, S) {
   // as estacas e as travessas de trás
   madeira(g, S, () => { reta(g, cam, x0, 0, z0, x0, alto, z0); reta(g, cam, x0, alto, z0, x1, alto, z0); reta(g, cam, x0, alto, z0, x0, alto, z1); });
   if (tem) {
-    g.globalAlpha = alfa * 0.28; A.desenhar(g, v.chave, 0, sx, sy, S, v.espelhar);
-    const y = caixa[3] - (caixa[3] - caixa[1]) * (0.12 + 0.88 * feito);
+    g.globalAlpha = alfa * 0.4; A.desenhar(g, v.chave, 0, sx, sy, S, v.espelhar);
+    const y = caixa[3] - (caixa[3] - caixa[1]) * (0.25 + 0.75 * feito);
     g.save(); g.beginPath(); g.rect(caixa[0] - S, y, caixa[2] - caixa[0] + 2 * S, caixa[3] - y + S); g.clip();
     g.globalAlpha = alfa; A.desenhar(g, v.chave, 0, sx, sy, S, v.espelhar);
     g.restore();
@@ -243,7 +248,7 @@ registrarCamada('chao', (g, cam, m, S, cena) => {
     g.globalAlpha = 1; g.lineWidth = Math.max(2, 0.05 * S); g.strokeStyle = TRACO; g.setLineDash([0.2 * S, 0.14 * S]); g.stroke(); g.setLineDash([]);
   }
   const F = FANTASMA;
-  if (!F.ligado || F.local !== loc.id) return;
+  if (!F.ligado || F.local !== loc.id || F.repouso) return;
   const def = F.cursor ? null : defDe(m, F.id), cs = def ? casasDe(def, F.giro) : [1, 1], pulso = 0.5 + 0.5 * Math.sin(cena.tempo * 6);
   // as casas da base: verdes quando o lugar serve; vermelhas as que não servem (ou todas, se o motivo é do conjunto)
   for (let z = F.z; z < F.z + cs[1]; z++) for (let x = F.x; x < F.x + cs[0]; x++) {
@@ -284,7 +289,7 @@ registrarCamada('cima', (g, cam, m, S, cena) => {
   for (let k = 0; k < T.length; k++) { const e = T[k]; if ((e.obraAte > 0 || e.ampliaAte > 0) && e.local === loc.id && !(FANTASMA.ligado && FANTASMA.mudando === e)) barraDaObra(g, cam, m, S, cena, e); }
   if (loc.interior && !FANTASMA.ligado) setaDaSaida(g, cam, m, S, cena);
   const F = FANTASMA;
-  if (!F.ligado || F.cursor || F.local !== loc.id) return;
+  if (!F.ligado || F.cursor || F.repouso || F.local !== loc.id) return;
   const def = defDe(m, F.id);
   if (!def) return;
   const cs = casasDe(def, F.giro), sx = cam.telaX(F.x + cs[0] / 2, F.z + cs[1] / 2), sy = cam.telaY(F.x + cs[0] / 2, 0, F.z + cs[1] / 2) - (0.05 + 0.03 * Math.sin(cena.tempo * 5)) * S;

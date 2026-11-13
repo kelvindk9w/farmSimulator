@@ -361,8 +361,8 @@
   .cons-bt { min-height: 48px; white-space: nowrap; }
   .cons-bt.sem { opacity: .5; }
   body.colocando .rodape, body.colocando .topo-dir, body.colocando .balao, body.colocando .alavanca, body.colocando .agir, body.colocando .seta-ui { display: none !important; }
-  /* o botão de entrar no celeiro e de sair dele, na linha da dica */
-  .bt.cons-porta { flex: none; min-height: 46px; padding: 2px 14px 2px 6px; border-radius: 24px; font-weight: 800; white-space: nowrap; background: #fff1b8; }
+  /* o botão de entrar no celeiro e de sair dele: mais um na fileira dos modos, de outra cor */
+  .bt.modo.cons-porta { background: #fff1b8; margin-left: 8px; }
   /* o catálogo e o cartão de uma construção */
   .cons-oferta { grid-template-columns: 52px 1fr; }
   .cons-oferta > canvas.ic { grid-row: span 2; }
@@ -416,11 +416,11 @@
   .ind-falta { font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .ind-sobe canvas { transform: rotate(180deg); }
   .ind-vagas { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 2px; }
-  .ind-vaga { display: flex; align-items: center; gap: 6px; min-height: 48px; padding: 2px 12px 2px 8px; border: 2.5px dashed var(--marrom2); border-radius: 12px; font-size: 14px; font-weight: 700; color: var(--marrom2); box-sizing: border-box; }
+  .ind-vaga { display: flex; align-items: center; gap: 6px; min-height: 52px; padding: 2px 12px 2px 8px; border: 2.5px dashed var(--marrom2); border-radius: 12px; font-size: 14px; font-weight: 700; color: var(--marrom2); box-sizing: border-box; }
   .ind-vaga.trancada { border-style: solid; border-color: var(--marrom); background: var(--creme2); color: var(--marrom); padding: 2px 4px 2px 8px; }
   .ind-vaga .rot { display: flex; flex-direction: column; line-height: 1.15; margin-right: 4px; }
   .ind-vaga .rot small { font-size: 14px; font-weight: 600; color: var(--marrom2); }
-  .ind-vaga .bt { padding: 4px 10px; min-height: 40px; }
+  .ind-vaga .bt { padding: 4px 10px; min-height: 44px; }
   .ind-vaga .bt.sem { opacity: .55; }
   .ind-receitas { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
   .ind-receita { grid-template-columns: 44px 1fr auto; }
@@ -463,6 +463,65 @@
   .ped-bilhete.trancada { background: #b98a52; border-color: #6e431d; box-shadow: inset 0 0 0 2px rgba(255, 249, 236, .25); color: #fff9ec; }
   .ped-quadro .vazio { grid-column: 1 / -1; color: var(--marrom); text-align: center; }
   .ped-troca { margin: 8px 2px 0; text-align: center; color: var(--marrom2); }
+  /* frente: animais */
+  .balao.avulsa { background: #fff7d6; }
+  .chip.recipiente[hidden] { display: none; }
+  /* o painel do abrigo */
+  .abr small { display: block; font-size: 14px; font-weight: 600; color: var(--marrom2); line-height: 1.15; }
+  .abr .ruim { color: var(--ruim); }
+  .abr .bom { color: var(--verde2); font-weight: 700; }
+  .abr .bt.sem { opacity: .55; }
+  .abr-topo { display: grid; grid-template-columns: 56px 1fr auto; gap: 10px; align-items: center; margin-bottom: 8px; }
+  .abr-topo .nome { font-size: 17px; font-weight: 800; }
+  .abr-topo .nome small { display: inline; }
+  .abr-topo .info { font-size: 14px; font-weight: 600; color: var(--marrom2); }
+  .abr-topo > .bt { white-space: nowrap; }
+  .abr-aviso { display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 8px; margin-bottom: 8px; border: 2.5px solid var(--marrom); border-radius: 12px; background: #fff1b8; font-size: 14px; font-weight: 700; }
+  .abr-aviso > span { flex: 1; }
+  .abr-aviso .bt { white-space: nowrap; }
+  .abr-trato { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .abr-medida { display: grid; grid-template-columns: 34px 1fr auto; gap: 8px; align-items: center; border: 2.5px solid var(--marrom); border-radius: 12px; background: #fff; padding: 6px 6px 6px 8px; }
+  .abr-medida-titulo { display: flex; justify-content: space-between; gap: 6px; }
+  .abr-medida-titulo span { font-weight: 800; font-variant-numeric: tabular-nums; }
+  .abr-medida .barra { width: 100%; margin: 3px 0 3px; }
+  .abr-medida.bebedouro .barra i { background: #4aa9e6; }
+  .abr .barra.pouco { border-color: var(--ruim); }
+  .abr-medida .bt { min-width: 78px; }
+  .abr-bichos { margin-bottom: 8px; }
+  .oferta.abr-bicho > canvas.ic { grid-row: span 2; align-self: start; }
+  .abr-bicho .info { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; }
+  .abr-bicho .barra.ciclo { width: 72px; flex: none; }
+  .abr-bicho .barra.ciclo i { background: var(--verde); transition: none; }
+  .abr-bicho .barra.ciclo.pouco i { background: var(--ouro); }
+  .abr-bicho.pronto { background: #e9f8d8; }
+  .abr-bicho.fim { background: #fff1b8; }
+  .abr-bicho.estimacao { background: #eef6ff; }
+  .abr-bicho .nome small.abr-tem { display: inline-flex; align-items: center; gap: 2px; margin-left: 8px; color: var(--marrom); font-weight: 800; vertical-align: middle; }
+  .abr-velha { flex-basis: 100%; }
+  .abr-comprar, .abr-extras { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .abr-comprar .bt { white-space: nowrap; }
+  .abr-comprar .nota { margin: 0; }
+  .abr-trava { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 600; color: var(--marrom2); }
+  .abr-extra { display: flex; flex-direction: column; gap: 2px; max-width: 260px; }
+  .abr .cons-ampliar { margin-top: 0; }
+  .abr .cons-obra { margin-bottom: 0; }
+  /* a tela do destino do bicho que parou de produzir */
+  .abr-fim-topo { display: grid; grid-template-columns: 76px 1fr; gap: 10px; align-items: center; margin-bottom: 8px; }
+  .abr-fim-topo b { display: block; font-size: 17px; font-weight: 800; }
+  .abr-fim-topo p { margin: 2px 0 0; font-size: 14px; font-weight: 600; }
+  .abr-saidas { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 8px; }
+  .bt.abr-saida { flex-direction: column; gap: 3px; padding: 8px; background: #fff; text-align: center; min-height: 112px; }
+  .abr-saida-texto b { display: block; font-weight: 800; line-height: 1.1; }
+  .abr-saida-texto small { margin-top: 3px; }
+  .abr-saida .preco { font-weight: 800; color: var(--verde2); }
+  .abr-pe { display: flex; justify-content: center; margin-top: 8px; }
+  .abr-pe .bt { min-width: 200px; }
+  /* a aba "Animais" da loja */
+  .oferta.animal { grid-template-columns: 52px 1fr; }
+  .oferta.animal > canvas.ic { grid-row: span 2; align-self: start; }
+  .oferta.animal .botoes { align-items: center; }
+  .oferta.animal .botoes > .preco { margin-left: auto; padding-right: 4px; font-weight: 800; }
+  @media (max-width: 560px) { .abr-trato { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>

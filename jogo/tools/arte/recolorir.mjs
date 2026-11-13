@@ -21,7 +21,7 @@ const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const sharp = createRequire(path.join(AQUI, '../../package.json'))('sharp');
 const ARTE = path.join(AQUI, '../../arte');
 
-const BRANCO = [252, 242, 232], BRANCO_SOMBRA = [215, 191, 182], TRACO = [25, 10, 3];
+const BRANCO = [252, 242, 232], TRACO = [25, 10, 3];
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 const luz = (c) => 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2];
 const hsl = (c) => { const mx = Math.max(...c), mn = Math.min(...c), l = (mx + mn) / 510, s = mx === mn ? 0 : (mx - mn) / (l > 0.5 ? 510 - mx - mn : mx + mn);
@@ -97,7 +97,7 @@ if (o.verboso) for (const [q, l] of Object.entries(porQuadro)) console.log(`  qu
 let mudados = 0; const lT = luz(TRACO);
 for (const r of regioes) { if (!r.classe) continue;
   const de = r.classe.sombra ? r.cor : C, para = r.classe.sombra ? receita.para.map((v) => v * luz(r.cor) / luz(C)) : receita.para;
-  const claro = r.classe.sombra ? BRANCO_SOMBRA : BRANCO, lC = luz(de), lB = Math.max(luz(claro), lC + 20);
+  const claro = BRANCO, lC = luz(de), lB = Math.max(luz(claro), lC + 20); // a meia na sombra fica entre a cor nova e o branco
   for (const p of r.px) { const i = p * 4, l = luz([data[i], data[i + 1], data[i + 2]]);
     const [a, b, t] = l <= lC ? [TRACO, para, Math.max(0, (l - lT) / (lC - lT))] : [para, claro, Math.min(1, (l - lC) / (lB - lC))];
     for (let ch = 0; ch < 3; ch++) data[i + ch] = Math.round(a[ch] + (b[ch] - a[ch]) * t); mudados++; } }

@@ -11,7 +11,6 @@
 import { el, icone, botao, por } from '../dom.js';
 import '../animais.js'; // os textos, o desenho no terreno e o retorno desta frente
 import { T, numero, tempo } from '../textos.js';
-import { jeitoDe } from '../textos/animais.js';
 import { J } from '../../contexto.js';
 import { registrarPainel, abrirPainel } from './registro.js';
 import { linhaDeArrumar, iconeDaConstrucao } from './construcao.js';
@@ -54,7 +53,7 @@ registrarPainel({
   montar(corpo, ctx, arg) {
     const id = arg && arg.entidade;
     let destinoDe = (arg && arg.animal) || null; // o bicho cuja tela de destino está aberta
-    let assinatura = '', relogios = [], barraObra = null, tObra = null;
+    let assinatura = '', relogios = [], barraObra = null, tObra = null, montado = false;
     const cab = corpo.parentNode && corpo.parentNode.querySelector('header .titulo');
     const mandar = (c) => { const r = J.mundo.comando(c); if (!r.ok) som.tocar('erro'); return r; };
     const focar = (k) => { const b = corpo.querySelector(`[data-k="${k}"]`) || corpo.querySelector('button'); try { if (b) b.focus({ preventScroll: true }); } catch { /* sem foco */ } };
@@ -153,7 +152,7 @@ registrarPainel({
     // ---------- o painel ----------
     function desenhar() {
       const m = J.mundo, D = m.dados, e = construcaoPorId(m, id), def = e && defDe(m, e.tipo);
-      if (!e || !def || !m.animais.abrigos[e.id]) { ctx.fechar(); return; }
+      if (!e || !def || !m.animais.abrigos[e.id]) { if (montado) ctx.fechar(); else corpo.append(el('div', 'vazio', T.motivos['nao-existe'] ? T.motivos['nao-existe']() : '')); return; }
       const bichos = animaisDe(m, { abrigo: e.id }), st = estadoDoAbrigo(m, e), pedido = pedidoDaMissao(m);
       faltaNoAbrigo(m, e, falta);
       const alvo = destinoDe ? animalPorId(m, destinoDe) : null;
@@ -170,6 +169,9 @@ registrarPainel({
         amp ? Object.keys(amp.custo.itens).map((k) => quantoTem(m, k)).join(',') : ''].join('|');
       if (sinal === assinatura) { relogio(m, e); return; }
       assinatura = sinal; relogios = []; barraObra = null; tObra = null;
+      // refazer não pode perder o foco de quem anda pelas setas (o relógio também refaz, sem evento nenhum)
+      const ativo = document.activeElement, chave = montado && ativo && corpo.contains(ativo) ? ativo.dataset.k : null;
+      if (chave) queueMicrotask(() => { if (corpo.contains(document.activeElement)) return; const b = corpo.querySelector(`[data-k="${chave}"]`) || corpo.querySelector('button:not([disabled])'); try { if (b) b.focus({ preventScroll: true }); } catch { /* sem foco */ } });
       corpo.textContent = '';
       if (cab) cab.textContent = def.nome;
       ctx.saldo.textContent = '';
@@ -276,9 +278,9 @@ registrarPainel({
       if (barraObra) { barraObra.style.transform = `scaleX(${Math.round(andamentoDaObra(m, e) * 200) / 200})`; por(tObra, T.animais.falta(faltaDaObra(m, e))); }
     }
     desenhar();
+    montado = true;
     // os relógios andam mesmo sem evento nenhum (e um ciclo que vira muda o cartão do bicho)
     const tique = setInterval(() => { if (J.mundo && construcaoPorId(J.mundo, id)) desenhar(); }, 400);
     return { atualizar: desenhar, aoFechar() { clearInterval(tique); } };
   },
 });
-export { jeitoDe };

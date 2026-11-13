@@ -6,7 +6,7 @@ import { T, numero } from './textos.js';
 import { J } from '../contexto.js';
 import { modosEmOrdem } from '../nucleo/registro.js';
 import { barraDeXp } from '../nucleo/sistemas/niveis.js';
-import { noCesto, capacidadeDoCesto, ferramentaNoCinto, ferramentaNoSuporte } from '../nucleo/sistemas/posses.js';
+import { noCesto, foraDoCesto, capacidadeDoCesto, ferramentaNoCinto, ferramentaNoSuporte } from '../nucleo/sistemas/posses.js';
 import { plantavel } from '../nucleo/sistemas/lavoura.js';
 import { PAINEIS, abrirPainel, painelAberto } from './paineis/registro.js';
 import { tela } from '../plataforma/tela.js';
@@ -103,7 +103,7 @@ export function criarHud(ui) {
     num(txtXp, bx.feito * 100000 + bx.precisa, bx.precisa ? `${bx.feito}/${bx.precisa}` : '');
     num(nOuro, P.ouro); num(nCash, P.cash);
     // cesto
-    const nc = noCesto(m), cap = capacidadeDoCesto(m);
+    const nc = noCesto(m) - foraDoCesto(m), cap = capacidadeDoCesto(m); // (ovo e leite vão na caixa e no balde: não ocupam o cesto)
     num(nCesto, nc * 1000 + cap, `${nc}/${cap}`);
     classe(cesto, 'cheio', nc >= cap);
     // regador: quanta água leva; se está no suporte do celeiro, avisa

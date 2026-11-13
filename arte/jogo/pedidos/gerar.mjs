@@ -14,6 +14,7 @@ As imagens anexas são de um jogo de fazenda original, em desenho com contorno:
 // ---------- personagem ----------
 
 const P_MODELO = '- `referencias/personagem.png`: a FOLHA DE MODELO da personagem (parada de frente três quartos, de costas três quartos e de perfil). Ela manda nas proporções, nas cores e na roupa.';
+const P_FERRAMENTAS_FOICE = '- `referencias/ferramentas.png`: a FOLHA DE MODELO das ferramentas, com a personagem ao lado para dar o tamanho. A foice não está nela: use a ENXADA da folha como medida do cabo (mesma madeira, mesmo comprimento) e o mesmo jeito de desenhar o ferro.';
 const P_FERRAMENTAS = '- `referencias/ferramentas.png`: a FOLHA DE MODELO das ferramentas, com a personagem ao lado para dar o tamanho. A ferramenta deste pedido tem de sair igual à da folha: mesma forma, mesmas cores, mesmo tamanho em relação a ela.';
 const P_VISTA = {
   frente: 'de FRENTE três quartos, exatamente como a primeira figura da folha de modelo: o corpo virado para a esquerda de quem olha, o rosto aparece',
@@ -49,10 +50,10 @@ ${FIM}
 }
 
 // Ações com os pés plantados: a primeira figura é ela parada em pé (dá a escala); depois vêm os quadros da ação.
-function acao({ arquivo, titulo, uso, n, quadros, vivo, vista, ferramenta, refs = [], semObjeto = '' }) {
+function acao({ arquivo, titulo, uso, n, quadros, vivo, vista, ferramenta, refs = [], semObjeto = '', foraDaFolha = false }) { // foraDaFolha: o que ela segura não está na folha de ferramentas
   return `${CABECA}
 ${P_MODELO}
-${ferramenta ? `${P_FERRAMENTAS}\n` : ''}${refs.join('\n')}${refs.length ? '\n' : ''}
+${ferramenta && !foraDaFolha ? `${P_FERRAMENTAS}\n` : ''}${refs.join('\n')}${refs.length ? '\n' : ''}
 Preciso da folha de animação da MESMA personagem ${titulo}, vista ${vista === 'frente' ? 'de FRENTE' : 'de COSTAS'} três quartos, para usar como figura 2D animada dentro do jogo${uso ? ` ${uso}` : ''}.
 
 Gere uma imagem e salve na pasta atual como \`${arquivo}\`:
@@ -259,6 +260,34 @@ for (const vista of ['frente', 'costas']) {
     ],
     vivo: 'Golpe forte, de corpo inteiro: torce para trás, desce na diagonal com o peso do corpo e arranca o machado de volta.',
     semObjeto: 'NÃO desenhe toco, tronco, árvore, lascas nem cavacos: só a personagem e o machado.',
+  });
+  pedidos[`personagem-foice-${vista}`] = acao({
+    arquivo: `foice-${vista}.png`, titulo: 'ROÇANDO O MATO COM A FOICE', uso: 'quando ela limpa o mato de um terreno', vista, n: 6, foraDaFolha: true, refs: [P_FERRAMENTAS_FOICE, ...fmt('foice')],
+    ferramenta: 'uma FOICE DE ROÇAR, segura com as DUAS MÃOS: cabo de madeira reto e comprido, igual ao da enxada da folha de ferramentas (em pé, vai do chão até o ombro dela), com uma lâmina de ferro cinza CURVA, em meia-lua, presa na ponta. É a mesma foice, do mesmo tamanho, nos 6 quadros.',
+    quadros: [
+      'PREPARA: em pé, pernas afastadas, joelhos um pouco dobrados, tronco inclinado para a frente; a foice nas duas mãos, com a lâmina baixa, perto do chão, do lado direito dela.',
+      'RECUA: gira o tronco para a direita e leva a foice para trás, a lâmina na altura do joelho; o peso vai para a perna de trás. É a antecipação.',
+      'GOLPE: varre a foice bem baixa, rente ao chão, da direita para a esquerda, num arco largo; o tronco gira junto, o peso passa para a perna da frente.',
+      'PASSA: a lâmina passa pela frente dos pés, rente ao chão, com os braços esticados; os joelhos bem dobrados. É o ponto mais BAIXO do corpo.',
+      'TERMINA: a foice acaba do lado esquerdo dela, a lâmina um pouco erguida; o tronco torcido para a esquerda.',
+      'VOLTA: ela endireita um pouco o corpo e traz a foice de volta, baixa, para o lado direito. Emenda no quadro 1.',
+    ],
+    vivo: 'Golpe lateral baixo, de corpo inteiro: torce para um lado, varre rente ao chão girando o tronco e a cintura, e volta. Ombros e quadril giram; a cabeça acompanha a lâmina.',
+    semObjeto: 'NÃO desenhe mato, capim, folhas cortadas voando nem riscos de movimento: só a personagem e a foice.',
+  });
+  pedidos[`personagem-plantar-muda-${vista}`] = acao({
+    arquivo: `plantar-muda-${vista}.png`, titulo: 'PLANTANDO UMA MUDA', uso: 'quando ela planta uma muda de árvore no chão', vista, n: 6, foraDaFolha: true, refs: fmt('plantar-muda'),
+    ferramenta: 'uma MUDA: plantinha pequena, com um caule fino e 3 ou 4 folhas verdes, e um torrão redondo de terra escura na raiz; a muda inteira tem o tamanho do antebraço dela. Ela a segura pelo torrão, com as DUAS MÃOS.',
+    quadros: [
+      'SEGURA: em pé, a muda nas duas mãos, na frente da barriga; ela olha para a muda, contente.',
+      'ABAIXA: dobra os joelhos e inclina o tronco para a frente; as mãos descem com a muda.',
+      'AGACHA: agachada, o quadril baixo, os joelhos abertos; a muda quase no chão, à frente dos pés.',
+      'PÕE: agachada, pousa o torrão da muda no chão, à frente dos pés, com as duas mãos em volta dele. É o ponto mais BAIXO do corpo.',
+      'FIRMA: ainda agachada, as duas mãos espalmadas apertam o chão dos dois lados da muda, que fica em pé no chão entre as mãos.',
+      'LEVANTA: endireita as pernas e o tronco, com as mãos VAZIAS voltando para a frente do corpo. Neste quadro a muda NÃO aparece (o jogo desenha a muda plantada). Emenda no quadro 1.',
+    ],
+    vivo: 'Movimento vivo e cuidadoso: ela agacha de verdade (o quadril desce, os joelhos abrem), pousa a muda com as duas mãos, firma a terra e levanta. A cabeça acompanha a muda.',
+    semObjeto: 'NÃO desenhe cova, monte de terra, terra voando, regador nem outras plantas: só a personagem e a muda.',
   });
   pedidos[`personagem-picareta-${vista}`] = acao({
     arquivo: `picareta-${vista}.png`, titulo: 'QUEBRANDO PEDRA COM A PICARETA', uso: 'quando ela quebra uma pedra para limpar o terreno', vista, n: 6, refs: fmt('picareta'),

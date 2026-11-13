@@ -17,3 +17,6 @@ import './caderno.js';
 // frente das indústrias e dos pedidos: o painel de uma indústria (fila e receitas) e o quadro de pedidos
 import './industria.js';
 import './pedidos.js';
+// frente dos animais: o painel do abrigo (cocho, bebedouro, bichos, fim de vida) e a aba "Animais" da loja
+import './abrigo.js';
+import './animais.js';

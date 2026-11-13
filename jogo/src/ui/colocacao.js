@@ -63,11 +63,13 @@ function montar() {
 const casas = () => (modo && modo.def ? casasDe(modo.def, F.giro) : [1, 1]);
 function conferir() {
   const m = J.mundo, loc = m.locais[F.local], cs = casas();
-  F.nRuins = 0;
+  F.nRuins = 0; F.repouso = false;
   if (modo.tipo === 'arrumar') { F.ok = true; modo.motivo = null; pintarBarra(); return; }
   const r = modo.tipo === 'mover' ? lugarServe(m, modo.id, F.x, F.z, { local: F.local, mudando: modo.e, giro: F.giro }) : podeConstruir(m, modo.id, F.x, F.z, { local: F.local, giro: F.giro });
   F.ok = r.ok; modo.motivo = r.ok ? null : r;
-  if (!r.ok) {
+  // colocando vários: parado em cima do trecho que acabou de pôr, não há erro nenhum a mostrar
+  if (!r.ok && modo.seq && modo.postas > 0 && r.motivo === 'lugar-ocupado') { const o = loc.entidadeEm(F.x, F.z) || construcaoEm(m, F.x, F.z); if (o && o.tipo === modo.id) { F.repouso = true; modo.motivo = null; } }
+  if (!r.ok && !F.repouso) {
     // as casas que, sozinhas, já não servem (fora da terra, ocupadas, com planta, na porta)
     const num = modo.e ? modo.e.num : -1;
     for (let z = F.z; z < F.z + cs[1]; z++) for (let x = F.x; x < F.x + cs[0]; x++) {
@@ -113,14 +115,15 @@ function pintarBarra() {
   let info = '', ruim = false;
   if (arrumar) info = T.colocar.escolha;
   else if (modo.motivo) { info = frase(modo.motivo.motivo, modo.motivo.dados, m.dados) || T.motivos['lugar-ocupado'](); ruim = true; }
+  else if (F.repouso) info = T.colocar.postas(modo.postas) + ' · ' + T.colocar.cada(def.custo ? def.custo.ouro : 0);
   else if (modo.tipo === 'mover') info = T.colocar.bom;
   else info = (modo.seq && modo.postas ? T.colocar.postas(modo.postas) + ' · ' : '') + (modo.seq ? T.colocar.cada(def.custo ? def.custo.ouro : 0) + ' · ' : '') + custoEmTexto(m, def);
   por(tInfo, info); classe(tInfo, 'ruim', ruim);
   const gira = !arrumar && !!def.gira, guarda = modo.tipo === 'mover' && guardavel(def) && !(modo.e.obraAte > 0);
   if (bGirar.hidden !== !gira) bGirar.hidden = !gira;
   if (bGuardar.hidden !== !guarda) bGuardar.hidden = !guarda;
-  if (bConfirmar.hidden !== arrumar) bConfirmar.hidden = arrumar;
   classe(bConfirmar, 'sem', !arrumar && !F.ok);
+  if (bConfirmar.hidden !== (arrumar || (!!modo.seq && F.repouso))) bConfirmar.hidden = arrumar || (!!modo.seq && F.repouso);
   por(bCancelar.lastChild, arrumar || (modo.seq && modo.postas > 0) ? T.colocar.pronto : T.colocar.cancelar);
   por(aviso, J.meio === 'teclas' ? (gira ? T.colocar.teclasGira : T.colocar.teclas) : arrumar ? T.colocar.escolha : modo.seq ? T.colocar.arrasteSeq : T.colocar.arraste);
 }
@@ -159,7 +162,7 @@ export function sairDaColocacao() {
   if (!modo) return;
   const cam = J.cena.cam;
   modo = null;
-  F.ligado = false; F.mudando = null; F.cursor = false;
+  F.ligado = false; F.mudando = null; F.cursor = false; F.repouso = false;
   camada.remove();
   document.body.classList.remove('colocando');
   cam.fixa = false; cam.seguindo = true;
