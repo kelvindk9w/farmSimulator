@@ -120,10 +120,12 @@ test('gravação de quem já tinha o campo grande (6 por 8) abre com ele, arado 
 });
 
 // ---------------------------------------------------------------------------------------------------------------
-test('o boi no nível 4: depois das tábuas, o Seu Tonho pede a baia; o estábulo simples cabe no bolso do nível 4', () => {
+test('o boi no nível 4: depois das tábuas e das pedras (que rendem 4 tábuas), o Seu Tonho pede a baia; o estábulo simples cabe no bolso do nível 4', () => {
   const m = novo(), D = m.dados, ids = D.missoes.vizinho.map((x) => x.id);
   const k = ids.indexOf('baia-do-boi');
-  assert.equal(ids[k - 1], 'tabuas'); assert.equal(ids[k + 1], 'boi-de-arado');
+  assert.equal(ids[k - 2], 'tabuas'); assert.equal(ids[k - 1], 'pedras'); assert.equal(ids[k + 1], 'boi-de-arado');
+  // as pedras vêm antes da baia: a obra do estábulo não gasta as pedras do começo antes da missão delas
+  assert.equal(D.missoes.vizinho[k - 1].recompensa.itens.tabua, 4);
   assert.equal(D.missoes.vizinho[k].nivel, 4); assert.equal(D.missoes.vizinho[k + 1].nivel, 4);
   const E = D.construcoes.estabulo;
   assert.equal(E.nivel, 4);
@@ -165,7 +167,7 @@ test('a baia pronta: o boi velho chega com o arado simples, o cocho e o bebedour
   assert.equal(m.comando({ tipo: 'fileira', x: L[0] + 0.5, z: L[1] + 1.5 }).ok, true);
   ateParar(m, 300);
   assert.ok(ev.de('missaoConcluida').some((d) => d.id === 'boi-de-arado'), 'arou 12 com o boi');
-  assert.equal(missaoAtual(m).missao.id, 'pedras');
+  assert.equal(missaoAtual(m).missao.id, 'galinheiro');
 });
 
 test('quem já tinha boi (comprado antes, gravação de antes) não ganha outro; quem tem o estábulo cheio também não', () => {

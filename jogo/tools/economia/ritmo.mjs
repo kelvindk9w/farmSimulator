@@ -50,10 +50,16 @@ function sorteador(semente) { let a = semente >>> 0; return () => { a = (a + 0x6
 // ---------- estado ----------
 function novoEstado(perfil) {
   const I = R.inicio, T = D.terras, a = T.inicial.area, lim = T.inicial.limpo;
-  const area = (a[2] - a[0]) * (a[3] - a[1]), limpa = (lim[2] - lim[0]) * (lim[3] - lim[1]);
+  const area = (a[2] - a[0]) * (a[3] - a[1]);
   let predios = 0; for (const c of Object.values(D.construcoes)) if (c.inicial) predios += c.casas[0] * c.casas[1];
   const caminhos = (T.caminhos || []).reduce((s, c) => s + (c[2] - c[0]) * (c[3] - c[1]), 0);
-  const borda = Math.max(0, area - limpa - 32); // a casa e o celeiro ficam na beirada, fora do miolo limpo
+  // a beirada que nasce com mato, pedra e toco: as casas da área inicial fora do miolo limpo, tirando as construções,
+  // os caminhos e o campo (a mesma conta que o jogo faz ao criar o sítio, em src/nucleo/sistemas/terras.js)
+  const dentro = (r, x, z) => x >= r[0] && x < r[2] && z >= r[1] && z < r[3];
+  const tapado = [...(T.caminhos || []), ...(T.inicial.campo ? [T.inicial.campo] : [])];
+  for (const [id, c] of Object.entries(D.construcoes)) { const p = T.pontos[id]; if (c.inicial && p) tapado.push([p[0], p[1], p[0] + c.casas[0], p[1] + c.casas[1]]); }
+  let borda = 0;
+  for (let z = a[1]; z < a[3]; z++) for (let x = a[0]; x < a[2]; x++) if (!dentro(lim, x, z) && !tapado.some((r) => dentro(r, x, z))) borda++;
   const S = {
     perfil, ap: perfil.aproveitamento, t: 0, fim: 0, nivel: 1, xp: 0, ouro: I.ouro, cash: I.cash,
     ferr: {}, usos: {}, est: { ...I.itens }, campo: [], aradas: 0, pico: 30, picoEst: 0,
@@ -95,7 +101,15 @@ function recompensar(S, r, de) {
   if (r.ouroPorNivel) ganhar(S, r.ouroPorNivel * S.nivel, de);
   if (r.cash) { S.cash += r.cash; soma(S.c.cashDe, de, r.cash); }
   for (const [k, n] of Object.entries(r.itens || {})) darItem(S, k, n);
+  for (const [k, n] of Object.entries(r.animais || {})) darAnimal(S, k, n);
   if (r.xp) darXp(S, r.xp, de);
+}
+// bicho de presente (o boi velho do Seu Tonho, por exemplo): como no jogo, completa até n bichos da espécie
+function darAnimal(S, id, n) {
+  const a = D.animais[id]; if (!a || !(n > 0)) return;
+  if (a.familia === 'trabalho') { if (!S.trab[id]) S.trab[id] = { tratado: true, visita: S.t }; return; }
+  if (a.familia === 'estimacao') { if (!S.pets[id]) S.pets[id] = { afago: -1 }; return; }
+  const ab = S.abr[a.abrigo] = S.abr[a.abrigo] || { animal: id, n: 0, visita: S.t, comida: 0, agua: 0 }; ab.n = Math.max(ab.n, n);
 }
 
 // ---------- eventos: missões do vizinho e conquistas (mesma regra de filtro do jogo) ----------
@@ -351,7 +365,8 @@ function abastecerFilas(S, plano) {
     const r = D.receitas[rid], q = S.filas[r.onde]; if (!q) continue;
     let k = vezes, pos = 0;
     while (k-- > 0 && q.length < grau(S, r.onde, 'fila') && rest(S) > 3) {
-      for (const [e, n] of Object.entries(r.entra)) { const x = D.itens[e], falta = n - (S.est[e] || 0); if (falta > 0 && x.tipo === 'embalagem' && S.ouro >= falta * x.compra) { gastar(S, falta * x.compra, 'embalagens'); soma(S.est, e, falta); } }
+      // embalagem se compra; material (a madeira da tábua) só quando a terra que ela tem não dá mais
+      for (const [e, n] of Object.entries(r.entra)) { const x = D.itens[e], falta = n - (S.est[e] || 0); if (falta > 0 && x.compra > 0 && (x.tipo === 'embalagem' || (x.tipo === 'material' && !daParaJuntar(S, e, falta))) && S.ouro >= falta * x.compra) { gastar(S, falta * x.compra, x.tipo === 'embalagem' ? 'embalagens' : 'materiais comprados'); soma(S.est, e, falta); } }
       if (!Object.entries(r.entra).every(([e, n]) => (S.est[e] || 0) >= n)) break;
       for (const [e, n] of Object.entries(r.entra)) S.est[e] -= n;
       q.push({ r: rid, pronto: Math.max(S.t, q.length ? q[q.length - 1].pronto : 0) + r.tempoSeg }); usar(S, A.abastecerFila, 'indústrias', 1); pos++;

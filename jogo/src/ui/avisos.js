@@ -1,7 +1,7 @@
 // Avisos curtos no alto da tela ("o regador está vazio: toque no poço"). Somem sozinhos e nunca bloqueiam o jogo.
 // No máximo dois ao mesmo tempo: os outros esperam a vez (e apressam o mais velho). Enquanto uma tela de recompensa
 // (a subida de nível) está aberta, nenhum aparece: ficam guardados e saem quando ela fecha.
-import { el } from './dom.js';
+import { el, icone } from './dom.js';
 
 const MAXIMO = 2, DURA = 2800, ESPERA_MAX = 4;
 const MINIMO = 1100; // ms que um aviso fica na tela antes de ceder o lugar a outro que espera
@@ -21,6 +21,7 @@ function tirar(a, jaJa) {
 }
 function mostrar(p) {
   const a = { e: el('div', 'aviso' + (p.tipo ? ' ' + p.tipo : ''), p.texto), texto: p.texto, tipo: p.tipo, dura: p.dura, some: 0, desde: Date.now() };
+  if (p.tipo === 'bom') a.e.prepend(icone('ui/certo', 22)); // o certinho verde do aviso de coisa boa
   a.e.setAttribute('role', 'status');
   caixa.append(a.e);
   vivos.push(a);

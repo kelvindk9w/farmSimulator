@@ -9,8 +9,11 @@ export const foco = {
   // onde as setas navegam agora: a tela de subida, o painel aberto, ou o HUD inteiro (no menu)
   escopo() {
     const ui = document.getElementById('ui');
-    return ui.querySelector('.subida') || ui.querySelector('.veu') || (this.menu ? ui : null);
+    return ui.querySelector('.subida') || ui.querySelector('.veu') || (this.menu ? (this.listaAberta && this.listaAberta()) || ui : null);
   },
+  // o Menu do celular (ui/menu.js): a lista aberta, e fechar a lista (devolve true se estava aberta)
+  listaAberta: null,
+  fecharLista: null,
   candidatos(raiz) {
     const out = [];
     for (const e of raiz.querySelectorAll('button, textarea')) if (!e.disabled && !e.hidden && e.offsetParent !== null && !e.closest('[hidden]')) out.push(e);
@@ -50,11 +53,13 @@ export const foco = {
   entrarNoMenu() {
     this.menu = true;
     document.body.classList.add('menu');
-    const ui = document.getElementById('ui'), ativo = ui.querySelector('.modo.ativo') || this.candidatos(ui)[0];
+    const ui = document.getElementById('ui'), lista = this.listaAberta && this.listaAberta();
+    const ativo = (lista && this.candidatos(lista)[0]) || ui.querySelector('.modo.ativo') || this.candidatos(ui)[0];
     if (ativo) this.focar(ativo);
     J.mundo.comando({ tipo: 'frear' });
   },
   sairDoMenu() {
+    if (this.fecharLista && this.fecharLista()) return true; // a lista do Menu fecha primeiro
     if (!this.menu) return false;
     this.menu = false;
     document.body.classList.remove('menu');

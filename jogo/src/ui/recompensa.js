@@ -64,7 +64,12 @@ function proxima() {
   cartao.append(el('div', 'faixa', d.faixa || R.faixa[tipo] || R.ganhou));
   const r = d.recompensa, tem = temAlgo(r);
   let atraso = 0.5;
-  if (tipo === 'nivel') cartao.append(el('div', 'numero', String(d.numero)));
+  if (tipo === 'nivel') {
+    // o selo do nível novo, com quatro estrelas em volta (e os raios atrás: estilo/telas.js)
+    const n = el('div', 'numero', String(d.numero));
+    for (let i = 1; i <= 4; i++) { const e = icone('ui/estrela', i % 2 ? 40 : 28); e.classList.add('e' + i); n.append(e); }
+    cartao.append(n);
+  }
   else {
     // o baú: fechado, treme e abre; os prêmios saem dele
     const bau = el('div', 'bau'), fechado = icone('ui/bau-fechado', 84), abertoIc = icone('ui/bau-aberto', 84);

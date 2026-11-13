@@ -2,7 +2,8 @@
 //   'construir'    o catálogo do que se constrói: por categoria, com custo, o que falta e o nível exigido. Abre pelo
 //                  botão do HUD (é assim que se compra a primeira bancada) e dentro do painel da bancada (frente das
 //                  indústrias monta este painel numa aba: PAINEIS.construir.montar(div, ctx, arg)).
-//                  arg = { categoria?, id? (construção a mostrar) }
+//                  arg = { categoria?, id? (construção a mostrar) }. Com categoria 'enfeites' é a aba Enfeites da loja:
+//                  cercas, caminhos e enfeites juntos, com o cabeçalho e as abas da loja (paineis/loja.js)
 //   'construcao'   o cartão de uma construção colocada: obra (relógio e concluir), o que ela guarda, a próxima
 //                  ampliação, Mudar de lugar e Guardar. É o que o toque abre quando o tipo não tem dono
 //                  (acaoPossivel padrão de construcao.js). arg = { entidade }
@@ -19,7 +20,7 @@ import '../textos/construcao.js';
 import { J } from '../../contexto.js';
 import { registrarPainel, abrirPainel, fecharPainel, painelAberto } from './registro.js';
 import { SECOES } from './mochila.js';
-import { ABAS_DE_FORA } from './loja.js';
+import { ABAS_DE_FORA, faixaDaLoja } from './loja.js';
 import { aoInstalarMundo } from '../ligacoes.js';
 import { avisar } from '../avisos.js';
 import { botaoConcluir } from '../concluir.js';
@@ -63,6 +64,7 @@ registrarPainel({
   id: 'construir', titulo: T.construir.titulo, icone: 'icone/martelo', ordem: 35,
   montar(corpo, ctx, arg) {
     let aba = (arg && arg.categoria) || null, pediu = arg && arg.id;
+    const daLoja = aba === 'enfeites' && !!ctx.abas; // a aba Enfeites da loja (no painel da bancada, não)
     function escolher(id) {
       const m = J.mundo, def = defDe(m, id), r = podePagar(m, id);
       if (!r.ok) { som.tocar('erro'); avisar(frase(r.motivo, r.dados, m.dados)); return; }
@@ -79,9 +81,18 @@ registrarPainel({
       if (travada) { c.append(trava(T.construir.nivel(def.nivel))); return c; }
       c.append(el('div', 'info', `${T.construir.casas(def.casas)} · ${def.obraSeg > 0 ? (def.tipo === 'movel' ? T.construir.montagem : T.construir.obra)(def.obraSeg) : T.construir.naHora}`));
       const pe = el('div', 'cons-pe');
+      // na loja, o enfeite que custa só ouro tem o preço no próprio botão verde (como os outros cartões da loja)
+      const soOuro = daLoja && !guardadas && !(def.custo.cash > 0) && def.custo.ouro > 0 && !Object.keys(def.custo.itens || {}).length;
       if (guardadas) pe.append(el('div', 'cons-custo'));
+      else if (def.custo.cash > 0 && daLoja) {
+        // enfeite de cash, na loja: o botão turquesa leva à loja de cash, onde a compra é feita
+        const b = botao({ classe: 'cash', rotulo: T.construir.cash(def.custo.cash), aoClicar: () => { som.tocar('toque'); abrirPainel('cash', { de: 'loja' }); } });
+        const p = el('span', 'preco'); p.append(icone('icone/cash', 22), el('span', '', numero(def.custo.cash))); b.append(p);
+        b.dataset.k = 'cash-' + def.id;
+        pe.append(b);
+      }
       else if (def.custo.cash > 0) { const l = el('div', 'cons-custo'), f = el('span', 'cons-ficha'); f.append(icone('icone/cash', 18), el('span', '', T.construir.cash(def.custo.cash))); l.append(f); pe.append(l); }
-      else pe.append(custo(m, def.custo));
+      else if (!soOuro) pe.append(custo(m, def.custo));
       const fora = def.onde !== m.personagem.local;
       if (!r.ok && r.motivo === 'exige') c.append(trava(T.construir.precisaDe(defDe(m, r.dados.construcao).nome)));
       else if (!r.ok && r.motivo === 'limite') c.append(el('div', 'info', frase('limite', r.dados, m.dados)));
@@ -89,6 +100,7 @@ registrarPainel({
       if (!(def.custo.cash > 0) || guardadas) {
         const b = botao({ texto: guardadas ? T.construir.colocar : def.tipo === 'movel' ? T.construir.montar : T.construir.escolher, classe: 'verde' + (r.ok && !fora ? '' : ' sem'), aoClicar: () => escolher(def.id) });
         b.dataset.k = 'c-' + def.id;
+        if (soOuro) { const p = el('span', 'preco' + (m.posses.ouro < def.custo.ouro ? ' falta' : '')); p.append(icone('icone/ouro', 22), el('span', '', numero(def.custo.ouro))); b.append(p); }
         pe.append(b);
       }
       c.append(pe);
@@ -97,24 +109,26 @@ registrarPainel({
     function desenhar() {
       const m = J.mundo, D = m.dados.construcoes, dentro = m.personagem.local === 'celeiro';
       corpo.textContent = '';
-      ctx.saldo.textContent = '';
-      ctx.saldo.append(icone('icone/ouro', 20), el('span', '', numero(m.posses.ouro)));
+      if (daLoja) faixaDaLoja(ctx, 'enfeites');
+      else { ctx.saldo.textContent = ''; ctx.saldo.append(icone('icone/ouro', 20), el('span', '', numero(m.posses.ouro))); }
       const porAba = {};
       for (const def of Object.values(D)) if (constroi(def) || quantasGuardadas(m, def.id) > 0) (porAba[categoriaDe(def)] || (porAba[categoriaDe(def)] = [])).push(def);
+      if (daLoja) porAba.enfeites = [...(porAba.cerca || []), ...(porAba.decoracao || [])];
       const abas = CATEGORIAS.filter((k) => porAba[k]);
       const caixa = el('div', 'cons');
       if (!abas.length) { caixa.append(el('div', 'vazio', T.construir.vazio)); corpo.append(caixa); return; }
-      if (pediu && D[pediu]) { aba = categoriaDe(D[pediu]); }
-      if (!abas.includes(aba)) aba = dentro ? 'armazem' : abas.find((k) => porAba[k].some((d) => d.onde === 'fazenda' && podePagar(m, d.id).ok)) || abas.find((k) => k !== 'armazem') || abas[0];
-      if (!abas.includes(aba)) aba = abas[0];
-      const linha = el('div', 'abas');
+      if (pediu && D[pediu] && !daLoja) { aba = categoriaDe(D[pediu]); }
+      if (daLoja) { if (!porAba.enfeites.length) { caixa.append(el('div', 'vazio', T.construir.vazio)); corpo.append(caixa); return; } }
+      else if (!abas.includes(aba)) aba = dentro ? 'armazem' : abas.find((k) => porAba[k].some((d) => d.onde === 'fazenda' && podePagar(m, d.id).ok)) || abas.find((k) => k !== 'armazem') || abas[0];
+      if (!daLoja && !abas.includes(aba)) aba = abas[0];
+      const linha = el('div', 'abas'); linha.hidden = daLoja;
       for (const k of abas) {
         const b = botao({ texto: T.construir.categorias[k], classe: 'aba' + (k === aba ? ' ativo' : ''), aoClicar: () => { aba = k; pediu = null; som.tocar('toque'); desenhar(); const n = corpo.querySelector(`[data-k="aba-${k}"]`); if (n) n.focus({ preventScroll: true }); } });
         b.dataset.k = 'aba-' + k;
         linha.append(b);
       }
       caixa.append(linha);
-      if (!dentro && !construcoesDe(m, 'bancada-de-carpintaria').length && D['bancada-de-carpintaria']) caixa.append(el('div', 'nota', T.construir.semBancada));
+      if (!daLoja && !dentro && !construcoesDe(m, 'bancada-de-carpintaria').length && D['bancada-de-carpintaria']) caixa.append(el('div', 'nota', T.construir.semBancada));
       const grade = el('div', 'grade');
       // primeiro o que está guardado, depois por nível e preço
       const lista = porAba[aba].slice().sort((a, b) => (quantasGuardadas(m, b.id) > 0) - (quantasGuardadas(m, a.id) > 0) || a.nivel - b.nivel || (a.custo ? a.custo.ouro : 0) - (b.custo ? b.custo.ouro : 0));
@@ -124,6 +138,7 @@ registrarPainel({
         grade.append(oferta(m, def));
       }
       caixa.append(grade);
+      if (daLoja) { corpo.append(caixa); return; }
       // no pé: arrumar o que já está posto e a porta do celeiro
       const pe = el('div', 'cons-linha');
       const bA = botao({ icone: 'ui/mover', tamanho: 24, texto: T.construir.arrumar, aoClicar: () => comecarArrumacao() }); bA.dataset.k = 'arrumar';
@@ -141,8 +156,8 @@ registrarPainel({
   },
 });
 
-// a loja leva ao catálogo ("compre na loja e escolha o lugar")
-ABAS_DE_FORA.push({ id: 'construir', nome: T.construir.titulo, painel: 'construir' });
+// a aba Enfeites da loja é o catálogo de cercas, caminhos e enfeites (o resto do catálogo abre no botão Construir)
+ABAS_DE_FORA.push({ id: 'enfeites', nome: T.construir.enfeites, painel: 'construir', arg: { categoria: 'enfeites', de: 'loja' } });
 
 // ---------- o cartão de uma construção ----------
 const ABAS = [];

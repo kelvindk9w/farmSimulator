@@ -1,8 +1,8 @@
 // Os painéis do jogo (loja, mochila, missões, configurações...). Cada um se registra no seu arquivo:
 //   registrarPainel({ id, titulo, icone, ordem, botao, montar(corpo, ctx, arg) → { atualizar(), aoFechar() } })
-//   ctx = { saldo (elemento do cabeçalho para mostrar ouro, por exemplo), fechar() }
+//   ctx = { saldo (elemento do cabeçalho para mostrar ouro, por exemplo), fechar(), titulo(texto, icone), abas, veu }
 // Um painel aberto por vez. Fecha no botão, tocando fora, com Esc e com o botão de voltar.
-import { el, botao, icone } from '../dom.js';
+import { el, botao, icone, trocarIcone } from '../dom.js';
 import { T } from '../textos.js';
 import { som } from '../../plataforma/som.js';
 
@@ -24,14 +24,19 @@ export function abrirPainel(id, arg) {
   const veu = el('div', 'veu'), cartao = el('div', 'cartao'), cab = el('header'), corpo = el('div', 'corpo');
   const saldo = el('span', 'saldo');
   const fechar = botao({ icone: 'ui/fechar', tamanho: 22, classe: 'quadrado fechar', rotulo: T.botoes.fechar, aoClicar: () => fecharPainel() });
-  cab.append(icone(p.icone, 28), el('span', 'titulo', p.titulo), saldo, fechar);
-  cartao.append(cab, corpo); veu.append(cartao);
+  const ic = icone(p.icone, 36), titulo = el('span', 'titulo', p.titulo);
+  cab.append(ic, titulo, saldo, fechar);
+  // a fileira de abas presa embaixo do cabeçalho (a família da loja usa: paineis/loja.js, faixaDaLoja)
+  const abas = el('div', 'abas abas-do-painel'); abas.hidden = true;
+  cartao.append(cab, abas, corpo); veu.append(cartao);
   veu.dataset.painel = id;
   veu.addEventListener('pointerdown', (e) => { if (e.target === veu) fecharPainel(); });
   raiz.append(veu);
   aberto = { id, veu, corpo, api: null };
   document.body.classList.add('com-painel');
-  aberto.api = p.montar(corpo, { saldo, fechar: fecharPainel }, arg) || {};
+  // ctx: saldo (no cabeçalho), fechar(); e para quem se veste de outro painel: titulo(texto, icone), abas, veu
+  const trocarTitulo = (texto, chave) => { titulo.textContent = texto; if (chave) trocarIcone(ic, chave); };
+  aberto.api = p.montar(corpo, { saldo, fechar: fecharPainel, titulo: trocarTitulo, abas, veu }, arg) || {};
   // o foco entra no painel (TV e teclado andam pelos botões com as setas)
   const primeiro = corpo.querySelector('button:not([disabled])') || fechar;
   try { primeiro.focus({ preventScroll: true }); } catch { /* sem foco */ }
@@ -63,5 +68,5 @@ export function atualizarPainel() {
   // refazer a lista não pode perder o foco de quem navega pelas setas
   const ativo = document.activeElement, chave = ativo && aberto.veu.contains(ativo) ? ativo.dataset.k : null;
   aberto.api.atualizar();
-  if (chave) { const b = aberto.corpo.querySelector(`[data-k="${chave}"]`); try { if (b) b.focus({ preventScroll: true }); else aberto.veu.querySelector('.fechar').focus({ preventScroll: true }); } catch { /* sem foco */ } }
+  if (chave) { const b = aberto.veu.querySelector(`[data-k="${chave}"]`); try { if (b) b.focus({ preventScroll: true }); else aberto.veu.querySelector('.fechar').focus({ preventScroll: true }); } catch { /* sem foco */ } }
 }

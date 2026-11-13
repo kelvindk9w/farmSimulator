@@ -1,6 +1,6 @@
 // O vizinho (Seu Tonho): balão com retrato e a missão da vez, e a seta que aponta o próximo passo, no mundo
 // (uma casa, o poço) ou na interface (um botão de modo, a loja). O passo vem de nucleo/guia.js.
-import { el, icone, por, classe, fracao } from './dom.js';
+import { el, icone, por, classe, encher } from './dom.js';
 import { T } from './textos.js';
 import { J } from '../contexto.js';
 import { missaoAtual } from '../nucleo/sistemas/missoes.js';
@@ -12,8 +12,8 @@ import { subidaAberta } from './subida.js';
 export function criarTutorial(ui, hud) {
   const balao = el('button', 'balao'); balao.type = 'button';
   const quem = el('div', 'quem'), retrato = el('div', 'retrato'), nome = el('div');
-  retrato.append(icone('retrato/' + J.dados.missoes.vizinhoId, 48)); quem.append(retrato, nome);
-  const texto = el('div', 'texto'), titulo = el('b'), fala = el('div', 'fala'), anda = el('div', 'anda'), barra = el('div', 'barra'), fio = el('i'), conta = el('span');
+  retrato.append(icone('retrato/' + J.dados.missoes.vizinhoId, 58)); quem.append(retrato, nome);
+  const texto = el('div', 'texto'), titulo = el('b'), fala = el('div', 'fala'), anda = el('div', 'anda'), barra = el('div', 'barra hud'), fio = el('i'), conta = el('span');
   barra.append(fio); anda.append(barra, conta); texto.append(titulo, fala, anda);
   balao.append(quem, texto);
   balao.hidden = true;
@@ -73,7 +73,7 @@ export function criarTutorial(ui, hud) {
     classe(balao, 'feita', feitaAte > 0);
     if (feitaAte > 0) feitaAte -= dt;
     if (anda.hidden !== (!!a.esperaNivel || !!dito)) anda.hidden = !!a.esperaNivel || !!dito;
-    if (!a.esperaNivel) { fracao(fio, a.conta / a.n); por(conta, T.tutorial.progresso(Math.min(a.conta, a.n), a.n)); }
+    if (!a.esperaNivel) { encher(fio, a.conta / a.n); por(conta, T.tutorial.progresso(Math.min(a.conta, a.n), a.n)); }
 
     // a seta: recalcula umas vezes por segundo
     if (relogio > 0) return;
@@ -85,7 +85,7 @@ export function criarTutorial(ui, hud) {
       // com a loja aberta, a seta aponta a oferta pedida (ou a primeira que dá para comprar)
       let alvo = null;
       if (g.tipo === 'painel' && painel === g.painel) alvo = (g.item && ui.querySelector(`.oferta[data-item="${g.item}"] .bt`)) || ui.querySelector('.oferta:not(.travada) .bt');
-      else if (g.tipo === 'painel') alvo = ui.querySelector(`.aba[data-k="aba-${g.painel}"]`); // o painel pedido é uma aba de fora da loja
+      else if (g.tipo === 'painel') alvo = ui.querySelector(`.aba[data-k="aba-${g.painel}"]`) || ui.querySelector('.veu .fechar'); // o painel pedido é uma aba da loja; se não for, primeiro fechar este
       apontarUi(alvo);
       return;
     }
@@ -97,12 +97,13 @@ export function criarTutorial(ui, hud) {
       if (e) { cena.seta.ligada = true; cena.seta.x = e.x + e.l / 2; cena.seta.z = e.z + e.p / 2; cena.seta.alto = TIPOS[e.tipo].altura || 1.6 + Math.min(e.l, e.p) * 0.5; }
     } else if (g.tipo === 'modo') apontarUi(hud.modos[g.modo]);
     else if (g.tipo === 'semente') apontarUi(hud.sementes[g.item] || hud.modos.semear);
-    else if (g.tipo === 'painel') apontarUi(hud.paineis[g.painel]);
+    else if (g.tipo === 'painel') apontarUi(hud.alvo ? hud.alvo(hud.paineis[g.painel]) : hud.paineis[g.painel]); // dentro do Menu fechado: primeiro o Menu
     else apontarUi(null);
     // o balão nunca fica em cima do alvo apontado no mundo: se ficaria, muda de lado
     if (cena.seta.ligada) {
-      const cam = cena.cam, tx = cam.cssX(cena.seta.x, cena.seta.z), ty = cam.cssY(cena.seta.x, cena.seta.alto, cena.seta.z), mg = 46;
-      const dentro = (lado) => { const l = lado ? 8 : cam.w - 8 - balao.offsetWidth, t = balao.offsetTop; return tx > l - mg && tx < l + balao.offsetWidth + mg && ty > t - mg && ty < t + balao.offsetHeight + mg + 60; };
+      // (em pontos do #ui: no computador ele cresce pelo zoom, J.esc)
+      const cam = cena.cam, k = J.esc || 1, tx = cam.cssX(cena.seta.x, cena.seta.z) / k, ty = cam.cssY(cena.seta.x, cena.seta.alto, cena.seta.z) / k, mg = 46;
+      const dentro = (lado) => { const l = lado ? 8 : cam.w / k - 8 - balao.offsetWidth, t = balao.offsetTop; return tx > l - mg && tx < l + balao.offsetWidth + mg && ty > t - mg && ty < t + balao.offsetHeight + mg + 60; };
       if (dentro(esq) && !dentro(!esq)) esq = !esq;
       classe(balao, 'esq', esq);
     }

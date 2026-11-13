@@ -28,14 +28,18 @@ registrarPainel({
       corpo.append(el('div', 'nota', P.info));
       const cartela = el('div', 'cartela');
       for (const d of e.dias) {
-        const c = el('div', 'dia ' + d.estado);
+        // o último dia da cartela é o especial (cartão dourado), enquanto não chega a vez dele
+        const c = el('div', 'dia ' + d.estado + (d.dia === e.dias.length && d.estado !== 'aberto' && d.estado !== 'hoje' ? ' especial' : ''));
         c.dataset.dia = d.dia;
-        c.append(el('div', 'rot', P.dia(d.dia)), miniatura(d.recompensa), el('div', 'estado', d.estado === 'aberto' ? '✓ ' + P.aberto : d.estado === 'hoje' ? P.hoje : d.estado === 'amanha' ? P.amanha : ''));
+        const estado = el('div', 'estado');
+        if (d.estado === 'aberto') estado.append(icone('ui/certo', 22), el('span', '', P.aberto));
+        else estado.textContent = d.estado === 'hoje' ? P.hoje : d.estado === 'amanha' ? P.amanha : '';
+        c.append(el('div', 'rot', P.dia(d.dia)), miniatura(d.recompensa), estado);
         cartela.append(c);
       }
       corpo.append(cartela);
       const pe = el('div', 'pe');
-      if (e.tem) { const b = botao({ icone: ICONE.presentes, tamanho: 30, texto: P.abrir, classe: 'verde', aoClicar: () => mandar({ tipo: 'abrirPresente' }) }); b.dataset.k = 'abrir-presente'; pe.append(b); }
+      if (e.tem) { const b = botao({ icone: ICONE.presentes, tamanho: 36, texto: P.abrir, classe: 'verde', aoClicar: () => mandar({ tipo: 'abrirPresente' }) }); b.dataset.k = 'abrir-presente'; pe.append(b); }
       else pe.append(el('div', 'nota bom', e.completa ? P.completa : P.volta));
       corpo.append(pe);
     }

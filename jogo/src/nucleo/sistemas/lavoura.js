@@ -331,14 +331,14 @@ registrarAutomatico((m, x, z) => {
 });
 
 // ---------- a fileira ----------
-// As casas de campo (arada ou sem sulco) seguidas na linha z, ao longo de X, que passam pela casa (x, z), em ordem a
-// partir da ponta mais perto da personagem. Casa que não é de campo: lista vazia.
 // segurar o dedo na casa (x, z) faz alguma fileira no modo ativo? (na lavoura, sempre; o modo com a fileira dele decide)
 export function podeSegurar(m, x, z) {
   const modo = MODOS[m.modo.id];
   if (!m.local.dentro(x, z)) return false;
   return modo && modo.fileira ? !!modo.fileira(m, x, z) : deLavoura(m.local.chao[z * m.local.l + x]);
 }
+// As casas de campo (arada ou sem sulco) seguidas na linha z, ao longo de X, que passam pela casa (x, z), em ordem a
+// partir da ponta mais perto da personagem. Casa que não é de campo: lista vazia.
 export function casasDaFileira(m, x, z, loc = m.local) {
   const serve = (cx) => loc.dentro(cx, z) && loc.propria[z * loc.l + cx] === 1 && !loc.ocupa[z * loc.l + cx] && deLavoura(loc.chao[z * loc.l + cx]);
   if (!serve(x)) return [];

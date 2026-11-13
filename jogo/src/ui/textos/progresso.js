@@ -33,7 +33,7 @@ const MOTIVOS = {
 };
 for (const k in MOTIVOS) if (!T.motivos[k]) T.motivos[k] = MOTIVOS[k];
 
-Object.assign(T.botoes, { fazenda: 'Minha fazenda', correio: 'Caixa de correio: tem presente' });
+Object.assign(T.botoes, { fazenda: 'Minha fazenda', correio: 'Correio', correioCheio: 'Correio: tem presente' });
 
 T.recompensa = {
   receber: 'Receber', continuar: 'Continuar', ganhou: 'Você ganhou', liberou: 'Liberou',
@@ -94,7 +94,7 @@ T.conquistas = {
 };
 
 T.presentes = {
-  titulo: 'Presente do dia', abrir: 'Abrir o presente de hoje', dia: (n) => `Dia ${n}`, hoje: 'Hoje!', amanha: 'Amanhã', aberto: 'Aberto',
+  titulo: 'Presente do dia', abrir: 'Receber', dia: (n) => `Dia ${n}`, hoje: 'Hoje!', amanha: 'Amanhã', aberto: 'Aberto',
   info: 'Um presente por dia jogado. Se faltar um dia, não perde nada: continua de onde parou.',
   volta: 'Volte amanhã para o próximo presente.', completa: 'Você abriu os sete! Amanhã começa um cartão novo.',
   chegou: 'Tem presente na caixa de correio',

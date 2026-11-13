@@ -48,3 +48,5 @@ export function botao(opc) {
 export function por(e, texto) { if (e._t !== texto) { e._t = texto; e.textContent = texto; } }
 export function classe(e, nome, liga) { const k = '_c' + nome; if (e[k] !== liga) { e[k] = liga; e.classList.toggle(nome, liga); } }
 export function fracao(barra, f) { const v = Math.round(Math.max(0, Math.min(1, f)) * 200) / 200; if (barra._f !== v) { barra._f = v; barra.style.transform = `scaleX(${v})`; } }
+// barra de 9 fatias do HUD (estilo/hud.js): o enchimento muda de largura (scaleX amassaria as pontas redondas)
+export function encher(fio, f) { const v = Math.round(Math.max(0, Math.min(1, f)) * 200) / 200; if (fio._f !== v) { fio._f = v; fio.style.width = v * 100 + '%'; fio.style.visibility = v > 0 ? '' : 'hidden'; } }

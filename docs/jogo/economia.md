@@ -10,7 +10,7 @@ Há quatro tipos de número aqui. Cada tabela diz de que tipo é.
 |---|---|---|
 | **Dado** | Está nos JSON e o jogo lê | Conferido por máquina: `validar.mjs` (0 erros, 0 avisos), o validador do próprio jogo (`npm run validar`: "Dados em ordem") e os testes do jogo (`npm run testar`) |
 | **Conta** | Sai de `jogo/tools/economia/ritmo.mjs`: um "jogador de planilha" que segue regras simples sobre os mesmos JSON | É estimativa. Serve para comparar um ajuste com outro, não para prometer um dia exato |
-| **Medido** | O jogo de verdade jogado por um jogador automático ou por gente | **Nada foi medido ainda.** Quem vai medir é o jogador automático do jogo (`npm run bot`, ainda não escrito) e depois pessoas jogando |
+| **Medido** | O jogo de verdade jogado por um jogador automático ou por gente | O jogador automático (`npm run bot`, em `jogo/tools/bot/`) joga o jogo de verdade nos três perfis; os números estão em `ritmo-medido.md`. Gente jogando ainda não foi medida |
 | **Chute** | Hipótese sem conta nem fonte | Lista na seção 11 |
 
 Como rodar:
@@ -48,49 +48,50 @@ A curva de níveis foi ajustada para o **regular**. Os outros dois são consequ�
 | Dia | Meta do regular | Casual | Regular | Engajado |
 |---|---|---|---|---|
 | 1ª sessão (15 min) | 4 | - | 4 | - |
-| D1 | 6 | 5 | 6 | 7 |
-| D3 | 8 | 6 | 8 | 11 |
+| D1 | 6 | 4 | 6 | 8 |
+| D3 | 8 | 6 | 8 | 12 |
 | D7 | 11 | 8 | 11 | 16 |
 | D14 | 14 | 11 | 14 | 20 |
 | D30 | 19 | 13 | 19 | 26 |
 | D60 | 23 | 18 | 23 | 34 |
-| D90 | 26 | 20 | 26 | 42 |
-| D120 | - | 21 | 29 | 49 |
+| D90 | 26 | 20 | 26 | 43 |
+| D120 | - | 21 | 29 | 50 |
+
+Com o começo humilde (campo de 12 casas, miolo limpo maior, boi no nível 4) a conta continua nas metas do regular. Para isso ela aprendeu três coisas: a beirada com mato, pedra e toco é contada casa por casa, como o jogo faz (a conta velha tirava 32 casas fixas e, com o miolo limpo maior, achava só 7 obstáculos em vez de uns 25); o bicho dado de presente por missão entra na fazenda (sem isso o boi velho nunca chegava e a missão de arar com o boi travava até o nível 12); e a madeira da tábua é comprada quando a terra não dá mais. O casual fecha o D1 no nível 4, a 3 pontos de experiência do 5 (417 de 420); o jogo medido dá 5 (`ritmo-medido.md`).
 
 O que cada marco quer dizer para o regular:
 
-- **Fim da 1ª sessão (nível 4):** plantou alface e milho, vendeu, entregou um pedido, comprou o regador de lata e o cesto grande, limpou mato e tocos, montou a bancada de carpintaria. Falta pouco para o nível 5 (354 de 420 de experiência), que abre o galinheiro: é o motivo para voltar.
-- **D1 (nível 6):** galinheiro com galinhas, tomate, bancada de embalar, regador grande. O primeiro lote fica para o dia 2.
+- **Fim da 1ª sessão (nível 4):** plantou alface e milho, vendeu, entregou um pedido, comprou o regador de lata e o cesto grande, limpou mato e tocos (a madeira da bancada de carpintaria). Falta pouco para o nível 5 (362 de 420 de experiência), que abre o galinheiro: é o motivo para voltar.
+- **D1 (nível 6):** o boi velho do Seu Tonho (nível 4, na segunda sessão: bancada de carpintaria, tábuas, pedras, a baia barata do estábulo e a primeira fileira arada com ele, uns 12 minutos depois de entrar), galinheiro com galinhas, tomate, bancada de embalar, regador grande. O primeiro lote fica para o dia 2.
 - **D7 (nível 11):** moinho, cozinha, curral com vacas, bananal, três lotes, regador de crivo. O laticínio e o arroz acabaram de abrir.
-- **D30 (nível 19):** boi, jumento com carroça e barril, cavalo, ovelhas, os primeiros aspersores, seis lotes. Faltam as quatro últimas receitas.
+- **D30 (nível 19):** arado de ferro, jumento com carroça e barril, cavalo, ovelhas, os primeiros aspersores, seis lotes. Faltam as quatro últimas receitas.
 - **D90 (nível 26):** todo o conteúdo desta versão foi visto (ele vai até o nível 25). Sobram as compras mais caras: os dois últimos lotes e a casa-grande.
 
 Dia em que cada perfil chega ao nível (conta; "~" é projeção):
 
 | Nível | Casual | Regular | Engajado |
 |---|---|---|---|
-| 5 | 1 | 1 | 1 |
-| 10 | 11 | 6 | 3 |
-| 15 | 40 | 16 | 6 |
-| 20 | 86 | 34 | 13 |
-| 25 | ~246 | 74 | 26 |
-| 30 | ~466 | ~129 | 44 |
-| 50 | ~1.399 | ~378 | ~122 |
+| 5 | 2 | 1 | 1 |
+| 10 | 11 | 6 | 2 |
+| 15 | 39 | 16 | 6 |
+| 20 | 82 | 33 | 13 |
+| 25 | ~219 | 72 | 26 |
+| 30 | ~408 | ~124 | 44 |
+| 50 | ~1.208 | ~350 | 118 |
 
 ### A primeira sessão, minuto a minuto (conta, regular)
 
 | Minuto | O que acontece |
 |---|---|
-| 0:00 a 1:25 | Ara 6 casas, planta a alface que ganhou, enche o regador e rega (quatro missões curtas do Seu Tonho) |
-| 3:05 | Primeira colheita; **nível 2** |
-| 4:25 a 4:50 | Vende na banca e compra sementes (milho liberado no nível 2) |
-| ~8:00 | Colhe o milho; **níveis 3 e 4** quase juntos (o modelo carimba os dois no fim da colheita; no jogo o 3 vem no meio dela) |
-| 8:03 | **Primeira melhoria:** regador de lata (45 de ouro, o dobro de água). Em seguida o cesto grande (90) |
-| 8:30 | Roça o mato com a foice que ganhou |
-| 10:13 | Entrega o primeiro pedido do quadro |
-| 11:40 a 12:30 | Guarda no celeiro, corta tocos (madeira) |
-| 14:31 | Monta a bancada de carpintaria |
-| 15:00 | Termina no nível 4, com 233 de ouro e 354 de 420 de experiência |
+| 0:00 a 1:27 | Ara a primeira fileira do campo pequeno (6 casas, com a enxada que trouxe), planta a alface que ganhou, pega o regador velho no chão ao lado do poço, enche e rega (quatro missões curtas do Seu Tonho) |
+| 3:16 | Primeira colheita; **nível 2** |
+| 4:39 a 5:06 | Vende na banca e compra sementes (milho liberado no nível 2) |
+| ~8:26 | Colhe o milho; **níveis 3 e 4** quase juntos (o modelo carimba os dois no fim da colheita; no jogo o 3 vem no meio dela) |
+| 8:33 | **Primeira melhoria:** regador de lata (45 de ouro, o dobro de água). Em seguida o cesto grande (90) |
+| 8:59 | Roça o mato com a foice que ganhou |
+| 10:45 | Entrega o primeiro pedido do quadro |
+| 12:09 a 13:02 | Guarda no celeiro, corta tocos (a madeira da bancada de carpintaria, que ela monta no começo da sessão seguinte) |
+| 15:00 | Termina no nível 4, com 393 de ouro e 362 de 420 de experiência |
 
 Os níveis 2, 3 e 4 têm experiência fixada à mão (20, 60 e 130) para que isso aconteça seja qual for o resto da curva. Sempre há algo para fazer agora (alface de 1 minuto, mato para roçar) e algo para esperar (milho de 3 minutos, depois feijão de 8, pedido que renova em 20 minutos, galinha que bota a cada 20).
 
@@ -100,18 +101,18 @@ Os níveis 2, 3 e 4 têm experiência fixada à mão (20, 60 e 130) para que iss
 
 | Dias | Ganha por dia | Gasta por dia | Saldo no fim | Nível |
 |---|---|---|---|---|
-| 1 | 2.967 | 2.646 | 341 | 6 |
-| 2 a 3 | 5.580 | 5.400 | 701 | 8 |
-| 4 a 7 | 10.819 | 9.333 | 6.646 | 11 |
-| 8 a 14 | 16.136 | 16.836 | 1.742 | 14 |
-| 15 a 30 | 30.248 | 28.733 | 25.973 | 19 |
-| 31 a 60 | 42.536 | 35.793 | 228.265 | 23 |
-| 61 a 90 | 43.003 | 35.644 | 449.025 | 26 |
-| 91 a 120 | 41.514 | 17.529 | 1.168.557 | 29 |
+| 1 | 3.358 | 3.154 | 224 | 6 |
+| 2 a 3 | 5.651 | 5.321 | 884 | 8 |
+| 4 a 7 | 11.960 | 12.125 | 225 | 11 |
+| 8 a 14 | 17.820 | 17.447 | 2.836 | 14 |
+| 15 a 30 | 32.859 | 32.248 | 12.612 | 19 |
+| 31 a 60 | 43.794 | 36.712 | 225.083 | 23 |
+| 61 a 90 | 45.009 | 33.305 | 576.188 | 26 |
+| 91 a 120 | 42.215 | 31.033 | 911.643 | 29 |
 
 Leitura: até o dia 30 o jogador gasta quase tudo o que ganha e nunca fica parado sem ter o que comprar nem com ouro sobrando. Do dia 31 em diante o saldo cresce, porque as compras que restam são caras e espaçadas. **Depois do dia 90 o conteúdo acaba e o ouro passa a sobrar**: é a primeira coisa a resolver com conteúdo novo (seção 12).
 
-Casual: ganha de 1.052 por dia (D1) a cerca de 8.000 (do dia 61 em diante); o saldo fica sempre curto (47 mil no D120) e ele ainda não comprou os lotes do fim. Engajado: 12.681 no D1 e cerca de 150 mil por dia do dia 15 em diante; termina o conteúdo perto do dia 26 a 30 e chega ao D120 com 10 milhões parados.
+Casual: ganha de 854 por dia (D1) a cerca de 8.500 (do dia 61 em diante); o saldo fica sempre curto (55 mil no D120) e ele ainda não comprou os lotes do fim. Engajado: 13.231 no D1 e cerca de 155 mil por dia do dia 15 em diante; termina o conteúdo perto do dia 26 a 30 e chega ao D120 com 10,5 milhões parados.
 
 ### Fontes (regular, 120 dias, conta)
 
@@ -123,7 +124,7 @@ Casual: ganha de 1.052 por dia (D1) a cerca de 8.000 (do dia 61 em diante); o sa
 | Pedidos (bônus de 25%) | 1% |
 | Diária, níveis, missões e compartilhar | menos de 1% cada |
 
-Para o casual a banca pesa 75% e os pedidos 18%: quem joga pouco depende mais do pedido.
+Para o casual a banca pesa 76% e os pedidos 17%: quem joga pouco depende mais do pedido.
 
 A banca compra tudo, sempre, pelo preço base. Não há oferta e procura, de propósito: o jogador nunca fica com produto encalhado nem precisa adivinhar preço.
 
@@ -131,13 +132,13 @@ A banca compra tudo, sempre, pelo preço base. Não há oferta e procura, de pro
 
 | Destino | Parte |
 |---|---|
-| Sementes | 26% |
-| Terras (12 lotes) | 23% |
-| Vagas de fila das indústrias | 19% |
-| Ampliações (celeiro e abrigos) | 17% |
-| Reforma da casa | 3% |
-| Ferramentas | 3% |
-| Irrigação (aspersores) | 3% |
+| Sementes | 24% |
+| Terras (lotes) | 20% |
+| Vagas de fila das indústrias | 17% |
+| Ampliações (celeiro e abrigos) | 15% |
+| Reforma da casa (até a casa-grande, no dia 118) | 13% |
+| Ferramentas | 2% |
+| Irrigação (aspersores) | 2% |
 | Ração comprada | 2% |
 | Animais | 2% |
 | Construções, materiais, troca de animais | 1% cada |
@@ -167,13 +168,13 @@ De onde vem a experiência em 120 dias (conta):
 
 | Fonte | Casual | Regular | Engajado |
 |---|---|---|---|
-| Colheita | 15% | 46% | 65% |
-| Pedidos | 56% | 34% | 23% |
-| Animais | 11% | 8% | 5% |
+| Colheita | 17% | 46% | 65% |
+| Pedidos | 56% | 34% | 24% |
+| Animais | 10% | 7% | 4% |
 | Receitas | 6% | 4% | 3% |
-| Pomar | 8% | 3% | 2% |
+| Pomar | 7% | 3% | 2% |
 | Terras compradas | 2% | 4% | 2% |
-| Construções e missões | 1% a 2% | 1% | 1% |
+| Construções e missões | 1% a 2% | 2% | 1% |
 
 Arar, semear, regar, tratar e construir não dão experiência: ela vem do resultado (colher, recolher, produzir, entregar). O pedido é o que segura o casual no jogo: cada vaga rende um pedido por visita, então **voltar vale mais do que ficar muito tempo**.
 
@@ -192,15 +193,15 @@ Regras (dado, em `loja.json` e `regras.json`):
 
 | Fonte | Casual | Regular | Engajado |
 |---|---|---|---|
-| Conquistas | 124 | 190 | 220 |
+| Conquistas | 124 | 195 | 230 |
 | Diária | 119 | 119 | 119 |
-| Níveis | 32 | 50 | 86 |
+| Níveis | 32 | 50 | 106 |
 | Missões | 12 | 12 | 12 |
-| **Total** | **287** | **371** | **437** |
-| Por dia | 2,4 | 3,1 | 3,6 |
-| Nos 30 primeiros dias | 113 | 172 | 246 |
+| **Total** | **287** | **376** | **467** |
+| Por dia | 2,4 | 3,1 | 3,9 |
+| Nos 30 primeiros dias | 119 | 172 | 247 |
 
-Para ter ideia do que os 371 cash do regular compram: as terceiras e quartas vagas de fila das cinco indústrias (225) e mais um chapéu de couro (80); ou o vestido de chita (150) e a roupa de festa junina (200); ou 74 obras de 1 hora concluídas na hora (5 cada). Todas as 15 vagas de fila custam 525 cash ou 640.000 de ouro. Todos os cosméticos de cash somam 1.610; os três animais especiais, 950. Quem não paga nada leva, em quatro meses, dois cosméticos ou um bom tanto de pressa: aparece, mas não resolve o jogo.
+Para ter ideia do que os 376 cash do regular compram: as terceiras e quartas vagas de fila das cinco indústrias (225) e mais um chapéu de couro (80); ou o vestido de chita (150) e a roupa de festa junina (200); ou 74 obras de 1 hora concluídas na hora (5 cada). Todas as 15 vagas de fila custam 525 cash ou 640.000 de ouro. Todos os cosméticos de cash somam 1.610; os três animais especiais, 950. Quem não paga nada leva, em quatro meses, dois cosméticos ou um bom tanto de pressa: aparece, mas não resolve o jogo.
 
 Convite (ligado nos dados): quando o amigo chega ao nível 5, quem convidou ganha 10 cash e 50 de ouro por nível; o amigo ganha 5 cash, 6 tábuas e 12 pregos. Limite de 10 amigos (100 cash no total). Compartilhar: 10 de ouro por nível, uma vez por dia, só ouro, com a chave `ligado` para desligar onde a loja proibir.
 
@@ -224,16 +225,16 @@ A ideia: o campo cresce, o trabalho por casa cai. **Dobrar o campo não pode dob
 
 | Dias | Campo (casas) | Casas colhidas | Toques | Toques por casa colhida | Idas ao poço |
 |---|---|---|---|---|---|
-| 1 | 70 | 66 | 441 | 6,6 | 17,0 |
-| 2 a 3 | 127 | 65 | 435 | 6,7 | 10,8 |
-| 4 a 7 | 175 | 83 | 409 | 4,9 | 4,5 |
-| 8 a 14 | 163 | 91 | 359 | 3,9 | 3,0 |
-| 15 a 30 | 326 | 109 | 373 | 3,4 | 0,3 |
-| 31 em diante | ~330 | ~125 | ~390 | 3,1 | 0 |
+| 1 | 80 | 70 | 432 | 6,2 | 18,3 |
+| 2 a 3 | 129 | 68 | 404 | 5,9 | 11,8 |
+| 4 a 7 | 193 | 94 | 370 | 3,9 | 5,0 |
+| 8 a 14 | 190 | 97 | 357 | 3,7 | 3,3 |
+| 15 a 30 | 371 | 116 | 382 | 3,3 | 0,3 |
+| 31 em diante | ~330 | ~128 | ~395 | 3,1 | 0 |
 
-O campo cresce quase cinco vezes, os toques por sessão caem um pouco e as idas ao poço vão de 17 para zero. "Toque" aqui é cada ação; arrastar o dedo para pintar várias casas conta como vários toques, então na mão o número sentido é menor. O engajado chega a cerca de 1.000 casas com 2,8 toques por casa.
+O campo cresce mais de quatro vezes, os toques por sessão caem um pouco e as idas ao poço vão de 18 para zero. "Toque" aqui é cada ação; arrastar o dedo para pintar várias casas conta como vários toques, então na mão o número sentido é menor. O engajado chega a cerca de 1.060 casas com 2,7 toques por casa.
 
-O ponto mais pesado é o **primeiro dia**: 17 idas ao poço por sessão com o regador velho e o de lata. O regador grande (nível 6, ainda no dia 1) corta isso; vale olhar com cuidado no teste com gente.
+O ponto mais pesado é o **primeiro dia**: 18 idas ao poço por sessão com o regador velho e o de lata. O regador grande (nível 6, ainda no dia 1) corta isso; vale olhar com cuidado no teste com gente.
 
 ### Os outros alívios (dado)
 
@@ -243,7 +244,7 @@ O ponto mais pesado é o **primeiro dia**: 17 idas ao poço por sessão com o re
 | Enxada de ferro e de aço | 7, 13 | Ara em 75% e 55% do tempo |
 | Foice de ferro e de aço | 8, 16 | Roça 3 e 5 casas por toque |
 | Cinto de couro e de ofício | 7, 15 | 3 e 4 ferramentas à mão: menos idas ao celeiro para trocar |
-| Boi com arado | 12 | Ara 5 casas em linha numa passada de 2,5 s (0,5 s por casa, contra 1,1 s da enxada velha) |
+| Boi com arado | 4 (o do Seu Tonho, presente); outro, 12 | Ara a fileira inteira de uma passada, para o lado com mais casas: até 6 com o arado simples, 10 com o de ferro (nível 12). A passada leva 2,5 s, com 6 casas ou com 10 (0,4 s por casa ou menos, contra 1,1 s da enxada velha), e é um toque só |
 | Matraca | 14 | Semeia na metade do tempo |
 | Caixa de ovos grande, latão de leite | 14, 15 | 36 ovos e 6 leites por viagem |
 | Jumento com carroça | 14 | Leva 150 coisas e acompanha a personagem |
@@ -252,7 +253,7 @@ O ponto mais pesado é o **primeiro dia**: 17 idas ao poço por sessão com o re
 
 Fôlego (dado): 10 s de corrida; enche em 5 s andando ou 3 s parada; sem fôlego ela só volta ao andar normal; nenhuma tarefa da fazenda gasta fôlego e ele nunca é vendido. O validador avisa se alguém deixar a recuperação andando acima de 8 s.
 
-Para onde vai o tempo de ação (conta, 120 dias): lavoura 54%, animais 24%, pomar 12%, indústrias 8% no regular. No casual a lavoura cai para 34% e animais e pomar sobem (28% e 24%): quem joga pouco vive mais do que produz sozinho.
+Para onde vai o tempo de ação (conta, 120 dias): lavoura 54%, animais 24%, pomar 11%, indústrias 9% no regular. No casual a lavoura cai para 36% e animais e pomar sobem (30% e 20%): quem joga pouco vive mais do que produz sozinho.
 
 ## 6. Tabelas resumidas (dado)
 
@@ -288,7 +289,7 @@ A árvore não pede rega nem replantio. A safra pronta espera no pé (guarda uma
 | Galinha | 5 | 80 | Galinheiro (4, 8, 12) | 1 milho | 1 ovo | 20 min | 18 |
 | Vaca | 9 | 900 | Curral (2, 4, 6) | 1 ração | 1 leite | 1 h | 60 |
 | Ovelha | 15 | 3.000 | Aprisco (3, 6, 9) | 1 ração | 1 lã | 4 h | 110 |
-| Boi de arado | 12 | 4.000 | Estábulo (1, 2, 3) | 1 ração a cada 6 h | Ara 5 casas por passada | - | - |
+| Boi de arado | 4 (presente da missão "baia-do-boi"); 12 na loja | 4.000 | Estábulo (1, 2, 3) | 1 ração a cada 6 h | Ara a fileira: até 6 casas (arado simples) ou 10 (de ferro); sem trato, 3 | - | - |
 | Jumento | 14 | 8.000 | Estábulo | 1 ração a cada 8 h | Puxa a carroça (150 coisas) e o barril | - | - |
 | Cavalo | 16 | 15.000 | Estábulo | 1 ração a cada 6 h | Montaria sem fôlego | - | - |
 | Gato | 6 | 600 | - | - | Um mimo por dia (sementes) | - | - |
@@ -312,7 +313,7 @@ Sem comida ou sem água o animal rende a metade; nenhum morre. A ração se comp
 |---|---|---|---|---|
 | Galinheiro | 5 | 250 | 1 min | 10: 2.500; 17: 20.000 |
 | Curral | 9 | 2.200 | 20 min | 14: 10.000; 21: 60.000 |
-| Estábulo | 12 | 3.500 | 45 min | 14: 6.000; 16: 15.000 |
+| Estábulo | 4 (uma baia: 150, 6 tábuas e 12 pregos) | 150 | 1 min 30 s | 14: 6.000; 16: 15.000 |
 | Aprisco | 15 | 15.000 | 2 h | 20: 50.000; 24: 120.000 |
 | Celeiro | já vem | - | - | 9: 2.000; 13: 10.000; 19: 60.000; 25: 200.000 |
 | Casa (só por gosto) | já vem | - | - | 10: 8.000; 18: 80.000; 26: 400.000 |
@@ -386,7 +387,7 @@ Cada lote pede o anterior. Cada um vem com a sua mistura de mato (foice), toco (
 | Cesto | palha, 12 (presente); grande, 24 (4: 90); balaio, 40 (9: 900); carrinho de mão, 70 (13: 5.000) |
 | Cinto | 2 ferramentas (começo); couro, 3 (7: 400); ofício, 4 (15: 6.000) |
 | Ovos e leite | caixa de ovos, 12 (presente da missão; 40); caixa grande, 36 (14: 1.500); balde, 2 (presente da missão; 150); latão, 6 (15: 4.000) |
-| Outros | arado (12: 1.500); matraca (14: 3.000); carroça (14: 6.000); barril (15: 5.000); tesoura de tosquia (15: 400); sela (16: 4.000) |
+| Outros | arado simples (vem com o boi, nível 4; na loja, 1.500); arado de ferro (12: 3.000); matraca (14: 3.000); carroça (14: 6.000); barril (15: 5.000); tesoura de tosquia (15: 400); sela (16: 4.000) |
 
 Ferramenta que a missão pede vem de presente na missão anterior: ninguém é mandado comprar a primeira foice. Os degraus de ferro gastam com o uso e pedem conserto (30% do preço); os de aço e os presentes não gastam nunca.
 
@@ -396,7 +397,7 @@ Ferramenta que a missão pede vem de presente na missão anterior: ninguém é m
 |---|---|---|---|---|---|
 | 2 | 20 | 20 | 15 | 1 | Milho, foice |
 | 3 | 60 | 40 | 28 | - | Regador de lata, pedidos, machado |
-| 4 | 130 | 70 | 44 | 1 | Feijão, cesto grande, carpintaria, picareta |
+| 4 | 130 | 70 | 44 | 1 | Feijão, cesto grande, carpintaria, picareta, estábulo de uma baia e o boi do Seu Tonho |
 | 5 | 420 | 290 | 63 | 5 | Galinheiro, 1º lote, prateleira |
 | 6 | 1.320 | 900 | 84 | 1 | Tomate, regador grande, embalar, gato |
 | 7 | 2.530 | 1.210 | 110 | - | Bananeira, moinho, enxada de ferro, cinto |
@@ -404,7 +405,7 @@ Ferramenta que a missão pede vem de presente na missão anterior: ninguém é m
 | 9 | 7.440 | 2.600 | 160 | - | Curral e vaca, regador de crivo, balaio |
 | 10 | 11.440 | 4.000 | 190 | 5 | Laranjeira, 3º lote, machado de ferro |
 | 11 | 17.610 | 6.170 | 220 | - | Arroz, laticínio |
-| 12 | 24.000 | 6.390 | 260 | 2 | Boi, arado, estábulo, 4º lote |
+| 12 | 24.000 | 6.390 | 260 | 2 | Outro boi, arado de ferro, 4º lote |
 | 13 | 32.720 | 8.720 | 290 | - | Cana, enxada de aço, carrinho de mão |
 | 14 | 44.620 | 11.900 | 330 | 2 | Jumento, carroça, regador de cobre, matraca, 5º lote |
 | 15 | 57.520 | 12.900 | 370 | 5 | Ovelha, aprisco, barril |
@@ -421,8 +422,8 @@ A lista completa de "o que cada nível libera" sai do `validar.mjs`. O nível ta
 
 ### Missões, conquistas e diária
 
-- **Missões do Seu Tonho:** 36, do nível 1 ao 18, uma mecânica por vez. As sete primeiras cabem nos primeiros cinco minutos. Somam 4.605 de ouro e 12 cash. Missão de "comprar" ou "construir" tem `valeJaTer`: se o jogador já tem a coisa, a missão se cumpre na hora. A conta mostra as 36 cumpridas no dia 60 (casual), 25 (regular) e 10 (engajado).
-- **Conquistas:** 22, com 88 marcos. Cada marco dá ouro (50, 250, 1.000, 4.000, 15.000) e cash (1, 2, 3, 5, 10). Em 120 dias: 59, 72 e 78 marcos (casual, regular, engajado).
+- **Missões do Seu Tonho:** 38, do nível 1 ao 18, uma mecânica por vez. As sete primeiras cabem nos primeiros cinco minutos. Somam 4.645 de ouro e 12 cash. Missão de "comprar" ou "construir" tem `valeJaTer`: se o jogador já tem a coisa, a missão se cumpre na hora. A conta mostra as 38 cumpridas no dia 60 (casual), 25 (regular) e 10 (engajado).
+- **Conquistas:** 22, com 88 marcos. Cada marco dá ouro (50, 250, 1.000, 4.000, 15.000) e cash (1, 2, 3, 5, 10). Em 120 dias: 59, 74 e 79 marcos (casual, regular, engajado).
 - **Diária:** 7 presentes que avançam a cada **dia jogado**; quem falta continua de onde parou. Pregos, ouro (20 por nível), tábuas, 2 cash, madeira e pedra, ouro (40 por nível), 5 cash. Na primeira volta, o sétimo dia dá também o chapéu de palha. Nada que sai da lavoura.
 
 ## 7. O que a pesquisa de jogadores mudou
@@ -468,7 +469,7 @@ A régua de tempo (minutos de jogo a partir de semanas de vida real) e a maior p
 | Galinha | perto de um ovo por dia no auge; cerca de 345 ovos na vida | ovo a cada 20 min; vida de 300 ovos |
 | Vaca | média do Brasil perto de 6,8 litros por dia; ordenha uma ou duas vezes ao dia | 1 leite por hora; bebe o dobro da galinha |
 | Ovelha | tosquia uma vez por ano; cerca de 2 kg de lã por animal (raça Crioula) | a lã mais demorada: 4 h |
-| Boi de arado | arar 1 hectare com um animal leva em média 4 dias de 6 horas; a tração animal corta a mão de obra umas 5 vezes | o boi ara pouco mais de 2 vezes mais rápido que a enxada velha e 5 casas por passada |
+| Boi de arado | arar 1 hectare com um animal leva em média 4 dias de 6 horas; a tração animal corta a mão de obra umas 5 vezes | o boi ara pouco mais de 2 vezes mais rápido que a enxada velha e a fileira inteira por passada (até 6 casas; 10 com o arado de ferro) |
 
 Onde o jogo foge da vida real de propósito: a abóbora (uns 3 a 4 meses na roça, de memória) fica mais demorada que o feijão para a escada de tempos não ter buraco; a goiabeira ficou depois da laranjeira só para espalhar as novidades; o boi é bem menos de 5 vezes mais rápido porque um ganho desse tamanho quebraria o ritmo.
 
@@ -503,7 +504,7 @@ Não achei fonte nesta rodada para: ciclo da abóbora e da cana, minutos de uma 
 
 ## 12. Dúvidas para o dono, com recomendação
 
-1. **Rearar depois de cada colheita?** Recomendo **manter**. É o que dá serviço ao boi e à enxada melhor, e segura o ouro no meio do jogo. Se no teste com gente cansar, o remédio é baratear o boi (hoje nível 12, 4.000 mais arado e estábulo), não tirar a regra.
+1. **Rearar depois de cada colheita?** Recomendo **manter**. É o que dá serviço ao boi e à enxada melhor, e segura o ouro no meio do jogo. Se no teste com gente cansar, o remédio é dar mais serviço ao boi (desde o começo humilde, o primeiro chega de presente no nível 4, com o arado simples), não tirar a regra.
 2. **O ouro sobra depois do dia 90 (regular) e do dia 30 (engajado).** Recomendo **não inflar preços agora** e tratar isso como a lista do próximo conteúdo: mais lotes, enfeites grandes de preço alto, casa por dentro. Subir preço hoje só puniria o casual.
 3. **O engajado termina tudo em 4 semanas.** Recomendo **aceitar nesta versão**. Frear quem joga 2 horas por dia com espera forçada é justamente o que a pesquisa de jogadores condena. O remédio é conteúdo.
 4. **A banca dá 91% do ouro; os pedidos, 6%.** O pedido hoje vale pela experiência (um terço dela). Recomendo **manter** e, se o dono quiser o quadro de pedidos mais importante, subir o bônus de 25% para 50%: a conta muda pouco e o pedido passa a ser claramente o melhor comprador.

@@ -27,7 +27,7 @@ export function ligarToque(entrada, hud) {
   let pino = null;
 
   function rumar(dx, dy) {
-    const len = Math.hypot(dx, dy), f = Math.min(1, len / RAIO);
+    const len = Math.hypot(dx, dy), f = Math.min(1, len / (RAIO * (J.esc || 1))); // (o #ui cresce pelo zoom no computador: J.esc)
     if (pino) pino.style.transform = len > 0 ? `translate(${(dx / len) * f * RAIO}px, ${(dy / len) * f * RAIO}px)` : '';
     if (f < 0.2) { J.mundo.comando({ tipo: 'frear' }); return; }
     // o mesmo rumo na tela que o dedo aponta
@@ -131,7 +131,7 @@ export function ligarToque(entrada, hud) {
       else if (ferramenta) gesto = 'pintar';
       else gesto = esquema === 'toque' ? 'camera' : 'alavanca';
       if (gesto === 'pintar') pintar(d1.x0, d1.y0);
-      if (gesto === 'alavanca') { solta.style.transform = `translate(${d1.x0}px, ${d1.y0}px)`; solta.hidden = false; pino = pinoSolto; entrada.destacar(-1, -1, null); }
+      if (gesto === 'alavanca') { solta.style.transform = `translate(${d1.x0 / (J.esc || 1)}px, ${d1.y0 / (J.esc || 1)}px)`; solta.hidden = false; pino = pinoSolto; entrada.destacar(-1, -1, null); }
       if (gesto === 'camera') entrada.destacar(-1, -1, null);
     }
     if (gesto === 'pintar') pintar(pt.x, pt.y);
@@ -175,7 +175,7 @@ export function ligarToque(entrada, hud) {
     // o centro da alavanca, em pontos do palco
     let x = fixa.offsetWidth / 2, y = fixa.offsetHeight / 2;
     for (let n = fixa; n && n.id !== 'palco'; n = n.offsetParent) { x += n.offsetLeft; y += n.offsetTop; }
-    fx = x; fy = y;
+    fx = x * (J.esc || 1); fy = y * (J.esc || 1); // (offsetLeft é em pontos do #ui, que cresce pelo zoom)
     rumar(pt.x - fx, pt.y - fy);
   });
   fixa.addEventListener('pointermove', (e) => { if (e.pointerId !== dedoFixo) return; tela.doPalco(e.clientX, e.clientY, pt); pino = hud.pino; rumar(pt.x - fx, pt.y - fy); });

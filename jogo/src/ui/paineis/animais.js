@@ -7,7 +7,7 @@ import '../animais.js'; // os textos, o desenho no terreno e o retorno desta fre
 import { T, numero } from '../textos.js';
 import { J } from '../../contexto.js';
 import { registrarPainel, abrirPainel } from './registro.js';
-import { ABAS_DE_FORA } from './loja.js';
+import { ABAS_DE_FORA, faixaDaLoja } from './loja.js';
 import { porVoltar } from '../progresso.js';
 import { som } from '../../plataforma/som.js';
 import { ofertasDeAnimais, abrigosProntos } from '../../nucleo/sistemas/animais.js';
@@ -20,7 +20,7 @@ function infoDe(m, d) {
   for (const f of INFO_DO_ANIMAL) { const t = f(m, d); if (t) return t; }
   return T.animais.resumo(d, m.dados) || d.descricao || '';
 }
-function preco(n) { const s = el('span', 'preco'); s.append(icone('icone/ouro', 18), el('span', '', numero(n))); return s; }
+function preco(n) { const s = el('span', 'preco'); s.append(icone('icone/ouro', 22), el('span', '', numero(n))); return s; }
 
 registrarPainel({
   id: 'animais', titulo: T.animais.titulo, icone: 'animal/galinha/parada-frente', ordem: 31, botao: false,
@@ -29,8 +29,7 @@ registrarPainel({
     function desenhar() {
       const m = J.mundo, D = m.dados, lista = ofertasDeAnimais(m);
       corpo.textContent = '';
-      ctx.saldo.textContent = '';
-      ctx.saldo.append(icone('icone/ouro', 20), el('span', '', numero(m.posses.ouro)));
+      faixaDaLoja(ctx, 'animais'); // a aba Animais da loja: o mesmo cabeçalho e as mesmas abas
       if (!lista.length) { corpo.append(el('div', 'vazio', T.animais.vazio)); return; }
       const grade = el('div', 'grade animais');
       let travadas = 0;

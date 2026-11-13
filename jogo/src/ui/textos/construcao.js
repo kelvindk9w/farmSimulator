@@ -47,6 +47,7 @@ T.botoes.construir = 'Construir';
 T.construir = {
   titulo: 'Construir',
   categorias: { abrigo: 'Abrigos', industria: 'Indústrias', armazem: 'Armazém', util: 'Úteis', cerca: 'Cercas', decoracao: 'Decoração' },
+  enfeites: 'Enfeites: cercas, caminhos e decoração',
   vazio: 'Nada para construir aqui ainda.',
   escolher: 'Construir', montar: 'Montar', colocar: 'Colocar', guardada: (n) => `no depósito: ${n}`, tem: (n, lim) => (lim ? `${n}/${lim}` : `tem ${n}`),
   nivel: (n) => `Nível ${n}`, obra: (seg) => `obra de ${tempo(seg)}`, montagem: (seg) => `montagem de ${tempo(seg)}`, naHora: 'na hora',

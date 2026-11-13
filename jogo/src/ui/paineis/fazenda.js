@@ -1,10 +1,11 @@
 // Painel "Minha fazenda": a porta de entrada do progresso. Em cima, o que está esperando para receber (presente do
 // dia, presentes de amigos, prêmios de conquista); depois os atalhos (conquistas, presente do dia, amigos,
-// guarda-roupa, loja de cash, caderno do vizinho) e o nome da fazenda, que aparece na foto e no convite.
+// guarda-roupa, loja de cash, caderno do vizinho, terras) e o nome da fazenda, que aparece na foto e no convite.
 import { el, botao } from '../dom.js';
 import { T, numero } from '../textos.js';
+import '../textos/interface.js';
 import { J } from '../../contexto.js';
-import { registrarPainel, abrirPainel } from './registro.js';
+import { registrarPainel, abrirPainel, PAINEIS } from './registro.js';
 import { ICONE, mandar } from '../progresso.js';
 import { avisar } from '../avisos.js';
 import { som } from '../../plataforma/som.js';
@@ -63,6 +64,7 @@ registrarPainel({
       atalho('guarda-roupa', ICONE.roupas, F.roupas, F.resumo.roupas(pecas), false);
       atalho('cash', ICONE.cash, F.cash, F.resumo.cash(numero(m.posses.cash)), false);
       atalho('caderno', ICONE.caderno, F.caderno, F.resumo.caderno(licoes), false);
+      if (PAINEIS.terras) atalho('terras', 'ui/lote', F.terras, F.resumo.terras, false); // (as terras saíram da loja)
     }
     desenhar();
     return { atualizar: desenhar };

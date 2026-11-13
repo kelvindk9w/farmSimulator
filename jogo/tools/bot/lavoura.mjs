@@ -221,13 +221,35 @@ export function venderDoCeleiro(J, forcar) {
   return passo(J, 'entidade', { id: 'celeiro' });
 }
 
+// ---------- o boi no arado: a fileira inteira de uma passada ----------
+// Com o boi pronto (o do Seu Tonho chega no nível 4, com o arado simples), ela ara com ele em vez da enxada sempre que
+// a passada que sai da casa tem pelo menos 3 casas e cabe toda na lavoura (a fileira do boi pega o lado com mais casas
+// e poderia sair da zona da lavoura, para a terra das obras). Uma passada de cada vez na fila: o boi é um só.
+const TB = X.trabalho;
+const BOI = !!(TB && typeof TB.podeArarComBoi === 'function' && typeof TB.fileiraDoBoi === 'function');
+const PASSADA_MINIMA = 3;
+// as casas (índices) que as passadas do boi na fila vão arar
+function casasDoBoiNaFila(J, loc) {
+  const p = J.p, out = new Set();
+  const conta = (t) => { if (t && t.tipo === 'agir' && t.acao === 'ararComBoi' && t.args && t.args.casas) for (const c of t.args.casas) out.add(c[1] * loc.l + c[0]); };
+  conta(p.tarefa); for (const t of p.fila) conta(t);
+  return out;
+}
+function passadaDoBoi(J, loc, x, z) {
+  if (!BOI || !TB.podeArarComBoi(J.m) || contarNaFila(J, 'ararComBoi') > 0) return null;
+  const f = TB.fileiraDoBoi(J.m, x, z);
+  if (!f || f.aArar.length < PASSADA_MINIMA) return null;
+  for (const c of f.aArar) if (!J.zonaSet[c[1] * loc.l + c[0]]) return null;
+  return f;
+}
+
 // ---------- arar e semear ----------
 // opc: { semente (a missão pede esta), arar (arar mesmo sem semente: missão "preparar a terra"), tudo (fim da sessão) }
 export function plantar(J, opc = {}) {
   if (!LIGADA || !naFazenda(J)) return null;
   const m = J.m, loc = fazenda(J), Z = zona(J), p = J.p;
   obstaculos(J); // o alcance a pé: a casa cercada de mato (lote novo) fica para depois de limpar
-  const A = J.alcance;
+  const A = J.alcance, doBoi = BOI ? casasDoBoiNaFila(J, loc) : null;
   let vazia = null, dv = Infinity, vazias = 0, aradas = 0, araveis = 0, arar = null;
   for (const i of Z) {
     if (A && !A[i]) continue;
@@ -235,7 +257,7 @@ export function plantar(J, opc = {}) {
     if (loc.chao[i] === ARADA) {
       aradas++;
       if (!loc.plantas[i] && !filaTem(J, 'semear', x, z)) { vazias++; const d = Math.abs(x + 0.5 - p.x) + Math.abs(z + 0.5 - p.z); if (d < dv) { dv = d; vazia = [x, z]; } }
-    } else if (aravel(J, loc, i, x, z)) { araveis++; if (!arar && !filaTem(J, 'arar', x, z)) arar = [x, z]; }
+    } else if (aravel(J, loc, i, x, z)) { araveis++; if (!arar && !filaTem(J, 'arar', x, z) && !(doBoi && doBoi.has(i))) arar = [x, z]; }
   }
   J.aradas = aradas;
   if (arar) J.campoSemEspaco = false;
@@ -253,10 +275,11 @@ export function plantar(J, opc = {}) {
     return venderDoCeleiro(J, true) || nota(J, 'sem semente e sem ouro para comprar (espera o socorro do vizinho)');
   }
   const alvo = opc.arar ? Infinity : campoAlvo(J);
-  if (aradas + contarNaFila(J, 'arar') >= alvo) return null;
+  if (aradas + contarNaFila(J, 'arar') + (doBoi ? doBoi.size : 0) >= alvo) return null;
   const temSemente = sementesLiberadas(J).some((it) => livresNaBolsa(J, it.id) > 0 || it.compra <= J.P.ouro);
   if (!temSemente && !opc.arar) return nota(J, 'sem semente e sem ouro para plantar mais');
   if (!arar) { J.campoSemEspaco = araveis === 0; return J.zonaObst > 0 ? nota(J, 'a lavoura não tem casa livre para arar (falta limpar o mato em volta)') : nota(J, 'a lavoura não tem mais para onde crescer'); }
+  if (passadaDoBoi(J, loc, arar[0], arar[1])) { if (J.S) J.S.passadasDoBoi = (J.S.passadasDoBoi || 0) + 1; return emModo(J, 'arado') || passo(J, 'casa', { x: arar[0], z: arar[1] }); }
   return emModo(J, 'enxada') || passo(J, 'casa', { x: arar[0], z: arar[1] });
 }
 

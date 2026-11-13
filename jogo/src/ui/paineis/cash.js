@@ -5,6 +5,7 @@ import { el, icone, botao } from '../dom.js';
 import { T, numero, tempo } from '../textos.js';
 import { J } from '../../contexto.js';
 import { registrarPainel, abrirPainel } from './registro.js';
+import { faixaDaLoja } from './loja.js';
 import { ICONE, chaveOu, porVoltar, mandar, relogioEmTeste } from '../progresso.js';
 import { perguntar } from '../dialogo.js';
 import { botaoConcluir } from '../concluir.js';
@@ -39,7 +40,7 @@ registrarPainel({
       else if (p.motivo === 'nao-existe' || p.motivo === 'nao-vende') trava(C.emBreve, false);
       else {
         c.append(el('div', 'info', info || (D.itens[o.alvo] && D.itens[o.alvo].descricao) || ''));
-        const bs = el('div', 'botoes'), b = botao({ classe: 'verde', aoClicar: () => { if (J.mundo.posses.cash < o.cash) mandar({ tipo: 'comprarOferta', oferta: o.id }); else comprarOferta(o); } });
+        const bs = el('div', 'botoes'), b = botao({ classe: 'verde cash', aoClicar: () => { if (J.mundo.posses.cash < o.cash) mandar({ tipo: 'comprarOferta', oferta: o.id }); else comprarOferta(o); } });
         b.append(el('span', '', C.comprar), cash(o.cash)); b.dataset.k = 'oferta-' + o.id;
         if (p.motivo === 'sem-cash') b.classList.add('sem');
         bs.append(b); c.append(bs);
@@ -49,8 +50,7 @@ registrarPainel({
     function desenhar() {
       const m = J.mundo, D = m.dados, L = lojaDeCash(m), R = progressoDe(D).concluir;
       corpo.textContent = '';
-      ctx.saldo.textContent = '';
-      ctx.saldo.append(icone('icone/cash', 20), el('span', '', numero(m.posses.cash)));
+      faixaDaLoja(ctx, 'cash'); // a aba Cash da loja: o cabeçalho mostra o ouro e o cash
 
       // ---- pacotes (compra simulada)
       if (L.compraSimulada && L.pacotes.length) {

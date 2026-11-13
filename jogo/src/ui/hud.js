@@ -1,8 +1,10 @@
 // O HUD: nível e experiência, ouro, cash, cesto, regador e fôlego (em cima, à esquerda); botões dos painéis (em cima,
 // à direita); linha de dica, fila de tarefas, sementes e barra de modo (embaixo); alavanca e botão de ação (toque).
 // É HTML por cima do canvas. atualizar() roda todo quadro, mas só mexe no DOM quando um valor muda.
-import { el, icone, trocarIcone, botao, por, classe, fracao } from './dom.js';
+import { el, icone, trocarIcone, botao, por, classe, encher } from './dom.js';
 import { T, numero } from './textos.js';
+import { prepararEstilo, ajustarEscala } from './estilo/index.js'; // o visual aprovado (molduras, escala, Menu)
+import { criarMenu } from './menu.js';
 import { J } from '../contexto.js';
 import { modosEmOrdem } from '../nucleo/registro.js';
 import { barraDeXp } from '../nucleo/sistemas/niveis.js';
@@ -21,32 +23,39 @@ function num(e, v, texto) { if (e._v !== v) { e._v = v; e.textContent = texto ==
 
 export function criarHud(ui) {
   const hud = { raiz: ui, modos: {}, sementes: {}, paineis: {}, dicaFixa: '' };
+  prepararEstilo(ui);
 
   // ---------- em cima, à esquerda ----------
   const esq = el('div', 'topo-esq');
   const l1 = el('div', 'linha'), l2 = el('div', 'linha');
-  const nivel = el('div', 'chip nivel'), selo = el('span', 'selo', '1'), barraXp = el('div', 'barra'), fioXp = el('i'), txtXp = el('span', 'xp');
+  const nivel = el('div', 'chip nivel'), selo = el('span', 'selo', '1'), barraXp = el('div', 'barra hud'), fioXp = el('i'), txtXp = el('span', 'xp');
   barraXp.append(fioXp); nivel.append(selo, barraXp, txtXp); nivel.title = T.hud.nivel;
-  const ouro = el('div', 'chip'), nOuro = el('span'); ouro.append(icone('icone/ouro', 22), nOuro); ouro.title = T.hud.ouro;
-  const cash = el('div', 'chip'), nCash = el('span'); cash.append(icone('icone/cash', 22), nCash); cash.title = T.hud.cash;
+  const ouro = el('div', 'chip'), nOuro = el('span'); ouro.append(icone('icone/ouro', 30), nOuro); ouro.title = T.hud.ouro;
+  const cash = el('div', 'chip cash'), nCash = el('span'); cash.append(icone('icone/cash', 30), nCash); cash.title = T.hud.cash;
+  // o "+" do cash abre a loja de cash (se ela existir)
+  const maisCash = botao({ icone: 'ui/mais', tamanho: 28, classe: 'mais-cash', rotulo: T.hud.maisCash, aoClicar: () => { som.tocar('toque'); abrirPainel('cash', { de: 'loja' }); } });
+  maisCash.dataset.k = 'mais-cash'; maisCash.hidden = !PAINEIS.cash; cash.append(maisCash);
   l1.append(nivel, ouro, cash);
-  const cesto = el('div', 'chip'), nCesto = el('span'); cesto.append(icone('icone/cesto', 22), nCesto); cesto.title = T.hud.cesto;
-  const reg = el('div', 'chip'), nReg = el('span'); reg.append(icone('icone/regador', 22), nReg); reg.title = T.hud.regador;
-  const folego = el('div', 'chip folego'), barraF = el('div', 'barra folego'), fioF = el('i'); barraF.append(fioF); folego.append(icone('icone/folego', 20), barraF); folego.title = T.hud.folego;
+  const cesto = el('div', 'chip'), nCesto = el('span'); cesto.append(icone('icone/cesto', 30), nCesto); cesto.title = T.hud.cesto;
+  const reg = el('div', 'chip'), nReg = el('span'); reg.append(icone('icone/regador', 30), nReg); reg.title = T.hud.regador;
+  const folego = el('div', 'chip folego'), barraF = el('div', 'barra hud folego'), fioF = el('i'); barraF.append(fioF); folego.append(icone('icone/folego', 26), barraF); folego.title = T.hud.folego;
   folego.hidden = true;
   l2.append(cesto, reg, folego);
   esq.append(l1, l2);
 
   // ---------- em cima, à direita: um botão por painel registrado, mais a tela cheia ----------
-  const dir = el('div', 'topo-dir');
+  // Mochila, Loja e Construir sempre à vista; os outros entram no Menu (no celular, uma lista; no computador, à vista)
+  const dir = el('div', 'topo-dir'), A_VISTA = { mochila: 1, loja: 1, construir: 1 }, noMenu = [];
   for (const p of Object.values(PAINEIS).sort((a, b) => a.ordem - b.ordem)) {
     if (!p.botao) continue;
-    const b = botao({ icone: p.icone, tamanho: 30, classe: 'quadrado', rotulo: p.titulo, aoClicar: () => { som.tocar('toque'); abrirPainel(p.id); } });
+    const b = botao({ icone: p.icone, tamanho: 40, classe: 'quadrado', rotulo: p.titulo, aoClicar: () => { som.tocar('toque'); abrirPainel(p.id); } });
     b.dataset.painel = p.id;
     hud.paineis[p.id] = b;
-    dir.append(b);
+    if (A_VISTA[p.id]) dir.append(b); else noMenu.push([b, T.menu[p.id] || p.titulo]);
   }
-  if (tela.podeTelaCheia()) dir.append(botao({ icone: 'ui/tela-cheia', tamanho: 28, classe: 'quadrado', rotulo: T.botoes.telaCheia, aoClicar: () => tela.alternarTelaCheia() }));
+  const menu = criarMenu(hud, dir);
+  for (const [b, r] of noMenu) menu.por(b, r);
+  if (tela.podeTelaCheia()) { const b = botao({ icone: 'ui/tela-cheia', tamanho: 36, classe: 'quadrado', rotulo: T.botoes.telaCheia, aoClicar: () => tela.alternarTelaCheia() }); b.dataset.k = 'tela-cheia'; menu.por(b, T.menu.telaCheia); }
 
   // ---------- embaixo ----------
   const rodape = el('div', 'rodape');
@@ -61,7 +70,7 @@ export function criarHud(ui) {
   const sementes = el('div', 'sementes'); sementes.hidden = true;
   const modos = el('div', 'modos');
   for (const md of modosEmOrdem()) {
-    const b = botao({ icone: md.icone || 'ui/' + md.id, tamanho: 30, texto: T.modos[md.id] || md.id, classe: 'modo', aoClicar: () => { som.tocar('toque'); J.mundo.comando({ tipo: 'escolherModo', modo: md.id }); } });
+    const b = botao({ icone: md.icone || 'ui/' + md.id, tamanho: 38, texto: T.modos[md.id] || md.id, classe: 'modo', aoClicar: () => { som.tocar('toque'); J.mundo.comando({ tipo: 'escolherModo', modo: md.id }); } });
     b.dataset.modo = md.id; b._modo = md;
     const conta = el('span', 'conta'); conta.hidden = true; b.append(conta); b._conta = conta;
     hud.modos[md.id] = b;
@@ -71,7 +80,7 @@ export function criarHud(ui) {
 
   // ---------- toque: alavanca e botão de ação ----------
   const alavanca = el('div', 'alavanca toca'), pino = el('i'); alavanca.append(pino); alavanca.hidden = true;
-  const agir = botao({ icone: 'ui/mao', tamanho: 40, classe: 'agir', rotulo: T.botoes.agir }); agir.hidden = true;
+  const agir = botao({ icone: 'ui/mao', tamanho: 54, classe: 'agir', rotulo: T.botoes.agir }); agir.hidden = true;
   agir.addEventListener('pointerdown', (e) => { e.preventDefault(); J.meio = 'teclas'; J.mundo.comando({ tipo: 'agir' }); });
   hud.alavanca = alavanca; hud.pino = pino; hud.agir = agir; hud.dicaEl = dica; hud.rodape = rodape;
 
@@ -96,10 +105,11 @@ export function criarHud(ui) {
   let ultFila = -1;
   hud.atualizar = function () {
     const m = J.mundo, P = m.posses, p = m.personagem, D = m.dados;
+    ajustarEscala(); // a tela mudou de tamanho: o zoom do #ui e o Menu do celular (estilo/index.js)
     // nível e experiência
     const bx = barraDeXp(m);
     num(selo, bx.nivel);
-    fracao(fioXp, bx.fracao);
+    encher(fioXp, bx.fracao);
     num(txtXp, bx.feito * 100000 + bx.precisa, bx.precisa ? `${bx.feito}/${bx.precisa}` : '');
     num(nOuro, P.ouro); num(nCash, P.cash);
     // cesto
@@ -113,7 +123,7 @@ export function criarHud(ui) {
     // fôlego: a barra some quando está cheia
     const F = D.regras.folego, cheio = p.folego >= F.max - 0.01;
     if (folego.hidden !== cheio) folego.hidden = cheio;
-    if (!cheio) { fracao(fioF, p.folego / F.max); classe(barraF, 'cansada', p.cansada); }
+    if (!cheio) { encher(fioF, p.folego / F.max); classe(barraF, 'cansada', p.cansada); }
 
     // modo ativo e os números da barra
     for (const id in hud.modos) { const b = hud.modos[id], some = !!b._modo.disponivel && !b._modo.disponivel(m); classe(b, 'ativo', m.modo.id === id); if (b.hidden !== some) b.hidden = some; } // modo que ainda não vale (sem a ferramenta) não aparece

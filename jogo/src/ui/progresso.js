@@ -30,7 +30,7 @@ import { conviteDoEndereco } from '../plataforma/foto.js';
 const naArte = (chave) => !!(defAtlas && defAtlas.pecas && defAtlas.pecas[chave]);
 export const chaveOu = (chave, ...reservas) => { for (const k of [chave, ...reservas]) if (naArte(k)) return k; return chave; };
 export const ICONE = {
-  fazenda: chaveOu('ui/fazenda', 'ui/trofeu'), correio: chaveOu('ui/correio', 'ui/presente'), conquistas: 'ui/trofeu', presentes: 'ui/presente',
+  fazenda: chaveOu('ui/minha-fazenda', chaveOu('ui/fazenda', 'ui/trofeu')), correio: chaveOu('ui/correio', 'ui/presente'), conquistas: 'ui/trofeu', presentes: 'ui/presente',
   amigos: chaveOu('ui/amigos', 'icone/convite'), roupas: chaveOu('ui/guarda-roupa', 'icone/camisa-xadrez'), cash: 'icone/cash',
   caderno: chaveOu('ui/caderno', 'ui/missoes'), voltar: chaveOu('ui/voltar', 'ui/seta'), foto: chaveOu('ui/foto', 'ui/compartilhar'),
 };
@@ -88,19 +88,18 @@ function relogioDeTeste(seg) {
 // para o painel da loja de cash: há um relógio de teste andando?
 export const relogioEmTeste = () => (teste.tipo && teste.ate > 0 ? { tipo: teste.tipo, alvo: ALVO_DE_TESTE } : null);
 
-// ---------- no HUD: a caixa de correio (só aparece com presente dentro) e o ponto no botão "Minha fazenda" ----------
-let caixa = null, pontoFazenda = null, sujo = true, quadros = 0;
+// ---------- no HUD: o correio (no Menu; a bolinha acende com presente dentro) e o ponto no botão "Minha fazenda" ----------
+let caixa = null, pontoCorreio = null, pontoFazenda = null, sujo = true, quadros = 0;
 function abrirCorreio() { som.tocar('toque'); mandar({ tipo: 'abrirCorreio' }); }
 function prepararHud(hud) {
   if (!hud || hud._progresso) return;
   hud._progresso = true;
   const dir = hud.raiz.querySelector('.topo-dir');
   if (dir) {
-    caixa = botao({ icone: ICONE.correio, tamanho: 30, classe: 'quadrado correio', rotulo: T.botoes.correio, aoClicar: abrirCorreio });
+    caixa = botao({ icone: ICONE.correio, tamanho: 40, classe: 'quadrado correio', rotulo: T.botoes.correio, aoClicar: abrirCorreio });
     caixa.dataset.k = 'correio';
-    caixa.append(el('span', 'ponto'));
-    caixa.hidden = true;
-    dir.prepend(caixa);
+    pontoCorreio = el('span', 'ponto'); pontoCorreio.hidden = true; caixa.append(pontoCorreio);
+    if (hud.menu) hud.menu.por(caixa, T.menu.correio, true); else dir.prepend(caixa); // (vazio, o toque diz que está vazio)
   }
   const b = hud.paineis.fazenda;
   if (b) { pontoFazenda = el('span', 'ponto'); pontoFazenda.hidden = true; b.append(pontoFazenda); }
@@ -124,7 +123,11 @@ function quadro() {
   if (sujo || ++quadros >= 30) {
     sujo = false; quadros = 0;
     const nCorreio = quantosNoCorreio(m), espera = nCorreio + conquistasProntas(m);
-    if (caixa && caixa.hidden !== !nCorreio) { caixa.hidden = !nCorreio; if (nCorreio) { caixa.classList.remove('chegou'); void caixa.offsetWidth; caixa.classList.add('chegou'); } }
+    if (pontoCorreio && pontoCorreio.hidden !== !nCorreio) {
+      pontoCorreio.hidden = !nCorreio;
+      const r = nCorreio ? T.botoes.correioCheio : T.botoes.correio; caixa.title = r; caixa.setAttribute('aria-label', r);
+      if (nCorreio) { caixa.classList.remove('chegou'); void caixa.offsetWidth; caixa.classList.add('chegou'); }
+    }
     if (pontoFazenda && pontoFazenda.hidden !== !espera) pontoFazenda.hidden = !espera;
     if (pontoFazenda) classe(pontoFazenda.parentNode, 'tem-premio', espera > 0);
   }

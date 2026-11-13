@@ -8,6 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import esbuild from 'esbuild';
 import { montarAtlas } from './tools/atlas.mjs';
+import { montarMolduras } from './tools/molduras.mjs';
 import { lerDados, conferirDados, pastaDist } from './tools/comum.mjs';
 
 const raiz = path.dirname(fileURLToPath(import.meta.url));
@@ -25,13 +26,16 @@ if (problemas.some((p) => p.grave)) console.log('\nATENÇÃO: há erro nos dados
 fs.mkdirSync(dist, { recursive: true });
 const atlas = await montarAtlas(path.join(raiz, 'arte'), path.join(dist, 'arte'));
 for (const a of atlas.avisos) console.log('arte: ' + a);
+// as molduras da interface (9 fatias e peças fixas do CSS): inteiras e pela metade (tools/molduras.mjs)
+const molduras = await montarMolduras(path.join(raiz, 'arte'), path.join(dist, 'molduras'));
+for (const a of molduras.avisos) console.log('interface: ' + a);
 
 // 3. código
 const virtuais = {
   'virtual:dados': 'export default ' + JSON.stringify(bruto) + ';',
   'virtual:atlas': 'export default ' + JSON.stringify({ paginas: atlas.def.paginas, pecas: atlas.def.pecas }) + ';',
 };
-for (const f of fs.readdirSync(dist)) if (f !== 'arte') fs.rmSync(path.join(dist, f), { recursive: true, force: true });
+for (const f of fs.readdirSync(dist)) if (f !== 'arte' && f !== 'molduras') fs.rmSync(path.join(dist, f), { recursive: true, force: true });
 await esbuild.build({
   entryPoints: [path.join(raiz, 'src/main.js')],
   outfile: path.join(dist, 'main.js'),
@@ -59,4 +63,5 @@ const linhas = [];
   }
 })(dist);
 console.log(linhas.join('\n'));
+console.log(`molduras da interface: ${molduras.arquivos} peças, ${(molduras.inteira / 1024).toFixed(0)} kB inteiras + ${(molduras.meia / 1024).toFixed(0)} kB pela metade (cada aparelho baixa só um dos dois, e só as que aparecem)${molduras.reaproveitado ? ' (reaproveitadas)' : ''}`);
 console.log(`${path.relative(raiz, dist) || '.'}/: ${linhas.length} arquivos, ${(total / 1024).toFixed(0)} kB, ${atlas.def.paginas.length} páginas de arte${atlas.reaproveitado ? ' (reaproveitadas)' : ''}, ${Object.keys(atlas.def.pecas).length} peças. ${((Date.now() - t0) / 1000).toFixed(1)} s`);

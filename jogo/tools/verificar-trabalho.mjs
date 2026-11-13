@@ -146,7 +146,8 @@ async function pronto(pg) {
       hud() {
         const raiz = j.hud.raiz, ruins = [], vis = (n) => !n.closest('[hidden]') && n.getClientRects().length > 0;
         const meus = [...raiz.querySelectorAll('.bt.trab, .chip.trab-carga, .chip.trab-agua, button[data-modo="arado"]')].filter(vis);
-        const outros = [...raiz.querySelectorAll('button, .chip, .balao, .dica, .agir')].filter((n) => vis(n) && !meus.some((x) => x === n || x.contains(n) || n.contains(x)) && !(n.closest('.balao') && n.closest('.balao') !== n));
+        // (o painel aberto fica por cima do HUD, debaixo do véu: o que está nele não conta como encostar)
+        const outros = [...raiz.querySelectorAll('button, .chip, .balao, .dica, .agir')].filter((n) => vis(n) && !n.closest('.veu') && !meus.some((x) => x === n || x.contains(n) || n.contains(x)) && !(n.closest('.balao') && n.closest('.balao') !== n));
         const nome = (n) => n.dataset.k || n.dataset.modo || n.className;
         const cruza = (r, q) => Math.min(r.right, q.right) - Math.max(r.left, q.left) > 1 && Math.min(r.bottom, q.bottom) - Math.max(r.top, q.top) > 1;
         for (const n of meus) {

@@ -82,14 +82,14 @@ function atualizarHud() {
 function arrumar() {
   const { dir, l1, lado } = H, ui = H.hud.raiz;
   if (!dir || !l1 || !dir.getClientRects().length) return;
-  const r1 = l1.getBoundingClientRect(), rd = dir.getBoundingClientRect();
-  if (H.cavalo.parentNode === dir) { if (rd.left < r1.right + 8) lado.append(H.cavalo, H.jumento); }
-  else if (rd.left - 2 * 54 >= r1.right + 24) dir.prepend(H.cavalo, H.jumento);
+  const r1 = l1.getBoundingClientRect(), rd = dir.getBoundingClientRect(), k = J.esc || 1; // (medidas da tela; o #ui cresce pelo zoom J.esc)
+  if (H.cavalo.parentNode === dir) { if (rd.left < r1.right + 8 * k) lado.append(H.cavalo, H.jumento); }
+  else if (rd.left - 2 * 59 * k >= r1.right + 24 * k) dir.prepend(H.cavalo, H.jumento);
   if (H.cavalo.parentNode !== lado) return;
   let embaixo = rd.bottom;
   const b = ui.querySelector('.balao:not(.esq):not([hidden])');
   if (b) { const rb = b.getBoundingClientRect(); if (rb.height > 0) embaixo = Math.max(embaixo, rb.bottom); }
-  const t = Math.round(embaixo - ui.getBoundingClientRect().top + 6) + 'px';
+  const t = Math.round((embaixo - ui.getBoundingClientRect().top) / k + 6) + 'px';
   if (lado.style.top !== t) lado.style.top = t;
 }
 setInterval(() => { if (!document.hidden) atualizarHud(); }, 150);
