@@ -21,20 +21,21 @@ Construções, objetos, plantas, ícones e retratos do jogo, pedidos ao Codex de
 - Curral (6 x 5): montado por código com as cercas, a porteira, a sombra, o cocho e o bebedouro do catálogo (`peca.mjs cercado`). `objeto/curral` é o conjunto; `objeto/curral-fundo` e `objeto/curral-frente` têm o mesmo quadro e o mesmo apoio, para desenhar fundo, bichos, frente. O mesmo comando faz outros cercados.
 - Celeiro por dentro: `objeto/piso-tabuas` (1 casa, apoio no centro, encosta no vizinho sem vão), `objeto/parede-x` e `objeto/parede-z` (1 unidade de parede, 3 de altura, apoio no meio do pé; a parede do fundo fica em z = 0 e x = 0). Os móveis (suporte, prateleiras, baú, caixote, saco de sementes, fardo de feno) têm o apoio no centro da casa. Montagem de teste com o piso de 8 x 5 dos dados: `arte/jogo/folhas/cena-celeiro-por-dentro.png`.
 - Começo da fazenda (pedidos 59 a 63): `objeto/casa-velha` tem o mesmo quadro (681 x 642) e o mesmo apoio (340, 470) de `objeto/casa`, para trocar uma pela outra quando a casa é reformada; `objeto/poco-velho` tem o apoio no mesmo ponto do chão de `objeto/poco` e a mureta do mesmo tamanho, mas o quadro é outro (sem a manivela); `objeto/caixote-de-venda` e `-cheio` têm o mesmo quadro e apoio (1 casa). Arame farpado na regra da cerca: `objeto/arame-x` e `objeto/arame-z` (e os caídos `arame-caido-x` e `-z`) têm 1 unidade de mourão a mourão e o apoio no meio do trecho, no chão; trechos vizinhos sobrepõem o mourão. `objeto/mourao-velho` é o mourão sozinho (apoio no pé); `objeto/mourao-caido` está deitado na direção X (desce para a direita); para a direção Z, espelhe. `objeto/regador-no-chao` tem o apoio no centro da casa; `objeto/enxada-escorada` inclui a estaca, com o apoio no pé da estaca. Montagem de teste: `arte/jogo/folhas/cena-comeco-fazenda.png`.
+- Peças que faltavam do começo (pedidos 65 a 71; folha: `arte/jogo/folhas/pecas-que-faltavam.png`): `objeto/trouxa-no-chao` é a trouxa de `personagem/andar-trouxa-*` largada no chão, sem o pau (cerca de 0,5 de largura), apoio no centro da casa. `objeto/porteira-de-arame-x` e `-z` são a porteira velha de paus roliços e arame entre dois mourões velhos, na regra da `objeto/porteira`: 2 unidades de mourão a mourão, apoio no meio do trecho, no chão; a `-x` corre em X (desce para a direita, casas 2 x 1) e a `-z` corre em Z (desce para a esquerda, casas 1 x 2 no chão, a mesma porteira com giro); as duas têm as dobradiças no mourão da esquerda. Os mourões delas são de porteira: da altura do `objeto/mourao-velho` (mais altos e grossos que os dos trechos de arame). As obras de reforma `objeto/obra-reforma-poco` (2 x 2), `-banca` (3 x 2) e `-casa` (4 x 3) têm o apoio no mesmo ponto do chão da peça nova (`objeto/poco`, `objeto/banca`, `objeto/casa`) e da velha, como a obra comum (`render/construcao.js` desenha a obra com o apoio da própria peça); o quadro é outro (o andaime passa da peça). O poço e a casa velhos dentro da obra batem com `objeto/poco-velho` e `objeto/casa-velha` (encaixe por código a menos de 1 px); a obra da banca é a banca pela metade, com os postes e o rodapé nos pontos da banca pronta.
 - Chão: `objeto/caminho-de-pedra` é chato, ocupa a casa inteira e encosta no vizinho (`peca.mjs chao`).
 - Culturas: `cultura/<id>-<estágio>` (1 a 4; alface 1 a 3), um punhado de plantas que cabe numa casa, sem a terra; apoio no centro da casa.
 - Árvores: `arvore/<id>-muda`, `-jovem`, `-adulta`, `-fruta` (adulta carregada), com os apelidos `-1` a `-4`; apoio no pé do tronco, o mesmo em `adulta` e `fruta`.
-- Ícones: `icone/<id do item>` para todos os itens de `jogo/dados/itens.json`, 128 x 128, apoio no centro. Fora dos itens: `icone/ouro`, `cash`, `xp`, `folego`, `gota`, `convite`, `martelo`; `icone/enxada`, `icone/regador` e `icone/cesto` são apelidos dos do começo do jogo.
-- Interface (`ui/...`, 128 x 128): `mao`, `enxada`, `semear`, `regar`, `loja`, `mochila`, `missoes`, `pedidos`, `config`, `fechar`, `seta`, `cadeado`, `som`, `tela-cheia`, `relogio`, `trofeu`, `presente`, `concluir` (terminar na hora), `vaga` (vaga de fila), `compartilhar`, `lote` (comprar terra), `mover` (mudar construção de lugar). `ui/subida-de-nivel` é a faixa da tela de nível (528 x 278, sem texto: o número vai por cima); `ui/bau-fechado` e `ui/bau-aberto` são o baú de recompensa, com o apoio no pé.
+- Ícones: `icone/<id do item>` para todos os itens de `jogo/dados/itens.json`, 128 x 128, apoio no centro. Fora dos itens: `icone/ouro`, `cash`, `xp`, `folego`, `gota`, `convite`, `martelo`; `icone/enxada`, `icone/regador` e `icone/cesto` são apelidos dos do começo do jogo. Reformas (pedido 70): `icone/reforma-poco`, `-banca`, `-casa` e `-cerca`, a peça nova com um martelinho no canto de baixo à direita.
+- Interface (`ui/...`, 128 x 128): `mao`, `enxada`, `semear`, `regar`, `loja`, `mochila`, `missoes`, `pedidos`, `config`, `fechar`, `seta`, `cadeado`, `som`, `tela-cheia`, `relogio`, `trofeu`, `presente`, `concluir` (terminar na hora), `vaga` (vaga de fila), `compartilhar`, `lote` (comprar terra), `mover` (mudar construção de lugar). Roda de ações (pedido 71): `afagar` (luva com coração), `colher` (cesto de laranjas), `podar` (tesoura de poda), `comprar-sementes` (saquinho com "+" verde); `limpar` (foice no mato) já existia (ui-modos-e-progresso.md). Ordenhar e dar ração não ganharam peça nova porque já existe o desenho igual: usar `icone/leite` (balde de leite, o mesmo do mockup da roda) e `icone/racao` (saco de ração com concha). `ui/subida-de-nivel` é a faixa da tela de nível (528 x 278, sem texto: o número vai por cima); `ui/bau-fechado` e `ui/bau-aberto` são o baú de recompensa, com o apoio no pé.
 - Retratos (256 x 256): `retrato/seu-tonho` (neutro; apelido `-neutro`), `-alegre`, `-explicando`. Folha de modelo: `arte/jogo/modelos/seu-tonho.png`. A personagem principal, no mesmo formato (busto do alto do coque ao meio do peito, encostado a 8 px do pé, apoio 128, 248): `retrato/personagem` (neutra) e `retrato/personagem-alegre`, pedido 64 (a rodada 1 saiu com as cores escuras e o rosto pequeno; valeu a `-r2`). Folha de modelo: `arte/jogo/modelos/personagem.png`; comparação com o Seu Tonho e no círculo do balão: `arte/jogo/folhas/retratos-personagem.png`. O círculo e o fundo azul do balão vêm do CSS, não do PNG.
 
 ## Peças
 
 <!-- tabela:inicio -->
 
-No catálogo: 299 chaves (299 prontas, 0 pendentes).
+No catálogo: 313 chaves (313 prontas, 0 pendentes).
 
-### objetos (86)
+### objetos (92)
 
 | Chave | Arquivo | Quadro (px) | Apoio | Casas | Tamanho pedido | Pedido | Situação |
 |---|---|---|---|---|---|---|---|
@@ -99,6 +100,9 @@ No catálogo: 299 chaves (299 prontas, 0 pendentes).
 | `objeto/mourao-caido` | objetos/mourao-caido.png | 136 x 83 | 76, 53 | 1 x 1 | fator 0.3587 | 61-arame-farpado-r2.md | pronto: mourão caído no chão com arame enrolado, raiz à esquerda e ponta quebrada à direita (desce para a direita, como o lado X); para a outra direção, espelhe; apoio no meio dele, no chão |
 | `objeto/mourao-velho` | objetos/mourao-velho.png | 74 x 143 | 36, 119 | 1 x 1 | fator 0.3587 | 61-arame-farpado-r2.md | pronto: mourão velho sozinho, um pouco torto, com raiz e duas voltas de arame; mesma escala dos mourões do arame; apoio no pé do mourão |
 | `objeto/ninho` | objetos/ninho.png | 108 x 78 | 54, 48 | 1 x 1 | largura 0.72 | 28-pecas-de-trato.md | pronto |
+| `objeto/obra-reforma-banca` | objetos/obra-reforma-banca.png | 405 x 473 | 205, 334 | 3 x 2 | fator 0.47427 | 68-obra-reforma-banca.md | pronto: obra da banca: a banca pela metade (postes, armação do balcão, algumas tábuas), um andaimezinho, pilha de tábuas, saco e o velho caixote de venda; postes e rodapé nos mesmos pontos de objeto/banca (encaixe por código, folga de 2 a 4 px) e o apoio é o mesmo ponto do chão de objeto/banca (centro das 3x2 casas) |
+| `objeto/obra-reforma-casa` | objetos/obra-reforma-casa.png | 679 x 694 | 339, 473 | 4 x 3 | fator 0.68836 | 69-obra-reforma-casa.md | pronto: obra da reforma da casa: a casa velha com andaime de varas nas duas paredes, escada no beiral, telhas novas no telhado, tábuas, sacos e balde; a casa bate com objeto/casa-velha (encaixe por código: escala 1,0015) e o apoio é o mesmo ponto do chão de objeto/casa e objeto/casa-velha (centro das 4x3 casas); o quadro é outro (o andaime passa um pouco da casa) |
+| `objeto/obra-reforma-poco` | objetos/obra-reforma-poco.png | 333 x 485 | 166, 353 | 2 x 2 | fator 0.46670 | 67-obra-reforma-poco.md | pronto: obra da reforma do poço: o poço velho com andaime de varas, corda nova, tábuas e saco de cal; o poço velho bate com objeto/poco-velho (encaixe por código) e o apoio é o mesmo ponto do chão de objeto/poco e objeto/poco-velho (centro das 2x2 casas) |
 | `objeto/parede-x` | objetos/parede-x.png | 109 x 382 | 54, 348 |  | parede de 1 unidade, altura 3 | 40-texturas-do-celeiro.md | pronto |
 | `objeto/parede-z` | objetos/parede-z.png | 109 x 382 | 54, 348 |  | parede de 1 unidade, altura 3 | 40-texturas-do-celeiro.md | pronto |
 | `objeto/pedra` | objetos/pedra.png | 125 x 103 | 63, 74 | 1 x 1 | largura 0.85 | 06-natureza.md | pronto |
@@ -108,6 +112,8 @@ No catálogo: 299 chaves (299 prontas, 0 pendentes).
 | `objeto/poco-velho` | objetos/poco-velho.png | 275 x 424 | 136, 353 | 2 x 2 | fator 0.3466 | 60-poco-velho.md | pronto: estado velho do poço (começo do jogo): mureta do mesmo tamanho e apoio no mesmo ponto do chão que objeto/poco; sem manivela |
 | `objeto/porteira` | objetos/porteira.png | 252 x 292 | 126, 216 | 2 x 1 | fator 0.7016 | 05-cercas.md | pronto |
 | `objeto/porteira-aberta` | objetos/porteira-aberta.png | 252 x 311 | 126, 235 | 2 x 1 | fator 0.7016 | 05-cercas.md | pronto |
+| `objeto/porteira-de-arame-x` | objetos/porteira-de-arame-x.png | 245 x 258 | 123, 177 | 2 x 1 | fator 0.37037 | 66-porteira-de-arame-r2.md | pronto: porteira velha de paus roliços e arame farpado entre dois mourões velhos, correndo em X (desce para a direita); mesma regra da objeto/porteira: 2 unidades de mourão a mourão, apoio no meio do trecho, no chão; desenhada em cima de uma guia na câmera do jogo (2ª rodada: a 1ª saiu curta e deitada) |
+| `objeto/porteira-de-arame-z` | objetos/porteira-de-arame-z.png | 247 x 259 | 123, 178 | 1 x 2 | fator 0.37037 | 66-porteira-de-arame-r2.md | pronto: a mesma porteira correndo em Z (desce para a esquerda); 2 unidades de mourão a mourão, apoio no meio do trecho, no chão; dobradiças no mourão da esquerda |
 | `objeto/poste-de-lampiao` | objetos/poste-de-lampiao.png | 169 x 311 | 121, 280 | 1 x 1 | altura 2.6 | 41-decoracao-1.md | pronto |
 | `objeto/prateleira-reforcada` | objetos/prateleira-reforcada.png | 222 x 360 | 111, 293 | 2 x 1 | fator 0.53 | 51-prateleira-reforcada.md | pronto |
 | `objeto/prateleira-reforcada-cheia` | objetos/prateleira-reforcada-cheia.png | 230 x 360 | 111, 293 | 2 x 1 | fator 0.53 | 51-prateleira-reforcada.md | pronto |
@@ -123,6 +129,7 @@ No catálogo: 299 chaves (299 prontas, 0 pendentes).
 | `objeto/suporte-de-ferramentas` | objetos/suporte-de-ferramentas.png | 223 x 286 | 112, 219 | 2 x 1 | fator 0.35 | 08-suporte-ferramentas.md | pronto |
 | `objeto/suporte-de-ferramentas-vazio` | objetos/suporte-de-ferramentas-vazio.png | 223 x 286 | 112, 219 | 2 x 1 | fator 0.35 | 08-suporte-ferramentas.md | pronto |
 | `objeto/toco` | objetos/toco.png | 144 x 126 | 72, 85 | 1 x 1 | largura 1.0 | 06-natureza.md | pronto |
+| `objeto/trouxa-no-chao` | objetos/trouxa-no-chao.png | 80 x 71 | 40, 49 | 1 x 1 | largura 0.5 | 65-trouxa-no-chao.md | pronto: a trouxa da personagem (o mesmo pano azul de florzinhas) largada no chão, sem o pau; cerca de 0,5 x 0,35 x 0,35; apoio no centro da casa, no chão (o centro do fundo da trouxa) |
 | `objeto/vaso` | objetos/vaso.png | 112 x 133 | 56, 108 | 1 x 1 | largura 0.75 | 41-decoracao-1.md | pronto |
 
 ### culturas (31)
@@ -190,7 +197,7 @@ No catálogo: 299 chaves (299 prontas, 0 pendentes).
 | `arvore/laranjeira-jovem` | arvores/laranjeira-jovem.png | 185 x 235 | 95, 213 |  | altura 3.3 | 35-arvore-laranjeira.md | pronto |
 | `arvore/laranjeira-muda` | arvores/laranjeira-muda.png | 88 x 127 | 43, 113 |  | altura 3.3 | 35-arvore-laranjeira.md | pronto |
 
-### icones (114)
+### icones (118)
 
 | Chave | Arquivo | Quadro (px) | Apoio | Casas | Tamanho pedido | Pedido | Situação |
 |---|---|---|---|---|---|---|---|
@@ -281,6 +288,10 @@ No catálogo: 299 chaves (299 prontas, 0 pendentes).
 | `icone/prego` | icones/prego.png | 128 x 128 | 64, 64 |  | caixa 128 | 19-icones-produtos.md | pronto |
 | `icone/queijo-minas` | icones/queijo-minas.png | 128 x 128 | 64, 64 |  | caixa 128 | 19-icones-produtos.md | pronto |
 | `icone/racao` | icones/racao.png | 128 x 128 | 64, 64 |  | caixa 128 | 19-icones-produtos.md | pronto |
+| `icone/reforma-banca` | icones/reforma-banca.png | 128 x 128 | 64, 64 |  | caixa 128 | 70-icones-reforma.md | pronto |
+| `icone/reforma-casa` | icones/reforma-casa.png | 128 x 128 | 64, 64 |  | caixa 128 | 70-icones-reforma.md | pronto |
+| `icone/reforma-cerca` | icones/reforma-cerca.png | 128 x 128 | 64, 64 |  | caixa 128 | 70-icones-reforma.md | pronto |
+| `icone/reforma-poco` | icones/reforma-poco.png | 128 x 128 | 64, 64 |  | caixa 128 | 70-icones-reforma.md | pronto |
 | `icone/regador` | icones/regador-velho.png (apelido) | 128 x 128 | 64, 64 |  | caixa 128 | 18-icones-ferramentas.md | pronto |
 | `icone/regador-de-cobre` | icones/regador-de-cobre.png | 128 x 128 | 64, 64 |  | caixa 128 | 47-icones-ferramentas-2.md | pronto |
 | `icone/regador-de-crivo` | icones/regador-de-crivo.png | 128 x 128 | 64, 64 |  | caixa 128 | 54-icones-rega.md | pronto |
@@ -320,17 +331,20 @@ No catálogo: 299 chaves (299 prontas, 0 pendentes).
 | `retrato/seu-tonho-explicando` | retratos/seu-tonho-explicando.png | 256 x 256 | 128, 248 |  | caixa 256 | 21-retratos-seu-tonho.md | pronto |
 | `retrato/seu-tonho-neutro` | retratos/seu-tonho.png (apelido) | 256 x 256 | 128, 248 |  | caixa 256 | 21-retratos-seu-tonho.md | pronto |
 
-### interface (38)
+### interface (42)
 
 | Chave | Arquivo | Quadro (px) | Apoio | Casas | Tamanho pedido | Pedido | Situação |
 |---|---|---|---|---|---|---|---|
+| `ui/afagar` | interface/afagar.png | 128 x 128 | 64, 64 |  | caixa 128 | 71-icones-acoes.md | pronto |
 | `ui/amigos` | interface/amigos.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-modos-e-progresso.md | pronto |
 | `ui/bau-aberto` | interface/bau-aberto.png | 268 x 280 | 134, 272 |  | fator 0.5 | 22-nivel-e-bau.md | pronto |
 | `ui/bau-fechado` | interface/bau-fechado.png | 252 x 226 | 126, 218 |  | fator 0.5 | 22-nivel-e-bau.md | pronto |
 | `ui/cadeado` | interface/cadeado.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/caderno` | interface/caderno.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-modos-e-progresso.md | pronto |
 | `ui/certo` | interface/certo.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-interface-aprovada.md | pronto |
+| `ui/colher` | interface/colher.png | 128 x 128 | 64, 64 |  | caixa 128 | 71-icones-acoes.md | pronto |
 | `ui/compartilhar` | interface/compartilhar.png | 128 x 128 | 64, 64 |  | caixa 128 | 48-icones-cosmeticos.md | pronto |
+| `ui/comprar-sementes` | interface/comprar-sementes.png | 128 x 128 | 64, 64 |  | caixa 128 | 71-icones-acoes.md | pronto |
 | `ui/concluir` | interface/concluir.png | 128 x 128 | 64, 64 |  | caixa 128 | 48-icones-cosmeticos.md | pronto |
 | `ui/config` | interface/config.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/correio` | interface/correio.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-modos-e-progresso.md | pronto |
@@ -351,6 +365,7 @@ No catálogo: 299 chaves (299 prontas, 0 pendentes).
 | `ui/mochila` | interface/mochila.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/mover` | interface/mover.png | 128 x 128 | 64, 64 |  | caixa 128 | 54-icones-rega.md | pronto |
 | `ui/pedidos` | interface/pedidos.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
+| `ui/podar` | interface/podar.png | 128 x 128 | 64, 64 |  | caixa 128 | 71-icones-acoes.md | pronto |
 | `ui/presente` | interface/presente.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/regar` | interface/regar.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/relogio` | interface/relogio.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
@@ -382,4 +397,5 @@ Nenhuma peça ficou marcada como pendente. O que vale saber:
 - **Peso**: o grupo `objetos` soma cerca de 17 milhões de pixels (mais de 4 páginas de atlas de 2048); mais da metade são os 10 celeiros e as 3 camadas do curral. Se pesar no celular, carregar só o celeiro do nível atual ou reduzir essas peças no atlas.
 - **Não feito**: a personagem e os animais são de outra frente. Só os itens têm `icone/<id>`: não há ícone de construção nem de animal. A tela de subida de nível pede `icone/<id>` do que foi liberado e cai na figura de reserva quando o liberado não é item; se a interface precisar, pedir uma grade nova no modelo dos pedidos 45 a 48.
 - **Começo da fazenda (pedidos 59 a 63)**: `casa-velha` saiu na 2ª rodada (59-casa-velha-r2.md): a 1ª veio 5% maior e com a parede da esquerda mais deitada; a 2ª envelheceu a própria casa nova sem mexer na forma, e bate com ela a 1 ou 2 px. O arame também foi para a 2ª rodada (61-arame-farpado-r2.md): na 1ª os mourões vinham baixos (na canela da personagem); agora têm a altura da cerca de madeira. Os trechos de arame vieram com a diagonal mais deitada (0,38 a 0,44) e foram acertados com `--inclinar`. Os trechos X e Z vêm de fatores um pouco diferentes (0,37 e 0,35) para o vão de 1 unidade ficar exato; no canto onde X encontra Z o mourão de um é uns 6% maior que o do outro. O regador no chão tem a largura do regador que a personagem segura na animação de regar.
+- **Peças que faltavam (pedidos 65 a 71)**: 8 imagens geradas, 1 descartada (a 1ª porteira de arame, `66-porteira-de-arame.md`: o desenho saiu bom, mas curta, com o vão de 1,3 vez a altura do mourão, e a linha do chão deitada, 0,25 em vez de 0,58). A 2ª rodada foi desenhada em cima de uma guia feita por código na câmera do jogo (dois mourões cinza a 2 unidades e o plano da folha; `/root/arte-codex/jogo-65-71-refs/guia-porteira-de-arame.png`) e saiu no lugar: fator 1/2,7 e apoio tirados da própria guia. O mourão de trás das duas porteiras pisa uns 15 a 20 px abaixo da linha do chão (o Codex o desenhou comprido embaixo); na cena parece só um mourão torto. As obras foram pedidas sobre a peça velha num quadro com folga e o losango tracejado da área; o Codex mexeu pouco no que já existia (o poço subiu 31 px; a casa ficou no lugar), e o fator e o apoio saíram do encaixe da peça velha na obra (script de correlação do traço; conferido de novo no tamanho do jogo). A obra da banca não tem peça velha dentro para encaixar: o apoio veio dos postes e do rodapé (dá 205 pela crua e pelo centro do V do rodapé; pedaços isolados dão de 196 a 211, a banca da obra não é idêntica à pronta). O que está no chão passa um pouco da beira da área: na obra do poço, a pilha de tábuas (até 0,4 de casa, na frente à esquerda); na da banca, a pilha de tábuas (até 0,55 de casa, à esquerda); na da casa, os sacos, o balde e a pilha de tábuas na frente da parede da direita (+X), até 0,9 de casa: no começo humilde isso cai atrás do baú da casa (29, 47), que tapa quase tudo (montagem conferida). A trouxa no chão ficou com 0,5 de largura (64 px de desenho); a pendurada no pau tem uns 37 px: no chão ela parece cheia e achatada, uma vez e meia a do pau.
 - **Codex**: nenhuma recusa, nenhum aviso de limite de uso nem de login em todos os pedidos (54 a 112 s cada). As imagens saem com alfa de verdade; o "halo" que aparece em alguns visualizadores é cor em pixels totalmente transparentes.
