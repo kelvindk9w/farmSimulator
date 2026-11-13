@@ -613,6 +613,21 @@
    "pedido": "gato-siames-parada-costas.md",
    "rodadas": 1,
    "nota": "Folha nova no Codex, copiando quadro a quadro a do gato comum (a recoloração por código não faz as pontas escuras do siamês): corpo creme sem listras, máscara, orelhas, patas e rabo castanho-escuros, olhos azuis; mesmo tamanho do gato comum (pela massa)."
+  },
+  "animal/gato-siames/andar-frente": {
+   "pedido": "gato-siames-andar-frente.md",
+   "rodadas": 1,
+   "nota": "Folha nova no Codex, copiando quadro a quadro a do gato comum (a recoloração por código não faz as pontas escuras do siamês): corpo creme sem listras, máscara, orelhas, patas e rabo castanho-escuros, olhos azuis; mesmo tamanho do gato comum (pela massa)."
+  },
+  "animal/gato-siames/andar-costas": {
+   "pedido": "gato-siames-andar-costas.md",
+   "rodadas": 1,
+   "nota": "Folha nova no Codex, copiando quadro a quadro a do gato comum (a recoloração por código não faz as pontas escuras do siamês): corpo creme sem listras, máscara, orelhas, patas e rabo castanho-escuros, olhos azuis; mesmo tamanho do gato comum (pela massa)."
+  },
+  "animal/gato-siames/sentado-frente": {
+   "pedido": "gato-siames-sentado-frente.md",
+   "rodadas": 1,
+   "nota": "Folha nova no Codex, copiando quadro a quadro a do gato comum (a recoloração por código não faz as pontas escuras do siamês): corpo creme sem listras, máscara, orelhas, patas e rabo castanho-escuros, olhos azuis; mesmo tamanho do gato comum (pela massa). Fora do pedido (a coordenação pediu parada e andar): para ele também sentar quando a personagem para."
   }
  },
  "geral": [

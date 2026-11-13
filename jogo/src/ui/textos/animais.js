@@ -16,16 +16,29 @@ const um = (nome) => `${artigo(nome) === 'a' ? 'uma' : 'um'} ${minus(nome)}`;
 const ela = (nome) => (artigo(nome) === 'a' ? 'ela' : 'ele');
 const plural = (n, um_, varios) => (n === 1 ? `1 ${um_}` : `${numero(n)} ${varios}`);
 
-// como cada produto se recolhe: a chave é a função da ferramenta em animais.json ("ferramenta")
+// como cada produto se recolhe: a chave é a função da ferramenta em animais.json ("ferramenta").
+//   aviso(d)  o que o Seu Tonho diz quando o primeiro fica pronto;  cheio(d)  o cartão do bicho que espera a coleta
+const pronta = (d) => (artigo(d && d.nome) === 'a' ? 'pronta' : 'pronto');
 const JEITO = {
-  'caixa-de-ovos': { recolher: 'Recolher os ovos', gesto: 'recolher', pronto: (n) => plural(n, 'ovo para recolher', 'ovos para recolher'), em: (t) => `Ovo em ${t}`, parou: 'parou de botar', da: 'bota', conta: (n) => plural(n, 'ovo', 'ovos') },
-  balde: { recolher: 'Ordenhar', gesto: 'ordenhar', pronto: () => 'Leite para ordenhar', em: (t) => `Leite em ${t}`, parou: 'não dá mais leite', da: 'dá leite', conta: (n) => plural(n, 'balde de leite', 'baldes de leite') },
-  tesoura: { recolher: 'Tosquiar', gesto: 'tosquiar', pronto: () => 'Lã para tosquiar', em: (t) => `Lã em ${t}`, parou: 'não dá mais lã', da: 'dá lã', conta: (n) => plural(n, 'lã', 'lãs') },
+  'caixa-de-ovos': {
+    recolher: 'Recolher os ovos', gesto: 'recolher', pronto: (n) => plural(n, 'ovo para recolher', 'ovos para recolher'), em: (t) => `Ovo em ${t}`, parou: 'parou de botar', da: 'bota', conta: (n) => plural(n, 'ovo', 'ovos'),
+    aviso: () => 'Tem ovo no ninho!', cheio: (d) => `Ninho cheio: recolha os ovos e ${ela(d && d.nome)} volta a botar`,
+  },
+  balde: {
+    recolher: 'Ordenhar', gesto: 'ordenhar', pronto: () => 'Leite para ordenhar', em: (t) => `Leite em ${t}`, parou: 'não dá mais leite', da: 'dá leite', conta: (n) => plural(n, 'balde de leite', 'baldes de leite'),
+    aviso: (d) => `${O(d.nome)} está ${pronta(d)} para a ordenha!`, cheio: (d) => `${pronta(d) === 'pronta' ? 'Pronta' : 'Pronto'} para ordenhar`,
+  },
+  tesoura: {
+    recolher: 'Tosquiar', gesto: 'tosquiar', pronto: () => 'Lã para tosquiar', em: (t) => `Lã em ${t}`, parou: 'não dá mais lã', da: 'dá lã', conta: (n) => plural(n, 'lã', 'lãs'),
+    aviso: (d) => `A lã ${do_(d.nome)} cresceu!`, cheio: (d) => `Lã crescida: ${pronta(d)} para tosquiar`,
+  },
 };
 const jeitoDe = (d, D) => JEITO[d && d.ferramenta] || {
   recolher: 'Recolher', gesto: 'recolher', pronto: (n) => `${n} × ${minus(nomeI(D, d && d.produto))} para recolher`, em: (t) => `${nomeI(D, d && d.produto)} em ${t}`,
   parou: 'parou de produzir', da: 'produz', conta: (n) => `${n} × ${minus(nomeI(D, d && d.produto))}`,
+  aviso: (x) => `${O(x.nome)} tem ${minus(nomeI(D, x.produto))} para recolher!`, cheio: () => 'Esperando: recolha para voltar a produzir',
 };
+const maiuscula = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 const defA = (D, id) => (D && D.animais ? D.animais[id] : null);
 
 Object.assign(T.acoes, {
@@ -41,7 +54,6 @@ Object.assign(T.motivos, {
   'ainda-nao': (d, D) => `${O(nomeA(D, d && d.animal))} ainda não chegou ao jogo`,
   'sem-abrigo': (d, D) => `${O(nomeA(D, d && d.animal))} precisa de ${um(nomeC(D, d && d.abrigo))} pronto: construa antes`,
   'abrigo-cheio': (d, D) => `Não há vaga ${no(nomeC(D, d && d.abrigo))}: amplie para caber mais`,
-  'so-com-cash': (d, D) => `${O(nomeA(D, d && d.animal))} é da loja de cash`,
   'sem-cocho': () => 'Este abrigo não tem cocho',
   'cocho-cheio': () => 'O cocho já está cheio',
   'sem-comida': (d, D) => `Falta ${minus(nomeI(D, d && d.item))} para pôr no cocho${D && D.itens[d && d.item] && D.itens[d.item].tipo === 'colheita' ? ': plante e colha' : ': compre na loja'}`,
@@ -49,7 +61,7 @@ Object.assign(T.motivos, {
   'bebedouro-cheio': () => 'O bebedouro já está cheio',
   'nada-para-recolher': () => 'Ainda não há nada para recolher aqui',
   'falta-de-recolher': (d, D) => `Você precisa de ${um(nomeI(D, d && d.item))} para ${jeitoDe(defA(D, d && d.animal), D).gesto}: compre na loja, em Ferramentas`,
-  'recipiente-cheio': (d, D) => `${O(nomeI(D, d && d.item))} está cheia: venda na banca ou guarde no celeiro`,
+  'recipiente-cheio': (d, D) => `${O(nomeI(D, d && d.item))} está ${artigo(nomeI(D, d && d.item)) === 'a' ? 'cheia' : 'cheio'}: venda na banca ou guarde no celeiro`,
   'abrigo-com-bicho': (d) => (d && d.n === 1 ? 'Tem um bicho morando aqui: não dá para guardar' : 'Tem bichos morando aqui: não dá para guardar'),
   'ainda-produz': (d, D) => `${O(nomeA(D, d && d.animal))} ainda produz: não está na hora`,
   'destino-desconhecido': () => 'Escolha um dos três destinos',
@@ -60,6 +72,11 @@ Object.assign(T.motivos, {
   T.motivos['sem-ferramenta'] = (d, D) => (d && d.funcao === 'tesoura' ? 'Você não tem uma tesoura de tosquia: compre na loja, em Ferramentas' : antes(d, D));
 }
 
+// bicho especial é da loja de cash (o resto do "so-com-cash" é da frente de construir)
+{
+  const antes = T.motivos['so-com-cash'];
+  T.motivos['so-com-cash'] = (d, D) => (d && d.animal ? `${O(nomeA(D, d.animal))} é da loja de cash` : antes ? antes(d, D) : 'É da loja de cash');
+}
 // o aviso de compra passa a saber de bicho
 {
   const antes = T.ganhos.comprou;
@@ -81,7 +98,7 @@ T.animais = {
   abrigo: 'Abrigo',
   // o cartão do bicho na loja
   tem: (n) => `Você tem ${n}`, comprar: 'Comprar', nivel: (n) => `Libera no nível ${n}`,
-  precisaDe: (D, abrigo) => `Precisa de ${um(nomeC(D, abrigo))}`, construir: 'Construir',
+  precisaDe: (D, abrigo) => `Precisa de ${um(nomeC(D, abrigo))}`, construir: 'Construir', construirAbrigo: (D, abrigo) => `Construir ${o(nomeC(D, abrigo))}`,
   semVaga: (D, abrigo) => `${nomeC(D, abrigo)} sem vaga: amplie`, verAbrigo: 'Ver',
   soCash: 'Na loja de cash',
   resumo: (d, D) => {
@@ -102,7 +119,7 @@ T.animais = {
   recolherTudo: (n) => `Recolher tudo${n > 0 ? ` (${n})` : ''}`,
   faltaDeRecolher: (D, d, item) => `Para ${jeitoDe(d, D).gesto} falta ${um(nomeI(D, item))}`,
   irComprar: 'Comprar na loja',
-  recipienteCheio: (D, item) => `${O(nomeI(D, item))} está cheia: venda na banca ou guarde no celeiro`,
+  recipienteCheio: (D, item) => `${O(nomeI(D, item))} está ${artigo(nomeI(D, item)) === 'a' ? 'cheia' : 'cheio'}: venda na banca ou guarde no celeiro`,
   cestoCheio: 'O cesto está cheio: venda na banca ou guarde no celeiro',
   comprarBicho: (nome) => `Comprar ${minus(nome)}`,
   semVagas: 'Não há vaga: amplie para caber mais',
@@ -110,10 +127,10 @@ T.animais = {
   // como o bicho está
   em: (d, D, seg) => jeitoDe(d, D).em(tempo(seg)),
   pronto: (d, D, n) => jeitoDe(d, D).pronto(n),
-  ninhoCheio: (d, D) => `${d && d.ferramenta === 'caixa-de-ovos' ? 'Ninho cheio' : 'Esperando'}: recolha para ${ela(d ? d.nome : '')} voltar a produzir`,
+  ninhoCheio: (d, D) => jeitoDe(d, D).cheio(d),
   semTrato: (falta, D, item) => `${falta.comida && falta.agua ? `Sem ${minus(nomeI(D, item))} e sem água` : falta.comida ? `Sem ${minus(nomeI(D, item))}` : 'Sem água'}: produz a metade`,
   semTratoCurto: 'Com fome ou com sede: produz a metade',
-  parou: (d, D) => `${d ? d.nome : 'Bicho'} ${jeitoDe(d, D).parou}`,
+  parou: (d, D) => maiuscula(jeitoDe(d, D).parou),
   estimacao: 'De estimação: não produz mais',
   velhinha: (d, D, n) => `Só mais ${jeitoDe(d, D).conta(n)} e ${ela(d ? d.nome : '')} para`,
   destino: 'Escolher o destino', vender: 'Vender',
@@ -154,8 +171,8 @@ T.animais = {
     animal: (d, D) => `${O(d.nome)} come ${minus(nomeI(D, d.comida))} e bebe água. Toque ${no(nomeC(D, d.abrigo))} e encha o cocho e o bebedouro.`,
     trato: (d, D) => `Com comida e água, ${o(d.nome)} ${jeitoDe(d, D).da} no tempo certo. Se faltar um dos dois, rende só a metade.`,
     recolher: (d, D, tem, item) => (tem
-      ? `${jeitoDe(d, D).pronto(1).replace(/^1 ovo/, 'Tem ovo')}! Com a Mão, toque ${no(nomeC(D, d.abrigo))} para ${jeitoDe(d, D).gesto}.`
-      : `${jeitoDe(d, D).pronto(1).replace(/^1 ovo/, 'Tem ovo')}! Para ${jeitoDe(d, D).gesto} você precisa de ${um(nomeI(D, item))}: compre na loja, em Ferramentas.`),
+      ? `${jeitoDe(d, D).aviso(d)} Com a Mão, toque ${no(nomeC(D, d.abrigo))} para ${jeitoDe(d, D).gesto}.`
+      : `${jeitoDe(d, D).aviso(d)} Para ${jeitoDe(d, D).gesto}, você precisa de ${um(nomeI(D, item))}: compre na loja, em Ferramentas.`),
     levar: (d, D) => `${nomeI(D, d.produto)} se vende na banca ou se guarda no celeiro, junto com a colheita.`,
     'fim-perto': (d, D, n) => `${O(d.nome)} está ficando ${artigo(d.nome) === 'a' ? 'velhinha' : 'velhinho'}: só mais ${jeitoDe(d, D).conta(n)}. Quando parar, você escolhe o que fazer, sem pressa.`,
     fim: (d, D) => `${O(d.nome)} ${jeitoDe(d, D).parou}. Toque ${no(nomeC(D, d.abrigo))} e escolha: vender, ou ficar com ${ela(d.nome)} de estimação.`,

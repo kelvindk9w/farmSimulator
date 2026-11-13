@@ -20,3 +20,5 @@ import './pedidos.js';
 // frente dos animais: o painel do abrigo (cocho, bebedouro, bichos, fim de vida) e a aba "Animais" da loja
 import './abrigo.js';
 import './animais.js';
+// frente dos animais de trabalho e de estimação: botões do cavalo e do jumento, carroça e barril no HUD, o estábulo
+import '../trabalho.js';

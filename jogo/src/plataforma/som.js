@@ -190,6 +190,12 @@ export const POR_EVENTO = {
   receitaPronta: 'pronto',
   cancelouReceita: 'fechar',
   entregou: 'moeda',
+  // animais de trabalho e de estimação
+  afagou: 'toque',
+  ganhouMimo: 'recompensa',
+  montouNoCavalo: 'abrir',
+  encheuBarril: 'encher',
+  carregouCarroca: 'guardar',
 };
 
 // intervalo mínimo entre duas vezes do mesmo som, em segundos (o resto usa PADRAO)

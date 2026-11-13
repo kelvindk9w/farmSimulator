@@ -29,7 +29,7 @@ export function zona(J) {
   if (J.zonaChave === chave) return J.zona;
   J.zonaChave = chave;
   const T = J.D.terras, poco = T.pontos.poco || T.pontos.lavoura, lv = T.pontos.lavoura || poco, campo = campoDemarcado(J.D);
-  const out = [], set = J.zonaSet || (J.zonaSet = new Uint8Array(loc.l * loc.p));
+  const pares = [], set = J.zonaSet || (J.zonaSet = new Uint8Array(loc.l * loc.p));
   set.fill(0);
   let obst = 0;
   for (let z = 0; z < loc.p; z++) for (let x = 0; x < loc.l; x++) {
@@ -41,13 +41,8 @@ export function zona(J) {
     if (e && !(TIPOS && TIPOS[e.tipo] && TIPOS[e.tipo].obstaculo)) continue; // obra, árvore: não é lavoura
     if (e) obst++;
     set[i] = 1;
-    out.push(noCampo ? i : i + 1e6 * (1 + Math.hypot(x + 0.5 - lv[0] - 0.5, z + 0.5 - lv[1] - 0.5)));
+    pares.push([noCampo ? 0 : 1, Math.hypot(x - lv[0], z - lv[1]), i]);
   }
-  out.sort((a, b) => a - b);
-  J.zona = out.map((v) => (v >= 1e6 ? Math.round(v % 1e6) : v)); // (o índice cabe abaixo de 1e6: o mapa tem 64×64)
-  // a ordem certa: refaz com a distância sem perder o índice
-  const pares = [];
-  for (let z = 0; z < loc.p; z++) for (let x = 0; x < loc.l; x++) { const i = z * loc.l + x; if (set[i]) pares.push([campo && dentro(campo, x, z) ? 0 : 1, Math.hypot(x - lv[0], z - lv[1]), i]); }
   pares.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
   J.zona = pares.map((q) => q[2]);
   J.zonaObst = obst;

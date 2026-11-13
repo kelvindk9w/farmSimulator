@@ -106,7 +106,7 @@ registrarPainel({
       textos.append(titulo, barra);
       if (nota) textos.append(el('small', ruim ? 'ruim' : '', nota));
       const indo = naFila(m, acao, e.id);
-      const b = botao({ texto: cheio ? T.animais.cheio : T.animais.encher, classe: !cheio && pode.ok && !indo ? 'verde' : '', aoClicar: () => { const r = mandar({ tipo: eCocho ? 'encherCocho' : 'encherBebedouro', entidade: e.id }); if (r.ok) som.tocar('toque'); } });
+      const b = botao({ texto: cheio ? T.animais.cheio : T.animais.encher, classe: !cheio && pode.ok && !indo ? 'verde' : '', aoClicar: () => { const r = mandar({ tipo: eCocho ? 'encherCocho' : 'encherBebedouro', entidade: e.id }); if (r.ok) { som.tocar('toque'); desenhar(); } } });
       b.dataset.k = 'encher-' + parte;
       if (cheio || indo) b.disabled = true; else if (!pode.ok) b.classList.add('sem');
       if (!cheio && pode.ok && !indo && pedido.evento === 'tratou' && (!pedido.abrigo || pedido.abrigo === e.tipo)) b.classList.add('alvo-tutorial');
@@ -171,7 +171,12 @@ registrarPainel({
       assinatura = sinal; relogios = []; barraObra = null; tObra = null;
       // refazer não pode perder o foco de quem anda pelas setas (o relógio também refaz, sem evento nenhum)
       const ativo = document.activeElement, chave = montado && ativo && corpo.contains(ativo) ? ativo.dataset.k : null;
-      if (chave) queueMicrotask(() => { if (corpo.contains(document.activeElement)) return; const b = corpo.querySelector(`[data-k="${chave}"]`) || corpo.querySelector('button:not([disabled])'); try { if (b) b.focus({ preventScroll: true }); } catch { /* sem foco */ } });
+      if (chave) queueMicrotask(() => {
+        if (corpo.contains(document.activeElement)) return;
+        const todos = [...corpo.querySelectorAll('button')], i = todos.findIndex((x) => x.dataset.k === chave);
+        const b = i >= 0 && !todos[i].disabled ? todos[i] : todos.slice(Math.max(0, i + 1)).find((x) => !x.disabled) || todos.find((x) => !x.disabled);
+        try { if (b) b.focus({ preventScroll: true }); } catch { /* sem foco */ }
+      });
       corpo.textContent = '';
       if (cab) cab.textContent = def.nome;
       ctx.saldo.textContent = '';

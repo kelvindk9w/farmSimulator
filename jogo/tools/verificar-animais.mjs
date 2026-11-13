@@ -416,7 +416,7 @@ async function cenario(a, f) {
   await ateParar();
   await fecharTelas();
   igual(await A('cesto', 'la'), 3, 'a lã das três ovelhas vai para o cesto');
-  igual(await A('missao'), 'barril', 'três tosquias cumprem a missão das ovelhas');
+  confere(await J(() => window.__jogo.mundo.missoes.feitas.includes('ovelhas')), 'três tosquias cumprem a missão das ovelhas');
   await J(([x, z]) => window.__jogo.olhar(x, z), [apr.x + 2.5, apr.z + 2]);
   await J(() => window.__jogo.avancar(0)); await quadro(500);
   const peladas = await J(() => window.__bichos().filter((b) => b.especie === 'ovelha'));
