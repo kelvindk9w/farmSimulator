@@ -1,6 +1,6 @@
 {
   "ouro": {
-    "nota": "A loja de ouro vende tudo de itens.json que tem \"compra\", mais animais, construções e lotes (cada um no seu arquivo). Nas ferramentas, mostra só o próximo degrau de cada função.",
+    "nota": "A loja de ouro vende tudo de itens.json que tem \"compra\", mais animais, construções e lotes (cada um no seu arquivo). Nas ferramentas, mostra só o próximo degrau de cada função. Preço fixo: enfeite repetido (cerca, caminho) não encarece a cada unidade.",
     "abas": [
       { "id": "sementes", "nome": "Sementes e mudas", "tipos": ["semente", "muda"] },
       { "id": "ferramentas", "nome": "Ferramentas", "tipos": ["ferramenta", "recipiente"], "soProximoDegrau": true },
@@ -14,7 +14,7 @@
     "fora": []
   },
   "cash": {
-    "nota": "Cash compra tempo, cosmético, animal especial de estimação e vaga de fila. Nunca compra ouro, produção, ferramenta melhor, conserto nem espaço. Na versão de teste a compra é simulada e avisada na tela.",
+    "nota": "Cash compra tempo, cosmético, animal especial de estimação e vaga de fila (que também se compra com ouro). Nada de útil é exclusivo do cash. Nunca compra ouro, produção, ferramenta melhor, conserto, espaço nem fôlego. Sem sorteio pago e sem anúncio forçado. Na versão de teste a compra é simulada e avisada na tela.",
     "compraSimulada": true,
     "cashPorReal": 10,
     "pacotes": [
@@ -27,8 +27,7 @@
     ],
     "ofertas": [
       { "id": "concluir-relogio", "nome": "Concluir na hora", "tipo": "tempo", "cash": null, "nota": "preço pela fórmula de regras.concluir; vale para obra, fila de indústria e muda crescendo" },
-      { "id": "vaga-4", "nome": "Quarta vaga na fila", "tipo": "vaga", "cash": 30, "fila": 4, "gratisCom": { "produzidos": 200 }, "nota": "por indústria; sai de graça depois de 200 itens feitos nela" },
-      { "id": "vaga-5", "nome": "Quinta vaga na fila", "tipo": "vaga", "cash": 60, "fila": 5, "gratisCom": { "produzidos": 1000 }, "nota": "por indústria; sai de graça depois de 1.000 itens feitos nela" },
+      { "id": "vaga-de-fila", "nome": "Vaga na fila", "tipo": "vaga", "cash": null, "nota": "cada vaga de fila de indústria (3ª, 4ª e 5ª) se compra com ouro ou com cash; os dois preços estão na ampliação da construção, em construcoes.json (campos \"custo.ouro\" e \"cash\")" },
       { "id": "bone-vermelho", "nome": "Boné vermelho", "tipo": "cosmetico", "cash": 30, "item": "bone-vermelho" },
       { "id": "chapeu-de-couro", "nome": "Chapéu de couro", "tipo": "cosmetico", "cash": 80, "item": "chapeu-de-couro" },
       { "id": "macacao-jeans", "nome": "Macacão jeans", "tipo": "cosmetico", "cash": 120, "item": "macacao-jeans" },

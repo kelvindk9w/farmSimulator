@@ -1,0 +1,25 @@
+{
+  "escala": 128,
+  "pecas": {
+    "ui/bau-aberto": { "arquivo": "interface/bau-aberto.png", "quadros": 1, "casa": [268, 280], "apoio": [134, 272], "ancora": "pe" },
+    "ui/bau-fechado": { "arquivo": "interface/bau-fechado.png", "quadros": 1, "casa": [252, 226], "apoio": [126, 218], "ancora": "pe" },
+    "ui/cadeado": { "arquivo": "interface/cadeado.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/config": { "arquivo": "interface/config.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/enxada": { "arquivo": "interface/enxada.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/fechar": { "arquivo": "interface/fechar.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/loja": { "arquivo": "interface/loja.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/mao": { "arquivo": "interface/mao.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/missoes": { "arquivo": "interface/missoes.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/mochila": { "arquivo": "interface/mochila.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/pedidos": { "arquivo": "interface/pedidos.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/presente": { "arquivo": "interface/presente.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/regar": { "arquivo": "interface/regar.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/relogio": { "arquivo": "interface/relogio.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/semear": { "arquivo": "interface/semear.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/seta": { "arquivo": "interface/seta.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/som": { "arquivo": "interface/som.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/subida-de-nivel": { "arquivo": "interface/subida-de-nivel.png", "quadros": 1, "casa": [528, 278], "apoio": [264, 270], "ancora": "pe" },
+    "ui/tela-cheia": { "arquivo": "interface/tela-cheia.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/trofeu": { "arquivo": "interface/trofeu.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] }
+  }
+}

@@ -202,6 +202,113 @@ for (const vista of ['frente', 'costas']) {
   });
 }
 
+// ---------- personagem: trato e ofícios ----------
+for (const vista of ['frente', 'costas']) {
+  const fmt = vista === 'costas' ? (n) => [`- \`referencias/${n}-frente.png\`: a folha de animação já pronta da mesma ação vista de frente (dá o formato da folha, o tamanho e o jeito do movimento; aqui a personagem é vista de costas).`] : () => [];
+  pedidos[`personagem-alimentar-${vista}`] = acao({
+    arquivo: `alimentar-${vista}.png`, titulo: 'JOGANDO MILHO PARA AS GALINHAS', uso: 'quando ela trata dos bichos', vista, n: 6, refs: fmt('alimentar'),
+    ferramenta: 'o BALDE de metal da folha de ferramentas, seguro pela alça na mão esquerda, ao lado do corpo, na altura do quadril.',
+    quadros: [
+      'PEGA: em pé, o balde na mão esquerda ao lado do corpo; a mão direita entra no balde. Ela olha para o balde.',
+      'ARMA: tira a mão direita fechada, cheia, e leva o braço para trás e para o lado; o tronco gira para trás, o peso vai para a perna de trás (antecipação).',
+      'LANÇA: o braço direito varre para a frente num arco largo; o tronco gira para a frente, o peso passa para a perna da frente.',
+      'SOLTA: o braço direito esticado à frente, a mão aberta com os dedos espalhados; o corpo inclinado para a frente. É o ponto de maior alcance.',
+      'SEGUE: o braço continua o arco e desce para o outro lado, mão aberta; ela sorri olhando para onde jogou.',
+      'VOLTA: o corpo endireita e a mão direita volta para o balde. Emenda no quadro 1.',
+    ],
+    vivo: 'Gesto largo de semeador: arma para trás, varre para a frente com o corpo todo e segue o movimento. O balde balança um pouco na outra mão.',
+    semObjeto: 'NÃO desenhe milho, grãos, pontinhos voando nem galinhas: o jogo faz os grãos. Só a personagem e o balde.',
+  });
+  pedidos[`personagem-martelar-${vista}`] = acao({
+    arquivo: `martelar-${vista}.png`, titulo: 'MARTELANDO', uso: 'quando ela constrói ou conserta alguma coisa na bancada', vista, n: 6, refs: fmt('martelar'),
+    ferramenta: 'o MARTELO da folha de ferramentas (cabo curto de madeira, cabeça de ferro), na mão direita.',
+    quadros: [
+      'APONTA: em pé, joelhos soltos, o tronco um pouco inclinado; a mão esquerda à frente, na altura da cintura, como quem segura um prego numa peça que não aparece; o martelo encostado perto da mão esquerda.',
+      'ERGUE: o martelo sobe até a altura do ombro; o corpo se estica um pouco.',
+      'TOPO: o martelo acima da cabeça, cotovelo dobrado, braço armado. É a antecipação.',
+      'DESCE: o martelo desce depressa; o tronco acompanha para a frente.',
+      'BATE: o martelo bate à frente dela, na altura da cintura, logo ao lado da mão esquerda; ombros para baixo, joelhos dobrados. É o ponto mais BAIXO.',
+      'QUICA: o martelo volta um palmo para cima com o tranco; o corpo sobe um pouco. Emenda no quadro 1.',
+    ],
+    vivo: 'Batida seca, com peso: arma no alto, desce com o ombro e o tronco, e o martelo quica depois de bater.',
+    semObjeto: 'NÃO desenhe prego, tábua, bancada, estrelinhas nem faíscas: só a personagem e o martelo. O que ela martela fica à frente dela, na altura da cintura, e é desenhado pelo jogo.',
+  });
+  pedidos[`personagem-colher-fruta-${vista}`] = acao({
+    arquivo: `colher-fruta-${vista}.png`, titulo: 'COLHENDO UMA FRUTA NO ALTO', uso: 'quando ela apanha fruta de uma árvore', vista, n: 6, refs: fmt('colher-fruta'),
+    quadros: [
+      'OLHA: em pé, a cabeça erguida olhando para cima e para a frente; o braço direito começa a subir.',
+      'ESTICA: o braço direito sobe esticado para o alto e para a frente; ela sobe na ponta dos pés; o braço esquerdo abre para equilibrar.',
+      'ALCANÇA: na ponta dos pés, o corpo todo esticado, a mão direita aberta no ponto mais alto, bem acima da cabeça. É o ponto mais ALTO do corpo.',
+      'APANHA: a mão direita fecha lá no alto (segura a fruta, que não aparece) e dá uma torcida; ela ainda na ponta dos pés.',
+      'DESCE: os calcanhares voltam ao chão, os joelhos dobram de leve; a mão fechada desce até a frente do peito e ela olha para a mão, contente.',
+      'GUARDA: leva a mão para o lado do quadril, como quem põe no cesto, e solta o braço. Emenda no quadro 1.',
+    ],
+    vivo: 'Ela se estica de verdade (ponta dos pés, braço e corpo numa linha só) e depois relaxa. Os pés não saem do lugar.',
+    semObjeto: 'A mão está VAZIA: NÃO desenhe fruta, galho, folha, árvore nem cesto. O jogo desenha a árvore e a fruta.',
+  });
+  pedidos[`personagem-machado-${vista}`] = acao({
+    arquivo: `machado-${vista}.png`, titulo: 'CORTANDO COM O MACHADO', uso: 'quando ela corta um toco ou uma árvore para limpar o terreno', vista, n: 6, refs: fmt('machado'),
+    ferramenta: 'o MACHADO da folha de ferramentas (cabo de madeira, lâmina de ferro em cunha), seguro com as DUAS MÃOS.',
+    quadros: [
+      'PREPARA: em pé, pernas afastadas, um pé à frente; o machado atravessado na frente do corpo, nas duas mãos.',
+      'ERGUE: leva o machado para trás e para cima, por cima do ombro; o tronco gira para trás, o peso vai para a perna de trás.',
+      'TOPO: o machado no alto, atrás da cabeça, braços dobrados, corpo esticado e torcido. É a antecipação.',
+      'GOLPE: o machado desce na diagonal, depressa; o tronco gira e dobra para a frente, o peso passa para a perna da frente.',
+      'CRAVA: a lâmina bate embaixo, à frente dela, na altura dos joelhos (num toco que não aparece); braços esticados, joelhos dobrados. É o ponto mais BAIXO.',
+      'ARRANCA: ela puxa o machado de volta com um tranco e começa a endireitar o corpo. Emenda no quadro 1.',
+    ],
+    vivo: 'Golpe forte, de corpo inteiro: torce para trás, desce na diagonal com o peso do corpo e arranca o machado de volta.',
+    semObjeto: 'NÃO desenhe toco, tronco, árvore, lascas nem cavacos: só a personagem e o machado.',
+  });
+  pedidos[`personagem-picareta-${vista}`] = acao({
+    arquivo: `picareta-${vista}.png`, titulo: 'QUEBRANDO PEDRA COM A PICARETA', uso: 'quando ela quebra uma pedra para limpar o terreno', vista, n: 6, refs: fmt('picareta'),
+    ferramenta: 'a PICARETA da folha de ferramentas (cabo de madeira, ferro curvo com duas pontas), segura com as DUAS MÃOS.',
+    quadros: [
+      'PREPARA: em pé, pernas bem afastadas; a picareta atravessada na frente do corpo, nas duas mãos, com o ferro na altura da cintura.',
+      'ERGUE: levanta a picareta por cima da cabeça; o corpo se estica e inclina para trás.',
+      'TOPO: a picareta no ponto mais alto, braços esticados para cima, ferro atrás da cabeça. É a antecipação.',
+      'GOLPE: a picareta desce reta e depressa; o tronco dobra para a frente, os joelhos dobram.',
+      'BATE: a ponta bate no chão logo à frente dos pés (numa pedra que não aparece); tronco bem inclinado, braços esticados para baixo. É o ponto mais BAIXO.',
+      'TRANCO: a picareta quica um palmo para cima com o tranco; ela começa a endireitar o corpo. Emenda no quadro 1.',
+    ],
+    vivo: 'Golpe pesado, de cima para baixo: estica o corpo todo para trás, desce com tudo e a picareta quica na pedra.',
+    semObjeto: 'NÃO desenhe pedra, lascas, faíscas nem poeira: só a personagem e a picareta.',
+  });
+}
+
+// ---------- personagem: ordenha (sentada no banquinho; nasce da folha de modelo da interação) ----------
+for (const vista of ['frente', 'costas']) {
+  const n = 6;
+  pedidos[`personagem-ordenhar-${vista}`] = `${CABECA}
+${P_MODELO}
+${P_FERRAMENTAS.replace('A ferramenta deste pedido tem', 'O balde de leite e o banquinho de ordenha têm').replace('igual à da folha', 'iguais aos da folha')}
+- \`referencias/ordenha.png\`: a FOLHA DE MODELO DA ORDENHA (a personagem sentada no banquinho ordenhando a vaca, vista por trás dela, pela frente dela, e a pose dela sozinha). Ela manda na pose, na posição do banquinho e do balde.
+${vista === 'costas' ? '- `referencias/ordenhar-frente.png`: a folha de animação já pronta da mesma ação vista de frente (dá o formato da folha, o tamanho e o jeito do movimento; aqui a personagem é vista de costas).\n' : ''}
+Preciso da folha de animação da MESMA personagem ORDENHANDO, sentada no banquinho, vista ${vista === 'frente' ? 'de FRENTE' : 'de COSTAS'} três quartos, para usar como figura 2D animada dentro do jogo. A VACA NÃO APARECE nesta folha: o jogo desenha a vaca à parte, ${vista === 'frente' ? 'na frente dela' : 'atrás dela'}.
+
+Gere uma imagem e salve na pasta atual como \`ordenhar-${vista}.png\`:
+
+- Uma única fileira horizontal com ${n + 1} figuras, da esquerda para a direita:
+  - Figura 1 (referência de tamanho): ela PARADA EM PÉ, igual à folha de modelo, pés juntos, braços soltos, mãos vazias, sem banquinho e sem balde.
+  - Figuras 2 a ${n + 1}: os ${n} quadros da ordenha. Em todos ela está SENTADA no banquinho de três pés, joelhos dobrados e abertos, os dois pés no chão, o tronco inclinado para a frente, os dois braços esticados para a frente e para baixo com as mãos fechadas (segurando as tetas, que não aparecem), e o balde de leite no chão à frente dela, entre os pés. Nesta ordem:
+    1. A mão DIREITA desce, puxando; a mão esquerda está no alto. O ombro direito desce junto.
+    2. A mão direita no ponto mais BAIXO, quase na boca do balde; o tronco balança para esse lado, a cabeça inclina.
+    3. A mão direita sobe de volta; a mão ESQUERDA começa a descer. O tronco volta ao meio.
+    4. A mão ESQUERDA desce, puxando; a mão direita está no alto. O ombro esquerdo desce junto.
+    5. A mão esquerda no ponto mais BAIXO; o tronco balança para o outro lado, a cabeça inclina para lá.
+    6. A mão esquerda sobe de volta; a mão direita começa a descer. Emenda no quadro 1.
+- Movimento ritmado e vivo: as mãos sobem e descem alternadas, uma de cada vez; os ombros acompanham, o tronco balança de um lado para o outro, a cabeça segue as mãos, as pontas do lenço balançam.
+- Em todas as figuras ela é vista pela mesma câmera da cena (isométrica, de cima), ${P_VISTA[vista]}. ${vista === 'frente' ? 'É a terceira pose da folha de modelo da ordenha (ela sozinha, de frente).' : 'É como no primeiro desenho da folha de modelo da ordenha (visto por trás dela), mas SEM a vaca: o corpo dela esconde parte dos braços e do balde; aparecem os cotovelos subindo e descendo e as bordas do balde entre as pernas.'}
+- Nos ${n} quadros da ordenha o BANQUINHO, o BALDE e os dois PÉS ficam exatamente no MESMO LUGAR; só os braços, os ombros, o tronco e a cabeça se mexem.
+- As ${n + 1} figuras na MESMA escala (a cabeça tem o mesmo tamanho em todas), os pés na mesma linha de base, igualmente espaçadas, cada uma centrada numa casa de mesma largura, com um vão vazio entre uma e outra (nenhuma encosta na vizinha).
+- ${P_MESMA}
+- O BANQUINHO DE ORDENHA (madeira, redondo, três pés, da altura da canela dela) e o BALDE DE LEITE (metal cinza-claro, com alça de arame, da altura do joelho dela) são os da folha de ferramentas, inteiros e do mesmo tamanho em todos os quadros da ordenha.
+- NÃO desenhe a vaca, nem úbere, nem tetas, nem leite, nem jatos, nem gotas: só a personagem, o banquinho e o balde.
+- ${LIMPO}
+${FIM}
+`;
+}
+
 // ---------- bichos ----------
 
 const B_VISTA = {
@@ -277,6 +384,7 @@ for (const vista of ['frente', 'costas']) {
     vivo: 'Movimento vivo: o corpo inteiro tomba para a frente na bicada (cabeça embaixo, rabo em cima) e volta.',
     semObjeto: 'NÃO desenhe milho, grãos, minhoca, terra voando nem buraco: só a galinha.',
   });
+  const jeito = [`- \`referencias/parada-${vista}.png\`: a folha já pronta da mesma vaca parada, nesta mesma vista (dá o formato da folha, o tamanho e o jeito do desenho: a vaca tem de sair igual a esta).`];
   pedidos[`vaca-parada-${vista}`] = bicho({
     ...VACA, arquivo: `parada-${vista}.png`, titulo: 'PARADA, ruminando', vista, n: 4, plantado: true,
     quadros: [
@@ -288,11 +396,11 @@ for (const vista of ['frente', 'costas']) {
     vivo: 'É uma vaca calma, mas viva: mastiga, pisca, abana as orelhas e o rabo, a barriga respira. As quatro patas ficam plantadas e o corpo não sai do lugar.',
   });
   pedidos[`vaca-andar-${vista}`] = bicho({
-    ...VACA, arquivo: `andar-${vista}.png`, titulo: 'ANDANDO', vista, n: 8, quadros: ANDAR4(), refs: fmt('vaca', 'andar'),
+    ...VACA, arquivo: `andar-${vista}.png`, titulo: 'ANDANDO', vista, n: 8, quadros: ANDAR4(), refs: [...jeito, ...fmt('vaca', 'andar')],
     vivo: 'Andar pesado e calmo de vaca: as patas em diagonal andam juntas, a cabeça balança para cima e para baixo a cada passo, o lombo sobe e desce de leve, o rabo balança de um lado para o outro, o úbere balança.',
   });
   pedidos[`vaca-pastar-${vista}`] = bicho({
-    ...VACA, arquivo: `pastar-${vista}.png`, titulo: 'PASTANDO', vista, n: 6, plantado: true, refs: fmt('vaca', 'pastar'),
+    ...VACA, arquivo: `pastar-${vista}.png`, titulo: 'PASTANDO', vista, n: 6, plantado: true, refs: [...jeito, ...fmt('vaca', 'pastar')],
     quadros: [
       'COMEÇA: em pé, a cabeça começa a descer, o pescoço se estica para a frente e para baixo.',
       'DESCE: a cabeça na altura dos joelhos, o focinho apontando para o chão.',

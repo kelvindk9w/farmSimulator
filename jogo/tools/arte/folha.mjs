@@ -33,6 +33,8 @@
 //                         referência ou, sem ela, na mediana dos quadros. Na personagem a cor é o vermelho do lenço e o alvo
 //                         vem da folha de modelo: 47.5 de frente e 48.7 de costas. A escala final é a média geométrica entre
 //                         a da altura e a da cor (--peso-cor 0.5), para nem a altura nem a cabeça destoarem entre folhas.
+//   --tamanho-massa t     bichos: a escala sai da área de tinta da figura (raiz da área, em pontos de saída), que quase não
+//                         muda com a pose; o alvo é o valor medido na folha da figura parada (linha "tamanho pela massa")
 //   --ajuste f            multiplica a escala (acerto fino depois de comparar com outra folha)
 //   --altura-livre        a altura muda de propósito (agachar, erguer a ferramenta): a variação é só informada
 //   --soltas juntar|apagar  peças soltas da figura (padrão juntar ao quadro mais próximo; ciscos sempre saem)
@@ -307,6 +309,11 @@ async function principal() {
     esc = (emPe / emPeFonte) ** (1 - peso) * (Number(o['tamanho-cor']) / med) ** peso; emPeReal = emPeFonte * esc;
     if (peso < 1 && Math.abs(Number(o['tamanho-cor']) / med / (emPe / emPeFonte) - 1) > 0.08) avisos.push(`a proporção entre cabeça e corpo difere ${(Math.abs(Number(o['tamanho-cor']) / med / (emPe / emPeFonte) - 1) * 100).toFixed(0)}% da folha de modelo`);
   }
+  const massa = (f) => { let n = 0; for (let i = 3; i < f.px.length; i += 4) if (f.px[i] > 128) n++; return Math.sqrt(n); };
+  if (o['tamanho-massa']) { // bichos: a escala sai da área de tinta (raiz, em pontos de saída), que quase não muda com a pose
+    const m = (ref ? [ref] : quadros).map(massa).sort((a, b) => a - b);
+    esc = Number(o['tamanho-massa']) / m[m.length >> 1]; emPeReal = emPeFonte * esc;
+  }
   esc *= Number(o.ajuste || 1);
   if (esc > 1.02) avisos.push(`a folha crua é menor que a saída (figura em pé com ${emPeFonte.toFixed(0)} pontos para ${emPe}): a figura foi ampliada ${esc.toFixed(2)} vezes`);
 
@@ -429,7 +436,7 @@ async function principal() {
   const medidas = {
     chave: o.chave, crua: path.basename(crua), cruaTamanho: [W, H], linhasNaCrua: nLinhas, figurasNaCrua: recortes.length, referencia: !!ref, modo,
     emPe, emPeReal: Math.round(emPeReal), emPeFonte: Math.round(emPeFonte), escala: Number(esc.toFixed(4)), casa: [cw, ch], apoio, quadros: seq.length, desenhos: n, qps: entrada.qps, laco: entrada.laco,
-    alturas: alturas.map((a) => Math.round(a)), variacaoAltura: Number((varAlt * 100).toFixed(1)), tamanhoPelaCor: tamCor ? tamCor.map((t) => Number(t.toFixed(1))) : undefined,
+    alturas: alturas.map((a) => Math.round(a)), tamanhoPelaMassa: quadros.map((f) => Number((massa(f) * esc).toFixed(1))), variacaoAltura: Number((varAlt * 100).toFixed(1)), tamanhoPelaCor: tamCor ? tamCor.map((t) => Number(t.toFixed(1))) : undefined,
     custosDoMolde: custos.length ? custos : undefined, bytes: folha.length, avisos, falhas, ok,
     opcoes: Object.fromEntries(Object.entries(o).filter(([k]) => k !== '_' && k !== 'ensaio')),
   };
@@ -443,6 +450,7 @@ async function principal() {
   console.log(`  figura em pé: ${emPeFonte.toFixed(0)} pontos na crua -> ${(emPeFonte * esc).toFixed(0)} (escala ${esc.toFixed(3)}); casa ${cw}x${ch}; apoio ${apoio.join(',')}; ${seq.length} quadro(s) de ${n} desenho(s); ${(folha.length / 1024).toFixed(0)} KB`);
   console.log(`  alturas: ${alturas.map((a) => a.toFixed(0)).join(' ')} (variação ${(varAlt * 100).toFixed(1)}%)`);
   if (tamCor) console.log(`  tamanho pela cor: ${tamCor.map((t) => t.toFixed(1)).join(' ')}`);
+  console.log(`  tamanho pela massa: ${quadros.map((f) => (massa(f) * esc).toFixed(1)).join(' ')}`);
   if (custos.length) console.log(`  custos do molde: ${custos.join(' ')}`);
   for (const a of avisos) console.log(`  AVISO: ${a}`);
   for (const f of falhas) console.log(`  FALHA: ${f}`);

@@ -10,8 +10,7 @@
     "testar": "node --test \"testes/*.test.mjs\"",
     "verificar": "node tools/verificar.mjs",
     "bot": "node tools/bot.mjs",
-    "servir": "node tools/servir.mjs dist 8091",
-    "capturas": "node tools/capturar.mjs",
+    "servir": "node tools/servir.mjs",
     "validar": "node tools/validar.mjs"
   },
   "devDependencies": {

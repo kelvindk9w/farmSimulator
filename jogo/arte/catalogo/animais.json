@@ -1,0 +1,17 @@
+{
+  "escala": 128,
+  "pecas": {
+    "animal/galinha/andar-costas": { "arquivo": "animais/galinha/andar-costas.png", "quadros": 6, "casa": [112, 152], "apoio": [56, 134], "qps": 9, "laco": true },
+    "animal/galinha/andar-frente": { "arquivo": "animais/galinha/andar-frente.png", "quadros": 6, "casa": [120, 152], "apoio": [60, 134], "qps": 9, "laco": true },
+    "animal/galinha/ciscar-costas": { "arquivo": "animais/galinha/ciscar-costas.png", "quadros": 6, "casa": [152, 152], "apoio": [76, 134], "qps": 7, "laco": true },
+    "animal/galinha/ciscar-frente": { "arquivo": "animais/galinha/ciscar-frente.png", "quadros": 6, "casa": [144, 152], "apoio": [72, 134], "qps": 7, "laco": true },
+    "animal/galinha/parada-costas": { "arquivo": "animais/galinha/parada-costas.png", "quadros": 8, "casa": [112, 160], "apoio": [56, 142], "qps": 4, "laco": true },
+    "animal/galinha/parada-frente": { "arquivo": "animais/galinha/parada-frente.png", "quadros": 8, "casa": [128, 160], "apoio": [64, 142], "qps": 4, "laco": true },
+    "animal/vaca/andar-costas": { "arquivo": "animais/vaca/andar-costas.png", "quadros": 8, "casa": [312, 336], "apoio": [156, 297], "qps": 8, "laco": true },
+    "animal/vaca/andar-frente": { "arquivo": "animais/vaca/andar-frente.png", "quadros": 8, "casa": [320, 320], "apoio": [160, 283], "qps": 8, "laco": true },
+    "animal/vaca/parada-costas": { "arquivo": "animais/vaca/parada-costas.png", "quadros": 8, "casa": [312, 320], "apoio": [156, 281], "qps": 4, "laco": true },
+    "animal/vaca/parada-frente": { "arquivo": "animais/vaca/parada-frente.png", "quadros": 8, "casa": [336, 304], "apoio": [168, 267], "qps": 4, "laco": true },
+    "animal/vaca/pastar-costas": { "arquivo": "animais/vaca/pastar-costas.png", "quadros": 6, "casa": [344, 320], "apoio": [172, 281], "qps": 6, "laco": true },
+    "animal/vaca/pastar-frente": { "arquivo": "animais/vaca/pastar-frente.png", "quadros": 6, "casa": [384, 304], "apoio": [192, 256], "qps": 6, "laco": true }
+  }
+}

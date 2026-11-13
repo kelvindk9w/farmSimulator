@@ -6,7 +6,7 @@ import { ferramentaNoCinto, ferramentaNoSuporte } from './posses.js';
 const regador = (m) => ferramentaNoCinto(m, 'regador') || ferramentaNoSuporte(m, 'regador');
 
 registrarAcao({
-  id: 'encher', ferramenta: 'regador', dur: 1.5, efeitoEm: 1.1, estadoVisual: 'encher',
+  id: 'encher', ferramenta: 'regador', dur: 1.5, efeitoEm: 1.1, estadoVisual: 'manivela',
   pode(m) {
     const id = regador(m);
     if (!id) return { ok: false, motivo: 'sem-ferramenta', dados: { funcao: 'regador' } };

@@ -5,7 +5,7 @@
   "semente-milho": { "nome": "Semente de milho", "tipo": "semente", "compra": 5, "nivel": 2 },
   "enxada": { "nome": "Enxada", "tipo": "ferramenta", "nivel": 1 },
   "regador": { "nome": "Regador", "tipo": "ferramenta", "capacidade": 3, "nivel": 1 },
-  "regador-grande": { "nome": "Regador grande", "tipo": "ferramenta", "capacidade": 8, "compra": 30, "nivel": 2 },
+  "regador-grande": { "nome": "Regador grande", "tipo": "ferramenta", "degrau": 2, "capacidade": 8, "compra": 30, "nivel": 2 },
   "cesto": { "nome": "Cesto", "tipo": "recipiente", "capacidade": 6 },
-  "cesto-grande": { "nome": "Cesto grande", "tipo": "recipiente", "capacidade": 12, "compra": 25, "nivel": 1 }
+  "cesto-grande": { "nome": "Cesto grande", "tipo": "recipiente", "degrau": 2, "capacidade": 12, "compra": 25, "nivel": 1 }
 }

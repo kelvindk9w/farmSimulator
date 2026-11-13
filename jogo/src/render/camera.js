@@ -19,12 +19,15 @@ export class Camera {
     this.mexeuNoZoom = false;
   }
 
-  // tela mudou de tamanho: recalcula o zoom padrão (a personagem ocupa perto de um quarto da altura no celular)
+  // tela mudou de tamanho: recalcula o zoom padrão
   ajustar(w, h, dpr) {
     const antes = this.base;
     this.w = w; this.h = h; this.dpr = dpr;
-    this.base = limitar(Math.min(w, h * 1.75) / 13.5, 40, 100);
-    this.minE = this.base * 0.42; this.maxE = this.base * 2.3;
+    // zoom padrão: mundo grande à vista. No computador a personagem fica com uns 14% da altura da tela;
+    // no celular deitado, uns 21% (ela tem 2,33 unidades de altura no desenho). O jogador aproxima se quiser.
+    const pelaAltura = h >= 720 ? h * 0.06 : 34 + (h - 390) * (9 / 330);
+    this.base = limitar(Math.min(pelaAltura, w / 13), 28, 110);
+    this.minE = this.base * 0.55; this.maxE = this.base * 2.8;
     if (!this.mexeuNoZoom) this.E = this.alvoE = this.base; else { const k = this.base / antes; this.E = limitar(this.E * k, this.minE, this.maxE); this.alvoE = limitar(this.alvoE * k, this.minE, this.maxE); }
     this.preparar();
   }

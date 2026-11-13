@@ -70,9 +70,9 @@ function custo(arq, onde, c) {
 function recompensa(arq, onde, r) {
   if (r === undefined) return;
   if (!obj(r)) { erro(arq, `${onde}: "recompensa" devia ser um objeto`); return; }
-  for (const k of ['ouro', 'cash', 'xp', 'ouroPorNivel', 'sementes']) if (r[k] !== undefined && !positivo(r[k])) erro(arq, `${onde}: recompensa.${k} devia ser número maior que zero`);
+  for (const k of ['ouro', 'cash', 'xp', 'ouroPorNivel']) if (r[k] !== undefined && !positivo(r[k])) erro(arq, `${onde}: recompensa.${k} devia ser número maior que zero`);
   mapaDeItens(arq, onde, r.itens, 'recompensa.itens');
-  for (const k of Object.keys(r)) if (!['ouro', 'cash', 'xp', 'ouroPorNivel', 'sementes', 'itens'].includes(k)) aviso(arq, `${onde}: recompensa com campo desconhecido "${k}"`);
+  for (const k of Object.keys(r)) if (!['ouro', 'cash', 'xp', 'ouroPorNivel', 'itens'].includes(k)) aviso(arq, `${onde}: recompensa com campo desconhecido "${k}"`);
 }
 const funcoes = () => new Set(entradas(itens).filter(([, i]) => i.tipo === 'ferramenta' || i.tipo === 'recipiente').map(([id, i]) => i.funcao || id.split('-')[0]));
 const nivelDe = (o) => (num(o && o.nivel) ? o.nivel : 1);
@@ -215,7 +215,10 @@ for (const [id, c] of entradas(construcoes)) {
     if (a.custo && num(a.custo.ouro) && a.custo.ouro <= ouroAnt) erro('construcoes', `${o2}: devia custar mais que a anterior`);
     if (a.piso) { if (pisoAnt && (a.piso[0] < pisoAnt[0] || a.piso[1] < pisoAnt[1])) erro('construcoes', `${o2}: o piso encolheu`); pisoAnt = a.piso; }
     if (a.vagas !== undefined) { if (!(a.vagas > vagasAnt)) erro('construcoes', `${o2}: as vagas (${a.vagas}) deviam aumentar`); vagasAnt = a.vagas; }
-    if (a.fila !== undefined) { if (!(a.fila > filaAnt)) erro('construcoes', `${o2}: a fila (${a.fila}) devia aumentar`); filaAnt = a.fila; }
+    if (a.fila !== undefined) {
+      if (!(a.fila > filaAnt)) erro('construcoes', `${o2}: a fila (${a.fila}) devia aumentar`); filaAnt = a.fila;
+      if (!(a.custo && positivo(a.custo.ouro)) || !inteiroPos(a.cash)) erro('construcoes', `${o2}: vaga de fila tem de ter os dois preços, "custo.ouro" e "cash" (nada de útil é exclusivo do cash)`);
+    } else if (a.cash !== undefined) erro('construcoes', `${o2}: só vaga de fila pode ter preço em cash`);
     nAnt = a.nivel; ouroAnt = (a.custo && a.custo.ouro) || 0;
   });
 }
@@ -323,6 +326,9 @@ const dado = new Set(); // itens que só chegam de presente (missão, início, d
 for (const k of Object.keys((regras.inicio || {}).itens || {})) dado.add(k);
 for (const k of [(regras.inicio || {}).cesto, ...((regras.inicio || {}).cinto || []), ...((regras.inicio || {}).suporte || [])]) if (k) dado.add(k);
 for (const mi of missoes.vizinho || []) { for (const k of Object.keys((mi.recompensa || {}).itens || {})) dado.add(k); }
+for (const r of Object.values(niveis.recompensas || {})) for (const k of Object.keys((r && r.itens) || {})) dado.add(k);
+for (const d of (missoes.diaria || {}).dias || []) for (const r of [d.recompensa, d.primeiraVolta]) for (const k of Object.keys((r && r.itens) || {})) dado.add(k);
+for (const c of missoes.conquistas || []) for (const r of c.recompensas || []) for (const k of Object.keys((r && r.itens) || {})) dado.add(k);
 const usado = new Set();
 for (const k of Object.keys(entraEmReceita)) usado.add(k);
 for (const [, a] of entradas(animais)) { for (const k of Object.keys(a.come || {})) usado.add(k); for (const k of a.exige || []) usado.add(k); }
@@ -593,11 +599,25 @@ const encosta = (a, b) => (a[0] <= b[2] && b[0] <= a[2] && a[1] < b[3] && b[1] <
   const dias = (missoes.diaria || {}).dias;
   if (!Array.isArray(dias) || dias.length !== 7) erro('missoes', 'a diária tem de ter 7 dias');
   else dias.forEach((d, k) => { if (d.dia !== k + 1) erro('missoes', `diária: o dia ${k + 1} está marcado como ${d.dia}`); if (!obj(d.recompensa) || !Object.keys(d.recompensa).length) erro('missoes', `diária, dia ${k + 1}: sem recompensa`); recompensa('missoes', `diária, dia ${k + 1}`, d.recompensa); if (d.primeiraVolta) recompensa('missoes', `diária, dia ${k + 1}, primeira volta`, d.primeiraVolta); });
+  if (Array.isArray(dias)) for (const d of dias) for (const r of [d.recompensa, d.primeiraVolta]) for (const k of Object.keys((r && r.itens) || {})) if (itens[k] && ['semente', 'muda', 'colheita', 'produto', 'racao'].includes(itens[k].tipo)) erro('missoes', `diária, dia ${d.dia}: "${k}" sai da lavoura; o presente da diária é material de obra, ouro, cash ou cosmético`);
+  if ((missoes.diaria || {}).zeraAoFaltar !== false) erro('missoes', 'diária: "zeraAoFaltar" tem de ser false (quem falta um dia continua de onde parou)');
   const cv = missoes.convite;
   if (!obj(cv)) erro('missoes', 'falta "convite"');
   else { recompensa('missoes', 'convite', cv.recompensaPorAmigo); recompensa('missoes', 'convite (convidado)', cv.convidado); campo('missoes', 'convite', cv, 'limite', inteiroPos, 'um inteiro'); campo('missoes', 'convite', cv, 'amigoChegaAoNivel', inteiroPos, 'um inteiro'); }
   const cp = missoes.compartilhar;
-  if (!obj(cp)) erro('missoes', 'falta "compartilhar"'); else recompensa('missoes', 'compartilhar', cp.recompensa);
+  if (!obj(cp)) erro('missoes', 'falta "compartilhar"');
+  else {
+    recompensa('missoes', 'compartilhar', cp.recompensa);
+    if (typeof cp.ligado !== 'boolean') erro('missoes', 'compartilhar: falta a chave "ligado" (true ou false)');
+    if (cp.limitePorDia !== 1) erro('missoes', 'compartilhar: "limitePorDia" tem de ser 1');
+    for (const k of Object.keys(cp.recompensa || {})) if (!['ouro', 'ouroPorNivel'].includes(k)) erro('missoes', `compartilhar: o agrado é só em ouro (achei "${k}")`);
+  }
+  if (obj(cv) && typeof cv.ligado !== 'boolean') erro('missoes', 'convite: falta a chave "ligado" (true ou false)');
+  // nenhuma missão manda gastar cash
+  for (const mi of viz) { const f = (mi.objetivo || {}).filtro || {}; if ((mi.objetivo || {}).evento !== 'comprou') continue;
+    for (const v of [].concat(f.item || [])) if (itens[v] && !(itens[v].compra > 0)) erro('missoes', `missão "${mi.id}": manda comprar "${v}", que não se vende por ouro`);
+    for (const v of [].concat(f.animal || [])) if (animais[v] && !(animais[v].preco || {}).ouro) erro('missoes', `missão "${mi.id}": manda comprar "${v}", que só se vende por cash`);
+  }
   if (!obj(missoes.quem) || !txt(missoes.quem.nome)) erro('missoes', 'falta "quem": { nome } (o vizinho)');
 }
 
@@ -629,7 +649,8 @@ const encosta = (a, b) => (a[0] <= b[2] && b[0] <= a[2] && a[1] < b[3] && b[1] <
       if (idsO.has(of.id)) erro('loja', `${onde}: id repetido`); idsO.add(of.id);
       campo('loja', onde, of, 'nome', txt, 'um texto');
       if (!TIPOS_OFERTA.includes(of.tipo)) erro('loja', `${onde}: tipo "${of.tipo}" não existe (use ${TIPOS_OFERTA.join(', ')})`);
-      if (of.tipo !== 'tempo' && !inteiroPos(of.cash)) erro('loja', `${onde}: precisa de "cash" (inteiro maior que zero)`);
+      if (of.tipo !== 'tempo' && of.tipo !== 'vaga' && !inteiroPos(of.cash)) erro('loja', `${onde}: precisa de "cash" (inteiro maior que zero)`);
+      if (of.tipo === 'vaga' && !entradas(construcoes).some(([, co]) => (co.ampliacoes || []).some((a) => a.fila && inteiroPos(a.cash)))) erro('loja', `${onde}: nenhuma ampliação de fila tem preço em cash em construcoes.json`);
       if (of.item) { const it = itens[of.item]; if (!it) erro('loja', `${onde}: o item "${of.item}" não existe`); else if (it.tipo !== 'cosmetico') erro('loja', `${onde}: cash só compra item cosmético, e "${of.item}" é ${it.tipo}`); }
       if (of.construcao) { const co = construcoes[of.construcao]; if (!co) erro('loja', `${onde}: a construção "${of.construcao}" não existe`); else if (co.tipo !== 'decoracao') erro('loja', `${onde}: cash só compra decoração, e "${of.construcao}" é ${co.tipo}`); else if (!(co.custo && co.custo.cash === of.cash)) erro('loja', `${onde}: o preço (${of.cash}) não bate com o custo em cash da construção`); }
       if (of.animal) { const an = animais[of.animal]; if (!an) erro('loja', `${onde}: o animal "${of.animal}" não existe`); else { if (an.familia === 'producao') erro('loja', `${onde}: cash não compra animal de produção`); if (!(an.preco && an.preco.cash === of.cash)) erro('loja', `${onde}: o preço (${of.cash}) não bate com o do animal`); } }
@@ -657,6 +678,7 @@ const encosta = (a, b) => (a[0] <= b[2] && b[0] <= a[2] && a[1] < b[3] && b[1] <
   for (const k of ['andar', 'correr']) if (!positivo(pe[k])) erro('regras', `personagem.${k} devia ser maior que zero`);
   if (pe.correr <= pe.andar) erro('regras', 'correr tem de ser mais rápido que andar');
   for (const k of ['max', 'gastoPorSeg', 'recuperaAndando', 'recuperaParado']) if (!positivo(fo[k])) erro('regras', `folego.${k} devia ser maior que zero`);
+  if (fo.max / fo.recuperaAndando > 8) aviso('regras', `fôlego: leva ${Math.round(fo.max / fo.recuperaAndando)} s para encher andando; o plano pede "poucos segundos"`);
   if (!obj(regras.acoes)) erro('regras', 'falta "acoes" (segundos por ação)');
   else for (const [k, v] of Object.entries(regras.acoes)) if (!positivo(v)) erro('regras', `acoes.${k} devia ser um número de segundos maior que zero`);
   for (const k of ['arar', 'semear', 'regar', 'colher', 'encher']) if (!regras.acoes || regras.acoes[k] === undefined) erro('regras', `falta acoes.${k}`);

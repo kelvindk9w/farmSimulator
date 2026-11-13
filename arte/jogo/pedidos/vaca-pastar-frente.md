@@ -3,6 +3,7 @@ Use a sua ferramenta própria de geração de imagens. Não escreva código para
 As imagens anexas são de um jogo de fazenda original, em desenho com contorno:
 - `referencias/var-2-contorno.png`: a cena do jogo (dá o estilo e a câmera);
 - `referencias/vaca.png`: a FOLHA DE MODELO da vaca (parada de frente três quartos, de costas três quartos e de perfil). Ela manda nas proporções, nas cores e nos detalhes.
+- `referencias/parada-frente.png`: a folha já pronta da mesma vaca parada, nesta mesma vista (dá o formato da folha, o tamanho e o jeito do desenho: a vaca tem de sair igual a esta).
 
 Preciso da folha de animação da MESMA vaca PASTANDO, vista de FRENTE três quartos, para usar como figura 2D animada dentro do jogo.
 

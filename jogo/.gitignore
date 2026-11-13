@@ -1,4 +1,6 @@
 node_modules/
 dist/
+dist-*/
+capturas-*/
 capturas/tmp/
 *.tmp

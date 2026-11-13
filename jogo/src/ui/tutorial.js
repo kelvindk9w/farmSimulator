@@ -1,0 +1,108 @@
+// O vizinho (Seu Tonho): balão com retrato e a missão da vez, e a seta que aponta o próximo passo, no mundo
+// (uma casa, o poço) ou na interface (um botão de modo, a loja). O passo vem de nucleo/guia.js.
+import { el, icone, por, classe, fracao } from './dom.js';
+import { T } from './textos.js';
+import { J } from '../contexto.js';
+import { missaoAtual } from '../nucleo/sistemas/missoes.js';
+import { guiaDaMissao } from '../nucleo/guia.js';
+import { TIPOS } from '../nucleo/registro.js';
+import { painelAberto, abrirPainel } from './paineis/registro.js';
+import { subidaAberta } from './subida.js';
+
+export function criarTutorial(ui, hud) {
+  const balao = el('button', 'balao'); balao.type = 'button';
+  const quem = el('div', 'quem'), retrato = el('div', 'retrato'), nome = el('div');
+  retrato.append(icone('retrato/' + J.dados.missoes.vizinhoId, 48)); quem.append(retrato, nome);
+  const texto = el('div', 'texto'), titulo = el('b'), fala = el('div', 'fala'), anda = el('div', 'anda'), barra = el('div', 'barra'), fio = el('i'), conta = el('span');
+  barra.append(fio); anda.append(barra, conta); texto.append(titulo, fala, anda);
+  balao.append(quem, texto);
+  balao.hidden = true;
+  // tocar no balão encolhe ou abre a fala; a missão inteira está sempre no painel de missões
+  balao.addEventListener('click', () => { pequeno = !pequeno; fixo = true; });
+  ui.append(balao);
+  const seta = el('div', 'seta-ui'); seta.append(icone('ui/seta', 34)); seta.hidden = true; ui.append(seta);
+
+  let pequeno = true, fixo = false, ultima = null, relogio = 0, feitaAte = 0, aberto = 0, marcado = null, esq = false;
+  const baixa = () => J.cena.cam.h < 500; // celular deitado: o balão já nasce compacto
+  const passo = { tipo: null };
+
+  // centro de um elemento em pontos do palco (offsetLeft não se confunde com o palco girado)
+  function centro(e, out) {
+    let x = e.offsetWidth / 2, y = 0;
+    for (let n = e; n && n !== ui; n = n.offsetParent) { x += n.offsetLeft; y += n.offsetTop; }
+    out.x = x; out.y = y; out.h = e.offsetHeight;
+    return out;
+  }
+  const pt = { x: 0, y: 0, h: 0 };
+  function marcar(e) {
+    if (marcado === e) return;
+    if (marcado) marcado.classList.remove('alvo-tutorial');
+    marcado = e;
+    if (e) e.classList.add('alvo-tutorial');
+  }
+  function apontarUi(e) {
+    if (!e || e.hidden || !e.offsetParent) { seta.hidden = true; marcar(null); hud.esconderDica(false); return; }
+    marcar(e);
+    hud.esconderDica(hud.rodape.contains(e)); // a seta e a linha de dica não ficam uma em cima da outra
+    centro(e, pt);
+    const cima = pt.y < 90; // botão no alto da tela: a seta fica embaixo dele, apontando para cima
+    seta.style.transform = `translate(${Math.round(pt.x)}px, ${Math.round(cima ? pt.y + pt.h : pt.y)}px)`;
+    classe(seta, 'cima', cima);
+    seta.hidden = false;
+  }
+
+  function atualizar(dt) {
+    const m = J.mundo, a = missaoAtual(m), cena = J.cena;
+    relogio -= dt; aberto += dt;
+    if (!a) { if (!balao.hidden) balao.hidden = true; apontarUi(null); cena.seta.ligada = false; return; }
+    if (balao.hidden) balao.hidden = false;
+    // missão nova: o balão abre com a fala; depois de um tempo encolhe sozinho (a não ser que o jogador tenha mexido)
+    if (ultima !== a.missao.id) { ultima = a.missao.id; pequeno = baixa(); fixo = false; aberto = 0; relogio = 0; }
+    if (!fixo && !pequeno && aberto > 12) pequeno = true;
+    por(nome, m.dados.missoes.vizinhoNome);
+    por(titulo, a.missao.titulo);
+    por(fala, a.esperaNivel ? T.missoes.espera(a.esperaNivel) : a.missao.fala);
+    classe(balao, 'pequeno', pequeno);
+    classe(balao, 'feita', feitaAte > 0);
+    if (feitaAte > 0) feitaAte -= dt;
+    if (anda.hidden !== !!a.esperaNivel) anda.hidden = !!a.esperaNivel;
+    if (!a.esperaNivel) { fracao(fio, a.conta / a.n); por(conta, T.tutorial.progresso(Math.min(a.conta, a.n), a.n)); }
+
+    // a seta: recalcula umas vezes por segundo
+    if (relogio > 0) return;
+    relogio = 0.3;
+    cena.seta.ligada = false;
+    if (a.esperaNivel || subidaAberta()) { apontarUi(null); return; }
+    const g = guiaDaMissao(m, passo), painel = painelAberto();
+    if (painel) {
+      // com a loja aberta, a seta aponta a oferta pedida (ou a primeira que dá para comprar)
+      let alvo = null;
+      if (g.tipo === 'painel' && painel === g.painel) alvo = (g.item && ui.querySelector(`.oferta[data-item="${g.item}"] .bt`)) || ui.querySelector('.oferta:not(.travada) .bt');
+      apontarUi(alvo);
+      return;
+    }
+    if (g.tipo === 'casa') { apontarUi(null); cena.seta.ligada = true; cena.seta.x = g.x + 0.5; cena.seta.z = g.z + 0.5; cena.seta.alto = 0.9; }
+    else if (g.tipo === 'entidade') {
+      const e = m.local.porId[g.id];
+      apontarUi(null);
+      if (e) { cena.seta.ligada = true; cena.seta.x = e.x + e.l / 2; cena.seta.z = e.z + e.p / 2; cena.seta.alto = TIPOS[e.tipo].altura || 1.6 + Math.min(e.l, e.p) * 0.5; }
+    } else if (g.tipo === 'modo') apontarUi(hud.modos[g.modo]);
+    else if (g.tipo === 'semente') apontarUi(hud.sementes[g.item] || hud.modos.semear);
+    else if (g.tipo === 'painel') apontarUi(hud.paineis[g.painel]);
+    else apontarUi(null);
+    // o balão nunca fica em cima do alvo apontado no mundo: se ficaria, muda de lado
+    if (cena.seta.ligada) {
+      const cam = cena.cam, tx = cam.cssX(cena.seta.x, cena.seta.z), ty = cam.cssY(cena.seta.x, cena.seta.alto, cena.seta.z), mg = 46;
+      const dentro = (lado) => { const l = lado ? 8 : cam.w - 8 - balao.offsetWidth, t = balao.offsetTop; return tx > l - mg && tx < l + balao.offsetWidth + mg && ty > t - mg && ty < t + balao.offsetHeight + mg + 60; };
+      if (dentro(esq) && !dentro(!esq)) esq = !esq;
+      classe(balao, 'esq', esq);
+    }
+  }
+
+  return {
+    atualizar,
+    concluiu() { feitaAte = 1.6; pequeno = false; fixo = false; aberto = 0; relogio = 0; },
+    abrirMissoes() { abrirPainel('missoes'); },
+    balao, seta,
+  };
+}

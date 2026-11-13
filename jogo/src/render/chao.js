@@ -1,19 +1,19 @@
 // O chão, desenhado por código no estilo de contorno e guardado em blocos (canvas fora da tela, alinhados à tela).
 // Cada bloco só é refeito quando uma casa dele muda (ou quando o zoom muda); a cada quadro o chão é só colar blocos.
 // Grama com detalhe leve, terra arada seca e molhada com sulcos e contorno só na borda da mancha, caminho de terra,
-// terra à venda escurecida e a beirada do mapa.
-import { KX, KY, KA } from './camera.js';
+// terra à venda escurecida. Fora do mapa o chão segue no mesmo verde escuro, sem detalhe.
+import { KX, KY } from './camera.js';
 import { GRAMA, ARADA, CAMINHO } from '../nucleo/local.js';
 import { acaso } from '../nucleo/util.js';
 
 const T = 256; // lado do bloco, em pontos do canvas
 const COR = {
-  ceu: '#a5def5',
+  ceu: '#619439', // fora do mapa: o mesmo verde da terra à venda, sem detalhe (o mundo não acaba num barranco)
   grama: '#86c63f', gramaClara: '#97d24b', gramaEscura: '#5f9f2c',
   terra: '#b0703c', terraSulco: '#8a5228', terraLuz: '#c98a52', terraLado: '#7d4a25',
   molhada: '#70421f', molhadaSulco: '#54301a', molhadaLuz: '#8b5630', molhadaLado: '#4f2c16',
   caminho: '#f0b765', caminhoClaro: '#f8d08c', caminhoBorda: '#c98a3a',
-  traco: '#3a2412', barranco: '#8a5630', barrancoEscuro: '#6c4124', flor: '#fff6d8', miolo: '#f6c12c',
+  traco: '#3a2412', flor: '#fff6d8', miolo: '#f6c12c',
   venda: 'rgba(24, 52, 46, 0.34)', divisa: 'rgba(58, 36, 18, 0.6)',
 };
 export const COR_DO_CEU = COR.ceu;
@@ -108,7 +108,7 @@ export class Chao {
     g.fillRect(0, 0, T, T);
     g.translate(-x0, -y0);
     const ux = KX * S, uy = KY * S; // meia largura e meia altura do losango de uma casa
-    const M = 0.9 * S; // folga: o barranco e as faixas da frente saem da casa
+    const M = 0.9 * S; // folga: as faixas da frente da terra arada saem da casa
     const a0 = (x0 - M) / ux, a1 = (x0 + T + M) / ux, b0 = (y0 - M) / uy, b1 = (y0 + T + M) / uy;
     const xi = Math.max(0, Math.floor((a0 + b0) / 2) - 1), xf = Math.min(L - 1, Math.ceil((a1 + b1) / 2));
     const zi = Math.max(0, Math.floor((b0 - a1) / 2) - 1), zf = Math.min(P - 1, Math.ceil((b1 - a0) / 2));
@@ -249,25 +249,6 @@ export class Chao {
     }
     if (haDiv) { g.strokeStyle = COR.divisa; g.lineWidth = Math.max(2, 0.05 * S); g.setLineDash([0.16 * S, 0.14 * S]); g.stroke(); g.setLineDash([]); }
 
-    // 5. a beirada do mapa: barranco de terra nas duas faces que olham para a câmera, e o traço em volta
-    const fundo = 0.75 * KA * S;
-    if (xf === L - 1 || zf === P - 1) {
-      g.lineWidth = lw; g.strokeStyle = COR.traco; g.lineJoin = 'round';
-      if (xf === L - 1) {
-        g.beginPath(); g.moveTo(px(L, 0), py(L, 0)); g.lineTo(px(L, P), py(L, P)); g.lineTo(px(L, P), py(L, P) + fundo); g.lineTo(px(L, 0), py(L, 0) + fundo); g.closePath();
-        g.fillStyle = COR.barranco; g.fill(); g.stroke();
-      }
-      if (zf === P - 1) {
-        g.beginPath(); g.moveTo(px(0, P), py(0, P)); g.lineTo(px(L, P), py(L, P)); g.lineTo(px(L, P), py(L, P) + fundo); g.lineTo(px(0, P), py(0, P) + fundo); g.closePath();
-        g.fillStyle = COR.barrancoEscuro; g.fill(); g.stroke();
-      }
-    }
-    if (xi === 0 || zi === 0) {
-      g.beginPath();
-      if (zi === 0) { g.moveTo(px(0, 0), py(0, 0)); g.lineTo(px(L, 0), py(L, 0)); }
-      if (xi === 0) { g.moveTo(px(0, 0), py(0, 0)); g.lineTo(px(0, P), py(0, P)); }
-      g.strokeStyle = COR.traco; g.lineWidth = lw; g.stroke();
-    }
     g.setTransform(1, 0, 0, 1, 0, 0);
   }
 }

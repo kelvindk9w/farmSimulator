@@ -68,7 +68,7 @@ const NAO = (motivo, dados, limpar) => ({ ok: false, motivo, dados, limpar });
 const SIM = { ok: true };
 
 registrarAcao({
-  id: 'arar', ferramenta: 'enxada', dur: 1.1, efeitoEm: 0.7, estadoVisual: 'arar',
+  id: 'arar', ferramenta: 'enxada', dur: 1.1, efeitoEm: 0.7, estadoVisual: 'enxadar',
   pode(m, alvo) {
     const loc = m.local, i = idx(m, alvo);
     if (!loc.ehPropria(alvo.x, alvo.z)) return NAO('terra-a-venda');
@@ -209,7 +209,8 @@ registrarAutomatico((m, x, z) => {
   const e = estadoDaPlanta(m, pl);
   if (e === 'pronta') return { acao: 'colher', dados: { cultura: pl.cultura } };
   if (e === 'sede') return filaTem(m, 'regar', x, z) ? { acao: null, texto: 'na-fila' } : semAgua(m) ? { acao: null, texto: 'regador-vazio', falta: true } : { acao: 'regar', dados: { cultura: pl.cultura } };
-  return { acao: null, texto: 'crescendo', dados: { cultura: pl.cultura, seg: segundosDeAgua(m, pl) } };
+  // crescendo: o toque só informa (não anda até lá nem desmancha a fila)
+  return { acao: null, texto: 'crescendo', info: true, dados: { cultura: pl.cultura, seg: segundosDeAgua(m, pl) } };
 });
 
 registrarEvento('arou', { campos: ['x', 'z'] });

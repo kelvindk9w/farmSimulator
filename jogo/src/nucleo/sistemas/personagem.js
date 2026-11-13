@@ -5,7 +5,7 @@
 import { PASSO, limitar, girarPara, rumoPara } from '../util.js';
 import { registrarSistema, registrarModo, ACOES, TIPOS, MODOS, AUTOMATICOS, modosEmOrdem } from '../registro.js';
 import { acharCaminho, comprimento, cabe } from '../caminho.js';
-import { ferramentaNoCinto, ferramentaNoSuporte, usarFerramenta } from './posses.js';
+import { ferramentaNoCinto, ferramentaNoSuporte, usarFerramenta, noCesto } from './posses.js';
 import { darXp } from './niveis.js';
 
 const ACEL = 13, FREIO = 15; // unidades/s²
@@ -334,6 +334,10 @@ registrarSistema({
       const modo = MODOS[m.modo.id], d = modo.acaoNaCasa(m, x, z);
       if (d && d.texto === 'na-fila') return { ok: true, repetida: true }; // já prometida: o toque repetido não muda nada
       if (d && d.acao) return enfileirar(m, { tipo: 'agir', acao: d.acao, x, z, args: d.args || null });
+      if (d && d.info) { // só uma informação (planta crescendo): diz e não mexe na fila
+        if (!c.arrasto) m.eventos.emitir('informou', { motivo: d.texto, dados: d.dados, x, z });
+        return { ok: false, motivo: d.texto, dados: d.dados };
+      }
       if (d && d.texto && (d.falta || (modo.id !== 'mao' && !c.arrasto))) {
         m.eventos.emitir('faltou', { motivo: d.texto, dados: d.dados, x, z });
         return { ok: false, motivo: d.texto, dados: d.dados };
@@ -392,7 +396,8 @@ registrarSistema({
 export function visualDaPersonagem(m, out) {
   const p = m.personagem, a = p.acao;
   out.x = p.x; out.z = p.z; out.rumo = p.rumo; out.vel = p.vel; out.fase = p.fase;
-  out.estado = a ? ACOES[a.id].estadoVisual : p.vel > PARADA_ABAIXO_DE ? (p.correndo ? 'correr' : 'andar') : 'parada';
+  // andando com colheita no cesto, a figura é a de carregar
+  out.estado = a ? ACOES[a.id].estadoVisual : p.vel > PARADA_ABAIXO_DE ? (p.correndo ? 'correr' : noCesto(m) > 0 ? 'carregar' : 'andar') : 'parada';
   out.t = a ? a.t : 0; out.p = a ? a.t / a.dur : 0; out.acao = a ? a.id : null;
   return out;
 }

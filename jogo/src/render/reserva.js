@@ -2,7 +2,6 @@
 // Formas simples no estilo de contorno (cor chapada e traço escuro), boas o bastante para jogar.
 // Cada figura é desenhada uma vez num canvas próprio, a 96 pontos por unidade, e depois é só colada.
 import { KX, KY, KA } from './camera.js';
-import { acaso } from '../nucleo/util.js';
 
 export const E0 = 96; // pontos por unidade das figuras de reserva
 export const TRACO = '#3a2412';
@@ -101,7 +100,6 @@ const OBJETOS = {
       // dois esteios e o telhadinho
       for (const s of [-1, 1]) { g.fillStyle = '#b06a2c'; g.beginPath(); g.rect(s * r * 1.05 - 6, -2.0 * E0 * KA, 12, 1.5 * E0 * KA); g.fill(); g.stroke(); }
       g.beginPath(); g.moveTo(-r * 1.5, -1.95 * E0 * KA); g.lineTo(0, -2.6 * E0 * KA); g.lineTo(r * 1.5, -1.95 * E0 * KA); g.closePath(); g.fillStyle = '#e2562a'; g.fill(); g.stroke();
-      linha(g, [0, 0, 0], null, 1);
       g.beginPath(); g.moveTo(-r * 1.05, -1.55 * E0 * KA); g.lineTo(r * 1.05, -1.55 * E0 * KA); g.save(); g.lineWidth = 7; g.stroke(); g.strokeStyle = '#d9a23a'; g.lineWidth = 3; g.stroke(); g.restore();
     },
   },
@@ -303,4 +301,3 @@ export function desenharReserva(g, f, sx, sy, S, espelhar, escalaY = 1) {
 }
 // quantos quadros a reserva tem para a peça (a personagem andando tem 6)
 export const quadrosDaReserva = (chave) => (/^personagem\/(andar|correr)/.test(chave) ? 6 : 1);
-export { acaso };

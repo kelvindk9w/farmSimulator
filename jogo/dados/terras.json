@@ -7,8 +7,8 @@
   "inicial": {
     "area": [24, 44, 40, 60],
     "limpo": [25, 49, 39, 59],
-    "natureza": { "mato": 0.3, "pedra": 0.05, "toco": 0.06 },
-    "descricao": "O sítio do começo: 16 por 16 casas. O miolo vem limpo; as beiradas têm mato, umas pedras e tocos para aprender a limpar."
+    "natureza": { "mato": 0.35, "pedra": 0.06, "toco": 0.12 },
+    "descricao": "O sítio do começo: 16 por 16 casas. O miolo vem limpo e compacto (casa, poço, celeiro, banca e o primeiro campo a poucos passos um do outro); as beiradas têm mato, pedras e tocos para aprender a limpar e para a madeira das primeiras obras."
   },
   "pontos": {
     "casa": [25, 45],
@@ -42,14 +42,14 @@
     { "id": "lote-1", "nome": "Pasto do Fundo", "area": [24, 30, 40, 44], "preco": 800, "nivel": 5, "exige": [], "natureza": { "mato": 0.35, "toco": 0.05, "pedra": 0.03 }, "xp": 40, "descricao": "Atrás da casa. Quase só mato: fibra à vontade e espaço para a lavoura." },
     { "id": "lote-2", "nome": "Capoeira", "area": [40, 44, 50, 60], "preco": 2500, "nivel": 8, "exige": ["lote-1"], "natureza": { "mato": 0.3, "toco": 0.12, "pedra": 0.02, "mata": 0.02 }, "xp": 125, "descricao": "Mato alto e muito toco. É a madeira do curral." },
     { "id": "lote-3", "nome": "Pedregal", "area": [14, 44, 24, 60], "preco": 5000, "nivel": 10, "exige": ["lote-2"], "natureza": { "mato": 0.2, "toco": 0.03, "pedra": 0.14 }, "xp": 250, "descricao": "Chão de pedra. É a pedra do laticínio." },
-    { "id": "lote-4", "nome": "Baixada", "area": [40, 30, 50, 44], "preco": 9000, "nivel": 12, "exige": ["lote-3"], "natureza": { "mato": 0.35, "toco": 0.06, "pedra": 0.04, "mata": 0.03 }, "xp": 450, "descricao": "Terra boa e plana, tomada de mato." },
-    { "id": "lote-5", "nome": "Roça Velha", "area": [14, 30, 24, 44], "preco": 14000, "nivel": 14, "exige": ["lote-4"], "natureza": { "mato": 0.4, "toco": 0.08, "pedra": 0.04, "mata": 0.03 }, "xp": 700, "descricao": "Já foi lavoura um dia." },
-    { "id": "lote-6", "nome": "Beira da Estrada", "area": [50, 44, 60, 60], "preco": 20000, "nivel": 16, "exige": ["lote-5"], "natureza": { "mato": 0.3, "toco": 0.08, "pedra": 0.06, "mata": 0.04 }, "xp": 1000, "descricao": "Comprida, junto da estrada." },
-    { "id": "lote-7", "nome": "Várzea", "area": [4, 44, 14, 60], "preco": 28000, "nivel": 18, "exige": ["lote-6"], "natureza": { "mato": 0.45, "toco": 0.04, "pedra": 0.03, "mata": 0.03 }, "xp": 1400, "descricao": "Baixa e úmida, de mato fechado." },
-    { "id": "lote-8", "nome": "Morro do Ipê", "area": [24, 16, 40, 30], "preco": 38000, "nivel": 20, "exige": ["lote-7"], "natureza": { "mato": 0.3, "toco": 0.08, "pedra": 0.1, "mata": 0.05 }, "xp": 1900, "descricao": "Um lote grande, no alto." },
-    { "id": "lote-9", "nome": "Grota", "area": [50, 30, 60, 44], "preco": 50000, "nivel": 22, "exige": ["lote-8"], "natureza": { "mato": 0.3, "toco": 0.06, "pedra": 0.16, "mata": 0.04 }, "xp": 2500, "descricao": "Pedra grande e árvore velha." },
-    { "id": "lote-10", "nome": "Capão", "area": [4, 30, 14, 44], "preco": 65000, "nivel": 24, "exige": ["lote-9"], "natureza": { "mato": 0.3, "toco": 0.12, "pedra": 0.05, "mata": 0.08 }, "xp": 3250, "descricao": "Um capão de mato: madeira que não acaba mais." },
-    { "id": "lote-11", "nome": "Chapada", "area": [40, 16, 60, 30], "preco": 90000, "nivel": 27, "exige": ["lote-10"], "natureza": { "mato": 0.3, "toco": 0.08, "pedra": 0.11, "mata": 0.05 }, "xp": 4500, "descricao": "O lote largo do alto, à direita." },
-    { "id": "lote-12", "nome": "Mata do Ribeirão", "area": [4, 16, 24, 30], "preco": 130000, "nivel": 30, "exige": ["lote-11"], "natureza": { "mato": 0.35, "toco": 0.1, "pedra": 0.09, "mata": 0.08 }, "xp": 6500, "descricao": "O último lote à venda nesta versão." }
+    { "id": "lote-4", "nome": "Baixada", "area": [40, 30, 50, 44], "preco": 10000, "nivel": 12, "exige": ["lote-3"], "natureza": { "mato": 0.35, "toco": 0.06, "pedra": 0.04, "mata": 0.03 }, "xp": 500, "descricao": "Terra boa e plana, tomada de mato." },
+    { "id": "lote-5", "nome": "Roça Velha", "area": [14, 30, 24, 44], "preco": 18000, "nivel": 14, "exige": ["lote-4"], "natureza": { "mato": 0.4, "toco": 0.08, "pedra": 0.04, "mata": 0.03 }, "xp": 900, "descricao": "Já foi lavoura um dia." },
+    { "id": "lote-6", "nome": "Beira da Estrada", "area": [50, 44, 60, 60], "preco": 30000, "nivel": 16, "exige": ["lote-5"], "natureza": { "mato": 0.3, "toco": 0.08, "pedra": 0.06, "mata": 0.04 }, "xp": 1500, "descricao": "Comprida, junto da estrada." },
+    { "id": "lote-7", "nome": "Várzea", "area": [4, 44, 14, 60], "preco": 50000, "nivel": 18, "exige": ["lote-6"], "natureza": { "mato": 0.45, "toco": 0.04, "pedra": 0.03, "mata": 0.03 }, "xp": 2500, "descricao": "Baixa e úmida, de mato fechado." },
+    { "id": "lote-8", "nome": "Morro do Ipê", "area": [24, 16, 40, 30], "preco": 80000, "nivel": 20, "exige": ["lote-7"], "natureza": { "mato": 0.3, "toco": 0.08, "pedra": 0.1, "mata": 0.05 }, "xp": 4000, "descricao": "Um lote grande, no alto." },
+    { "id": "lote-9", "nome": "Grota", "area": [50, 30, 60, 44], "preco": 120000, "nivel": 22, "exige": ["lote-8"], "natureza": { "mato": 0.3, "toco": 0.06, "pedra": 0.16, "mata": 0.04 }, "xp": 6000, "descricao": "Pedra grande e árvore velha." },
+    { "id": "lote-10", "nome": "Capão", "area": [4, 30, 14, 44], "preco": 180000, "nivel": 24, "exige": ["lote-9"], "natureza": { "mato": 0.3, "toco": 0.12, "pedra": 0.05, "mata": 0.08 }, "xp": 9000, "descricao": "Um capão de mato: madeira que não acaba mais." },
+    { "id": "lote-11", "nome": "Chapada", "area": [40, 16, 60, 30], "preco": 260000, "nivel": 27, "exige": ["lote-10"], "natureza": { "mato": 0.3, "toco": 0.08, "pedra": 0.11, "mata": 0.05 }, "xp": 13000, "descricao": "O lote largo do alto, à direita." },
+    { "id": "lote-12", "nome": "Mata do Ribeirão", "area": [4, 16, 24, 30], "preco": 380000, "nivel": 30, "exige": ["lote-11"], "natureza": { "mato": 0.35, "toco": 0.1, "pedra": 0.09, "mata": 0.08 }, "xp": 19000, "descricao": "O último lote à venda nesta versão." }
   ]
 }

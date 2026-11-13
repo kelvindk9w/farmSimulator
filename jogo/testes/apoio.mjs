@@ -6,6 +6,7 @@ import '../src/nucleo/sistemas/index.js';
 import { Mundo } from '../src/nucleo/mundo.js';
 import { prepararDados } from '../src/nucleo/dados.js';
 import { ocupada } from '../src/nucleo/sistemas/personagem.js';
+import { plantaEm, estadoDaPlanta } from '../src/nucleo/sistemas/lavoura.js';
 
 const aqui = path.dirname(fileURLToPath(import.meta.url));
 
@@ -40,3 +41,31 @@ export function ouvirTudo(m) {
   m.eventos.ouvir('*', (dados, tipo) => lista.push({ tipo, dados }));
   return { lista, tipos: () => lista.map((e) => e.tipo), de: (tipo) => lista.filter((e) => e.tipo === tipo).map((e) => e.dados), limpar: () => { lista.length = 0; } };
 }
+
+// ---------- atalhos de jogo (os mesmos comandos que o toque manda) ----------
+export const modo = (m, id, semente) => m.comando({ tipo: 'escolherModo', modo: id, semente });
+export const tocar = (m, x, z) => m.comando({ tipo: 'tocarCasa', x: x + 0.5, z: z + 0.5 });
+export const tocarEm = (m, id) => m.comando({ tipo: 'tocarEntidade', id });
+export function arar(m, casas) { modo(m, 'enxada'); for (const [x, z] of casas) tocar(m, x, z); return ateParar(m); }
+export function semear(m, casas, semente = 'semente-rabanete') { modo(m, 'semear', semente); for (const [x, z] of casas) tocar(m, x, z); return ateParar(m); }
+export function encher(m) { tocarEm(m, 'poco'); return ateParar(m); }
+export function regar(m, casas) { modo(m, 'regar'); for (const [x, z] of casas) tocar(m, x, z); return ateParar(m); }
+export function colher(m, casas) { modo(m, 'mao'); for (const [x, z] of casas) tocar(m, x, z); return ateParar(m); }
+// enche o regador e rega, quantas idas ao poço forem precisas, até nenhuma das casas ter sede
+export function regarTudo(m, casas) {
+  for (let k = 0; k < 30; k++) {
+    const sede = casas.filter(([x, z]) => { const pl = plantaEm(m, x, z); return pl && estadoDaPlanta(m, pl) === 'sede'; });
+    if (!sede.length) return;
+    encher(m); regar(m, sede);
+  }
+  throw new Error('não consegui regar tudo');
+}
+// ara, semeia, rega e espera a cultura ficar pronta (pulando o relógio a cada rega)
+export function plantarAtePronta(m, casas, semente = 'semente-rabanete') {
+  arar(m, casas); semear(m, casas, semente);
+  const c = m.dados.culturas[m.dados.culturaDaSemente[semente]];
+  for (let r = 0; r < c.regas; r++) { regarTudo(m, casas); pular(m, c.tempoSeg / c.regas + 1); }
+}
+// pula o relógio como quem fecha o jogo e volta depois
+export const pular = (m, seg) => m.acertarRelogio(m.agora + seg * 1000);
+export const CAMPO = [[12, 13], [13, 13], [12, 14], [13, 14]];

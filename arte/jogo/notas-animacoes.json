@@ -9,6 +9,21 @@
    "arquivo": "ferramentas.png",
    "pedido": "modelo-ferramentas.md",
    "nota": "As dez ferramentas de mão (enxada, regador, cesto, saquinho de sementes, martelo, machado, picareta, tesoura de tosquia, balde, banquinho) ao lado da personagem, para dar o tamanho. Vai anexada a toda ação com ferramenta. Uma rodada."
+  },
+  "galinha": {
+   "arquivo": "galinha.png",
+   "pedido": "modelo-galinha.md",
+   "nota": "A galinha branca da cena de estilo: frente, costas e perfil. Uma rodada."
+  },
+  "vaca": {
+   "arquivo": "vaca.png",
+   "pedido": "modelo-vaca.md",
+   "nota": "Vaca leiteira malhada: frente, costas e perfil. Uma rodada."
+  },
+  "ordenha": {
+   "arquivo": "ordenha.png",
+   "pedido": "modelo-ordenha.md",
+   "nota": "Folha de modelo da INTERAÇÃO: a personagem no banquinho ordenhando a vaca, vista por trás dela, pela frente dela (a vaca em primeiro plano) e a pose dela sozinha com banquinho e balde. Anexada aos pedidos de ordenhar. Uma rodada."
   }
  },
  "folhas": {
@@ -78,11 +93,98 @@
    "pedido": "personagem-colher-frente.md",
    "rodadas": 1,
    "nota": "Prepara, abaixa, agarra, puxa com força (cara de esforço), levanta contente, guarda. Mãos vazias: o jogo desenha o que foi colhido."
+  },
+  "personagem/carregar-frente": {
+   "pedido": "personagem-carregar-frente.md",
+   "rodadas": 1,
+   "nota": "Anda com o cesto de vime nas duas mãos, à frente da barriga. O cesto vai vazio."
+  },
+  "personagem/colher-costas": {
+   "pedido": "personagem-colher-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente."
+  },
+  "personagem/carregar-costas": {
+   "pedido": "personagem-carregar-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente; aparece a borda do cesto ao lado da cintura."
+  },
+  "personagem/manivela-frente": {
+   "pedido": "personagem-manivela-frente.md",
+   "rodadas": 1,
+   "nota": "As mãos juntas fazem um círculo à frente do corpo; a manivela não é desenhada (é do poço)."
+  },
+  "personagem/manivela-costas": {
+   "pedido": "personagem-manivela-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente."
+  },
+  "animal/galinha/parada-frente": {
+   "pedido": "galinha-parada-frente.md",
+   "rodadas": 1,
+   "nota": "4 desenhos (descanso, espicha, vira a cabeça, afofa de olho fechado) em 8 quadros. Altura da galinha: 129 pontos (0,88 unidade, na proporção da personagem)."
+  },
+  "animal/galinha/andar-frente": {
+   "pedido": "galinha-andar-frente.md",
+   "rodadas": 1,
+   "nota": "Andar de galinha com a cabeça indo e vindo; eixo pelo centro de massa."
+  },
+  "animal/galinha/ciscar-frente": {
+   "pedido": "galinha-ciscar-frente.md",
+   "rodadas": 1,
+   "nota": "Olha, cisca com uma pata, com a outra, abaixa, bica (o bico desce abaixo dos pés), levanta. Escala pela área de tinta, igual à da parada."
+  },
+  "animal/galinha/parada-costas": {
+   "pedido": "galinha-parada-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente."
+  },
+  "animal/vaca/parada-frente": {
+   "pedido": "vaca-parada-frente.md",
+   "rodadas": 1,
+   "nota": "4 desenhos (descanso, rumina, respira com o rabo no alto, pisca) em 8 quadros. Alinhada pelo corpo e pelas patas."
+  },
+  "animal/galinha/andar-costas": {
+   "pedido": "galinha-andar-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente."
+  },
+  "animal/vaca/andar-frente": {
+   "pedido": "vaca-andar-frente.md",
+   "rodadas": 1,
+   "nota": "8 quadros; eixo pelo centro de massa e chão da folha inteira. A folha crua veio pequena (265 pontos de altura) e foi ampliada 10% para bater com a parada: o traço fica um pouco menos nítido."
+  },
+  "animal/vaca/pastar-frente": {
+   "pedido": "vaca-pastar-frente.md",
+   "rodadas": 1,
+   "nota": "Desce a cabeça, morde, arranca, mastiga, sobe. Patas plantadas (alinhadas pelo corpo e pelas patas)."
+  },
+  "animal/galinha/ciscar-costas": {
+   "pedido": "galinha-ciscar-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente: risca o chão com um pé e com o outro, bica duas vezes e volta."
+  },
+  "animal/vaca/parada-costas": {
+   "pedido": "vaca-parada-costas.md",
+   "rodadas": 1,
+   "nota": "Balança o rabo, respira e mexe a orelha; cascos plantados. Tamanho pela massa 202 (alvo das folhas de costas)."
+  },
+  "animal/vaca/pastar-costas": {
+   "pedido": "vaca-pastar-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente: desce a cabeça, morde, arranca, mastiga e sobe; cascos plantados."
+  },
+  "animal/vaca/andar-costas": {
+   "pedido": "vaca-andar-costas-r2.md",
+   "rodadas": 2,
+   "nota": "1ª rodada saiu um trote, com o corpo maior e as patas mais curtas que as da vaca parada; a 2ª pede passo lento de quatro tempos (uma pata por vez) e as proporções da folha parada: corpo igual, patas inteiras."
   }
  },
  "geral": [
   "Altura da personagem em pé: 294 pontos (2,3 unidades de tela a 128 por unidade).",
   "No andar, o chão de cada quadro é a média entre o ponto mais baixo do quadro e o da folha inteira (`--base 0.5`): guarda o sobe e desce que o Codex desenhou sem deixar os pés longe do chão.",
-  "O tamanho da figura entre folhas é conferido pela área do lenço vermelho (coluna tamanho pela cor de `medidas-animacoes.json`): na folha de modelo, com 294 pontos de altura, dá 47,5 de frente e 48,7 de costas. Com `--tamanho-cor`, a escala é a média entre a da altura e a do lenço, para nem a altura nem a cabeça destoarem de uma folha para a outra. Quando a vista muda (mais de costas, cabeça baixa), o lenço engana e vale só a altura."
+  "O tamanho da figura entre folhas é conferido pela área do lenço vermelho (coluna tamanho pela cor de `medidas-animacoes.json`): na folha de modelo, com 294 pontos de altura, dá 47,5 de frente e 48,7 de costas. Com `--tamanho-cor`, a escala é a média entre a da altura e a do lenço, para nem a altura nem a cabeça destoarem de uma folha para a outra. Quando a vista muda (mais de costas, cabeça baixa), o lenço engana e vale só a altura.",
+  "Bichos: a galinha tem 129 pontos de altura (0,88 unidade de `escala.json`, na mesma proporção que dá 294 pontos à personagem de 2,0 unidades). A vaca tem 226 pontos até o lombo (1,54 unidade); como de frente três quartos a figura inteira (chifres até o casco mais baixo) mede 1,21 vez isso, a figura de frente tem 273 pontos e a de costas 297.",
+  "Ponto de apoio dos bichos: o meio das patas. Na vaca fica 9% da altura acima do casco mais baixo (as quatro patas se espalham na tela por causa da câmera); na galinha, 5%."
  ]
 }

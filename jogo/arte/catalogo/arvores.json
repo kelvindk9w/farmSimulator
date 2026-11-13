@@ -1,0 +1,13 @@
+{
+  "escala": 128,
+  "pecas": {
+    "arvore/laranjeira-1": { "arquivo": "arvores/laranjeira-muda.png", "quadros": 1, "casa": [88, 127], "apoio": [43, 113] },
+    "arvore/laranjeira-2": { "arquivo": "arvores/laranjeira-jovem.png", "quadros": 1, "casa": [185, 235], "apoio": [95, 213] },
+    "arvore/laranjeira-3": { "arquivo": "arvores/laranjeira-adulta.png", "quadros": 1, "casa": [348, 389], "apoio": [176, 353] },
+    "arvore/laranjeira-4": { "arquivo": "arvores/laranjeira-fruta.png", "quadros": 1, "casa": [349, 389], "apoio": [176, 353] },
+    "arvore/laranjeira-adulta": { "arquivo": "arvores/laranjeira-adulta.png", "quadros": 1, "casa": [348, 389], "apoio": [176, 353] },
+    "arvore/laranjeira-fruta": { "arquivo": "arvores/laranjeira-fruta.png", "quadros": 1, "casa": [349, 389], "apoio": [176, 353] },
+    "arvore/laranjeira-jovem": { "arquivo": "arvores/laranjeira-jovem.png", "quadros": 1, "casa": [185, 235], "apoio": [95, 213] },
+    "arvore/laranjeira-muda": { "arquivo": "arvores/laranjeira-muda.png", "quadros": 1, "casa": [88, 127], "apoio": [43, 113] }
+  }
+}

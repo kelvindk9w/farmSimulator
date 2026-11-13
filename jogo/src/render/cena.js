@@ -12,6 +12,7 @@ import { estadoDaPlanta, estagioDaPlanta } from '../nucleo/sistemas/lavoura.js';
 const MAX = 1200; // figuras num quadro
 const ENT = 0, PLANTA = 1, PERS = 2;
 const COR_DA_ACAO = { arar: '#c98a45', semear: '#74b83a', regar: '#4aa9e6', colher: '#f6c12c', encher: '#4aa9e6', vender: '#f6c12c', guardar: '#f6e3b5', pegar: '#f6e3b5' };
+const PASSADA = { andar: true, correr: true, carregar: true }; // estados em que os quadros seguem o passo, não o relógio
 const FOLGA = 0.25; // folga para a figura não ficar trocando de lado quando o rumo está na divisa
 
 export class Cena {
@@ -23,8 +24,12 @@ export class Cena {
     this.chao = new Chao();
     this.part = new Particulas();
     this.itens = [];
-    for (let i = 0; i < MAX; i++) this.itens.push({ prof: 0, tipo: 0, ref: null, x: 0, z: 0, i: 0 });
+    for (let i = 0; i < MAX; i++) this.itens.push({ prof: 0, tipo: 0, ref: null, x: 0, z: 0, i: 0, b: 0 });
     this.ordem = new Int16Array(MAX);
+    this.conta = new Int32Array(2400); // gavetas da ordenação por profundidade
+    this.pontos = []; // o que não pode ficar escondido atrás de árvore ou construção: a personagem e as casas-alvo
+    for (let i = 0; i < 4; i++) this.pontos.push({ sx: 0, y0: 0, y1: 0, meia: 0, prof: 0 });
+    this.nPontos = 0;
     this.n = 0;
     this.v = { chave: '', quadro: 0, fase: 0, espelhar: false, variante: 0 };
     this.pv = { x: 0, z: 0, rumo: 0, vel: 0, fase: 0, estado: 'parada', t: 0, p: 0, acao: null };
@@ -54,12 +59,12 @@ export class Cena {
     if (R[k]) return R[k];
     const A = this.atlas, dir = lado ? 'costas' : 'frente';
     const tenta = [[estado, dir]];
-    if (estado === 'correr') tenta.push(['andar', dir]);
-    if (estado !== 'parada' && estado !== 'andar' && estado !== 'correr') tenta.push([estado, 'frente'], ['trabalhar', dir], ['trabalhar', 'frente']);
+    if (estado === 'correr' || estado === 'carregar') tenta.push(['andar', dir]);
+    if (!PASSADA[estado] && estado !== 'parada') tenta.push([estado, 'frente'], ['trabalhar', dir], ['trabalhar', 'frente']);
     let achou = null;
     for (const [e, d] of tenta) if (A.tem('personagem/' + e + '-' + d)) { achou = { chave: 'personagem/' + e + '-' + d, deFrente: d === 'frente', reserva: false, estado: e }; break; }
-    if (!achou && estado !== 'andar' && estado !== 'correr' && A.tem('personagem/parada-' + dir)) achou = { chave: 'personagem/parada-' + dir, deFrente: !lado, reserva: false, estado: 'parada' };
-    if (!achou) achou = { chave: 'personagem/' + (estado === 'correr' ? 'andar' : estado) + '-' + dir, deFrente: !lado, reserva: true, estado };
+    if (!achou && !PASSADA[estado] && A.tem('personagem/parada-' + dir)) achou = { chave: 'personagem/parada-' + dir, deFrente: !lado, reserva: false, estado: 'parada' };
+    if (!achou) achou = { chave: 'personagem/' + (PASSADA[estado] ? 'andar' : estado) + '-' + dir, deFrente: !lado, reserva: true, estado: PASSADA[estado] ? 'andar' : estado };
     R[k] = achou;
     return achou;
   }
@@ -92,15 +97,14 @@ export class Cena {
     }
     const pv = visualDaPersonagem(m, this.pv);
     { const it = itens[n++]; it.tipo = PERS; it.ref = null; it.x = pv.x; it.z = pv.z; it.prof = pv.x + pv.z + 0.02; }
-    // ordena por profundidade (inserção: a lista muda pouco de um quadro para o outro)
-    const o = this.ordem;
-    for (let k = 0; k < n; k++) {
-      const pk = itens[k].prof;
-      let j = k - 1;
-      while (j >= 0 && itens[o[j]].prof > pk) { o[j + 1] = o[j]; j--; }
-      o[j + 1] = k;
-    }
+    // ordena por profundidade em gavetas de 1/8 de casa (linear: o mapa tem mais de mil figuras)
+    const o = this.ordem, C = this.conta, esc = Math.min(8, (C.length - 2) / (loc.l + loc.p + 2)), NB = Math.ceil((loc.l + loc.p + 2) * esc) + 1;
+    for (let b = 0; b <= NB; b++) C[b] = 0;
+    for (let k = 0; k < n; k++) { let b = (itens[k].prof * esc) | 0; if (b < 0) b = 0; else if (b >= NB) b = NB - 1; itens[k].b = b; C[b + 1]++; }
+    for (let b = 1; b <= NB; b++) C[b] += C[b - 1];
+    for (let k = 0; k < n; k++) o[C[itens[k].b]++] = k;
     this.n = n;
+    this._pontosDeInteresse(cam, m, pv, S);
 
     // sombras primeiro (ficam todas no chão), depois as figuras
     g.fillStyle = 'rgba(34, 52, 20, 0.22)';
@@ -122,7 +126,12 @@ export class Cena {
         const e = it.ref, v = this.v;
         v.quadro = 0; v.espelhar = false; v.variante = 0;
         TIPOS[e.tipo].visual(m, e, v);
+        // o que está na frente da personagem ou de uma casa-alvo fica meio transparente (some e volta com suavidade)
+        const alvo = this._tapa(it, e, v, sx, sy, S) ? 0.38 : 1;
+        e.va = e.va === undefined ? alvo : e.va + (alvo - e.va) * Math.min(1, dt * 9 + (dt === 0 ? 1 : 0));
+        if (e.va < 0.985) g.globalAlpha = e.va;
         if (!this.atlas.desenhar(g, v.chave, v.quadro, sx, sy, S, v.espelhar)) desenharReserva(g, figuraDeReserva(v.chave, 0, e.l, e.p, v.variante), sx, sy, S, v.espelhar);
+        g.globalAlpha = 1;
       } else if (it.tipo === PLANTA) {
         const pl = it.ref, chave = this.chaveDaCultura(pl.cultura, estagioDaPlanta(m, pl));
         if (!this.atlas.desenhar(g, chave, 0, sx, sy, S, false)) desenharReserva(g, figuraDeReserva(chave), sx, sy, S, false);
@@ -132,6 +141,38 @@ export class Cena {
     this._avisosDasPlantas(g, cam, m, S);
     this.part.desenhar(g, cam);
     if (this.seta.ligada) this._seta(g, cam, S);
+  }
+
+  // a personagem, a casa destacada, a casa da tarefa em curso e o alvo da seta do tutorial
+  _pontosDeInteresse(cam, m, pv, S) {
+    const P = this.pontos, p = m.personagem, d = this.destaque;
+    let n = 0;
+    const casa = (x, z) => { const q = P[n++]; q.sx = cam.telaX(x + 0.5, z + 0.5); const y = cam.telaY(x + 0.5, 0, z + 0.5); q.y0 = y - 0.75 * S; q.y1 = y + 0.2 * S; q.meia = 0.5 * S; q.prof = x + z + 1; };
+    { const q = P[n++]; q.sx = cam.telaX(pv.x, pv.z); const y = cam.telaY(pv.x, 0, pv.z); q.y0 = y - 2.1 * S; q.y1 = y; q.meia = 0.36 * S; q.prof = pv.x + pv.z; }
+    if (d.entidade === null && d.x >= 0) casa(d.x, d.z);
+    if (p.tarefa && p.tarefa.tipo === 'agir' && p.tarefa.entidade === undefined) casa(p.tarefa.x, p.tarefa.z);
+    if (this.seta.ligada && this.seta.alto < 1.2) casa(Math.floor(this.seta.x), Math.floor(this.seta.z));
+    this.nPontos = n;
+  }
+
+  // esta entidade está na frente de algum ponto de interesse e o desenho dela passa por cima dele?
+  _tapa(it, e, v, sx, sy, S) {
+    const P = this.pontos, c = this.caixa;
+    let temCaixa = false;
+    for (let k = 0; k < this.nPontos; k++) {
+      const q = P[k];
+      if (it.prof < q.prof + 0.4 || Math.abs(sx - q.sx) > 5 * S) continue;
+      if (!temCaixa) {
+        if (!this.atlas.pronta(v.chave) || !this.atlas.caixa(v.chave, v.quadro, sx, sy, S, c)) {
+          const f = figuraDeReserva(v.chave, 0, e.l, e.p, v.variante), kk = S / E0, mg = 0.5 * S;
+          c[0] = sx - f.ax * kk + mg; c[1] = sy - f.ay * kk + mg; c[2] = sx + (f.cv.width - f.ax) * kk - mg; c[3] = sy + (f.cv.height - f.ay) * kk - mg * 0.4;
+        }
+        const dx = (c[2] - c[0]) * 0.16; c[0] += dx; c[2] -= dx; c[1] += (c[3] - c[1]) * 0.1; // a borda da figura é quase toda vazia
+        temCaixa = true;
+      }
+      if (q.sx + q.meia > c[0] && q.sx - q.meia < c[2] && q.y1 > c[1] && q.y0 < c[3]) return true;
+    }
+    return false;
   }
 
   _personagem(g, cam, pv, sx, sy, S) {
@@ -147,7 +188,7 @@ export class Cena {
     const def = peca.reserva ? null : this.atlas.peca(peca.chave);
     const nq = def ? def.q.length : quadrosDaReserva(peca.chave);
     let quadro = 0, respiro = 1;
-    if (peca.estado === 'andar' || peca.estado === 'correr') { const f = pv.fase - Math.floor(pv.fase); quadro = Math.min(nq - 1, Math.floor(f * nq)); }
+    if (PASSADA[peca.estado]) { const f = pv.fase - Math.floor(pv.fase); quadro = Math.min(nq - 1, Math.floor(f * nq)); }
     else if (peca.estado === 'parada') { if (nq > 1) quadro = Math.floor(this.tempo * ((def && def.qps) || 6)) % nq; else if (pv.estado === 'parada') respiro = 1 + 0.012 * Math.sin(this.tempo * 2.4); else respiro = 1 - 0.05 * Math.abs(Math.sin(pv.t * 7)); }
     else if (nq > 1) quadro = def && def.laco === false ? Math.min(nq - 1, Math.floor(pv.p * nq)) : Math.floor(pv.t * ((def && def.qps) || 6)) % nq;
     if (peca.reserva || !this.atlas.desenhar(g, peca.chave, quadro, sx, sy, S, espelhar, respiro)) desenharReserva(g, figuraDeReserva(peca.chave, quadro), sx, sy, S, espelhar, respiro);
@@ -212,10 +253,21 @@ export class Cena {
     }
   }
 
+  // a seta do tutorial: em cima do alvo; se o alvo está fora da tela, fica na borda apontando para ele
   _seta(g, cam, S) {
-    const s = this.seta, sx = cam.telaX(s.x, s.z), sy = cam.telaY(s.x, s.alto, s.z) - (10 + 8 * Math.abs(Math.sin(this.tempo * 4))) * cam.dpr, a = Math.max(14 * cam.dpr, 0.3 * S);
-    g.beginPath(); g.moveTo(sx, sy); g.lineTo(sx - a * 0.8, sy - a); g.lineTo(sx - a * 0.32, sy - a); g.lineTo(sx - a * 0.32, sy - a * 2); g.lineTo(sx + a * 0.32, sy - a * 2); g.lineTo(sx + a * 0.32, sy - a); g.lineTo(sx + a * 0.8, sy - a); g.closePath();
+    const s = this.seta, W = this.cv.width, H = this.cv.height, a = Math.max(14 * cam.dpr, 0.3 * S), pulo = (10 + 8 * Math.abs(Math.sin(this.tempo * 4))) * cam.dpr;
+    const tx = cam.telaX(s.x, s.z), ty = cam.telaY(s.x, s.alto, s.z), mx = 70 * cam.dpr, my0 = 110 * cam.dpr, my1 = 150 * cam.dpr;
+    const fora = tx < mx || tx > W - mx || ty < my0 || ty > H - my1;
+    g.save();
+    if (!fora) g.translate(tx, ty - pulo);
+    else {
+      const cx = W / 2, cy = H / 2, ang = Math.atan2(ty - cy, tx - cx);
+      g.translate(Math.max(mx, Math.min(W - mx, tx)) - Math.cos(ang) * pulo, Math.max(my0, Math.min(H - my1, ty)) - Math.sin(ang) * pulo);
+      g.rotate(ang - Math.PI / 2);
+    }
+    g.beginPath(); g.moveTo(0, 0); g.lineTo(-a * 0.8, -a); g.lineTo(-a * 0.32, -a); g.lineTo(-a * 0.32, -a * 2); g.lineTo(a * 0.32, -a * 2); g.lineTo(a * 0.32, -a); g.lineTo(a * 0.8, -a); g.closePath();
     g.fillStyle = '#ffd84a'; g.fill(); g.lineWidth = Math.max(2, a * 0.16); g.lineJoin = 'round'; g.strokeStyle = TRACO; g.stroke();
+    g.restore();
   }
 
   // a entidade cuja figura está sob o ponto (pontos de CSS), a mais da frente; null se não há

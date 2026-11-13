@@ -560,6 +560,39 @@ async function parede(arq, chave, op) {
   await gravarFeita(chave, out, LW, LH, [Math.round(x0 + MEIA_L / 2), Math.round(yTopo + Hpx + MEIA_A / 2)], { ...op, cru: arq }, `parede de 1 unidade, altura ${U}`);
 }
 
+// cercado <chave> --casas LxP [--recuo 0.12] [--porteira I] [--dentro "objeto/a@x,z;objeto/b@x,z"]
+// Monta um cercado com as peças do catálogo (cerca-x, cerca-z, porteira): cerca em toda a volta do retângulo de
+// L por P casas, porteira de 2 casas no lado +Z (o da frente, à esquerda na tela) e as peças de dentro nos pontos
+// dados (em casas, a partir do canto de trás). Grava três peças com a mesma caixa e o mesmo apoio:
+// <chave> (tudo), <chave>-fundo (cercas de trás e o que fica dentro) e <chave>-frente (cercas da frente e porteira),
+// para o jogo poder desenhar os bichos entre o fundo e a frente.
+async function cercado(chave, op) {
+  const [L, P] = par(op.casas), rec = +(op.recuo ?? 0.12), cat = lerCatalogo('objetos').pecas;
+  const passoX = (L - 2 * rec) / L, passoZ = (P - 2 * rec) / P, fx = (i) => rec + (i + 0.5) * passoX, fz = (j) => rec + (j + 0.5) * passoZ;
+  const iP = op.porteira !== undefined ? +op.porteira : Math.floor((L - 2) / 2), itens = [];
+  for (let i = 0; i < L; i++) itens.push({ k: 'objeto/cerca-x', x: fx(i), z: rec, c: 'fundo' });
+  for (let j = 0; j < P; j++) itens.push({ k: 'objeto/cerca-z', x: rec, z: fz(j), c: 'fundo' });
+  for (const d of String(op.dentro ?? '').split(';').filter(Boolean)) { const [k, xz] = d.split('@'), [x, z] = xz.split(',').map(Number); itens.push({ k, x, z, c: 'fundo' }); }
+  for (let j = 0; j < P; j++) itens.push({ k: 'objeto/cerca-z', x: L - rec, z: fz(j), c: 'frente' });
+  for (let i = 0; i < L; i++) if (i !== iP && i !== iP + 1) itens.push({ k: 'objeto/cerca-x', x: fx(i), z: P - rec, c: 'frente' });
+  itens.push({ k: op['peca-porteira'] ?? 'objeto/porteira', x: rec + (iP + 1) * passoX, z: P - rec, c: 'frente' });
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const it of itens) {
+    const e = cat[it.k]; if (!e) throw new Error(`cercado: falta ${it.k} no catálogo`);
+    it.e = e; it.sx = (it.x - it.z) * MEIA_L - e.apoio[0]; it.sy = (it.x + it.z) * MEIA_A - e.apoio[1];
+    x0 = Math.min(x0, it.sx); y0 = Math.min(y0, it.sy); x1 = Math.max(x1, it.sx + e.casa[0]); y1 = Math.max(y1, it.sy + e.casa[1]);
+  }
+  x0 = Math.floor(x0); y0 = Math.floor(y0); const W = Math.ceil(x1) - x0, H = Math.ceil(y1) - y0;
+  const apoio = [Math.round(((L - P) / 2) * MEIA_L - x0), Math.round(((L + P) / 2) * MEIA_A - y0)];
+  const ordem = [...itens].sort((a, b) => (a.c === b.c ? a.x + a.z - (b.x + b.z) : a.c === 'fundo' ? -1 : 1));
+  const camada = async (qual) => sharp({ create: { width: W, height: H, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite(ordem.filter((it) => !qual || it.c === qual).map((it) => ({ input: path.join(ARTE, it.e.arquivo), left: Math.round(it.sx - x0), top: Math.round(it.sy - y0) }))).raw().toBuffer();
+  const o = { ...op, footprint: `${L}x${P}`, cru: '' }, dito = `cercado de ${L}x${P} montado por código`;
+  await gravarFeita(chave, await camada(null), W, H, apoio, o, dito);
+  await gravarFeita(`${chave}-fundo`, await camada('fundo'), W, H, apoio, { ...o, obs: 'camada de trás (cercas do fundo e o que fica dentro)' }, dito);
+  await gravarFeita(`${chave}-frente`, await camada('frente'), W, H, apoio, { ...o, obs: 'camada da frente (cercas da frente e porteira)' }, dito);
+}
+
 // ---------- comandos ----------
 const [comando, ...resto] = process.argv.slice(2);
 const { pos, op } = lerArgs(resto);
@@ -606,6 +639,8 @@ try {
     const img = await abrir(arq, op); const { celulas, notas } = separarGrade(img, C, L, op.vao ? +op.vao : 6);
     notas.forEach((n) => console.log('  ' + n));
     for (let i = 0; i < celulas.length; i++) { if (!nomes[i] || nomes[i] === '-') continue; await fazerPeca(recorte(img, celulas[i]), `${prefixo}/${nomes[i]}`, { ...op, caixa: op.caixa ?? 128 }); }
+  } else if (comando === 'cercado') {
+    await cercado(pos[0], op);
   } else if (comando === 'situacao') {
     const [chave, situacao, obs] = pos; const reg = lerRegistro(); if (!reg[chave]) throw new Error(`não há ${chave} no registro`);
     reg[chave].situacao = situacao; if (obs) reg[chave].obs = obs; else delete reg[chave].obs; gravarRegistro(reg); console.log(`${chave}: ${situacao}`);

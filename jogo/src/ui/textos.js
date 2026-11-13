@@ -4,7 +4,7 @@
 const nomeDe = (D, id) => (D && D.itens[id] ? D.itens[id].nome : id || '');
 const culturaDe = (D, id) => (D && D.culturas[id] ? D.culturas[id].nome : id || '');
 const minus = (s) => (s ? s.charAt(0).toLowerCase() + s.slice(1) : s);
-const FERRAMENTA = { enxada: 'uma enxada', regador: 'um regador' };
+const FERRAMENTA = { enxada: 'uma enxada', regador: 'um regador', foice: 'uma foice', machado: 'um machado', picareta: 'uma picareta' };
 
 export function tempo(seg) {
   seg = Math.max(0, Math.ceil(seg));
@@ -59,6 +59,7 @@ export const T = {
     'terra-arada-vazia': () => 'Terra arada: escolha Semear para plantar',
     'na-fila': () => 'Já está na fila',
     'terra-a-venda': () => 'Esta terra ainda não é sua',
+    'limpar-depois': (d) => `${{ mato: 'Mato', pedra: 'Pedra', toco: 'Toco', mata: 'Árvore do mato' }[d && d.obstaculo] || 'Isto'}: limpar a terra chega em breve`,
     'lote-a-venda': (d) => `${d && d.nome ? d.nome + ': ' : 'Lote à venda: '}${numero(d ? d.preco : 0)} de ouro${d && d.nivel > 1 ? ', nível ' + d.nivel : ''}. A compra de terras chega em breve.`,
     'sua-casa': () => 'Sua casa',
     'sem-caminho': () => 'Não dá para chegar lá',
@@ -72,7 +73,7 @@ export const T = {
     'fora-do-mapa': () => '',
     'nao-da': () => 'Não deu',
   },
-  hud: { nivel: 'Nível', ouro: 'Ouro', cash: 'Cash', folego: 'Fôlego', cesto: 'Cesto', regador: 'Regador', fila: (n) => (n === 1 ? '1 tarefa na fila' : `${n} tarefas na fila`), cansada: 'Sem fôlego: ela anda até recuperar', semRegador: 'no celeiro' },
+  hud: { nivel: 'Nível', ouro: 'Ouro', cash: 'Cash', folego: 'Fôlego', cesto: 'Cesto', regador: 'Regador', cancelarFila: 'Tarefas na fila: toque para cancelar', cansada: 'Sem fôlego: ela segue andando até recuperar', semRegador: 'no celeiro' },
   botoes: { loja: 'Loja', mochila: 'Mochila e celeiro', missoes: 'Missões', config: 'Configurações', telaCheia: 'Tela cheia', fechar: 'Fechar', agir: 'Agir' },
   ganhos: {
     colheu: (d, D) => `+${d.n} ${nomeDe(D, d.item)}`,
@@ -84,30 +85,34 @@ export const T = {
     pegouFerramenta: (d, D) => (d.guardou ? `Pegou ${minus(nomeDe(D, d.item))} e guardou ${minus(nomeDe(D, d.guardou))}` : `Pegou ${minus(nomeDe(D, d.item))}`),
     comprou: (d, D) => `Comprou ${d.n > 1 ? d.n + ' × ' : ''}${nomeDe(D, d.item)}`,
     missao: (d) => `Missão cumprida: ${d.titulo}`,
-    ausencia: (seg) => `Você ficou fora por ${tempo(seg)}. A lavoura seguiu o relógio.`,
+    socorro: (d, D) => `Seu Tonho deixou ${d.n} × ${minus(nomeDe(D, d.item))} para você recomeçar`,
+    volta: (seg, n) => `Que bom te ver! Você ficou fora por ${tempo(seg)}. ${n.prontas ? (n.prontas === 1 ? 'Uma planta está pronta para colher.' : n.prontas + ' plantas estão prontas para colher.') : n.sede ? (n.sede === 1 ? 'Uma planta está com sede.' : n.sede + ' plantas estão com sede.') : 'Está tudo em ordem.'}`,
   },
   loja: {
     titulo: 'Loja', abas: { semente: 'Sementes', ferramenta: 'Ferramentas', recipiente: 'Recipientes', outros: 'Outros' },
     comprar: 'Comprar', mais5: '+5', tem: (n) => `Você tem ${n}`, jaTem: 'Você já tem', nivel: (n) => `Libera no nível ${n}`,
-    cultura: (c) => `Cresce em ${tempo(c.tempoSeg)} · ${c.regas} ${c.regas === 1 ? 'rega' : 'regas'} · rende ${c.rende}`,
-    capacidadeRegador: (n) => `${n} regas por enchida`, capacidadeCesto: (n) => `Leva ${n} itens`, vazio: 'Nada à venda aqui ainda.',
+    cultura: (c, produto) => `${tempo(c.tempoSeg)} · ${c.regas} ${c.regas === 1 ? 'rega' : 'regas'} · dá ${c.rende}${produto && produto.venda ? ' (vende a ' + produto.venda + ')' : ''}`,
+    capacidadeRegador: (n) => `Leva ${n} regas`, capacidadeCesto: (n) => `Leva ${n} coisas`, capacidadeCinto: (n) => `Leva ${n} ferramentas`, vazio: 'Nada à venda aqui ainda.',
   },
   mochila: {
-    titulo: 'Mochila e celeiro', comVoce: 'Com você', cesto: 'Cesto', sementes: 'Sementes', cinto: 'Cinto de ferramentas', vagas: (n, t) => `${n}/${t} vagas`,
+    titulo: 'Mochila e celeiro', comVoce: 'Com você', cesto: 'Cesto', sementes: 'Sementes', outros: 'Outras coisas', cinto: 'Cinto de ferramentas', vagas: (n, t) => `${n}/${t} vagas`,
     celeiro: 'No celeiro', estoque: 'Estoque', suporte: 'Suporte de ferramentas', vazio: 'Vazio', agua: (a, c) => `água ${a}/${c}`,
     dica: 'Toque no celeiro para guardar o cesto. Com o cesto vazio, o toque pega de volta o que dá para vender.',
   },
   missoes: {
     titulo: 'Missões', atual: 'Agora', feitas: 'Cumpridas', fim: 'Você cumpriu todas as missões do Seu Tonho por enquanto. Vêm mais por aí!',
-    recompensa: 'Recompensa', nenhuma: 'Nenhuma ainda.',
+    recompensa: 'Recompensa', nenhuma: 'Nenhuma ainda.', espera: (n) => `Chegue ao nível ${n} para a próxima missão. Plante, colha e venda: tudo dá experiência.`,
   },
   config: {
-    titulo: 'Configurações', som: 'Som', somInfo: 'Efeitos do jogo', alavanca: 'Alavanca na tela', alavancaInfo: 'Para andar com o polegar, como num controle',
-    telaCheia: 'Tela cheia', telaCheiaInfo: 'Esconde as barras do navegador', ligado: 'Ligado', desligado: 'Desligado', entrar: 'Entrar', sair: 'Sair',
-    gravacao: 'Gravação', gravacaoInfo: 'O jogo grava sozinho neste aparelho.', semGravacao: 'Este navegador não deixa gravar: copie o texto de exportar para não perder o progresso.',
-    exportar: 'Exportar', exportarInfo: 'Copie este texto e guarde. Ele é a sua fazenda inteira.', copiar: 'Copiar', copiado: 'Copiado!', naoCopiou: 'Não deu para copiar sozinho: selecione o texto e copie.',
-    importar: 'Importar', importarInfo: 'Cole aqui um texto exportado e toque em Carregar. A fazenda atual é trocada por ele.', carregar: 'Carregar', importou: 'Fazenda carregada!',
-    recomecar: 'Recomeçar do zero', recomecarInfo: 'Apaga a fazenda deste aparelho.', certeza: 'Tem certeza? Tudo será apagado.', sim: 'Sim, apagar tudo', nao: 'Não',
+    titulo: 'Configurações', som: 'Som', somInfo: 'Efeitos do jogo', ligado: 'Ligado', desligado: 'Desligado',
+    esquema: 'Controle no toque', esquemaInfo: 'Tocar no chão, alavanca com botão de ação, ou os dois', soToque: 'Só toque', alavanca: 'Alavanca', osDois: 'Os dois',
+    botoes: 'Tamanho dos botões', botoesInfo: 'Botões maiores para dedos e para a TV', normal: 'Normal', grande: 'Grande',
+    telaCheia: 'Tela cheia', telaCheiaInfo: 'Esconde as barras do navegador', entrar: 'Entrar', sair: 'Sair',
+    gravacao: 'Gravação', gravacaoInfo: 'O jogo grava sozinho, o tempo todo. A fazenda fica guardada neste aparelho; use Exportar para ter uma cópia.',
+    semGravacao: 'Este navegador não deixa gravar neste aparelho. Use Exportar e guarde o texto para não perder a fazenda.',
+    exportar: 'Exportar', exportarInfo: 'Copie este texto e guarde. Ele é a sua fazenda inteira.', copiar: 'Copiar', copiado: 'Copiado!', naoCopiou: 'Não deu para copiar sozinho: o texto está selecionado, copie por ele.',
+    importar: 'Importar', importarInfo: 'Cole aqui um texto exportado e toque em Carregar. A fazenda atual é trocada por ele.', colar: 'Cole o texto aqui', carregar: 'Carregar', importou: 'Fazenda carregada!',
+    recomecar: 'Recomeçar', recomecarInfo: 'Apaga a fazenda deste aparelho.', certeza: 'Tem certeza? A fazenda deste aparelho será apagada e o jogo começa do zero.', sim: 'Sim, apagar tudo', nao: 'Não',
     versao: 'Versão de teste do marco M1.',
   },
   subida: { faixa: 'Subiu de nível!', ganhou: 'Você ganhou', liberou: 'Liberou', continuar: 'Continuar', xp: 'xp' },
@@ -115,6 +120,8 @@ export const T = {
   deitar: 'Deite o celular para jogar',
   erroDeGravacao: (e) => `A gravação não serve: ${e}`,
   erroDeDados: 'Os dados do jogo têm erro e ele não pode começar:',
+  erroDoJogo: 'O jogo encontrou um erro e parou. Recarregue a página; a fazenda gravada continua guardada.',
+  gravacaoRuim: 'A gravação deste aparelho não abriu e ficou guardada à parte. Começamos uma fazenda nova.',
 };
 
 // código da lógica → frase. Código desconhecido aparece como veio (para ninguém deixar de ver que falta o texto).

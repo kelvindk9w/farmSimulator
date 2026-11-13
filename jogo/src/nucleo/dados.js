@@ -159,7 +159,7 @@ export function prepararDados(bruto) {
   }
 
   // ---------- missões ----------
-  const missoes = { vizinho: [] };
+  const missoes = { vizinho: [], vizinhoNome: 'Seu Tonho', vizinhoId: 'vizinho' };
   if (tem('missoes')) {
     const v = bruto.missoes.vizinho;
     if (!Array.isArray(v)) aviso('missoes.json', 'falta a lista "vizinho" (as missões do Seu Tonho)');
@@ -170,6 +170,7 @@ export function prepararDados(bruto) {
       for (const k of Object.keys((obj(m.recompensa) && m.recompensa.itens) || {})) if (!itens[k]) aviso('missoes.json', `missão "${m.id}": o item "${k}" da recompensa não existe`);
     }
     missoes.vizinhoNome = (obj(bruto.missoes.quem) && bruto.missoes.quem.nome) || bruto.missoes.vizinhoNome || 'Seu Tonho';
+    missoes.vizinhoId = (obj(bruto.missoes.quem) && bruto.missoes.quem.id) || 'vizinho'; // o retrato é a peça retrato/<id>
   }
 
   // ---------- loja de ouro ----------
