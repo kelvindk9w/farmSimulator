@@ -184,6 +184,10 @@
     .balao { top: calc(max(6px, env(safe-area-inset-top)) + 50px); }
     .avisos { top: calc(max(6px, env(safe-area-inset-top)) + 78px); }
     .aviso { padding: 5px 12px; }
+    /* com o balão do vizinho na tela, os avisos ficam na parte livre à esquerda dele (não cobrem a fala) */
+    body:has(.balao:not([hidden])) .avisos { right: calc(min(330px, 40%) + max(8px, env(safe-area-inset-right)) + 6px); }
+    body:has(.balao:not([hidden])) .aviso { max-width: 96%; }
+    body.com-painel:has(.balao:not([hidden])) .avisos { right: 0; } /* painel aberto: o balão fica atrás dele */
     .rodape.com-sementes .dica { display: none; }
     .rodape { gap: 4px; }
     .semente { width: 48px; height: 46px; }

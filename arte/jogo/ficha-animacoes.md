@@ -25,6 +25,8 @@ Como é feito: o pedido (`arte/jogo/pedidos/<nome>.md`) vai ao Codex com a cena 
 | montaria | `arte/jogo/modelos/montaria.png` | `modelo-montaria.md` | Folha de modelo da INTERAÇÃO: a personagem montada no cavalo selado (pés nos estribos, mãos nas rédeas), de frente, de costas e de perfil. Anexada aos pedidos da personagem montada. A folha veio com um véu de sujeira quase transparente no fundo, que foi limpo antes de guardar. Uma rodada. |
 | jumento | `arte/jogo/modelos/jumento.png` | `modelo-jumento.md` | Jumento cinza atrelado à carroça de madeira de duas rodas, vazia: frente, costas e perfil. A carroça faz parte da figura. Uma rodada. |
 | cachorro | `arte/jogo/modelos/cachorro.png` | `modelo-cachorro.md` | Vira-lata caramelo de coleira vermelha, peito, patas e ponta do rabo brancos: frente, costas e perfil. Uma rodada. |
+| gato | `arte/jogo/modelos/gato.png` | `modelo-gato.md` | Gato rajado laranja, de peito, focinho e patas brancos, olhos verdes e rabo erguido; frente, costas e perfil. |
+| seu-tonho | `arte/jogo/modelos/seu-tonho.png` | `20-modelo-seu-tonho.md` | Feita pela frente de retratos; usada aqui para a figura de corpo inteiro. |
 
 ## 1. Personagem: movimento e lavoura
 
@@ -123,12 +125,12 @@ Como é feito: o pedido (`arte/jogo/pedidos/<nome>.md`) vai ao Codex com a cena 
 | `animal/cachorro/andar-costas` | Pronta | 6 | 152x200 | 76,173 | 9 | 1 | `cachorro-andar-costas.md` | Trote de 6 quadros visto por trás; mesmo tamanho da espera (pela massa); um quadro com as patas no ar. |
 | `animal/cachorro/sentado-frente` | Pronta | 8 (4 desenhos) | 176x192 | 88,170 | 5 | 1 | `cachorro-sentado-frente.md` | Sentado, para quando a personagem para: ofega, varre o chão com o rabo, inclina a cabeça e pisca; 4 desenhos em 8 quadros; cabeça do mesmo tamanho da figura em pé. |
 | `animal/cachorro/sentado-costas` | Pronta | 8 (4 desenhos) | 136x192 | 68,170 | 5 | 1 | `cachorro-sentado-costas.md` | Sentado visto por trás: varre o chão com o rabo, levanta uma orelha, ofega e pisca; 4 desenhos em 8 quadros. |
-| `animal/gato/parada-frente` | Falta | | | | |  |  |  |
-| `animal/gato/parada-costas` | Falta | | | | |  |  |  |
-| `animal/gato/andar-frente` | Falta | | | | |  |  |  |
-| `animal/gato/andar-costas` | Falta | | | | |  |  |  |
-| `animal/gato/sentado-frente` | Falta | | | | |  |  |  |
-| `animal/gato/sentado-costas` | Falta | | | | |  |  |  |
+| `animal/gato/parada-frente` | Pronta | 8 (4 desenhos) | 112x144 | 56,121 | 5 | 1 | `gato-parada-frente.md` | Gato rajado laranja: descanso, balança o rabo erguido, olha em volta e pisca; 4 desenhos em 8 quadros. Altura de 118 px contando o rabo erguido (cerca de 100 px até a ponta das orelhas). |
+| `animal/gato/parada-costas` | Pronta | 8 (4 desenhos) | 128x136 | 64,114 | 5 | 1 | `gato-parada-costas.md` | O mesmo gato visto por trás: balança o rabo, vira a cabeça e pisca; 4 desenhos em 8 quadros; mesmo tamanho da vista de frente (pela massa). |
+| `animal/gato/andar-frente` | Pronta | 6 | 120x144 | 60,121 | 9 | 1 | `gato-andar-frente.md` | Trote leve de 6 quadros, rabo erguido; mesmo tamanho da espera (pela massa). |
+| `animal/gato/andar-costas` | Pronta | 6 | 128x136 | 64,114 | 9 | 1 | `gato-andar-costas.md` | Trote leve de 6 quadros visto por trás; mesmo tamanho da espera (pela massa). |
+| `animal/gato/sentado-frente` | Pronta | 8 (4 desenhos) | 96x136 | 48,117 | 5 | 1 | `gato-sentado-frente.md` | Sentado com o rabo enrolado nas patas, para quando a personagem para: olha em volta, lambe a pata e pisca; 4 desenhos em 8 quadros; cabeça do mesmo tamanho da figura em pé. |
+| `animal/gato/sentado-costas` | Pronta | 8 (4 desenhos) | 104x136 | 52,117 | 5 | 1 | `gato-sentado-costas.md` | Sentado visto por trás: vira a cabeça, lambe a pata e pisca; 4 desenhos em 8 quadros. |
 
 ## 5. Acréscimos da coordenação: bichos especiais e Seu Tonho
 
@@ -156,16 +158,16 @@ Como é feito: o pedido (`arte/jogo/pedidos/<nome>.md`) vai ao Codex com a cena 
 | `personagem/montada-mangalarga-andar-costas` | Pronta | 8 | 352x480 | 176,439 | 8 | 1 | `recolorida de personagem/montada-andar-costas` | A mesma folha da montada com o cavalo de pelagem baia (dourada), por código (recolorir.mjs --receita mangalarga); a personagem, a sela e as botas não mudam; mesma casa e apoio. |
 | `personagem/montada-mangalarga-galope-frente` | Pronta | 8 | 520x488 | 260,446 | 12 | 1 | `recolorida de personagem/montada-galope-frente` | A mesma folha da montada com o cavalo de pelagem baia (dourada), por código (recolorir.mjs --receita mangalarga); a personagem, a sela e as botas não mudam; mesma casa e apoio. |
 | `personagem/montada-mangalarga-galope-costas` | Pronta | 8 | 456x456 | 228,415 | 12 | 1 | `recolorida de personagem/montada-galope-costas` | A mesma folha da montada com o cavalo de pelagem baia (dourada), por código (recolorir.mjs --receita mangalarga); a personagem, a sela e as botas não mudam; mesma casa e apoio. |
-| `animal/seu-tonho/parado-frente` | Falta | | | | |  |  |  |
+| `animal/seu-tonho/parado-frente` | Pronta | 8 (4 desenhos) | 176x312 | 88,282 | 4 | 1 | `seu-tonho-parado-frente.md` | Seu Tonho de corpo inteiro no terreiro, com a folha de modelo dele (arte/jogo/modelos/seu-tonho.png, feita pela outra frente): descansa, respira, toca a aba do chapéu cumprimentando e pisca; 4 desenhos em 8 quadros, na altura da personagem (294 px com o chapéu). |
 
 ## 6. Acréscimos da frente de terras
 
 | Chave | Estado | Quadros | Casa | Apoio | qps | Rodadas | Pedido | Nota |
 |---|---|---|---|---|---|---|---|---|
-| `personagem/foice-frente` | Falta | | | | |  |  |  |
-| `personagem/foice-costas` | Falta | | | | |  |  |  |
-| `personagem/plantar-muda-frente` | Falta | | | | |  |  |  |
-| `personagem/plantar-muda-costas` | Falta | | | | |  |  |  |
+| `personagem/foice-frente` | Pronta | 6 | 200x344 | 100,302 | 8 | 1 | `personagem-foice-frente.md` | Roçada com a foice de cabo comprido nas duas mãos: recua, varre rente ao chão e volta, com os joelhos dobrando no golpe; 6 quadros em laço. A foice não está na folha de ferramentas (o pedido usa o cabo da enxada como medida). O arco da lâmina é mais curto que o pedido, mas lê bem. |
+| `personagem/foice-costas` | Pronta | 6 | 248x312 | 124,290 | 8 | 1 | `personagem-foice-costas.md` | A roçada vista por trás: a foice varre baixa do lado direito, com o tronco torcendo e os joelhos dobrando; 6 quadros em laço. |
+| `personagem/plantar-muda-frente` | Pronta | 6 | 152x320 | 76,298 | 8 | 1 | `personagem-plantar-muda-frente.md` | Segura a muda com torrão nas duas mãos, agacha, pousa e firma a terra (a muda fica em pé no chão no quadro 5) e levanta de mãos vazias (o jogo desenha a muda plantada); 6 quadros. |
+| `personagem/plantar-muda-costas` | Pronta | 6 | 176x320 | 88,298 | 8 | 1 | `personagem-plantar-muda-costas.md` | O plantio visto por trás: agacha com a muda, pousa-a do lado da frente e levanta de mãos vazias; 6 quadros. |
 
 ## Como cada folha foi preparada
 
@@ -195,6 +197,12 @@ A folha crua de cada chave e as opções passadas a `folha.mjs` (para refazer ig
 | `animal/galinha/ciscar-frente` | `ciscar-frente.png` (2172x724) | `--altura 129 --quadros 6 --qps 7 --alinhar molde --molde 0.78-1 --em-pe-quadro 1 --faixa-pes 0.12 --chao 0.05 --tamanho-massa 84 --altura-livre` | 17.5% | altura varia 17.5% entre quadros (128 106 114 115 120 129), esperado nesta ação |
 | `animal/galinha/parada-costas` | `parada-costas.png` (2172x724) | `--altura 129 --quadros 4 --qps 4 --alinhar molde --molde 0-1 --em-pe-quadro 1 --faixa-pes 0.12 --chao 0.05 --cor-ref 236,40,40 --altura-livre --sequencia 1,2,2,1,3,3,1,4` | 10.1% | altura varia 10.1% entre quadros (129 138 131 124), esperado nesta ação |
 | `animal/galinha/parada-frente` | `parada-frente.png` (2172x724) | `--altura 129 --quadros 4 --qps 4 --alinhar molde --molde 0-1 --em-pe-quadro 1 --faixa-pes 0.12 --chao 0.05 --cor-ref 236,40,40 --altura-livre --sequencia 1,2,2,1,3,3,1,4` | 12.3% | altura varia 12.3% entre quadros (129 138 129 121), esperado nesta ação; tamanho pela cor de referência varia 13% entre quadros (24 21 21 24): confira se a figura muda de tamanho |
+| `animal/gato/andar-costas` | `andar-costas.png` (2172x724) | `--altura 107 --quadros 6 --qps 9 --eixo massa --base linha --chao 0.09 --tamanho-massa 74 --altura-livre` | 3.7% | altura varia 3.7% entre quadros (111 107 107 111 109 109), esperado nesta ação |
+| `animal/gato/andar-frente` | `andar-frente.png` (2172x724) | `--altura 118 --quadros 6 --qps 9 --eixo massa --base linha --chao 0.09 --tamanho-massa 75 --altura-livre` | 7.7% | altura varia 7.7% entre quadros (122 116 114 118 114 113), esperado nesta ação |
+| `animal/gato/parada-costas` | `parada-costas.png` (2172x724) | `--altura 107 --quadros 4 --qps 5 --alinhar molde --molde 0.55-1 --em-pe-quadro 1 --faixa-pes 0.25 --chao 0.09 --sequencia 1,2,3,2,3,1,4,1 --altura-livre` | 9.6% | altura varia 9.6% entre quadros (107 106 117 109), esperado nesta ação |
+| `animal/gato/parada-frente` | `parada-frente.png` (2172x724) | `--altura 118 --quadros 4 --qps 5 --alinhar molde --molde 0.55-1 --em-pe-quadro 1 --faixa-pes 0.25 --chao 0.09 --sequencia 1,2,3,2,3,1,4,1 --altura-livre` | 10.2% | altura varia 10.2% entre quadros (118 110 123 113), esperado nesta ação |
+| `animal/gato/sentado-costas` | `sentado-costas.png` (2172x724) | `--altura 118 --quadros 4 --qps 5 --alinhar molde --molde 0.35-0.9 --em-pe-quadro 1 --faixa-pes 0.2 --chao 0.06 --sequencia 1,2,3,2,3,1,4,1 --tamanho-massa 70 --altura-livre` | 0.7% |  |
+| `animal/gato/sentado-frente` | `sentado-frente.png` (2172x724) | `--altura 118 --quadros 4 --qps 5 --alinhar molde --molde 0.35-0.9 --em-pe-quadro 1 --faixa-pes 0.2 --chao 0.06 --sequencia 1,2,3,2,3,1,4,1 --tamanho-massa 70 --altura-livre` | 0.7% |  |
 | `animal/jumento/andar-barril-costas` | `andar-barril-costas.png` (1536x1024) | `--altura 330 --quadros 8 --qps 8 --eixo massa --base linha --chao 0.25 --tamanho-massa 216 --altura-livre --apoio-dx 90` | 1.7% |  |
 | `animal/jumento/andar-barril-frente` | `andar-barril-frente.png` (1536x1024) | `--altura 255 --quadros 8 --qps 8 --eixo massa --base linha --chao 0.09 --tamanho-massa 222.3 --altura-livre --apoio-dx -23` | 4.2% | altura varia 4.2% entre quadros (253 248 256 252 254 252 258 255), esperado nesta ação |
 | `animal/jumento/andar-costas` | `andar-costas.png` (1536x1024) | `--altura 330 --quadros 8 --qps 8 --eixo massa --base linha --chao 0.25 --tamanho-massa 209 --altura-livre --apoio-dx 85` | 3.7% | altura varia 3.7% entre quadros (325 325 326 323 327 327 323 315), esperado nesta ação |
@@ -209,6 +217,7 @@ A folha crua de cada chave e as opções passadas a `folha.mjs` (para refazer ig
 | `animal/ovelha/andar-frente` | `andar-frente.png` (2172x724) | `--altura 190 --quadros 6 --qps 9 --eixo massa --base linha --chao 0.09 --tamanho-massa 143 --altura-livre` | 8.5% | altura varia 8.5% entre quadros (191 177 184 193 183 181), esperado nesta ação |
 | `animal/ovelha/parada-costas` | `parada-costas.png` (2172x724) | `--altura 204 --quadros 4 --qps 4 --alinhar molde --molde 0.55-1 --em-pe-quadro 1 --faixa-pes 0.25 --chao 0.09 --sequencia 1,2,2,3,3,1,4,1` | 0.7% |  |
 | `animal/ovelha/parada-frente` | `parada-frente.png` (2172x724) | `--altura 190 --quadros 4 --qps 4 --alinhar molde --molde 0.55-1 --em-pe-quadro 1 --faixa-pes 0.25 --chao 0.09 --sequencia 1,2,2,3,3,1,4,1` | 2.4% |  |
+| `animal/seu-tonho/parado-frente` | `parado-frente.png` (2172x724) | `--altura 294 --quadros 4 --qps 4 --alinhar molde --molde 0.5-1 --em-pe-quadro 1 --faixa-pes 0.12 --chao 0.06 --sequencia 1,2,1,2,3,3,1,4` | 0.4% |  |
 | `animal/vaca/andar-costas` | `andar-costas.png` (2172x724) | `--altura 297 --quadros 8 --qps 8 --eixo massa --base linha --chao 0.09 --tamanho-massa 202 --altura-livre` | 6.9% | altura varia 6.9% entre quadros (309 307 303 299 300 300 312 291), esperado nesta ação |
 | `animal/vaca/andar-frente` | `andar-frente.png` (2172x724) | `--altura 273 --quadros 8 --qps 8 --eixo massa --base linha --chao 0.09 --tamanho-massa 212 --altura-livre` | 6.4% | a folha crua é menor que a saída (figura em pé com 265 pontos para 273): a figura foi ampliada 1.10 vezes; altura varia 6.4% entre quadros (287 274 288 277 292 274 289 281), esperado nesta ação |
 | `animal/vaca/parada-costas` | `parada-costas.png` (2172x724) | `--altura 297 --quadros 4 --qps 4 --alinhar molde --molde 0.35-1 --em-pe-quadro 1 --faixa-pes 0.25 --chao 0.09 --sequencia 1,2,2,3,3,1,4,1` | 2.1% |  |
@@ -229,6 +238,8 @@ A folha crua de cada chave e as opções passadas a `folha.mjs` (para refazer ig
 | `personagem/correr-frente` | `correr-frente.png` (2172x724) | `--altura 294 --quadros 8 --qps 12 --base linha --tamanho-cor 47.5 --peso-cor 1 --altura-livre` | 12.6% | a proporção entre cabeça e corpo difere 15% da folha de modelo; altura varia 12.6% entre quadros (250 238 244 218 246 236 243 220), esperado nesta ação |
 | `personagem/enxadar-costas` | `enxadar-costas.png` (2172x724) | `--altura 294 --quadros 7 --ref --alinhar molde --tamanho-cor 48.7 --altura-livre --qps 8` | 32.9% | altura varia 32.9% entre quadros (300 298 370 278 248 290), esperado nesta ação |
 | `personagem/enxadar-frente` | `enxadar-frente.png` (2172x724) | `--altura 294 --quadros 7 --ref --alinhar molde --tamanho-cor 47.5 --altura-livre --qps 8` | 31.3% | alinhamento incerto pelo molde nos quadros 3, 5 (custos 0 131 173 139 152 101): olhe a sobreposição na tira; altura varia 31.3% entre quadros (301 300 374 282 257 291), esperado nesta ação |
+| `personagem/foice-costas` | `foice-costas.png` (2172x724) | `--altura 294 --quadros 7 --ref --alinhar molde --tamanho-cor 48.7 --altura-livre --qps 8` | 11.8% | altura varia 11.8% entre quadros (287 290 280 256 278 283), esperado nesta ação |
+| `personagem/foice-frente` | `foice-frente.png` (2172x724) | `--altura 294 --quadros 7 --ref --alinhar molde --tamanho-cor 47.5 --altura-livre --qps 8` | 9.5% | alinhamento incerto pelo molde nos quadros 3, 4 (custos 0 176 241 233 194 131): olhe a sobreposição na tira; altura varia 9.5% entre quadros (302 288 300 290 274 296), esperado nesta ação |
 | `personagem/machado-costas` | `machado-costas.png` (2172x724) | `--altura 294 --quadros 7 --ref --alinhar molde --tamanho-cor 48.7 --altura-livre --qps 8` | 10.5% | altura varia 10.5% entre quadros (299 299 303 293 271 293), esperado nesta ação |
 | `personagem/machado-frente` | `machado-frente.png` (2172x724) | `--altura 294 --quadros 7 --ref --alinhar molde --tamanho-cor 47.5 --altura-livre --qps 8` | 12.8% | altura varia 12.8% entre quadros (303 303 303 293 265 294), esperado nesta ação; tamanho pela cor de referência varia 17% entre quadros (46 46 41 47 48 47): confira se a figura muda de tamanho |
 | `personagem/manivela-costas` | `manivela-costas.png` (2172x724) | `--altura 294 --quadros 7 --ref --alinhar molde --tamanho-cor 48.7 --altura-livre --qps 8` | 7.3% | altura varia 7.3% entre quadros (305 305 301 283 297 305), esperado nesta ação |
@@ -245,6 +256,8 @@ A folha crua de cada chave e as opções passadas a `folha.mjs` (para refazer ig
 | `personagem/parada-frente` | `parada-frente.png` (2172x724) | `--quadros 4 --altura 294 --qps 6 --alinhar molde --em-pe-quadro 1 --tamanho-cor 47.5 --sequencia 1,1,2,3,3,3,2,1,1,4,1,1` | 0% |  |
 | `personagem/picareta-costas` | `picareta-costas.png` (2172x724) | `--altura 294 --quadros 7 --ref --alinhar molde --tamanho-cor 48.7 --altura-livre --qps 8` | 25.5% | altura varia 25.5% entre quadros (294 299 348 287 259 285), esperado nesta ação |
 | `personagem/picareta-frente` | `picareta-frente.png` (2172x724) | `--altura 294 --quadros 7 --ref --alinhar molde --tamanho-cor 47.5 --altura-livre --qps 8` | 19.4% | altura varia 19.4% entre quadros (289 292 313 270 253 288), esperado nesta ação |
+| `personagem/plantar-muda-costas` | `plantar-muda-costas.png` (2172x724) | `--altura 294 --quadros 7 --ref --alinhar molde --tamanho-cor 48.7 --altura-livre --qps 8` | 27.9% | altura varia 27.9% entre quadros (297 279 249 222 214 286), esperado nesta ação |
+| `personagem/plantar-muda-frente` | `plantar-muda-frente.png` (2172x724) | `--altura 294 --quadros 7 --ref --alinhar molde --tamanho-cor 47.5 --altura-livre --qps 8` | 32% | altura varia 32.0% entre quadros (298 274 236 209 203 288), esperado nesta ação |
 | `personagem/regar-costas` | `regar-costas.png` (2172x724) | `--altura 294 --quadros 7 --ref --alinhar molde --tamanho-cor 48.7 --altura-livre --qps 8` | 6.8% | altura varia 6.8% entre quadros (294 294 291 274 276 292), esperado nesta ação |
 | `personagem/regar-frente` | `regar-frente.png` (2172x724) | `--altura 294 --quadros 7 --ref --alinhar molde --tamanho-cor 47.5 --altura-livre --qps 8` | 11.1% | altura varia 11.1% entre quadros (303 301 293 270 277 303), esperado nesta ação |
 | `personagem/semear-costas` | `semear-costas.png` (2171x724) | `--altura 294 --quadros 7 --ref --alinhar molde --tamanho-cor 48.7 --altura-livre --qps 8` | 21.5% | altura varia 21.5% entre quadros (297 301 271 243 236 293), esperado nesta ação |
@@ -263,6 +276,6 @@ A folha crua de cada chave e as opções passadas a `folha.mjs` (para refazer ig
 
 ## Resumo
 
-92 prontas, 2 pendentes (no catálogo, com defeito anotado) e 17 em falta, de 111 folhas da lista.
+103 prontas, 2 pendentes (no catálogo, com defeito anotado) e 6 em falta, de 111 folhas da lista.
 
 As tiras de conferência (`arte/jogo/folhas/<nome>.png`: os quadros lado a lado, a linha do chão, o ponto de apoio e todos os quadros sobrepostos) e as animações (`.gif`) têm o nome da chave com hífens, por exemplo `personagem-andar-frente.png`.

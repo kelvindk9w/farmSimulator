@@ -240,11 +240,13 @@ DESLOCAMENTO.velocidade = (m) => { const T = m.trabalho; return T && T.viagem ? 
 DESLOCAMENTO.visual = (m, out) => {
   const T = m.trabalho;
   if (!T || !T.viagem) return;
-  if (T.montada) { out.estado = out.vel > 4 ? 'montada-galope' : 'montada-andar'; out.t = T.tMontada; out.p = 0; out.montada = T.figura; } else if (out.estado === 'andar' || out.estado === 'carregar') out.estado = 'correr';
+  // montada: personagem/montada-<andar|galope>; num cavalo especial, montada-<nome>-<andar|galope> (o desenho cai na comum)
+  if (T.montada) { out.estado = 'montada-' + T.sufixo + (out.vel > 4 ? 'galope' : 'andar'); out.t = T.tMontada; out.p = 0; out.montada = T.figura; } else if (out.estado === 'andar' || out.estado === 'carregar') out.estado = 'correr';
 };
 
 function subir(m, T, cav) {
   T.montada = true; T.cavalgado = 0; T.tMontada = 0; T.figura = cav.especie;
+  const s = cav.especie.replace(/^cavalo-?/, ''); T.sufixo = s ? s + '-' : '';
   recolher(m, cav.id);
   m.eventos.emitir('montouNoCavalo', { animal: cav.especie });
 }
@@ -502,7 +504,7 @@ registrarSistema({
     for (const a of Object.values(m.dados.arvores || {})) if (a && a.rende > folga) folga = a.rende;
     m.trabalho = {
       aCavalo: false, levando: false, carroca: {}, barril: 0,
-      montada: false, viagem: false, embarque: 0, descanso: 0, direto: 0, cavalgado: 0, tMontada: 0, figura: null,
+      montada: false, viagem: false, embarque: 0, descanso: 0, direto: 0, cavalgado: 0, tMontada: 0, figura: null, sufixo: '',
       boiOcioso: 0, arrasto: { x: -9, z: -9, n: -9999, dir: -1 }, folgaDoCesto: folga, versao: -1, bichos: [],
     };
     // a duração da passada é a do boi (animais.json: efeito.seg), se regras.json não disser outra

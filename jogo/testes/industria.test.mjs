@@ -15,6 +15,7 @@ import { missaoAtual, missaoPossivel } from '../src/nucleo/sistemas/missoes.js';
 import { consultaDeConcluir } from '../src/nucleo/sistemas/cash.js';
 import { ofertasDaLoja } from '../src/nucleo/sistemas/loja.js';
 import { guiaDaMissao } from '../src/nucleo/guia.js';
+import { darXp } from '../src/nucleo/sistemas/niveis.js';
 import { receitasDe, ehIndustria, vagasDaFila, proximaVaga, estadoDaIndustria, faltaDaFila, andamentoDaFila, visaoDaIndustria, prontosNaSaida, podeProduzir } from '../src/nucleo/sistemas/industria.js';
 
 const filaDe = (m, e) => (estadoDaIndustria(m, e) || { fila: [] }).fila;
@@ -329,6 +330,15 @@ function mundoDeVerdade(nivel) {
   m.posses.celeiro.capacidade = 500;
   return m;
 }
+test('dados de verdade: a subida para o nível 7 mostra o fubá como receita nova e a ração uma vez só (é item da loja)', () => {
+  const m = mundoDeVerdade(6), ev = ouvirTudo(m);
+  darXp(m, m.dados.niveis.limiar[7] - m.progresso.xp);
+  assert.equal(m.progresso.nivel, 7);
+  const lib = ev.de('subiuDeNivel')[0].liberou;
+  assert.deepEqual(lib.filter((x) => x.tipo === 'receitas').map((x) => [x.id, x.icone]), [['fuba', 'icone/fuba']]);
+  assert.equal(lib.filter((x) => x.id === 'racao' || x.item === 'racao').length, 1, 'a ração aparece uma vez');
+});
+
 // põe a construção pronta no primeiro lugar livre do terreiro
 function erguer(m, id) {
   const loc = m.locais.fazenda, c = m.dados.construcoes[id].casas, a = m.dados.terras.limpo || m.dados.terras.inicial;

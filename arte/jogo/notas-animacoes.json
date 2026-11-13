@@ -593,6 +593,26 @@
    "pedido": "personagem-plantar-muda-frente.md",
    "rodadas": 1,
    "nota": "Segura a muda com torrão nas duas mãos, agacha, pousa e firma a terra (a muda fica em pé no chão no quadro 5) e levanta de mãos vazias (o jogo desenha a muda plantada); 6 quadros."
+  },
+  "personagem/foice-costas": {
+   "pedido": "personagem-foice-costas.md",
+   "rodadas": 1,
+   "nota": "A roçada vista por trás: a foice varre baixa do lado direito, com o tronco torcendo e os joelhos dobrando; 6 quadros em laço."
+  },
+  "personagem/plantar-muda-costas": {
+   "pedido": "personagem-plantar-muda-costas.md",
+   "rodadas": 1,
+   "nota": "O plantio visto por trás: agacha com a muda, pousa-a do lado da frente e levanta de mãos vazias; 6 quadros."
+  },
+  "animal/gato-siames/parada-frente": {
+   "pedido": "gato-siames-parada-frente.md",
+   "rodadas": 1,
+   "nota": "Folha nova no Codex, copiando quadro a quadro a do gato comum (a recoloração por código não faz as pontas escuras do siamês): corpo creme sem listras, máscara, orelhas, patas e rabo castanho-escuros, olhos azuis; mesmo tamanho do gato comum (pela massa)."
+  },
+  "animal/gato-siames/parada-costas": {
+   "pedido": "gato-siames-parada-costas.md",
+   "rodadas": 1,
+   "nota": "Folha nova no Codex, copiando quadro a quadro a do gato comum (a recoloração por código não faz as pontas escuras do siamês): corpo creme sem listras, máscara, orelhas, patas e rabo castanho-escuros, olhos azuis; mesmo tamanho do gato comum (pela massa)."
   }
  },
  "geral": [
