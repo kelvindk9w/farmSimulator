@@ -112,6 +112,7 @@ ${TINTAS.map(([s, c]) => `#ui ${s}{--tinta:${c}}`).join('\n')}
 #ui .veu.da-loja .corpo>.grade,#ui .veu.da-loja .cons .grade{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 #ui .veu.da-loja .oferta{display:flex;flex-direction:column;align-items:center;text-align:center;gap:1px;padding:2px 5px 5px;min-height:132px}
 #ui .veu.da-loja .oferta>canvas.ic{width:48px!important;height:48px!important;margin-top:1px;flex:none}
+#ui:not(.compacto) .veu.da-loja .oferta>canvas.ic{width:64px!important;height:64px!important}
 #ui .veu.da-loja .oferta .nome{font-size:16px;font-weight:800;line-height:1.1}
 #ui .veu.da-loja .oferta .nome small{display:block;font-size:14px}
 #ui .veu.da-loja .oferta .info{font-size:14px;font-weight:600;line-height:1.15;color:#8a5a2b;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}

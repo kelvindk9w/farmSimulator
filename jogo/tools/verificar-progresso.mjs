@@ -436,10 +436,10 @@ try {
   igual(vistos, 'construir,loja,menu,mochila', 'no celular deitado o alto direito mostra só Mochila, Loja, Construir e Menu');
   const menuLista = () => J(pg, () => {
     const l = document.getElementById('menu-lista'), bm = document.querySelector('[data-k="menu"]');
-    const itens = l ? [...l.querySelectorAll('button')].filter((b) => !b.hidden && b.offsetParent) : [];
-    const rs = itens.map((b) => b.getBoundingClientRect());
-    let encostam = 0;
-    for (let i = 0; i < rs.length; i++) for (let k = i + 1; k < rs.length; k++) { const a = rs[i], b = rs[k]; if (a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1) encostam++; }
+    const itens = l ? [...l.querySelectorAll('button')].filter((b) => !b.hidden && b.offsetParent && b.getBoundingClientRect().width > 0) : [];
+    const rs = itens.map((b) => b.getBoundingClientRect()), nome = (b) => b.dataset.painel || b.dataset.k || b.className;
+    const encostam = [];
+    for (let i = 0; i < rs.length; i++) for (let k = i + 1; k < rs.length; k++) { const a = rs[i], b = rs[k]; if (a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1) encostam.push(`${nome(itens[i])} (${Math.round(a.top)}-${Math.round(a.bottom)}) e ${nome(itens[k])} (${Math.round(b.top)}-${Math.round(b.bottom)})`); }
     return { aberta: document.querySelector('.topo-dir').classList.contains('menu-aberto'), visivel: !!l && !!l.offsetParent, expandido: bm.getAttribute('aria-expanded'), itens: itens.map((b) => b.dataset.painel || b.dataset.k), encostam, pontoMenu: !bm.querySelector('.ponto').hidden, pontoDentro: !!l.querySelector('.ponto:not([hidden])'), foco: document.activeElement ? document.activeElement.dataset.painel || document.activeElement.dataset.k || '' : '', focoNaLista: l.contains(document.activeElement) };
   });
   let ml = await menuLista();
@@ -449,7 +449,7 @@ try {
   ml = await menuLista();
   confere(ml.aberta && ml.visivel && ml.expandido === 'true', 'o toque no Menu abre a lista');
   confere(['correio', 'missoes', 'fazenda', 'config'].every((k) => ml.itens.includes(k)), `a lista tem Correio, Missões, Minha fazenda e Configurações (veio ${ml.itens.join(', ')})`);
-  igual(ml.encostam, 0, 'os itens da lista do Menu não encostam uns nos outros');
+  confere(ml.encostam.length === 0, 'os itens da lista do Menu não encostam uns nos outros: ' + ml.encostam.join('; '));
   confere(await cabe(pg, '#menu-lista'), 'a lista do Menu cabe na tela');
   ruins = await pequenos(pg);
   confere(ruins.length === 0, 'celular, lista do Menu: ' + ruins.slice(0, 4).join('; '));

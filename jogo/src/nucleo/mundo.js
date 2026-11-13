@@ -17,7 +17,7 @@ export class Mundo {
     this.eventos = new Eventos();
     this.locais = {};
     this.comandos = {};
-    this._passo = []; this._segundo = [];
+    this._passo = []; this._segundo = []; this._antes = [];
     for (const s of SISTEMAS) {
       if (s.comandos) for (const k in s.comandos) {
         if (this.comandos[k]) throw new Error(`comando "${k}" definido por dois sistemas`);
@@ -25,6 +25,7 @@ export class Mundo {
       }
       if (s.passo) this._passo.push(s);
       if (s.segundo) this._segundo.push(s);
+      if (s.antesDoComando) this._antes.push(s);
     }
     for (const s of SISTEMAS) if (s.iniciar) s.iniciar(this);
   }
@@ -53,6 +54,9 @@ export class Mundo {
 
   // Toda entrada do jogador passa por aqui. Devolve { ok, motivo, dados }: "motivo" é um código (ui/textos.js faz a frase).
   comando(c) {
+    // um sistema pode olhar a ordem antes (a chegada da personagem termina no primeiro toque); devolvendo uma
+    // resposta, a ordem para ali
+    for (let i = 0; i < this._antes.length; i++) { const r = this._antes[i].antesDoComando(this, c); if (r) return r; }
     const f = this.comandos[c.tipo];
     if (!f) return { ok: false, motivo: 'comando-desconhecido', dados: { tipo: c.tipo } };
     return f(this, c) || OK;
@@ -71,6 +75,8 @@ export class Mundo {
     obj = migrar(obj);
     const m = new Mundo(dados, { ...opc, agora: obj.agora });
     m.sorteio.a = obj.sorteio >>> 0;
+    // antes de qualquer sistema carregar, quem precisa olha a gravação inteira (a fazenda de antes do começo humilde)
+    for (const s of SISTEMAS) if (s.antesDeCarregar) s.antesDeCarregar(m, obj);
     for (const s of SISTEMAS) if (s.carregar && obj.sistemas[s.id] !== undefined) s.carregar(m, obj.sistemas[s.id]);
     m.eventos.emitir('carregou', {});
     return m;

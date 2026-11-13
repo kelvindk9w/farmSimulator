@@ -47,9 +47,12 @@ export const CSS_HUD = `
 #ui .bt.menu{display:none}
 /* celular deitado: só Mochila, Loja, Construir e Menu; o resto desce numa lista */
 #ui.compacto .bt.menu{display:flex}
-#ui.compacto .menu-lista{display:none;position:absolute;right:-3px;top:62px;width:240px;flex-direction:column;gap:0;${mold('menu-lista', '27px 36px 18px 17px')}border-width:15px 9px 9px 8px;padding:0 2px;z-index:4}
+#ui.compacto .menu-lista{display:none;position:absolute;right:-3px;top:62px;width:240px;flex-direction:column;gap:0;${mold('menu-lista', '27px 36px 18px 17px')}border-width:15px 9px 9px 8px;padding:0 2px;z-index:4;max-height:calc(100vh / var(--esc, 1) - 76px);overflow-y:auto;overscroll-behavior:contain}
 #ui.compacto .topo-dir.menu-aberto .menu-lista{display:flex}
-#ui.compacto .menu-lista .bt.quadrado{border:0;border-image:none;background:none;width:100%;height:44px;flex-direction:row;justify-content:flex-start;gap:12px;padding:0 6px 0 4px;border-radius:8px}
+/* (a caixa de correio que recebeu presente pulsa só o ícone: a fileira inteira crescendo encostaria nas vizinhas) */
+#ui .bt.correio.chegou{animation:none}
+#ui .bt.correio.chegou>canvas.ic{animation:pulsa .5s 3}
+#ui.compacto .menu-lista .bt.quadrado{border:0;border-image:none;background:none;width:100%;height:44px;flex:none;margin:0;flex-direction:row;justify-content:flex-start;gap:12px;padding:0 6px 0 4px;border-radius:8px}
 #ui.compacto .menu-lista .bt.quadrado+.bt.quadrado{border-top:1.5px solid rgba(160,104,52,.4)}
 #ui.compacto .menu-lista .bt.quadrado:active{background:rgba(214,160,92,.35)}
 #ui.compacto .menu-lista .bt.quadrado>canvas.ic{width:36px!important;height:36px!important;flex:none}
