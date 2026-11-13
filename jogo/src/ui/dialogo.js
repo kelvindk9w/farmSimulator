@@ -2,6 +2,8 @@
 // Dois botões; o foco começa no "não", para um Enter distraído não gastar nada. Fecha com Esc, com o botão de
 // voltar e tocando fora. Usa o mesmo véu das telas de recompensa (classe "subida"): as setas andam pelos botões.
 //   perguntar({ titulo, texto, nota, icone, sim, nao, classeSim, aoSim, aoNao })
+// (e, para um cartão que não é bem pergunta: conteudo (um elemento, antes dos botões), classe (a mais no véu) e
+// foco (seletor do botão que recebe o foco, dentro do cartão). Ex.: o "Onde conseguir?" de ui/fontes.js)
 import { el, icone, botao } from './dom.js';
 import './textos/progresso.js';
 import { T } from './textos.js';
@@ -16,11 +18,12 @@ export const dialogoAberto = () => !!aberto;
 export function perguntar(p) {
   if (!raiz) return false;
   if (aberto) fecharDialogo();
-  const veu = el('div', 'subida dialogo'), cartao = el('div', 'cartao');
+  const veu = el('div', 'subida dialogo' + (p.classe ? ' ' + p.classe : '')), cartao = el('div', 'cartao');
   if (p.icone) cartao.append(icone(p.icone, 52));
   if (p.titulo) cartao.append(el('div', 'faixa', p.titulo));
   if (p.texto) cartao.append(el('p', 'pergunta', p.texto));
   if (p.nota) cartao.append(el('p', 'nota', p.nota));
+  if (p.conteudo) cartao.append(p.conteudo);
   const linha = el('div', 'linha');
   const nao = botao({ texto: p.nao || T.dialogo.nao, aoClicar: () => { fecharDialogo(); som.tocar('fechar'); if (p.aoNao) p.aoNao(); } });
   nao.dataset.k = 'nao';
@@ -37,7 +40,7 @@ export function perguntar(p) {
   raiz.append(veu);
   aberto = { veu, antes: document.activeElement };
   som.tocar('abrir');
-  try { nao.focus({ preventScroll: true }); } catch { /* sem foco */ }
+  try { ((p.foco && cartao.querySelector(p.foco)) || nao).focus({ preventScroll: true }); } catch { /* sem foco */ }
   return true;
 }
 

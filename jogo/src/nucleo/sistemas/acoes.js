@@ -60,11 +60,12 @@ function semear(m, x, z, s) {
   if (filaTem(m, 'semear', x, z)) return NA_FILA;
   if (!s) return { acao: null, texto: 'sem-sementes-na-mao', falta: true };
   if (sementesLivres(m, s) <= 0) return { acao: null, texto: 'sem-sementes', dados: { item: s }, falta: true };
-  return { acao: 'semear', args: { semente: s }, dados: { item: s }, item: s, modo: 'semear' };
+  return { acao: 'semear', args: { semente: s }, dados: { item: s }, item: s, modo: 'semear', arrasta: true };
 }
 
 // O que o toque na casa livre (x, z) faz, sem fazer nada: como o acaoNaCasa de um modo ({ acao, args, texto, dados,
-// falta, info, casas }), mais "modo" (o modo interno que o arrastar e o segurar repetem) e "item" (a semente usada).
+// falta, info, casas }), mais "modo" (o modo interno que o segurar repete na fileira), "arrasta" (arrastar o dedo a
+// partir daqui repete a ação: só do campo e das plantas; da grama, o arrasto anda) e "item" (a semente usada).
 // null = nada a fazer (o toque só anda até lá). c = o comando do toque (o boi quer saber se o dedo está pintando).
 export function acaoNaturalNaCasa(m, x, z, c) {
   const loc = m.local;
@@ -74,14 +75,14 @@ export function acaoNaturalNaCasa(m, x, z, c) {
   if (loc.plantas[i]) { // a planta: colher a pronta, regar a com sede; crescendo, só informa
     const d = MODOS.mao.acaoNaCasa(m, x, z);
     if (d && d.acao === 'regar' && !temFerramenta(m, 'regador')) return { acao: null, texto: 'sem-ferramenta', dados: { funcao: 'regador' }, falta: true };
-    return d && d.acao === 'regar' ? { ...d, modo: 'regar' } : d;
+    return d && d.acao === 'regar' ? { ...d, modo: 'regar', arrasta: true } : d;
   }
   const chao = loc.chao[i], item = itemNaMao(m), muda = ehMuda(m, item);
   if (chao === ARADA || filaTem(m, 'arar', x, z)) { // (a casa que a enxada vai arar já aceita a semente)
     // a muda vai na grama: no campo, só sementes
     return muda ? { acao: null, texto: 'muda-na-grama', info: true, dados: { item } } : semear(m, x, z, item);
   }
-  if (chao === CAMPO) return arar(m, x, z, c);
+  if (chao === CAMPO) { const a = arar(m, x, z, c); return a && a.modo ? { ...a, arrasta: true } : a; }
   if (chao !== GRAMA) return null;
   if (muda) { // a muda escolhida na mão: planta na grama tocada
     const p = PLANTIOS.find((k) => k.serve(m.dados, item));
@@ -101,6 +102,8 @@ const ehAbrigo = (m, e) => { const d = m.dados.construcoes[e.tipo]; return !!d &
 // precisam: comida ou água que falta; depois, o que está pronto para recolher; sem nada disso, abrir o painel.
 function acoesDoAbrigo(m, e) {
   const falta = faltaNoAbrigo(m, e), out = [];
+  let come = false, bebe = false; // alguém ali come, alguém bebe (no abrigo vazio, o trato não aparece)
+  for (const x of m.animais.lista) { if (x.abrigo !== e.id) continue; const dx = defDoAnimal(m, x); if (dx && dx.cicloSeg > 0) { come = come || dx.porcoes > 0; bebe = bebe || dx.bebe > 0; } }
   let recolher = null, racao = null, agua = null;
   const a = m.animais.lista.find((x) => x.abrigo === e.id && x.pronto > 0);
   const d = a && defDoAnimal(m, a);
@@ -108,8 +111,8 @@ function acoesDoAbrigo(m, e) {
     const acao = acaoDeRecolher(d), r = podeRecolher(m, d);
     if (r.ok && !naFilaNa(m, acao, e.id)) recolher = { id: acao, acao, ok: true, comando: { tipo: 'recolher', entidade: e.id }, dados: { animal: d.id, item: d.produto, construcao: e.tipo } };
   }
-  if (podeEncherCocho(m, e).ok && !naFilaNa(m, 'abastecerCocho', e.id)) racao = { id: 'abastecerCocho', acao: 'abastecerCocho', ok: true, comando: { tipo: 'encherCocho', entidade: e.id }, item: comidaDoAbrigo(m, e), dados: { construcao: e.tipo } };
-  if (podeEncherBebedouro(m, e).ok && !naFilaNa(m, 'abastecerBebedouro', e.id)) agua = { id: 'abastecerBebedouro', acao: 'abastecerBebedouro', ok: true, comando: { tipo: 'encherBebedouro', entidade: e.id }, dados: { construcao: e.tipo } };
+  if (come && podeEncherCocho(m, e).ok && !naFilaNa(m, 'abastecerCocho', e.id)) racao = { id: 'abastecerCocho', acao: 'abastecerCocho', ok: true, comando: { tipo: 'encherCocho', entidade: e.id }, item: comidaDoAbrigo(m, e), dados: { construcao: e.tipo } };
+  if (bebe && podeEncherBebedouro(m, e).ok && !naFilaNa(m, 'abastecerBebedouro', e.id)) agua = { id: 'abastecerBebedouro', acao: 'abastecerBebedouro', ok: true, comando: { tipo: 'encherBebedouro', entidade: e.id }, dados: { construcao: e.tipo } };
   const abrir = { id: 'abrir', ok: true, painel: 'abrigo', arg: { entidade: e.id }, texto: 'ver-abrigo', dados: { construcao: e.tipo } };
   const principal = (falta.comida && racao) || (falta.agua && agua) || recolher || abrir;
   out.push(principal);
@@ -140,7 +143,8 @@ export function acoesDaEntidade(m, e) {
 //   ok      false = não dá agora (texto diz por quê; "na-fila" = já prometida)
 //   acao    a ação que entra na fila (na casa ou na entidade), com args; comando = o comando que a pede em vez disso
 //   painel  o painel que abre (arg), sem andar
-//   modo    o modo interno que o arrastar e o segurar repetem a partir desta casa (só arar, plantar e regar)
+//   modo    o modo interno que o segurar repete na fileira a partir desta casa (só arar, plantar e regar)
+//   arrasta o arrastar a partir desta casa repete a ação nas casas por onde o dedo passa (campo e plantas)
 // [] = nada a fazer (o toque na casa só anda até lá).
 export function acoesDoAlvo(m, alvo) {
   const loc = m.local;
@@ -224,9 +228,11 @@ registrarSistema({
       }
       const d = acaoNaturalNaCasa(m, x, z, c);
       if (c.fileira) {
-        if (!d || !d.modo) return { ok: false, motivo: 'fora-do-campo' };
-        if (d.modo === 'semear') fixarNaMao(m, d.item);
-        return m.comando({ tipo: 'fileira', x: x + 0.5, z: z + 0.5, modo: d.modo });
+        // (o modo de quando o dedo ou o botão apertou: a primeira casa já pode estar na fila, e aí a ação dela mudou)
+        const modo = c.modo && MODOS[c.modo] ? c.modo : d && d.modo;
+        if (!modo) return { ok: false, motivo: 'fora-do-campo' };
+        if (modo === 'semear') fixarNaMao(m, (d && d.item) || itemNaMao(m));
+        return m.comando({ tipo: 'fileira', x: x + 0.5, z: z + 0.5, modo });
       }
       if (d && (d.acao || d.texto)) {
         const r = fazer(m, opcao(d), { x, z });
@@ -258,15 +264,21 @@ registrarSistema({
 });
 
 // ---------- para a interface (só leem) ----------
-// a fileira que segurar o dedo na casa (x, z) faria, com o modo da ação natural dela: { modo, ...fileiraDe } ou null
-export function fileiraNatural(m, x, z) {
-  const d = acaoNaturalNaCasa(m, x, z);
-  if (!d || !d.modo || !podeSegurar(m, x, z, d.modo)) return null;
+// a fileira que segurar o dedo na casa (x, z) faria, com o modo da ação natural dela (ou o modo dado: o de quando
+// apertou): { modo, ...fileiraDe } ou null
+export function fileiraNatural(m, x, z, modoDado) {
+  let modo = modoDado && MODOS[modoDado] ? modoDado : null, item = null;
+  if (!modo) {
+    const d = acaoNaturalNaCasa(m, x, z);
+    if (!d || !d.modo) return null;
+    modo = d.modo; item = d.item || null;
+  } else if (modo === 'semear') item = itemNaMao(m);
+  if (!podeSegurar(m, x, z, modo)) return null;
   const antes = m.modo.semente;
-  if (d.item) m.modo.semente = d.item; // a conta com a semente da mão (o comando a fixa antes de plantar)
+  if (item) m.modo.semente = item; // a conta com a semente da mão (o comando a fixa antes de plantar)
   try {
-    const f = fileiraDe(m, x, z, d.modo);
-    return f ? { ...f, modo: d.modo } : null;
+    const f = fileiraDe(m, x, z, modo);
+    return f ? { ...f, modo } : null;
   } finally { m.modo.semente = antes; }
 }
 export { itemNaMao, itensParaAMao };

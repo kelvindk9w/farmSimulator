@@ -198,6 +198,36 @@ async function cenario(a, f) {
     igual(await painel(), null, 'Esc fecha o catálogo');
   }
 
+  // ---- o que falta: "falta N" em vermelho e o "Onde conseguir?" (o cartão das fontes leva à loja e ao toco)
+  await J(() => { const m = window.__jogo.mundo; window.__guarda = { ...m.posses.bolsa }; m.posses.bolsa.madeira = 2; window.__jogo.desenhar(); });
+  await abrirCatalogo('industria');
+  confere(await J(() => { const o = document.querySelector('.oferta[data-item="bancada-de-carpintaria"]'), f = o && o.querySelector('.cons-ficha.falta[data-item="madeira"]'); return !!f && /falta 4/.test(f.textContent) && getComputedStyle(f.querySelector('span')).color.replace(/\s/g, '') !== getComputedStyle(o).color.replace(/\s/g, ''); }), 'sem madeira, a ficha da bancada diz "falta 4", em outra cor');
+  confere(await J(() => !!document.querySelector('.oferta[data-item="bancada-de-carpintaria"] [data-k="onde-bancada-de-carpintaria"]') && !document.querySelector('[data-k="c-bancada-de-carpintaria"]')), 'no lugar do botão apagado, "Onde conseguir?"');
+  await foto('falta-material');
+  await tocarEm('[data-k="onde-bancada-de-carpintaria"]');
+  confere(await J(() => !!document.querySelector('.subida.fontes') && /Madeira/.test(document.querySelector('.subida.fontes').textContent) && /Faltam 4/.test(document.querySelector('.subida.fontes').textContent)), 'o botão abre o cartão das fontes da madeira, com o que falta');
+  confere(await J(() => [...document.querySelectorAll('.subida.fontes .fonte')].map((e) => e.dataset.fonte).join(',').includes('limpar-toco') && !!document.querySelector('.subida.fontes .fonte.agora [data-k="fonte-loja"]')), 'o cartão tem cortar tocos e a loja (que já vale, com botão)');
+  await esperar(450); // (o cartão entra crescendo: mede depois)
+  ruins = await J(() => window.__c.textoPequeno(document.querySelector('.subida.fontes')));
+  confere(ruins.length === 0, 'cartão das fontes: ' + ruins.slice(0, 4).join('; '));
+  await foto('onde-conseguir');
+  await tocarEm('.subida.fontes [data-k="fonte-loja"]');
+  await quadro();
+  confere(await J(() => !document.querySelector('.subida.fontes') && window.__jogo.painelAberto() === 'loja' && !!document.querySelector('.veu .aba.ativo[data-k="aba-materiais"]') && !!document.querySelector('.veu .oferta[data-item="madeira"]')), '"Comprar" fecha o cartão e abre a loja na aba Materiais, com a madeira');
+  await esperar(200); await quadro();
+  confere(await J(() => !!document.querySelector('.veu .oferta.fonte-alvo[data-item="madeira"]')), 'a madeira pisca na loja');
+  await fecharPainel();
+  // com o machado: "Mostrar" fecha tudo e a seta aponta um toco da terra
+  await J(() => { const m = window.__jogo.mundo; window.__semMachado = !m.posses.ferramentas['machado-velho']; if (window.__semMachado) m.posses.ferramentas['machado-velho'] = { onde: 'suporte', agua: 0, usos: 0, vez: 0 }; window.__jogo.desenhar(); });
+  await abrirCatalogo('industria');
+  await tocarEm('.oferta[data-item="bancada-de-carpintaria"] .cons-ficha.falta[data-item="madeira"]');
+  confere(await J(() => !!document.querySelector('.subida.fontes .fonte.agora[data-fonte="limpar-toco"] [data-k="fonte-toco"]')), 'tocar na ficha vermelha também abre o cartão; com o machado, cortar tocos já vale');
+  await tocarEm('.subida.fontes [data-k="fonte-toco"]');
+  await esperar(150); await quadro();
+  confere(await J(() => { const j = window.__jogo, s = j.cena.seta, loc = j.mundo.local; if (j.painelAberto() || j.subidaAberta() || !s.ligada) return false; return loc.entidades.some((e) => e.tipo === 'toco' && Math.abs(e.x + e.l / 2 - s.x) < 0.01 && Math.abs(e.z + e.p / 2 - s.z) < 0.01); }), '"Mostrar" fecha o painel e a seta aponta um toco');
+  await foto('seta-no-toco');
+  await J(() => { const m = window.__jogo.mundo; if (window.__semMachado) delete m.posses.ferramentas['machado-velho']; for (const k in m.posses.bolsa) delete m.posses.bolsa[k]; Object.assign(m.posses.bolsa, window.__guarda); window.__jogo.desenhar(); });
+
   // ---- a bancada: escolher o lugar, cancelar, lugar ruim, confirmar; ela anda, martela e a obra nasce
   let md = await escolher('industria', 'bancada-de-carpintaria');
   confere(await J(() => document.body.classList.contains('colocando') && !!document.querySelector('.cons-barra [data-k="confirmar"]') && !!document.querySelector('.cons-barra [data-k="cancelar"]')), 'Confirmar e Cancelar ficam à vista');

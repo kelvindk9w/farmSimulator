@@ -14,6 +14,7 @@ import { reformas } from './sistemas/comeco.js';
 import { missaoAtual, missaoPossivel } from './sistemas/missoes.js';
 import { progressoDe } from './premios.js';
 import { temPresente } from './sistemas/diaria.js';
+import { loteDaCasa, loteComprado } from './sistemas/terras.js';
 
 const obj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
 const TIPOS = ['loja', 'limpar', 'receita', 'bicho', 'premios'];
@@ -29,6 +30,16 @@ export function faltasDe(m, itens) {
   return out;
 }
 
+// ---------- o Seu Tonho explica cada material uma vez só ----------
+// a marca fica nas dicas da indústria (industria.dicas, gravadas), com o comando viuDica { dica: dicaDoMaterial(item) }
+export const dicaDoMaterial = (item) => 'fonte:' + item;
+export const jaExplicou = (m, item) => !!(m.industria && m.industria.dicas[dicaDoMaterial(item)]);
+// entre os que faltam de { item: n }: o primeiro que tem fonte e que o Seu Tonho ainda não explicou (ou null)
+export function materialParaExplicar(m, itens) {
+  for (const f of faltasDe(m, itens)) if (temFontes(m, f.item) && !jaExplicou(m, f.item)) return f.item;
+  return null;
+}
+
 // ---------- quando cada fonte abre (servem ao jogo e ao validador; só dados) ----------
 const forcaDe = (it) => (it && it.forca > 0 ? it.forca : 1);
 const ferramentaServe = (D, id, funcao, forca) => { const it = D.itens[id]; return !!it && it.tipo === 'ferramenta' && it.funcao === funcao && forcaDe(it) >= forca; };
@@ -40,6 +51,16 @@ export function nivelDaFerramenta(D, funcao, forca = 1) {
   for (const mi of (D.missoes && D.missoes.vizinho) || []) for (const k in (mi.recompensa && mi.recompensa.itens) || {}) if (ferramentaServe(D, k, funcao, forca)) n = Math.min(n, mi.nivel || 1);
   for (const id of (D.loja && D.loja.ouro) || []) if (ferramentaServe(D, id, funcao, forca)) n = Math.min(n, D.itens[id].nivel || 1);
   return n;
+}
+// a ferramenta mais fácil de ter que limpa (a de menor nível entre as que se ganham ou compram): id ou null
+export function ferramentaQueServe(D, funcao, forca = 1) {
+  let melhor = null, nv = Infinity;
+  const ver = (id, n) => { if (ferramentaServe(D, id, funcao, forca) && n < nv) { melhor = id; nv = n; } };
+  const I = D.regras && D.regras.inicio;
+  if (I) for (const id of [...(I.cinto || []), ...(I.suporte || []), ...(I.noLugar || [])]) ver(id, 1);
+  for (const mi of (D.missoes && D.missoes.vizinho) || []) for (const k in (mi.recompensa && mi.recompensa.itens) || {}) ver(k, mi.nivel || 1);
+  for (const id of (D.loja && D.loja.ouro) || []) ver(id, D.itens[id].nivel || 1);
+  return melhor;
 }
 const naLoja = (D, item) => !!D.itens[item] && D.itens[item].compra > 0 && !!D.loja && D.loja.ouro.includes(item);
 const abaDaLoja = (D, item) => { const a = D.loja && D.loja.abas.find((x) => x.itens.includes(item)); return a ? a.id : null; };
@@ -78,7 +99,8 @@ export function premiosCom(m, item) {
 // ---------- as fontes de um item, para o cartão ----------
 // [{ tipo, ok (dá para usar agora), nivel (quando abre), ...o da fonte }], as que já valem primeiro (na ordem dos dados)
 //   loja     { preco, aba }
-//   limpar   { obstaculo, nome, da, ferramenta (a função), temFerramenta, restam (na terra dela), naTerraNova (nos lotes à venda) }
+//   limpar   { obstaculo, nome, da, chance, ferramenta (a função), ferramentaItem, forte, temFerramenta, restam (na terra dela),
+//              naTerraNova: { id, nome, nivel, n } (o lote à venda de menor nível que tem desse obstáculo) | null }
 //   receita  { receita, onde, entra, sai, temConstrucao }
 //   bicho    { animal, temBicho }
 //   premios  { missao, nivel: (o prêmio de nível), dia }  (premiosCom; "nivel" aqui é o do prêmio, não o da fonte)
@@ -96,10 +118,19 @@ export function fontesDoItem(m, item) {
     if (f.tipo === 'loja') out.push({ tipo: 'loja', nivel, ok: nivel <= agora, preco: D.itens[item].compra, aba: abaDaLoja(D, item) });
     else if (f.tipo === 'limpar') {
       const O = D.obstaculos[f.obstaculo], loc = m.locais.fazenda, F = m.posses.ferramentas;
-      let temFerramenta = false, restam = 0, naTerraNova = 0;
+      let temFerramenta = false, restam = 0;
+      const lotes = {};
       for (const id in F) if (ferramentaServe(D, id, O.ferramenta, O.forcaMinima || 1)) temFerramenta = true;
-      if (loc) for (const e of loc.entidades) if (e.tipo === f.obstaculo) { if (loc.ehPropria(e.x, e.z)) restam++; else naTerraNova++; }
-      out.push({ tipo: 'limpar', nivel, ok: temFerramenta && restam > 0, obstaculo: f.obstaculo, nome: O.nome, da: O.da[item], chance: O.chance, ferramenta: O.ferramenta, temFerramenta, restam, naTerraNova });
+      if (loc) for (const e of loc.entidades) {
+        if (e.tipo !== f.obstaculo) continue;
+        if (loc.ehPropria(e.x, e.z)) { restam++; continue; }
+        const l = loteDaCasa(m, e.x, e.z);
+        if (l && !loteComprado(m, l.id)) lotes[l.id] = (lotes[l.id] || 0) + 1;
+      }
+      // o lote à venda mais fácil (o de menor nível) que tem desse obstáculo: { id, nome, nivel, n }
+      let naTerraNova = null;
+      for (const id in lotes) { const l = D.terras.lotes.find((x) => x.id === id); if (!naTerraNova || l.nivel < naTerraNova.nivel) naTerraNova = { id, nome: l.nome, nivel: l.nivel, n: lotes[id] }; }
+      out.push({ tipo: 'limpar', nivel, ok: temFerramenta && restam > 0, obstaculo: f.obstaculo, nome: O.nome, da: O.da[item], chance: O.chance, ferramenta: O.ferramenta, ferramentaItem: ferramentaQueServe(D, O.ferramenta, O.forcaMinima || 1), forte: (O.forcaMinima || 1) > 1, temFerramenta, restam, naTerraNova });
     } else if (f.tipo === 'receita') {
       const r = receitasDe(D).todas[f.receita], tem = temPronta(m, r.onde);
       out.push({ tipo: 'receita', nivel, ok: nivel <= agora && tem, receita: r.id, onde: r.onde, entra: r.entra, sai: r.sai[item], temConstrucao: tem });
@@ -137,6 +168,19 @@ export function paraQueServe(m, item, quantos = 3) {
   }
   out.sort((a, b) => (b.ja - a.ja) || a.nivel - b.nivel);
   return out.slice(0, quantos);
+}
+
+// o prêmio { item: n } traz material? { mats: { item: n } (só os materiais), usos: [até "quantos" de paraQueServe, sem
+// repetir, o mais perto primeiro] } ou null. É o que a nota "+10 pregos: servem para o estábulo" diz.
+const MATERIAL = { material: 1, embalagem: 1, racao: 1 };
+export function usosDoPremio(m, itens, quantos = 2) {
+  const D = m.dados, mats = {};
+  for (const k in itens || {}) if (D.itens[k] && MATERIAL[D.itens[k].tipo] && itens[k] > 0) mats[k] = itens[k];
+  if (!Object.keys(mats).length) return null;
+  const usos = [], vistos = new Set();
+  for (const k in mats) for (const u of paraQueServe(m, k, 3)) { const c = u.tipo + ':' + u.id; if (!vistos.has(c)) { vistos.add(c); usos.push(u); } }
+  usos.sort((a, b) => (b.ja - a.ja) || a.nivel - b.nivel);
+  return usos.length ? { mats, usos: usos.slice(0, quantos) } : null;
 }
 
 // ---------- o que a missão da vez pede de material ----------

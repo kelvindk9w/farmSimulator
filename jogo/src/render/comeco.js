@@ -6,11 +6,15 @@
 //     com mourão velho nos cantos e nas pontas da entrada (objeto/mourao-velho) e um mourão caído no chão de vez em
 //     quando (objeto/mourao-caido, desenhado ao longo de X: espelhado para os trechos em Z). Depois da reforma, a de
 //     madeira (objeto/cerca-x, -z); durante a obra, os trechos novos vão aparecendo a partir da entrada.
+//   - a porteira no vão da entrada: a de arame (objeto/porteira-de-arame-x, com os dois mourões dela) e, desde o começo
+//     da obra da reforma da cerca, a de madeira (objeto/porteira). Quando ela chega perto, a porteira abre para fora,
+//     para a estrada (a folha é a mesma porteira correndo em Z: objeto/porteira-de-arame-z; a de madeira, espelhada).
+//   - a trouxa que ela larga no chão no fim da chegada (objeto/trouxa-no-chao; mundo.comeco.trouxa).
 // Tudo entra na ordem de profundidade como figura solta (render/cena.js: SOLTAS). Nada aqui é sorteado a cada quadro:
 // o que está caído é sempre o mesmo trecho (o sorteio é o da casa, em comeco.js).
 import { SOLTAS, GESTO_PARECIDO } from './cena.js';
 import { figuraDeReserva, desenharReserva } from './reserva.js';
-import { DESENHO, trechosDaCerca, tipoDoTrecho } from '../nucleo/sistemas/comeco.js';
+import { DESENHO, trechosDaCerca, tipoDoTrecho, porteiraDaCerca } from '../nucleo/sistemas/comeco.js';
 
 GESTO_PARECIDO['parada-trouxa'] = 'parada';
 
@@ -20,6 +24,16 @@ const ARAME = 'cerca-de-arame';
 
 function peca(g, cena, chave, sx, sy, S, espelhar, quadro = 0) {
   if (!cena.atlas.desenhar(g, chave, quadro, sx, sy, S, espelhar)) desenharReserva(g, figuraDeReserva(chave, quadro, 1, 1, 0), sx, sy, S, espelhar);
+}
+// só o pedaço da peça entre as colunas c0 e c1 do desenho dela (pontos da peça, antes de espelhar): o mourão sem a
+// folha, a folha sem o mourão
+function pedaco(g, cena, chave, sx, sy, S, espelhar, c0, c1) {
+  const p = cena.atlas.peca(chave);
+  if (!p) return;
+  const k = S / p.e, a = (c0 - p.apoio[0]) * k, b = (c1 - p.apoio[0]) * k, x0 = espelhar ? sx - b : sx + a, x1 = espelhar ? sx - a : sx + b;
+  g.save(); g.beginPath(); g.rect(x0, sy - 8 * S, x1 - x0, 10 * S); g.clip();
+  peca(g, cena, chave, sx, sy, S, espelhar);
+  g.restore();
 }
 
 // ---------- o Seu Tonho ----------
@@ -66,6 +80,34 @@ function soltaDoMouraoCaido(m, t) {
 function soltaDoMourao(m, x, z, t) {
   return { x, z, raio: 0, desenhar(g, cena, sx, sy, S) { if (tipoDoTrecho(cache.m, t) === ARAME) peca(g, cena, 'objeto/mourao-velho', sx, sy, S, false); } };
 }
+// ---------- a porteira da entrada ----------
+// Aberta, a folha gira no mourão da esquerda para fora, para a estrada (para dentro ela bateria na banca): é a mesma
+// porteira correndo em Z (a de arame tem a peça, objeto/porteira-de-arame-z; a de madeira é objeto/porteira espelhada,
+// como a que se coloca girada), sem o mourão da ponta solta; o mourão da direita fica de pé (o da porteira fechada).
+// Colunas das peças (pontos do desenho) onde a folha encontra esse mourão:
+//   porteira-de-arame-x: o mourão da direita começa na 194;   porteira-de-arame-z: o da ponta solta acaba na 49;
+//   porteira: o mourão da direita começa na 188 (a folha, sem o gancho dele, vai até a 182).
+const PORTEIRA = {
+  arame: { fechada: 'objeto/porteira-de-arame-x', folha: 'objeto/porteira-de-arame-z', espelhar: false, mourao: 194, de: 49, ate: 1e4 },
+  madeira: { fechada: 'objeto/porteira', folha: 'objeto/porteira', espelhar: true, mourao: 188, de: -1e4, ate: 182 },
+};
+// ela está perto da porteira (a mesma conta da porteira de madeira que se coloca: render/construcao.js)
+const ABRE_X = 1.9, ABRE_Z = 1.4;
+function aberta(m, pt) { const p = m.personagem; return p.local === 'fazenda' && Math.abs(p.x - pt.x) < ABRE_X && Math.abs(p.z - pt.z) < ABRE_Z; }
+// a de madeira desde que a obra da cerca começa (a obra sai da porteira: ela é o primeiro "trecho")
+const qual = (m) => (tipoDoTrecho(m, { ordem: 0 }) !== ARAME ? PORTEIRA.madeira : PORTEIRA.arame);
+// três figuras, cada uma na sua profundidade: a porteira fechada, no meio do vão; aberta, a folha (na estrada) e o
+// mourão da direita, que fica na frente de quem passa
+function soltasDaPorteira(pt) {
+  return [
+    { x: pt.x, z: pt.z, raio: 0, desenhar(g, cena, sx, sy, S) { const m = cache.m; if (!aberta(m, pt)) peca(g, cena, qual(m).fechada, sx, sy, S, false); } },
+    { x: pt.x - 1, z: pt.z + 1, raio: 0, desenhar(g, cena, sx, sy, S) { const m = cache.m, P = qual(m); if (aberta(m, pt)) pedaco(g, cena, P.folha, sx, sy, S, P.espelhar, P.de, P.ate); } },
+    { x: pt.x + 1, z: pt.z, raio: 0, desenhar(g, cena, sx, sy, S) {
+      const m = cache.m, P = qual(m);
+      if (aberta(m, pt)) pedaco(g, cena, P.fechada, cena.cam.telaX(pt.x, pt.z), cena.cam.telaY(pt.x, 0, pt.z), S, false, P.mourao, 1e4);
+    } },
+  ];
+}
 function montar(m, lista) {
   const loc = m.locais.fazenda, out = [], pontas = new Map();
   const ponta = (x, z, eixo, t) => { const k = x * 4096 + z; const p = pontas.get(k) || { x, z, x0: 0, z0: 0, t }; if (eixo === 'x') p.x0++; else p.z0++; pontas.set(k, p); };
@@ -76,6 +118,9 @@ function montar(m, lista) {
     if (t.sorte < MOURAO_NO_CHAO) out.push(soltaDoMouraoCaido(m, t));
     if (t.eixo === 'x') { ponta(t.x - 0.5, t.z, 'x', t); ponta(t.x + 0.5, t.z, 'x', t); } else { ponta(t.x, t.z - 0.5, 'z', t); ponta(t.x, t.z + 0.5, 'z', t); }
   }
+  // a porteira no vão da entrada (com os mourões dela: as pontas do vão ficam sem o mourão velho)
+  const pt = porteiraDaCerca(m);
+  if (pt) { out.push(...soltasDaPorteira(pt)); pontas.delete(pt.x0 * 4096 + pt.z); pontas.delete(pt.x1 * 4096 + pt.z); }
   // canto = onde um trecho em X encontra um em Z; ponta = onde só chega um trecho (a beira da entrada)
   for (const p of pontas.values()) if ((p.x0 && p.z0) || p.x0 + p.z0 === 1) out.push(soltaDoMourao(m, p.x, p.z, p.t));
   return out;
@@ -86,4 +131,14 @@ SOLTAS.push((m) => {
   if (!lista) return null;
   if (cache.lista !== lista || cache.m !== m) { cache.lista = lista; cache.m = m; cache.soltas = montar(m, lista); }
   return cache.soltas;
+});
+
+// ---------- a trouxa no chão ----------
+const TROUXA = 'objeto/trouxa-no-chao';
+const trouxa = { x: 0, z: 0, raio: 0.22, desenhar(g, cena, sx, sy, S) { peca(g, cena, TROUXA, sx, sy, S, false); } }, soTrouxa = [trouxa];
+SOLTAS.push((m) => {
+  const t = m.local === m.locais.fazenda && m.comeco && m.comeco.trouxa;
+  if (!t) return null;
+  trouxa.x = t[0]; trouxa.z = t[1];
+  return soTrouxa;
 });

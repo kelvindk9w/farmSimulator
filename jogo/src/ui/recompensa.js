@@ -23,6 +23,8 @@ let raiz = null, aberta = null;
 const fila = [], relogios = [];
 
 export function prepararRecompensa(ui) { raiz = ui; prepararDialogo(ui); }
+// linhas a mais embaixo dos prêmios: cada frente põe (d) → texto | null (ui/fontes.js: para que serve o material ganho)
+export const NOTAS_DA_RECOMPENSA = [];
 export const recompensaAberta = () => !!aberta;
 export const recompensasNaFila = () => fila.length + (aberta ? 1 : 0);
 
@@ -84,6 +86,7 @@ function proxima() {
   if (tem) {
     if (tipo === 'nivel') cartao.append(el('div', 'rotulo', R.ganhou));
     cartao.append(fichas(r, atraso));
+    for (const f of NOTAS_DA_RECOMPENSA) { const t = f(d); if (t) cartao.append(el('div', 'sub para-que-serve', t)); }
   }
   if (d.liberou && d.liberou.length) {
     cartao.append(el('div', 'rotulo', R.liberou));

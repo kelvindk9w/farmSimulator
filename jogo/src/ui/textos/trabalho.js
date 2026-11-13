@@ -72,7 +72,7 @@ T.trabalho = {
   // o que o Seu Tonho explica na primeira vez de cada coisa
   tonho: {
     titulo: { boi: 'O boi de arado', cavalo: 'A cavalo', jumento: 'O jumento', barril: 'O barril de água', barrilCheio: 'Água no campo', afago: 'Um companheiro', falta: 'Falta um apetrecho' },
-    boi: (n) => `Toque ou segure o dedo numa casa do campo ou da grama: o boi ara a fileira inteira, até ${n} casas, para o lado com mais terra. Arraste o dedo para escolher a direção.`,
+    boi: (n) => `Com o boi, é só tocar no campo (ou na grama encostada nele): ele ara a fileira inteira, até ${n} casas, para o lado com mais terra. Segure o dedo para ver a fileira antes; arraste no campo para escolher a direção.`,
     cavalo: 'Com o cavalo ligado, toda viagem longa é montada, sem gastar fôlego. Chegou, ela apeia sozinha e o cavalo espera do lado.',
     jumento: 'O jumento vai atrás de você com a carroça. Cesto cheio, a colheita passa para ela; a banca e o celeiro levam tudo junto.',
     barril: 'Leve o jumento até o poço e toque nele: o barril enche junto com o regador.',

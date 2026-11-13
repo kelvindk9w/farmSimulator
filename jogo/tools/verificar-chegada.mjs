@@ -4,11 +4,13 @@
 // alface" sai da trouxa); depois ele acena e dá as boas-vindas; o botão "Pular" fica no canto e o balão fica
 // escondido enquanto ela anda; pular (botão ou toque no chão) termina a cena na hora, e nada fica preso; no jogo de
 // verdade (sem #teste) a cena começa sozinha (parada na porteira enquanto a tela de carregando estiver à vista) e
-// não volta depois de gravar. Também a fazenda do começo: casa e poço velhos, caixote, baú, cerca de arame, sem
-// celeiro, banca nem quadro; e a gravação de antes (testes/gravacoes) abrindo com a fazenda de antes, com a pergunta
-// da versão de teste (uma vez só: "Agora não" deixa a fazenda de antes; "Sim" começa o jogo novo). Em 1280x720
-// (mouse) e 844x390 (celular deitado, dedo). Fotos h-*.jpg (a chegada quadro a quadro). Termina com "Tudo certo." ou
-// com a lista das falhas.
+// não volta depois de gravar. A porteira de arame no vão da entrada (fechada; aberta para fora quando ela passa) e a
+// trouxa que ela larga no chão no fim. Também a fazenda do começo: casa e poço velhos, caixote, baú, cerca de arame,
+// sem celeiro, banca nem quadro; as reformas (a aba com os ícones delas, a fila, a obra de cada uma com a peça
+// própria, o cartão da obra, a porteira de madeira e o aviso da reforma pronta com o ícone); e a gravação de antes
+// (testes/gravacoes) abrindo com a fazenda de antes, com a pergunta da versão de teste (uma vez só: "Agora não"
+// deixa a fazenda de antes; "Sim" começa o jogo novo). Em 1280x720 (mouse) e 844x390 (celular deitado, dedo). Fotos
+// h-*.jpg (a chegada quadro a quadro, a trouxa, cada obra). Termina com "Tudo certo." ou com a lista das falhas.
 //   JOGO_DIST=dist-x JOGO_CAPTURAS=capturas-x node tools/verificar-chegada.mjs     (monte antes: npm run build)
 import fs from 'node:fs';
 import path from 'node:path';
@@ -40,12 +42,20 @@ async function abrir(w, h, opc = {}) {
     await pg.evaluate(() => window.__jogo.baixarArte());
     await pg.waitForFunction(() => window.__jogo.arteBaixada(), null, { timeout: 30000 });
   }
+  // o atlas anota quantas vezes cada peça foi desenhada (quadro(): as peças do quadro que acabou de sair)
+  await pg.evaluate(() => {
+    const A = window.__jogo.atlas, d = A.desenhar;
+    A.__anota = new Map();
+    A.desenhar = function (g, chave, ...r) { const ok = d.call(this, g, chave, ...r); if (ok) A.__anota.set(chave, (A.__anota.get(chave) || 0) + 1); return ok; };
+  });
   return { ctx, pg, erros, w, h };
 }
 const semErros = (a, onde) => confere(a.erros.length === 0, `${onde}: erro no console: ${a.erros.slice(0, 3).join(' | ')}`);
 const J = (pg, f, arg) => pg.evaluate(f, arg);
-// (no modo #teste o desenho anda a fala do vizinho 1 s por chamada: aqui desenha-se sem andar o relógio dela)
-const foto = async (pg, nome) => { await J(pg, () => window.__jogo.desenhar()); await esperar(150); await pg.screenshot({ path: path.join(capturas, nome), type: 'jpeg', quality: 84 }); };
+// desenha um quadro e devolve as peças desenhadas nele ({ chave: vezes })
+const quadro = (pg) => J(pg, () => { const A = window.__jogo.atlas; A.__anota.clear(); window.__jogo.desenhar(); return Object.fromEntries(A.__anota); });
+// (no modo #teste o desenho anda a fala do vizinho 1 s por chamada: a foto do balão é retrato(), sem desenhar)
+const foto = async (pg, nome) => { const q = await quadro(pg); await esperar(150); await pg.screenshot({ path: path.join(capturas, nome), type: 'jpeg', quality: 84 }); return q; };
 // (a foto do balão como está, sem desenhar de novo: o desenho andaria a fala)
 const retrato = async (pg, nome) => { await esperar(150); await pg.screenshot({ path: path.join(capturas, nome), type: 'jpeg', quality: 84 }); };
 const cena = (pg) => J(pg, () => {
@@ -104,10 +114,16 @@ try {
   confere(!c.balao, 'o balão fica escondido enquanto ela anda');
   confere(Math.abs(Math.cos(c.rumo) + 1) < 0.2, `ela entra de costas para a câmera, andando para o fundo (rumo ${c.rumo.toFixed(2)})`);
   igual(await J(pg, () => window.__jogo.guia().tipo), null, 'durante a cena, nenhuma seta');
-  // quadro a quadro (0,5 s cada)
-  let viuFala = false, viuAceno = false, k = 0;
+  // quadro a quadro (0,5 s cada); a porteira de arame: fechada com ela longe, aberta (a folha em Z, na estrada) quando
+  // ela passa, fechada de novo depois
+  const PT = { x: 33, z: 60 }, perto = (c) => Math.abs(c.x - PT.x) < 1.9 && Math.abs(c.z - PT.z) < 1.4;
+  const PX = 'objeto/porteira-de-arame-x', PZ = 'objeto/porteira-de-arame-z';
+  let viuFala = false, viuAceno = false, k = 0, abriu = 0, fechada = 0;
   for (; k < 32 && (await cena(pg)).chegada; k++) {
-    await foto(pg, `h-1280-chegada-${String(k).padStart(2, '0')}.jpg`);
+    const pos = await cena(pg), q = await foto(pg, `h-1280-chegada-${String(k).padStart(2, '0')}.jpg`);
+    if (perto(pos)) { if (confere(q[PZ] === 1 && q[PX] === 1, `quadro ${k}: ela passa pela porteira e ela abre (a folha na estrada, o mourão de pé) (veio ${JSON.stringify([q[PX], q[PZ]])})`)) abriu++; }
+    else if (confere(q[PX] === 1 && !q[PZ], `quadro ${k}: longe dela, a porteira de arame fica fechada (veio ${JSON.stringify([q[PX], q[PZ]])})`)) fechada++;
+    if (perto(pos) && abriu === 1) await retrato(pg, 'h-1280-porteira-de-arame-aberta.jpg');
     await J(pg, () => window.__jogo.avancar(0.5));
     c = await cena(pg);
     if (!c.falou && !viuFala) confere(!c.acenou, `andando, o Seu Tonho ainda não acena (quadro ${k})`);
@@ -134,11 +150,17 @@ try {
   }
   confere(viuFala, 'ela falou');
   confere(viuAceno, 'o Seu Tonho acenou');
+  confere(abriu >= 1 && fechada >= 2, `a porteira abriu quando ela passou (${abriu} quadros) e ficou fechada no resto (${fechada})`);
   c = await cena(pg);
   confere(!c.chegada && c.chegou, `a cena acabou sozinha (${k} quadros)`);
   confere(!c.pular, 'acabada a cena, o botão "Pular" some');
   igual(await J(pg, () => { const g = window.__jogo.guia(); return g.tipo + ':' + g.id; }), 'entidade:vizinho', 'acabada a cena, a seta aponta o Seu Tonho');
-  await foto(pg, 'h-1280-chegada-fim.jpg');
+  // a trouxa: ela larga no chão, atrás dela, em vez de sumir
+  const tr = await J(pg, () => { const m = window.__jogo.mundo, p = m.personagem, t = m.comeco.trouxa; return t && { d: Math.hypot(t[0] - p.x, t[1] - p.z) }; });
+  confere(tr && tr.d > 0.4 && tr.d < 0.7, `no fim ela larga a trouxa no chão, junto dos pés (veio ${JSON.stringify(tr)})`);
+  const qf = await foto(pg, 'h-1280-chegada-fim.jpg');
+  confere(qf['objeto/trouxa-no-chao'] === 1, 'a trouxa no chão aparece (objeto/trouxa-no-chao)');
+  confere(qf[PX] === 1 && !qf[PZ], 'e a porteira fechou atrás dela');
   // e o primeiro clique de verdade já vale: no Seu Tonho, conversa
   await J(pg, () => { const v = window.__jogo.mundo.local.porId.vizinho; window.__jogo.olhar(v.x + 0.5, v.z + 0.5); });
   const t = await J(pg, () => window.__jogo.daEntidade('vizinho', 0.9));
@@ -204,6 +226,67 @@ try {
   confere(!c.chegada && c.chegou && !c.pular, 'o dedo no "Pular" termina a cena');
   semErros(a, '844x390');
   void cdp;
+  await a.ctx.close();
+
+  // =====================================================================================================
+  console.log('1280x720: as reformas: a aba com os ícones, a fila, a obra de cada uma (peça própria), o cartão, a porteira de madeira e o aviso');
+  a = await abrir(1280, 720); pg = a.pg;
+  await J(pg, () => { const m = window.__jogo.mundo; window.__jogo.comando({ tipo: 'pularChegada' }); m.progresso.nivel = 12; m.posses.ouro = 50000; Object.assign(m.posses.bolsa, { madeira: 60, tabua: 60, prego: 90, pedra: 40 }); window.__jogo.seguir(); });
+  const REF = { 'poco-velho': ['poco', 'poco'], 'caixote-de-venda': ['banca', 'banca'], 'casa-velha': ['casa', 'casa'], 'cerca-de-arame': ['cerca', 'cerca'] };
+  await centroDe(pg, '.topo-dir [data-painel="construir"]').then((b) => pg.mouse.click(b.x, b.y));
+  await esperar(200);
+  igual(await J(pg, () => window.__jogo.painelAberto()), 'construir', 'o botão Construir abre o painel');
+  confere(await J(pg, () => { const b = document.querySelector('[data-k="aba-reforma"]'); return !!b && b.classList.contains('ativo'); }), 'com reforma por fazer, a aba "Reformas" vem aberta');
+  const icones = await J(pg, (R) => Object.fromEntries(Object.keys(R).map((de) => { const c = document.querySelector(`.oferta[data-item="reforma:${de}"] canvas.ic`); return [de, c ? c.dataset.chave : null]; })), REF);
+  igual(icones, Object.fromEntries(Object.entries(REF).map(([de, [, ic]]) => [de, 'icone/reforma-' + ic])), 'cada cartão da aba Reformas tem o ícone da reforma (a peça nova com o martelinho)');
+  await esperar(150);
+  await pg.screenshot({ path: path.join(capturas, 'h-1280-aba-reformas.jpg'), type: 'jpeg', quality: 84 });
+  // o poço: Reformar (ela vai a pé; na fila de tarefas, o ícone da reforma)
+  let bt2 = await centroDe(pg, '[data-k="r-poco-velho"]');
+  await pg.mouse.click(bt2.x, bt2.y);
+  await esperar(150);
+  await J(pg, () => window.__jogo.desenhar());
+  confere(await J(pg, () => [...document.querySelectorAll('#ui .fila canvas.ic')].some((c) => !c.hidden && c.dataset.chave === 'icone/reforma-poco')), 'na fila de tarefas, "reformar o poço" tem o ícone da reforma do poço');
+  await J(pg, () => window.__jogo.ateParar(60));
+  const obra = (id) => J(pg, (id) => { const e = window.__jogo.mundo.locais.fazenda.porId[id]; return { tipo: e.tipo, reforma: e.reforma, obra: e.obraAte > 0, x: e.x + e.l / 2, z: e.z + e.p / 2 }; }, id);
+  let o = await obra('poco');
+  confere(o.obra && o.reforma === 'poco-velho', `ela martelou e a obra da reforma do poço começou (veio ${JSON.stringify(o)})`);
+  // as outras na hora (o caminho a pé já foi visto)
+  for (const alvo of ['banca', 'casa', 'cerca']) confere(await J(pg, (a) => window.__jogo.comando({ tipo: 'reformar', entidade: a, jaJa: true }).ok, alvo), `a reforma "${alvo}" começa`);
+  for (const [de, [id]] of Object.entries(REF)) {
+    if (id === 'cerca') continue;
+    o = await obra(id);
+    await J(pg, (o) => window.__jogo.olhar(o.x, o.z), o);
+    const qo = await foto(pg, `h-1280-obra-${id}.jpg`);
+    confere(qo['objeto/obra-reforma-' + id] === 1 && !qo['objeto/' + de] && !qo['objeto/' + id], `a obra da reforma ${id === 'banca' ? 'da banca' : id === 'casa' ? 'da casa' : 'do poço'} tem a peça própria (objeto/obra-reforma-${id}), no lugar da velha e da nova (veio ${JSON.stringify([qo['objeto/obra-reforma-' + id], qo['objeto/' + de], qo['objeto/' + id]])})`);
+  }
+  // o cartão da obra (o que o toque numa obra abre): o ícone da reforma
+  await J(pg, () => window.__jogo.abrirPainel('construcao', { entidade: 'poco' }));
+  await esperar(150);
+  igual(await J(pg, () => { const c = document.querySelector('.cons-topo canvas.ic'); return c ? c.dataset.chave : null; }), 'icone/reforma-poco', 'o cartão da obra da reforma tem o ícone dela');
+  await esperar(150);
+  await pg.screenshot({ path: path.join(capturas, 'h-1280-cartao-obra-de-reforma.jpg'), type: 'jpeg', quality: 84 });
+  await J(pg, () => window.__jogo.fecharPainel());
+  // a cerca: obra comum (os trechos novos saem da entrada) e a porteira já é a de madeira; abre (para fora) quando ela chega
+  await J(pg, () => { const p = window.__jogo.mundo.personagem; p.x = 32; p.z = 55; window.__jogo.olhar(33, 59); });
+  let qr = await foto(pg, 'h-1280-obra-cerca.jpg');
+  confere(qr['objeto/porteira'] === 1 && !qr['objeto/porteira-de-arame-x'] && !qr['objeto/obra-reforma-cerca'], `na obra da cerca a porteira é a de madeira, fechada (veio ${JSON.stringify([qr['objeto/porteira'], qr['objeto/porteira-de-arame-x']])})`);
+  await J(pg, () => { const p = window.__jogo.mundo.personagem; p.x = 33.2; p.z = 59.4; window.__jogo.olhar(33, 59); });
+  qr = await foto(pg, 'h-1280-porteira-de-madeira-aberta.jpg');
+  confere(qr['objeto/porteira'] === 2, `ela perto: a porteira de madeira abre (a folha na estrada e o mourão de pé: duas vezes a peça; veio ${qr['objeto/porteira']})`);
+  await J(pg, () => { const p = window.__jogo.mundo.personagem; p.x = 32; p.z = 55; });
+  // prontas: o aviso com o ícone da reforma
+  await J(pg, () => { window.__jogo.pular(45); window.__jogo.avancar(0.1); window.__jogo.desenhar(); });
+  await esperar(150);
+  const avisoIc = await J(pg, () => [...document.querySelectorAll('#ui .aviso canvas.ic')].map((c) => c.dataset.chave));
+  confere(avisoIc.includes('icone/reforma-poco'), `o aviso "poço reformado" vem com o ícone da reforma (veio ${JSON.stringify(avisoIc)})`);
+  await pg.screenshot({ path: path.join(capturas, 'h-1280-reforma-pronta.jpg'), type: 'jpeg', quality: 84 });
+  await J(pg, () => { window.__jogo.pular(1300); window.__jogo.avancar(0.1); });
+  o = await obra('banca');
+  await J(pg, () => window.__jogo.olhar(32, 57));
+  qr = await foto(pg, 'h-1280-reformas-prontas.jpg');
+  confere(qr['objeto/poco'] === 1 && qr['objeto/banca'] === 1 && qr['objeto/porteira'] === 1 && !Object.keys(qr).some((k) => k.startsWith('objeto/obra-reforma')), `tudo pronto: o poço e a banca novos, a porteira de madeira fechada, nenhuma obra (veio ${JSON.stringify(Object.keys(qr).filter((k) => /poco|banca|porteira|obra/.test(k)))})`);
+  semErros(a, '1280x720 (reformas)');
   await a.ctx.close();
 
   // =====================================================================================================

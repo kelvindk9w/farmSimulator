@@ -124,7 +124,8 @@ EXTRAS_DO_ABRIGO.push((m, e) => {
   };
   const semTrato = (a) => (estaTratado(m, a) ? null : A.semTrato(D, a.especie));
   const boi = bichoDe(m, 'arar'), cav = bichoDe(m, 'montaria'), jum = bichoDe(m, 'carga');
-  if (boi && !falta(boi, 'boi')) out.push({ id: 'arar', texto: A.arar, icone: 'icone/arado', ligado: m.modo.id === 'arado', dica: semTrato(boi) || A.ararDica(casasPorPassada(m, boi)), aoClicar() { m.comando({ tipo: 'escolherModo', modo: 'arado' }); fecharPainel(); } });
+  // (com as ações por toque o boi ara sozinho quando ela toca no campo: o botão só explica como)
+  if (boi && !falta(boi, 'boi')) out.push({ id: 'arar', texto: A.arar, icone: 'icone/arado', dica: semTrato(boi) || A.ararDica(casasPorPassada(m, boi)), aoClicar() { fecharPainel(); explicarBoi(m, true); } });
   if (cav && !falta(cav, 'cavalo')) out.push({ id: 'cavalo', texto: m.trabalho.aCavalo ? A.aPe : A.montar, icone: 'icone/sela', ligado: m.trabalho.aCavalo, dica: semTrato(cav) || A.montarDica, aoClicar() { alternar('cavalo'); } });
   if (jum && !falta(jum, 'jumento')) out.push({ id: 'jumento', texto: m.trabalho.levando ? A.deixar : A.levar, icone: 'icone/carroca', ligado: m.trabalho.levando, dica: semTrato(jum) || A.levarDica(capacidadeDaCarroca(m)), aoClicar() { alternar('jumento'); } });
   return out;
@@ -150,6 +151,7 @@ function figurasDoCartao(m) {
 }
 
 // ---------- o que o Seu Tonho explica na primeira vez de cada mecânica ----------
+let explicarBoi = () => {}; // (o botão "Arar com o boi" do estábulo pede a explicação; liga ao instalar o mundo)
 function explicar(m, tutorial, chave, titulo, fala) {
   const k = 'trabalho:' + chave;
   if (jaViuDica(m, k)) return false;
@@ -177,8 +179,12 @@ aoInstalarMundo((m, ctx) => {
     if (d.item === 'barril-de-agua' || (D.itens[d.item] && D.itens[d.item].funcao === 'barril')) explicar(m, tutorial, 'barril', F.titulo.barril, F.barril);
   });
 
-  // o boi: na primeira vez do modo "Arado"
-  ev.ouvir('modoMudou', (d) => { if (d.modo === 'arado') explicar(m, tutorial, 'boi', F.titulo.boi, F.boi(casasPorPassada(m))); });
+  // o boi: na primeira passada dele (tocar no campo já chama o boi; ele explica como escolher a fileira)
+  explicarBoi = (mm, sempre) => {
+    if (sempre && tutorial && tutorial.dizer) { tutorial.dizer(F.titulo.boi, F.boi(casasPorPassada(mm)), 12); return; }
+    explicar(mm, tutorial, 'boi', F.titulo.boi, F.boi(casasPorPassada(mm)));
+  };
+  ev.ouvir('arou', (d) => { if (d.com === 'boi') explicarBoi(m, false); });
   // os dois botões
   // (na primeira vez quem fala é o Seu Tonho; o aviso curto fica para as outras)
   ev.ouvir('montariaMudou', (d) => {

@@ -1,11 +1,16 @@
-// Toque e mouse no canvas. Tocar = ir e agir (anel no ponto tocado; a casa fica marcada antes de a ação acontecer).
-// Arrastar: com um modo de ferramenta, pinta as casas e enfileira; no modo mão, o dedo vira alavanca (anda para onde
-// arrasta) e o mouse move a câmera. Dois dedos: pinça dá zoom e desloca a câmera. Roda do mouse: zoom.
-// O esquema das configurações muda o toque: "só toque" (sem alavanca: arrastar no modo mão move a câmera),
+// Toque e mouse no canvas. Tocar = a ação natural do alvo (nucleo/sistemas/acoes.js: arar, plantar o que está na
+// mão, regar, colher, limpar, abrir...), ou andar até lá; anel no ponto tocado. Apertando, a casa fica marcada e o
+// balãozinho mostra a ação (ui/acoes.js); ela acontece ao soltar. Alvo com mais de uma ação: abre a roda de ações.
+// Arrastar a partir do campo ou de uma planta repete a ação da primeira casa nas casas por onde o dedo passa (arar,
+// plantar, regar; nunca colher, limpar nem abrir); de outro lugar, o dedo vira alavanca (anda para onde arrasta) e o
+// mouse move a câmera. Dois dedos: pinça dá zoom e desloca a câmera. Roda do mouse: zoom.
+// O esquema das configurações muda o toque: "só toque" (sem alavanca: arrastar fora do campo move a câmera),
 // "alavanca" (o chão não recebe ordens: só a alavanca e o botão de ação) ou "os dois".
 import { J } from '../contexto.js';
 import { KX, KY } from '../render/camera.js';
-import { TIPOS, MODOS } from '../nucleo/registro.js';
+import { TIPOS } from '../nucleo/registro.js';
+import { acoesDoAlvo } from '../nucleo/sistemas/acoes.js';
+import { acoesUi, pedeRoda } from '../ui/acoes.js';
 import { foco } from './foco.js';
 import { tela } from '../plataforma/tela.js';
 import { som } from '../plataforma/som.js';
@@ -20,7 +25,8 @@ export function ligarToque(entrada, hud) {
   const d1 = { id: -1, x: 0, y: 0, x0: 0, y0: 0 }, d2 = { id: -1, x: 0, y: 0 };
   let gesto = null; // null | 'toque' | 'pintar' | 'alavanca' | 'camera' | 'pinca' | 'nada'
   let pincaDist = 0, pincaX = 0, pincaY = 0, ultX = -1, ultZ = -1, botao = 0, mouse = false;
-  const cmd = { tipo: 'rumar', dx: 0, dz: 0, forca: 1, correr: false }, cmdCasa = { tipo: 'tocarCasa', x: 0, z: 0, arrasto: false };
+  let modoArrasto = null; // o modo que o arrasto repete (o da ação da casa onde o dedo apertou), ou null: o arrasto anda
+  const cmd = { tipo: 'rumar', dx: 0, dz: 0, forca: 1, correr: false }, cmdCasa = { tipo: 'agirNoAlvo', x: 0, z: 0, arrasto: true, modo: null };
 
   // alavanca solta: aparece onde o dedo começou a arrastar
   const solta = el('div', 'alavanca solta'), pinoSolto = el('i'); solta.append(pinoSolto); solta.hidden = true; hud.raiz.append(solta);
@@ -58,7 +64,11 @@ export function ligarToque(entrada, hud) {
     const m = J.mundo;
     alvoEm(x, y, alvo);
     if (!m.local.dentro(alvo.x, alvo.z) && alvo.entidade === null) return;
-    const r = alvo.entidade !== null ? m.comando({ tipo: 'tocarEntidade', id: alvo.entidade }) : (cmdCasa.x = alvo.x, cmdCasa.z = alvo.z, cmdCasa.arrasto = false, m.comando(cmdCasa));
+    const a = alvo.entidade !== null ? { entidade: alvo.entidade } : { x: alvo.x, z: alvo.z };
+    // mais de uma ação (o curral, a indústria com produto pronto): a roda, e a escolha é no botão dela
+    const lista = alvo.entidade !== null && !document.body.classList.contains('colocando') ? acoesDoAlvo(m, a) : null;
+    if (lista && pedeRoda(lista) && acoesUi.abrirRoda(a, lista)) return;
+    const r = m.comando({ tipo: 'agirNoAlvo', ...a });
     J.cena.part.anel(alvo.fx, alvo.fz, r.ok ? '#ffffff' : '#ffb39a');
     som.tocar(r.ok ? 'toque' : 'erro');
   }
@@ -69,7 +79,7 @@ export function ligarToque(entrada, hud) {
     // dedo rápido pula casas: preenche o caminho entre a última e esta
     const n = ultX < 0 ? 1 : Math.max(Math.abs(cx - ultX), Math.abs(cz - ultZ));
     for (let k = 1; k <= n; k++) {
-      cmdCasa.x = ultX < 0 ? cx : Math.round(ultX + ((cx - ultX) * k) / n); cmdCasa.z = ultX < 0 ? cz : Math.round(ultZ + ((cz - ultZ) * k) / n); cmdCasa.arrasto = true;
+      cmdCasa.x = ultX < 0 ? cx : Math.round(ultX + ((cx - ultX) * k) / n); cmdCasa.z = ultX < 0 ? cz : Math.round(ultZ + ((cz - ultZ) * k) / n); cmdCasa.modo = modoArrasto;
       const r = J.mundo.comando(cmdCasa);
       if (r.ok && !r.repetida) som.tocar('toque');
     }
@@ -100,10 +110,14 @@ export function ligarToque(entrada, hud) {
     botao = e.button;
     try { cv.setPointerCapture(e.pointerId); } catch { /* sem captura */ }
     if (mouse && botao !== 0) { gesto = 'camera'; e.preventDefault(); return; }
-    gesto = 'toque'; ultX = ultZ = -1;
+    gesto = 'toque'; ultX = ultZ = -1; modoArrasto = null;
     if (mouse || J.prefs.esquema !== 'alavanca') {
       alvoEm(pt.x, pt.y, alvo); entrada.destacar(alvo.x, alvo.z, alvo.entidade);
-      if (alvo.entidade === null) entrada.fileira.apertou('dedo', alvo.x, alvo.z); // segurar parado numa casa do campo: a fileira
+      if (alvo.entidade === null) {
+        const o = acoesDoAlvo(J.mundo, alvo)[0];
+        if (o && o.ok && o.arrasta && o.modo) modoArrasto = o.modo; // arrastar daqui repete esta ação (o campo, as plantas)
+        entrada.fileira.apertou('dedo', alvo.x, alvo.z); // segurar parado numa casa do campo: a fileira
+      }
     }
   });
 
@@ -125,7 +139,7 @@ export function ligarToque(entrada, hud) {
     d1.x = pt.x; d1.y = pt.y;
     if (gesto === 'toque' && Math.hypot(pt.x - d1.x0, pt.y - d1.y0) > (mouse ? 6 : SOLTA)) {
       entrada.fileira.cancelar('dedo'); // mexeu: não é mais segurar
-      const ferramenta = J.mundo.modo.id !== 'mao' && !!MODOS[J.mundo.modo.id], esquema = J.prefs.esquema;
+      const ferramenta = !!modoArrasto, esquema = J.prefs.esquema;
       if (mouse) gesto = ferramenta ? 'pintar' : 'camera';
       else if (esquema === 'alavanca') gesto = 'alavanca';
       else if (ferramenta) gesto = 'pintar';

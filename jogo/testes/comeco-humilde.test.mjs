@@ -7,13 +7,13 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { lerPasta, ateParar, ouvirTudo, modo, pular, tocarEm, porConstrucao } from './apoio.mjs';
+import { lerPasta, ateParar, ouvirTudo, modo, pular, tocarEm, porConstrucao, arar } from './apoio.mjs';
 import { Mundo } from '../src/nucleo/mundo.js';
 import { prepararDados } from '../src/nucleo/dados.js';
 import { missaoAtual } from '../src/nucleo/sistemas/missoes.js';
 import { noCaixote } from '../src/nucleo/sistemas/banca.js';
 import { capacidadeDe } from '../src/nucleo/sistemas/celeiro-dentro.js';
-import { reformas, trechosDaCerca, tipoDoTrecho, ehHumilde, querComecoNovo, versaoDoComeco } from '../src/nucleo/sistemas/comeco.js';
+import { reformas, trechosDaCerca, tipoDoTrecho, ehHumilde, querComecoNovo, versaoDoComeco, porteiraDaCerca } from '../src/nucleo/sistemas/comeco.js';
 import { construcoesDe, estaPronta } from '../src/nucleo/sistemas/construcao.js';
 import { guiaDaMissao } from '../src/nucleo/guia.js';
 import { TIPOS } from '../src/nucleo/registro.js';
@@ -125,6 +125,53 @@ test('a chegada nunca prende: pular, ou qualquer toque, termina a cena na hora; 
   const n = Mundo.carregar(d.dados, copia(d.salvar()));
   assert.ok(n.comeco.chegou && !n.comeco.chegada);
   assert.equal(n.comando({ tipo: 'comecarChegada' }).ok, false);
+});
+
+test('no fim da chegada ela larga a trouxa no chão, atrás dela; pulando ou gravando no meio, também; fica na gravação e sai quando a casa é usada', () => {
+  const m = novo(), p = m.personagem, loc = m.locais.fazenda;
+  assert.equal(m.comeco.trouxa, null, 'antes da chegada, nada no chão');
+  m.comando({ tipo: 'comecarChegada' });
+  for (let k = 0; k < 60 * 20 && m.comeco.chegada; k++) m.passo();
+  const t = m.comeco.trouxa, v = naFazenda(m, 'vizinho');
+  assert.ok(t, 'a trouxa ficou no chão');
+  const d = Math.hypot(t[0] - p.x, t[1] - p.z);
+  assert.ok(d > 0.4 && d < 0.7, `perto dos pés dela (${d.toFixed(2)})`);
+  assert.ok(Math.hypot(t[0] - v.x - 0.5, t[1] - v.z - 0.5) > Math.hypot(p.x - v.x - 0.5, p.z - v.z - 0.5), 'atrás dela (do lado de longe do Seu Tonho)');
+  const cx = Math.floor(t[0]), cz = Math.floor(t[1]);
+  assert.ok(loc.ehPropria(cx, cz) && !loc.entidadeEm(cx, cz) && !loc.plantas[loc.i(cx, cz)], 'numa casa livre');
+  // pulando, no mesmo lugar; gravada no meio da cena, abre com a trouxa no chão
+  const b = novo();
+  b.comando({ tipo: 'comecarChegada' }); b.passo(); b.comando({ tipo: 'pularChegada' });
+  assert.deepEqual(b.comeco.trouxa, t);
+  const c = novo();
+  c.comando({ tipo: 'comecarChegada' }); for (let k = 0; k < 30; k++) c.passo();
+  assert.deepEqual(Mundo.carregar(c.dados, copia(c.salvar())).comeco.trouxa, t);
+  // fica na gravação; com uma construção na casa dela (ou a casa arada), a trouxa sai
+  const n = Mundo.carregar(m.dados, copia(m.salvar()));
+  n.avancar(1.1);
+  assert.deepEqual(n.comeco.trouxa, t);
+  porConstrucao(n, 'espantalho', cx, cz);
+  n.avancar(1.1);
+  assert.equal(n.comeco.trouxa, null);
+  assert.equal(Mundo.carregar(n.dados, copia(n.salvar())).comeco.trouxa, null);
+  const a = Mundo.carregar(m.dados, copia(m.salvar())), livre = [[28, 53], [27, 53], [28, 54]].find(([x, z]) => a.locais.fazenda.chaoEm(x, z) === 0 && !a.locais.fazenda.entidadeEm(x, z));
+  a.comeco.trouxa = [livre[0] + 0.5, livre[1] + 0.5];
+  arar(a, [livre]);
+  a.avancar(1.1);
+  assert.equal(a.comeco.trouxa, null, 'arada');
+});
+
+test('a porteira fica no vão da entrada (o caminho da chegada passa por ela); a fazenda de antes não tem', () => {
+  const m = novo(), loc = m.locais.fazenda, pt = porteiraDaCerca(m), C = m.dados.terras.comeco;
+  assert.deepEqual(pt, { x: 33, z: 60, x0: 32, x1: 34 });
+  assert.equal(pt.x1 - pt.x0, 2, 'duas casas de largura, como as peças das porteiras');
+  assert.ok(loc.ehPropria(pt.x0, pt.z - 1) && !loc.ehPropria(pt.x0, pt.z), 'na beira da terra própria');
+  assert.ok(!trechosDaCerca(m).some((t) => t.eixo === 'x' && t.z === pt.z && t.x > pt.x0 && t.x < pt.x1), 'sem trecho de cerca no vão');
+  // o caminho dela cruza a linha da beira dentro do vão
+  const pts = C.chegada, i = pts.findIndex((q, k) => k > 0 && (pts[k - 1][1] - pt.z) * (q[1] - pt.z) <= 0), a = pts[i - 1], b = pts[i];
+  const x = a[0] + ((b[0] - a[0]) * (pt.z - a[1])) / (b[1] - a[1]);
+  assert.ok(x > pt.x0 + 0.5 && x < pt.x1 - 0.5, `entra pelo meio da porteira (x ${x})`);
+  assert.equal(porteiraDaCerca(Mundo.carregar(dadosDeVerdade(), velha('antes-nivel-1'))), null);
 });
 
 test('a chegada espera a tela de carregando: parada na porteira até soltarChegada; um toque também termina', () => {

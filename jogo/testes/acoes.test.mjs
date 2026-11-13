@@ -132,6 +132,34 @@ test('arrastar repete a ação da primeira casa (arar, plantar, regar) e nunca c
   assert.equal(m.personagem.fila.length, 0);
 });
 
+test('o arrasto só começa no campo e nas plantas; da grama encostada no campo, o toque ara mas o arrasto anda', () => {
+  const m = novoMundo();
+  por(m, 12, 13, CAMPO); por(m, 13, 13, ARADA);
+  const campo = principal(m, { x: 12, z: 13 }), arada = principal(m, { x: 13, z: 13 }), grama = principal(m, { x: 11, z: 13 });
+  assert.deepEqual([campo.id, campo.arrasta], ['arar', true]);
+  assert.deepEqual([arada.id, arada.arrasta], ['semear', true]);
+  assert.deepEqual([grama.id, grama.modo, !!grama.arrasta], ['arar', 'enxada', false], 'a grama ara no toque, mas arrastar dela anda');
+  agir(m, { x: 13, z: 13 }); ateParar(m);
+  const pl = plantaEm(m, 13, 13); pl.secaEm = 0;
+  assert.equal(principal(m, { x: 13, z: 13 }).arrasta, true, 'a planta com sede: arrastar rega');
+});
+
+test('segurar o botão de agir: a fileira fica com a ação de quando apertou (a primeira casa já entrou na fila)', () => {
+  const m = novoMundo();
+  for (const x of [12, 13, 14, 15]) por(m, x, 14, CAMPO);
+  const f = fileiraNatural(m, 12, 14);
+  assert.equal(f.modo, 'enxada');
+  // o botão age na hora: a primeira casa vai para a fila de arar, e a ação natural dela vira "plantar"
+  agir(m, { x: 12, z: 14 });
+  assert.equal(principal(m, { x: 12, z: 14 }).modo, 'semear');
+  // soltando, a fileira ainda é de arar (o modo de quando apertou)
+  assert.equal(fileiraNatural(m, 12, 14, f.modo).modo, 'enxada');
+  assert.equal(agir(m, { x: 12, z: 14, fileira: true, modo: f.modo }).ok, true);
+  ateParar(m);
+  assert.deepEqual([12, 13, 14, 15].map((x) => chao(m, x, 14)), [ARADA, ARADA, ARADA, ARADA]);
+  assert.equal(m.local.plantas[14 * m.local.l + 12], null, 'e nada foi plantado');
+});
+
 test('segurar o dedo: a fileira toda com a ação da casa; com o boi, o toque e o segurar aram com ele', () => {
   const m = mundoDoTrabalho();
   for (const x of [12, 13, 14, 15, 16]) por(m, x, 14, CAMPO);
@@ -178,6 +206,9 @@ test('obstáculos: mato, toco e pedra limpam com a ferramenta de cada um; sem el
 
 test('bicho no abrigo: o que ele mais precisa é a principal; a roda tem recolher, ração, água e abrir', () => {
   const m = mundoDosAnimais(), c = porAbrigo(m, 'curral');
+  darAnimais(m, { racao: 10 });
+  assert.deepEqual(ids(acoesDoAlvo(m, { entidade: c.id })), ['abrir'], 'o abrigo vazio só abre (para comprar o bicho): sem trato, sem roda');
+  m.posses.bolsa.racao = 0; m.posses.celeiro.itens.racao = 0;
   porAnimal(m, 'vaca');
   // sem comida nem água e sem ração no celeiro: dar água (o regador está no suporte) e abrir (o painel explica o resto)
   assert.deepEqual(ids(acoesDoAlvo(m, { entidade: c.id })), ['abastecerBebedouro', 'abrir']);

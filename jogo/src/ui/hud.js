@@ -1,15 +1,14 @@
 // O HUD: nível e experiência, ouro, cash, cesto, regador e fôlego (em cima, à esquerda); botões dos painéis (em cima,
-// à direita); linha de dica, fila de tarefas, sementes e barra de modo (embaixo); alavanca e botão de ação (toque).
+// à direita); linha de dica e fila de tarefas (embaixo), e a fileira de baixo, onde fica a vaga "Na mão" (ui/acoes.js);
+// alavanca e botão de agir (toque com alavanca, teclado e controle).
 // É HTML por cima do canvas. atualizar() roda todo quadro, mas só mexe no DOM quando um valor muda.
 import { el, icone, trocarIcone, botao, por, classe, encher } from './dom.js';
 import { T, numero } from './textos.js';
 import { prepararEstilo, ajustarEscala } from './estilo/index.js'; // o visual aprovado (molduras, escala, Menu)
 import { criarMenu } from './menu.js';
 import { J } from '../contexto.js';
-import { modosEmOrdem } from '../nucleo/registro.js';
 import { barraDeXp } from '../nucleo/sistemas/niveis.js';
 import { noCesto, foraDoCesto, capacidadeDoCesto, ferramentaNoCinto, ferramentaGuardada } from '../nucleo/sistemas/posses.js';
-import { plantavel } from '../nucleo/sistemas/lavoura.js';
 import { PAINEIS, abrirPainel, painelAberto } from './paineis/registro.js';
 import { tela } from '../plataforma/tela.js';
 import { som } from '../plataforma/som.js';
@@ -67,40 +66,17 @@ export function criarHud(ui) {
   fila.addEventListener('click', () => { J.mundo.comando({ tipo: 'cancelar' }); som.tocar('fechar'); });
   const dica = el('div', 'dica');
   info.append(fila, dica);
-  const sementes = el('div', 'sementes'); sementes.hidden = true;
+  // a fileira de baixo: a vaga "Na mão" (ui/acoes.js) e o que as frentes põem ao lado (a porta do celeiro). (O nome
+  // .modos ficou da barra de modos, que as ações por toque aposentaram.)
   const modos = el('div', 'modos');
-  for (const md of modosEmOrdem()) {
-    const b = botao({ icone: md.icone || 'ui/' + md.id, tamanho: 38, texto: T.modos[md.id] || md.id, classe: 'modo', aoClicar: () => { som.tocar('toque'); J.mundo.comando({ tipo: 'escolherModo', modo: md.id }); } });
-    b.dataset.modo = md.id; b._modo = md;
-    const conta = el('span', 'conta'); conta.hidden = true; b.append(conta); b._conta = conta;
-    hud.modos[md.id] = b;
-    modos.append(b);
-  }
-  rodape.append(info, sementes, modos);
+  rodape.append(info, modos);
 
   // ---------- toque: alavanca e botão de ação ----------
   const alavanca = el('div', 'alavanca toca'), pino = el('i'); alavanca.append(pino); alavanca.hidden = true;
-  const agir = botao({ icone: 'ui/mao', tamanho: 54, classe: 'agir', rotulo: T.botoes.agir }); agir.hidden = true;
-  agir.addEventListener('pointerdown', (e) => { e.preventDefault(); J.meio = 'teclas'; J.mundo.comando({ tipo: 'agir' }); });
+  const agir = botao({ icone: 'ui/mao', tamanho: 54, classe: 'agir', rotulo: T.botoes.agir }); agir.hidden = true; // (o apertar e o segurar: entrada/agir.js)
   hud.alavanca = alavanca; hud.pino = pino; hud.agir = agir; hud.dicaEl = dica; hud.rodape = rodape;
 
   ui.append(esq, dir, rodape, alavanca, agir);
-
-  // ---------- sementes: um botão por semente que há na bolsa ----------
-  let assinatura = '';
-  function refazerSementes(m) {
-    sementes.textContent = '';
-    hud.sementes = {};
-    const B = m.posses.bolsa, lista = [];
-    for (const id of m.dados.loja.ouro) if (plantavel(m.dados, id) && (B[id] > 0 || id === m.modo.semente)) lista.push(id);
-    for (const id of lista.slice(0, 8)) {
-      const b = botao({ icone: 'icone/' + id, tamanho: 34, classe: 'semente', rotulo: m.dados.itens[id].nome, aoClicar: () => { som.tocar('toque'); J.mundo.comando({ tipo: 'escolherModo', modo: 'semear', semente: id }); } });
-      b.dataset.semente = id;
-      const conta = el('span', 'conta'); b.append(conta); b._conta = conta;
-      hud.sementes[id] = b;
-      sementes.append(b);
-    }
-  }
 
   let ultFila = -1;
   hud.atualizar = function () {
@@ -125,23 +101,10 @@ export function criarHud(ui) {
     if (folego.hidden !== cheio) folego.hidden = cheio;
     if (!cheio) { encher(fioF, p.folego / F.max); classe(barraF, 'cansada', p.cansada); }
 
-    // modo ativo e os números da barra
-    for (const id in hud.modos) { const b = hud.modos[id], some = !!b._modo.disponivel && !b._modo.disponivel(m); classe(b, 'ativo', m.modo.id === id); if (b.hidden !== some) b.hidden = some; } // modo que ainda não vale (sem a ferramenta) não aparece
-    const bReg = hud.modos.regar;
-    if (bReg && rs) { const c = bReg._conta; if (c.hidden) c.hidden = false; num(c, P.ferramentas[rs].agua); classe(c, 'zero', P.ferramentas[rs].agua === 0); }
-    const bSem = hud.modos.semear;
-    if (bSem) { const s = m.modo.semente, n = s ? P.bolsa[s] || 0 : 0, c = bSem._conta; if (c.hidden !== !s) c.hidden = !s; if (s) { num(c, n); classe(c, 'zero', n === 0); } }
-
-    // sementes (só no modo semear)
-    const mostra = m.modo.id === 'semear';
-    if (sementes.hidden !== !mostra) sementes.hidden = !mostra;
-    classe(rodape, 'com-sementes', mostra);
-    if (mostra) {
-      let a = '';
-      for (const id of D.loja.ouro) if (plantavel(D, id) && (P.bolsa[id] > 0 || id === m.modo.semente)) a += id + ',';
-      if (a !== assinatura) { assinatura = a; refazerSementes(m); }
-      for (const id in hud.sementes) { const b = hud.sementes[id], n = P.bolsa[id] || 0; classe(b, 'ativo', m.modo.semente === id); classe(b, 'vazia', n === 0); num(b._conta, n); }
-    }
+    // o botão de agir: com a alavanca na tela, e sempre que se joga pelas teclas ou pelo controle (o desenho dele
+    // é o da ação do alvo à frente: entrada/index.js)
+    const mostraAgir = comAlavanca || J.meio === 'teclas';
+    if (agir.hidden !== !mostraAgir) agir.hidden = !mostraAgir;
 
     // fila de tarefas: os próximos passos, em ícones
     const nf = p.fila.length + (p.tarefa ? 1 : 0);
@@ -167,11 +130,10 @@ export function criarHud(ui) {
     }
   };
 
-  // linha de dica: o que o toque ou o botão de ação vai fazer; sem nada a dizer, a dica do modo
+  // linha de dica: o que o toque ou o botão de ação vai fazer; sem nada a dizer, a dica geral (T.dicaDoModo.mao)
   let dicaOculta = false;
   hud.dica = function (texto, fraca) {
-    const m = J.mundo;
-    const t = texto || T.dicaDoModo[m.modo.id] || '';
+    const t = texto || T.dicaDoModo.mao || '';
     por(dica, t);
     classe(dica, 'fraca', !texto || !!fraca);
     const some = !t || dicaOculta;
@@ -181,9 +143,11 @@ export function criarHud(ui) {
   hud.esconderDica = function (sim) { if (dicaOculta !== sim) { dicaOculta = sim; const some = sim || !dica.textContent; if (dica.hidden !== some) dica.hidden = some; } };
 
   // alavanca e botão de ação conforme o esquema escolhido (só em aparelho de toque)
+  let comAlavanca = false;
   hud.aplicarPrefs = function () {
-    const e = J.prefs.esquema, comAlavanca = J.toque && (e === 'alavanca' || e === 'os-dois');
-    alavanca.hidden = !comAlavanca; agir.hidden = !comAlavanca;
+    const e = J.prefs.esquema;
+    comAlavanca = !!J.toque && (e === 'alavanca' || e === 'os-dois');
+    alavanca.hidden = !comAlavanca; agir.hidden = !(comAlavanca || J.meio === 'teclas');
     document.body.classList.toggle('grande', J.prefs.botoes === 'grande');
     document.body.classList.toggle('com-alavanca', comAlavanca);
   };

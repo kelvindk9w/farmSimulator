@@ -20,6 +20,7 @@ import { perguntar } from '../dialogo.js';
 import { botaoConcluir } from '../concluir.js';
 import { som } from '../../plataforma/som.js';
 import { construcaoPorId, defDe, proximaAmpliacao, faltaDaObra, andamentoDaObra } from '../../nucleo/sistemas/construcao.js';
+import { fichaDeMaterial, botaoOndeConseguir, faltaComFonte } from '../fontes.js';
 import { quantoTem, ferramentaNoCinto, ferramentaGuardada } from '../../nucleo/sistemas/posses.js';
 import { animaisDe, animalPorId, defDoAnimal, estadoDoAbrigo, faltaNoAbrigo, ofertasDeAnimais, podeEncherCocho, podeEncherBebedouro, estaTratado } from '../../nucleo/sistemas/animais.js';
 import { situacaoDoAnimal, vidaDoAnimal, prontosNoAbrigo, podeRecolher } from '../../nucleo/sistemas/producao.js';
@@ -39,12 +40,7 @@ function pedidoDaMissao(m) {
 function custo(m, c) {
   const linha = el('div', 'cons-custo');
   if (c.ouro > 0) { const f = el('span', 'cons-ficha' + (m.posses.ouro < c.ouro ? ' falta' : '')); f.append(icone('icone/ouro', 18), el('span', '', numero(c.ouro))); linha.append(f); }
-  for (const k in c.itens) {
-    const tem = quantoTem(m, k), f = el('span', 'cons-ficha' + (tem < c.itens[k] ? ' falta' : ''));
-    f.title = m.dados.itens[k].nome;
-    f.append(icone('icone/' + k, 18), el('span', '', `${Math.min(tem, 999)}/${c.itens[k]}`));
-    linha.append(f);
-  }
+  for (const k in c.itens) linha.append(fichaDeMaterial(m, k, c.itens[k])); // (o que falta: vermelho, "falta N", toque abre o "Onde conseguir?")
   return linha;
 }
 const sit = {}, vida = {}, falta = {};
@@ -269,9 +265,12 @@ registrarPainel({
         if (amp.nivel > m.progresso.nivel) { const t = el('div', 'info trava'); t.append(icone('ui/cadeado', 18), el('span', '', T.animais.nivel(amp.nivel))); bloco.append(t); }
         else {
           bloco.append(custo(m, amp.custo));
-          const b = botao({ icone: 'icone/martelo', tamanho: 22, texto: T.animais.ampliar + (amp.obraSeg > 0 ? ' · ' + tempo(amp.obraSeg) : ''), classe: 'verde', aoClicar: () => { const r = mandar({ tipo: 'ampliar', entidade: e.id }); if (r.ok) som.tocar('martelo'); } });
-          b.dataset.k = 'ampliar';
-          bloco.append(b);
+          if (faltaComFonte(m, amp.custo.itens).length) bloco.append(botaoOndeConseguir(m, amp.custo.itens, 'onde-ampliar'));
+          else {
+            const b = botao({ icone: 'icone/martelo', tamanho: 22, texto: T.animais.ampliar + (amp.obraSeg > 0 ? ' · ' + tempo(amp.obraSeg) : ''), classe: 'verde', aoClicar: () => { const r = mandar({ tipo: 'ampliar', entidade: e.id }); if (r.ok) som.tocar('martelo'); } });
+            b.dataset.k = 'ampliar';
+            bloco.append(b);
+          }
         }
         caixa.append(bloco);
       }

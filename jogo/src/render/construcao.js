@@ -2,8 +2,8 @@
 //   fundo  o celeiro por dentro (fundo escuro, piso de tábuas, paredes do fundo, soleira) e o calçamento da fazenda
 //   chao   a planta do que a personagem foi mandada erguer e as casas verdes ou vermelhas do fantasma
 //   cima   o fantasma do que está sendo colocado, a barra e o relógio em cima de cada obra, a seta da saída
-// e as figuras que não são uma peça só: a obra subindo com andaime, a cerca em trechos que se emendam (com mourão
-// nos cantos) e a porteira, que abre quando alguém chega perto.
+// e as figuras que não são uma peça só: a obra subindo com andaime (a da reforma do começo humilde tem peça própria),
+// a cerca em trechos que se emendam (com mourão nos cantos) e a porteira, que abre quando alguém chega perto.
 // Quem liga o fantasma é a interface (ui/colocacao.js), preenchendo FANTASMA.
 import { registrarCamada, COR_DA_ACAO } from './cena.js';
 import { KX, KY, KA } from './camera.js';
@@ -85,10 +85,18 @@ function desenharObra(g, cena, m, e, sx, sy, S) {
     reta(g, cam, x0, alto * 0.5, z1, x1, alto * 0.5, z1); reta(g, cam, x1, alto * 0.5, z0, x1, alto * 0.5, z1);
   });
 }
+// a obra de uma reforma (o começo humilde: poço, banca, casa) tem peça própria, objeto/obra-reforma-<a nova>: a velha
+// com andaime, com o apoio no mesmo ponto do chão da peça nova. Sem a peça (a cerca não tem: a obra dela é a dos
+// trechos), ou enquanto a página não chega, a obra comum. (v.chave continua a da nova: a caixa do toque é a dela.)
+const OBRA_DA_REFORMA = {};
+const obraDaReforma = (tipo) => OBRA_DA_REFORMA[tipo] || (OBRA_DA_REFORMA[tipo] = 'objeto/obra-reforma-' + tipo);
+function desenharObraDeReforma(g, cena, m, e, sx, sy, S) {
+  if (!cena.atlas.desenhar(g, obraDaReforma(e.tipo), 0, sx, sy, S, cena.v.espelhar)) desenharObra(g, cena, m, e, sx, sy, S);
+}
 const NADA = () => {};
 DESENHO.visual = (m, e, v) => {
   if (FANTASMA.ligado && FANTASMA.mudando === e) { v.desenhar = NADA; return; } // está na mão do jogador: aparece como fantasma
-  if (e.obraAte > 0) v.desenhar = desenharObra;
+  if (e.obraAte > 0) v.desenhar = e.reforma ? desenharObraDeReforma : desenharObra;
 };
 
 // ---------- cerca e porteira ----------

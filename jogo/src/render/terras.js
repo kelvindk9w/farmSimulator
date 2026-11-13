@@ -12,6 +12,7 @@ import { situacaoDoLote } from '../nucleo/sistemas/lotes.js';
 import { podePlantarArvore, safrasProntas } from '../nucleo/sistemas/arvores.js';
 import { TIPO_DO_ASPERSOR, raioDoAspersor } from '../nucleo/sistemas/aspersor.js';
 import { planejadas } from '../nucleo/sistemas/construcao.js';
+import { itemNaMao } from '../nucleo/sistemas/lavoura.js';
 
 Object.assign(COR_DA_ACAO, { rocar: '#9bd04a', cortar: '#e0a05a', quebrar: '#c9c8c0', plantarMuda: '#74b83a', colherFruta: '#f6c12c' });
 // gestos ainda sem peça no catálogo usam o de um gesto parecido
@@ -80,7 +81,7 @@ registrarCamada('chao', (g, cam, m, S, cena, dt) => {
   g.lineJoin = 'round';
 
   // onde a muda escolhida pode ser plantada
-  const muda = m.modo.id === 'semear' && m.dados.arvoreDaMuda[m.modo.semente] ? m.modo.semente : null;
+  const naMao = itemNaMao(m), muda = m.dados.arvoreDaMuda[naMao] ? naMao : null; // (a muda na vaga "Na mão")
   if (muda) {
     relogioLivres -= dt;
     if (relogioLivres <= 0 || mudaDosLivres !== muda) { relogioLivres = 0.3; mudaDosLivres = muda; conferirLivres(m, cam); }

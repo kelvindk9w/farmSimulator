@@ -12,6 +12,8 @@
 //       acrescenta uma aba ao cartão das construções em que serve() der true
 //   linhaDeArrumar(idDaEntidade, ctx)  → <div> com os botões Mudar de lugar e Guardar, para pôr no painel próprio
 //   iconeDaConstrucao(id, tamanho)     → o ícone de uma construção (a própria peça do cenário, reduzida)
+//   iconeDaReforma(para, tamanho)      → o de uma reforma (icone/reforma-<a nova>: a peça nova com um martelinho);
+//   chaveDaReforma(para)                 a chave dele (o aviso da reforma pronta e a fila de tarefas usam)
 // E mais: o botão "Entrar" que aparece no HUD quando ela chega ao celeiro ("Sair", lá dentro) e as seções do
 // celeiro na mochila.
 import { el, icone, botao, por } from '../dom.js';
@@ -34,11 +36,15 @@ import { capacidadeDe, ocupacaoDe, guardaDoItem, moveisDe, pertoDaPorta } from '
 import { reformas } from '../../nucleo/sistemas/comeco.js';
 import { guiaDaMissao } from '../../nucleo/guia.js';
 import '../textos/comeco.js';
+import { fichaDeMaterial, botaoOndeConseguir, faltaComFonte } from '../fontes.js';
 
 const TRAVADAS_A_MOSTRA = 2;
 // não há "icone/<id>" para construção: o ícone é a própria peça do cenário, encaixada na caixa (ui/dom.js já encaixa
 // qualquer peça do catálogo). Para animal vale o mesmo com 'animal/<id>/parada-frente'.
 export const iconeDaConstrucao = (id, tamanho = 48) => icone('objeto/' + (id.startsWith('cerca') ? 'cerca-x' : id), tamanho);
+// a reforma tem ícone próprio (a cerca nova é uma só: reforma-cerca); sem ele no catálogo, o da construção nova
+export const chaveDaReforma = (para) => 'icone/reforma-' + (para.startsWith('cerca') ? 'cerca' : para);
+export const iconeDaReforma = (para, tamanho = 48) => (J.atlas && J.atlas.tem(chaveDaReforma(para)) ? icone(chaveDaReforma(para), tamanho) : iconeDaConstrucao(para, tamanho));
 
 // ---------- pedaços comuns ----------
 const CATEGORIAS = ['abrigo', 'industria', 'armazem', 'util', 'cerca', 'decoracao'];
@@ -48,33 +54,32 @@ function categoriaDe(def) {
   return CATEGORIAS.includes(def.tipo) ? def.tipo : 'util';
 }
 const constroi = (def) => !def.inicial && !!def.custo;
-// o preço em fichas: ouro e cada material, com o que há; vermelho no que falta
+// o preço em fichas: ouro e cada material, com o que há; o material que falta fica vermelho, "falta N", e o toque
+// nele abre o "Onde conseguir?" (ui/fontes.js)
 function custo(m, c) {
   const linha = el('div', 'cons-custo');
   if (c.ouro > 0) { const f = el('span', 'cons-ficha' + (m.posses.ouro < c.ouro ? ' falta' : '')); f.append(icone('icone/ouro', 18), el('span', '', numero(c.ouro))); linha.append(f); }
-  for (const k in c.itens) {
-    const tem = quantoTem(m, k), f = el('span', 'cons-ficha' + (tem < c.itens[k] ? ' falta' : ''));
-    f.title = m.dados.itens[k].nome;
-    f.append(icone('icone/' + k, 18), el('span', '', `${Math.min(tem, 999)}/${c.itens[k]}`));
-    linha.append(f);
-  }
+  for (const k in c.itens) linha.append(fichaDeMaterial(m, k, c.itens[k]));
   return linha;
 }
+// o que trava é o material (ou o material e o ouro)? então o botão vira "Onde conseguir?"
+const travaNoMaterial = (m, itens, pode) => !pode.ok && (pode.motivo === 'falta-material' || pode.motivo === 'sem-ouro') && faltaComFonte(m, itens || {}).length > 0;
 function trava(texto) { const t = el('div', 'info trava'); t.append(icone('ui/cadeado', 18), el('span', '', texto)); return t; }
 
 // ---------- as reformas (o começo humilde): o que já veio com a fazenda e fica melhor ----------
-// r = um item de reformas(m) (nucleo/sistemas/comeco.js); o cartão mostra a figura da nova, o ganho e o preço
+// r = um item de reformas(m) (nucleo/sistemas/comeco.js); o cartão mostra o ícone da reforma, o ganho e o preço
 const guia = { tipo: null };
 function cartaoDeReforma(m, r) {
   const travada = r.nivel > m.progresso.nivel, c = el('div', 'oferta cons-oferta' + (travada ? ' travada' : ''));
   c.dataset.item = 'reforma:' + r.de;
-  c.append(iconeDaConstrucao(r.para, 52), el('div', 'nome', r.nome));
+  c.append(iconeDaReforma(r.para, 52), el('div', 'nome', r.nome));
   if (travada) { c.append(trava(T.construir.nivel(r.nivel))); return c; }
   c.append(el('div', 'info', T.comeco.ganho[r.de] || ''));
   const pe = el('div', 'cons-pe');
   if (r.obra > 0) { c.append(el('div', 'info', T.comeco.emObra(r.obra))); c.append(pe); return c; }
   c.append(el('div', 'info', T.comeco.obra(r.obraSeg)));
   pe.append(custo(m, { ouro: r.custo.ouro || 0, itens: r.custo.itens || {} }));
+  if (travaNoMaterial(m, r.custo.itens, r.pode)) { pe.append(botaoOndeConseguir(m, r.custo.itens, 'onde-r-' + r.de)); c.append(pe); return c; }
   const b = botao({ texto: T.comeco.reformar, classe: 'verde' + (r.pode.ok ? '' : ' sem'), aoClicar: () => {
     const mm = J.mundo, res = mm.comando({ tipo: 'reformar', entidade: r.alvo, quieto: true });
     if (!res.ok) { som.tocar('erro'); avisar(frase(res.motivo, res.dados, mm.dados)); return; }
@@ -124,7 +129,8 @@ registrarPainel({
       if (!r.ok && r.motivo === 'exige') c.append(trava(T.construir.precisaDe(defDe(m, r.dados.construcao).nome)));
       else if (!r.ok && r.motivo === 'limite') c.append(el('div', 'info', frase('limite', r.dados, m.dados)));
       else if (fora) c.append(el('div', 'info', def.onde === 'celeiro' ? T.construir.soDentro : T.construir.soFora));
-      if (!(def.custo.cash > 0) || guardadas) {
+      if (!guardadas && !(def.custo.cash > 0) && !fora && travaNoMaterial(m, def.custo.itens, r)) pe.append(botaoOndeConseguir(m, def.custo.itens, 'onde-' + def.id));
+      else if (!(def.custo.cash > 0) || guardadas) {
         const b = botao({ texto: guardadas ? T.construir.colocar : def.tipo === 'movel' ? T.construir.montar : T.construir.escolher, classe: 'verde' + (r.ok && !fora ? '' : ' sem'), aoClicar: () => escolher(def.id) });
         b.dataset.k = 'c-' + def.id;
         if (soOuro) { const p = el('span', 'preco' + (m.posses.ouro < def.custo.ouro ? ' falta' : '')); p.append(icone('icone/ouro', 22), el('span', '', numero(def.custo.ouro))); b.append(p); }
@@ -249,6 +255,7 @@ registrarPainel({
         if (amp.nivel > m.progresso.nivel) bloco.append(trava(T.construir.nivel(amp.nivel)));
         else {
           bloco.append(custo(m, amp.custo));
+          if (faltaComFonte(m, amp.custo.itens).length) { bloco.append(botaoOndeConseguir(m, amp.custo.itens, 'onde-ampliar')); caixa.append(bloco); caixa.append(linhaDeArrumar(e.id, ctx)); return; }
           const b = botao({ icone: 'icone/martelo', tamanho: 22, texto: T.cartao.ampliar + (amp.obraSeg > 0 ? ' · ' + tempo(amp.obraSeg) : ''), classe: 'verde', aoClicar: () => { const r = m.comando({ tipo: 'ampliar', entidade: e.id }); if (r.ok) som.tocar('martelo'); } });
           b.dataset.k = 'ampliar';
           bloco.append(b);
@@ -276,7 +283,7 @@ registrarPainel({
       const guarda = oQueGuarda(m, e, def);
       if (guarda) textos.append(el('div', 'info', guarda));
       if (def.descricao) textos.append(el('div', 'info', def.descricao));
-      topo.append(iconeDaConstrucao(def.id, 64), textos);
+      topo.append(e.obraAte > 0 && e.reforma ? iconeDaReforma(def.id, 64) : iconeDaConstrucao(def.id, 64), textos); // (na obra da reforma, o ícone dela)
       caixa.append(topo);
       if (abas.length) {
         const linha = el('div', 'abas');

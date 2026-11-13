@@ -1,5 +1,5 @@
 // O vizinho (Seu Tonho): balão com retrato e a missão da vez, e a seta que aponta o próximo passo, no mundo
-// (uma casa, o poço) ou na interface (um botão de modo, a loja). O passo vem de nucleo/guia.js.
+// (uma casa, o poço) ou na interface (a vaga "Na mão", a loja). O passo vem de nucleo/guia.js.
 // As falas avulsas podem ser de outra pessoa (a dela, na chegada): o balão troca o nome e o retrato enquanto dura.
 import { el, icone, trocarIcone, por, classe, encher } from './dom.js';
 import { T } from './textos.js';
@@ -102,8 +102,8 @@ export function criarTutorial(ui, hud) {
       const e = m.local.porId[g.id];
       apontarUi(null);
       if (e) { cena.seta.ligada = true; cena.seta.x = e.x + e.l / 2; cena.seta.z = e.z + e.p / 2; cena.seta.alto = TIPOS[e.tipo].altura || 1.6 + Math.min(e.l, e.p) * 0.5; }
-    } else if (g.tipo === 'modo') apontarUi(hud.modos[g.modo]);
-    else if (g.tipo === 'semente') apontarUi(hud.sementes[g.item] || hud.modos.semear);
+    } else if (g.tipo === 'modo') apontarUi(hud.vaga); // (passo antigo de escolher modo: as ações por toque não pedem)
+    else if (g.tipo === 'semente') apontarUi(hud.alvoDaMao ? hud.alvoDaMao(g.item) : hud.vaga); // a vaga "Na mão" (aberta: a semente pedida)
     else if (g.tipo === 'painel') apontarUi(hud.alvo ? hud.alvo(hud.paineis[g.painel]) : hud.paineis[g.painel]); // dentro do Menu fechado: primeiro o Menu
     else apontarUi(null);
     // o balão nunca fica em cima do alvo apontado no mundo: se ficaria, muda de lado

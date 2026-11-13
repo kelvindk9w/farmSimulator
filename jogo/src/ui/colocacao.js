@@ -387,6 +387,8 @@ const DESVIA = {
   rumar(c) { passoDoRumo(c); }, frear() { ultimoPasso = 0; }, correr() {},
   agir() { confirmar(); }, cancelar() { cancelar(); }, trocarModo() { girar(); },
   tocarCasa() {}, tocarEntidade() {}, irPara() {}, escolherModo() {},
+  // as ações por toque (sistemas/acoes.js): o botão de agir confirma, Q e E (ombros) giram, o toque no chão não vale
+  agirNoAlvo(c) { if (c.frente) confirmar(); }, trocarNaMao() { girar(); }, naMao() {},
 };
 aoInstalarMundo((m, ctx) => {
   hud = ctx.hud;

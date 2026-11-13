@@ -1,15 +1,28 @@
 // Foco navegável pelas setas (teclado, controle de videogame e controle remoto de TV).
 // Com painel ou tela de subida abertos, as setas andam pelos botões deles. Sem nada aberto, as setas andam com a
 // personagem; "voltar" (Esc) ou Tab passam o foco para os botões do HUD (o "menu"), e voltar de novo devolve ao jogo.
+// A roda de ações e a fileira da vaga "Na mão" (ui/acoes.js) são um "popup": enquanto abertos, as setas andam pelos
+// botões deles e voltar fecha.
 import { J } from '../contexto.js';
 
 export const foco = {
   menu: false,
+  popup: null, // o elemento aberto por cima do jogo (a roda, a fileira da vaga)
+  fecharDoPopup: null,
+  abrirPopup(e, fechar) { this.popup = e; this.fecharDoPopup = fechar; },
+  // fecha o popup aberto (ou só esquece, se e não for ele); devolve true se havia um
+  fecharPopup(e) {
+    if (!this.popup || (e && e !== this.popup)) return false;
+    const f = this.fecharDoPopup;
+    this.popup = null; this.fecharDoPopup = null;
+    if (!e && f) f();
+    return true;
+  },
 
   // onde as setas navegam agora: a tela de subida, o painel aberto, ou o HUD inteiro (no menu)
   escopo() {
     const ui = document.getElementById('ui');
-    return ui.querySelector('.subida') || ui.querySelector('.veu') || (this.menu ? (this.listaAberta && this.listaAberta()) || ui : null);
+    return ui.querySelector('.subida') || ui.querySelector('.veu') || this.popup || (this.menu ? (this.listaAberta && this.listaAberta()) || ui : null);
   },
   // o Menu do celular (ui/menu.js): a lista aberta, e fechar a lista (devolve true se estava aberta)
   listaAberta: null,
@@ -54,7 +67,7 @@ export const foco = {
     this.menu = true;
     document.body.classList.add('menu');
     const ui = document.getElementById('ui'), lista = this.listaAberta && this.listaAberta();
-    const ativo = (lista && this.candidatos(lista)[0]) || ui.querySelector('.modo.ativo') || this.candidatos(ui)[0];
+    const ativo = (lista && this.candidatos(lista)[0]) || ui.querySelector('.vaga-mao') || this.candidatos(ui)[0];
     if (ativo) this.focar(ativo);
     J.mundo.comando({ tipo: 'frear' });
   },

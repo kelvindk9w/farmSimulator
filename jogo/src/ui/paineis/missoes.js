@@ -5,6 +5,10 @@ import { J } from '../../contexto.js';
 import { registrarPainel } from './registro.js';
 import { missaoAtual } from '../../nucleo/sistemas/missoes.js';
 
+// o que mais o cartão da missão da vez mostra: cada frente põe (mundo, missaoAtual) → elemento | null
+// (ui/fontes.js: o material que a obra da missão pede, o que falta e o "Onde conseguir?")
+export const EXTRAS_DA_MISSAO = [];
+
 // a recompensa em fichas: ouro, cash, xp, o bicho de presente e os itens
 export function fichasDaRecompensa(D, r) {
   const caixa = el('div', 'itens');
@@ -36,7 +40,9 @@ registrarPainel({
           const anda = el('div', 'anda'), barra = el('div', 'barra'), fio = el('i');
           fio.style.transform = `scaleX(${Math.min(1, a.conta / a.n)})`; barra.append(fio);
           anda.append(barra, el('span', '', T.tutorial.progresso(Math.min(a.conta, a.n), a.n)));
-          c.append(anda, el('div', 'secao', T.missoes.recompensa), fichasDaRecompensa(D, a.missao.recompensa));
+          c.append(anda);
+          for (const f of EXTRAS_DA_MISSAO) { const x = f(m, a); if (x) c.append(x); }
+          c.append(el('div', 'secao', T.missoes.recompensa), fichasDaRecompensa(D, a.missao.recompensa));
         }
         corpo.append(c);
       }

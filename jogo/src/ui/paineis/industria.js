@@ -24,6 +24,8 @@ import { quantoTem } from '../../nucleo/sistemas/posses.js';
 import { missaoAtual } from '../../nucleo/sistemas/missoes.js';
 import { receitasDe, receitasDaConstrucao, ehIndustria, vagasDaFila, proximaVaga, estadoDaIndustria, faltaDaFila, andamentoDaFila, prontosNaSaida, podeProduzir } from '../../nucleo/sistemas/industria.js';
 import { pedidosDe, QUADRO } from '../../nucleo/sistemas/pedidos.js';
+import { abrirOndeConseguir, tocavel } from '../fontes.js';
+import { temFontes } from '../../nucleo/fontes.js';
 
 const BANCADA = 'bancada-de-carpintaria';
 const VAZIA = { fila: [], inicio: 0, saida: [] };
@@ -51,10 +53,12 @@ function itemDaMissao(m) {
   if (!o || o.evento !== 'produziu' || !o.filtro) return null;
   return Array.isArray(o.filtro.item) ? o.filtro.item[0] : o.filtro.item || null;
 }
-// ingrediente em ficha: figura, nome e "tem/precisa", verde ou vermelho
+// ingrediente em ficha: figura, nome e "tem/precisa", verde; o que falta, vermelho com "falta N" (material com
+// fonte nos dados: o toque abre o "Onde conseguir?", ui/fontes.js)
 function ficha(m, item, precisa) {
   const tem = quantoTem(m, item), f = el('span', 'ind-ficha ' + (tem >= precisa ? 'tem' : 'falta'));
-  f.append(icone('icone/' + item, 22), el('span', '', m.dados.itens[item].nome), el('b', '', `${Math.min(tem, 999)}/${precisa}`));
+  f.append(icone('icone/' + item, 22), el('span', '', m.dados.itens[item].nome), el('b', '', tem >= precisa ? `${Math.min(tem, 999)}/${precisa}` : T.fontes.falta(precisa - tem)));
+  if (tem < precisa && temFontes(m, item)) tocavel(f, () => abrirOndeConseguir({ [item]: precisa }));
   return f;
 }
 function preco(chave, n) { const s = el('span', 'preco'); s.append(icone(chave, 18), el('span', '', numero(n))); return s; }
@@ -187,7 +191,9 @@ registrarPainel({
         if (travada) { const t = el('div', 'info trava'); t.append(icone('ui/cadeado', 18), el('span', '', T.industria.nivel(r.nivel))); c.append(t); grade.append(c); continue; }
         const info = el('div', 'info ind-tempo'); info.append(icone('ui/relogio', 18), el('span', '', tempo(r.tempoSeg)));
         const p = podeProduzir(m, e, r.id);
-        const b = botao({ texto: T.industria.fazer, classe: 'verde' + (p.ok ? '' : ' sem') + (p.ok && daMissao === r.item ? ' alvo-tutorial' : ''), aoClicar: () => mandar({ tipo: 'produzir', entidade: id, receita: r.id }) });
+        // faltando material que tem fonte (madeira, cartela...), o Fazer abre o "Onde conseguir?"; o resto, o aviso de sempre
+        const fazer = () => { const mm = J.mundo, pp = podeProduzir(mm, construcaoPorId(mm, id), r.id); if (!pp.ok && pp.motivo === 'falta-ingrediente' && abrirOndeConseguir(r.entra)) return; mandar({ tipo: 'produzir', entidade: id, receita: r.id }); };
+        const b = botao({ texto: T.industria.fazer, classe: 'verde' + (p.ok ? '' : ' sem') + (p.ok && daMissao === r.item ? ' alvo-tutorial' : ''), aoClicar: fazer });
         b.dataset.k = 'fazer-' + r.id;
         const ing = el('div', 'ind-ingredientes');
         for (const k in r.entra) ing.append(ficha(m, k, r.entra[k]));

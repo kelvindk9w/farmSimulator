@@ -24,6 +24,7 @@ import { J, PREFS_PADRAO } from './contexto.js';
 import { el, prepararIcones, repintarIcones } from './ui/dom.js';
 import { T } from './ui/textos.js';
 import { criarHud } from './ui/hud.js';
+import { criarAcoes } from './ui/acoes.js';
 import { prepararAvisos, avisar, avisosNaTela, avisosEmEspera } from './ui/avisos.js';
 import { prepararSubida, subidaAberta, fecharSubida } from './ui/subida.js';
 import { criarTutorial } from './ui/tutorial.js';
@@ -79,6 +80,7 @@ function comecar() {
   // ---------- interface ----------
   prepararPaineis(ui);
   const hud = criarHud(ui);
+  const acoes = criarAcoes(ui, hud); // a vaga "Na mão", o balãozinho e a roda de ações
   prepararAvisos(ui);
   prepararSubida(ui);
   const tutorial = criarTutorial(ui, hud);
@@ -110,7 +112,7 @@ function comecar() {
   }
   J.gravarLogo = () => { pedido = true; };
 
-  const ORDENS = { tocarCasa: 1, tocarEntidade: 1, irPara: 1, rumar: 1, agir: 1 };
+  const ORDENS = { tocarCasa: 1, tocarEntidade: 1, irPara: 1, rumar: 1, agir: 1, agirNoAlvo: 1 };
   // põe um mundo em uso: liga o retorno e o som aos eventos dele e leva a câmera até a personagem
   function instalar(m) {
     J.mundo = m;
@@ -177,6 +179,7 @@ function comecar() {
       cena.desenhar(m, dt, tudoDeNovo ? 0 : 3);
       tudoDeNovo = false;
       hud.atualizar();
+      acoes.atualizar();
       tutorial.atualizar(dt);
       atualizarPainel();
       if (deitarAte > 0) { deitarAte -= dt; if (deitarAte <= 0) deitar.hidden = true; }
@@ -206,7 +209,7 @@ function comecar() {
   // ---------- ganchos para as ferramentas (verificar, capturas) ----------
   const pt = { x: 0, y: 0 };
   window.__jogo = {
-    pronto: true, erros, dados, cena, atlas, J, hud,
+    pronto: true, erros, dados, cena, atlas, J, hud, acoes,
     get mundo() { return J.mundo; },
     get teste() { return J.teste; },
     comando: (c) => J.mundo.comando(c),
@@ -217,7 +220,7 @@ function comecar() {
     // avança até a personagem ficar sem ter o que fazer; devolve os segundos passados (-1 se não parou)
     ateParar(max = 180) { const m = J.mundo; let n = 0; while (ocupada(m) && n < max * 60) { m.passo(); n++; } return ocupada(m) ? -1 : n / 60; },
     ocupada: () => ocupada(J.mundo),
-    desenhar() { cam.seguir(J.mundo.personagem.x, J.mundo.personagem.z, 1); cena.desenhar(J.mundo, 0, 0); hud.atualizar(); tutorial.atualizar(1); atualizarPainel(); },
+    desenhar() { cam.seguir(J.mundo.personagem.x, J.mundo.personagem.z, 1); cena.desenhar(J.mundo, 0, 0); hud.atualizar(); acoes.atualizar(); tutorial.atualizar(1); atualizarPainel(); },
     // ponto da janela onde aparece o ponto (x, y, z) do mundo: é onde a ferramenta toca de verdade
     naTela(x, z, y = 0) { cam.preparar(); tela.daJanela(cam.cssX(x, z), cam.cssY(x, y, z), pt); return { x: pt.x, y: pt.y }; },
     daEntidade(id, alto = 0.6) { const e = J.mundo.local.porId[id]; if (!e) return null; return this.naTela(e.x + e.l / 2, e.z + e.p / 2, alto); },

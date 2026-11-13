@@ -9,7 +9,8 @@
 //   - o caixote de venda: "6 no caixote" quando ela põe, "+4 ouro" sobre ele a cada coisa que o freguês leva (na
 //     volta de uma ausência, um "+ouro" só, com a soma).
 //   - o Seu Tonho: depois da primeira conversa, tocar nele abre o painel de missões (para reler o que ele pediu).
-//   - a reforma pronta: um aviso.
+//   - a reforma pronta: um aviso, com o ícone dela (icone/reforma-*); o mesmo ícone na fila de tarefas, quando ela vai
+//     reformar.
 // A aba "Reformas" do painel Construir fica em paineis/construcao.js.
 import '../render/comeco.js';
 import './textos/comeco.js';
@@ -21,7 +22,9 @@ import { avisar, limparAvisos } from './avisos.js';
 import { perguntar } from './dialogo.js';
 import { nomeDoItem } from './textos.js';
 import { som } from '../plataforma/som.js';
-import { querComecoNovo } from '../nucleo/sistemas/comeco.js';
+import { querComecoNovo, reformas } from '../nucleo/sistemas/comeco.js';
+import { ICONE_DA_ACAO } from './hud.js';
+import { chaveDaReforma } from './paineis/construcao.js';
 
 const DOURADO = '#ffe07a', VERDE = '#c8f08c';
 const ESPERA_MAX = 12000; // ms: nada espera a tela de carregando mais do que isso
@@ -47,6 +50,11 @@ function esconderBalao(ctx, esconder) {
   t.seta.style.visibility = esconder ? 'hidden' : '';
 }
 function tirarPular() { if (pular) { pular.remove(); pular = null; } }
+// na fila de tarefas, "reformar" mostra o ícone da reforma (alvo = o id da construção velha, ou 'cerca')
+ICONE_DA_ACAO.reformarConstrucao = (t) => {
+  const r = J.mundo && t.args ? reformas(J.mundo).find((x) => x.alvo === t.args.alvo) : null;
+  return r ? chaveDaReforma(r.para) : 'icone/martelo';
+};
 
 aoInstalarMundo((m, ctx) => {
   const ev = m.eventos, part = J.cena.part;
@@ -97,7 +105,7 @@ aoInstalarMundo((m, ctx) => {
     agendado = true;
     setTimeout(() => { const c = centro('banca'); part.brilho(c[0], 0.9, c[1], 4); part.texto(T.comeco.vendeu(somaVendida), c[0], 1.5, c[1], DOURADO); somaVendida = 0; agendado = false; }, 0);
   });
-  ev.ouvir('reformou', (d) => { avisar(d.entidade === 'cerca' ? T.comeco.reformouCerca : T.comeco.reformou(d, m.dados), 'bom', 4000); som.tocar('martelo'); });
+  ev.ouvir('reformou', (d) => { avisar(d.entidade === 'cerca' ? T.comeco.reformouCerca : T.comeco.reformou(d, m.dados), 'bom', 4000, J.atlas && J.atlas.tem(chaveDaReforma(d.para)) ? chaveDaReforma(d.para) : null); som.tocar('martelo'); });
 
   // durante a cena: o botão Pular no canto, e o balão do vizinho escondido até ele acenar
   ev.ouvir('comecouChegada', () => {

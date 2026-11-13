@@ -20,10 +20,12 @@
 //   - a gravação de antes do começo humilde (sem "comeco" na gravação) abre com a fazenda de antes: casa, poço,
 //     celeiro, banca e quadro prontos, sem cerca e sem as missões do começo humilde (antesDeCarregar).
 //   - o atalho de teste: quem pula para um nível ganha o que um jogador daquele nível já teria construído e reformado.
+//   - a trouxa: no fim da chegada ela larga a trouxa no chão, atrás dela; fica lá até a casa ser usada (arada,
+//     plantada, construída). O desenho é de render/comeco.js.
 //   mundo.comeco = { humilde, chegou, chegada (a cena em curso, ou null), cerca: { tipo, obraAte, obraDur } | null,
 //                    esperaDosPedidos (fator da espera das vagas do quadro: a cerca nova encurta), acenouEm, conversas,
 //                    versao (de que começo é esta fazenda: 0 = a de antes do começo humilde), perguntou (a versão do
-//                    começo sobre a qual já se perguntou) }
+//                    começo sobre a qual já se perguntou), trouxa ([x, z] da trouxa no chão, ou null) }
 // Eventos: conversou { entidade, n, vez }, comecouChegada { seg }, elaFalou { itens, seg }, tonhoAcenou {}, chegou { pulou },
 // reformou { construcao, para, entidade, n }
 // (o de construções sai de construcao.js), comecouObra (da cerca: { entidade: 'cerca', ... }).
@@ -132,15 +134,39 @@ function elaFala(m, c) {
   c.falou = true;
   m.eventos.emitir('elaFalou', { itens: { ...m.dados.regras.inicio.itens }, seg: FALA_DELA });
 }
-// a cena acabou (andou tudo, pulou, ou o jogador deu uma ordem): ela fica no fim do caminho, olhando o Seu Tonho
+// a trouxa no chão (ela larga no fim da chegada): a casa serve para ela se for terra própria, grama ou caminho, sem nada em cima (nem planta, nem construção, nem o Seu Tonho)
+function trouxaServe(m, x, z) {
+  const loc = m.locais.fazenda, cx = Math.floor(x), cz = Math.floor(z);
+  if (!loc.ehPropria(cx, cz)) return false;
+  const c = loc.chaoEm(cx, cz), i = loc.i(cx, cz);
+  if ((c !== GRAMA && c !== CAMINHO) || loc.ocupa[i] || loc.plantas[i]) return false;
+  return !loc.entidades.some((e) => cx >= e.x && cx < e.x + (e.l || 1) && cz >= e.z && cz < e.z + (e.p || 1));
+}
+// onde ela larga a trouxa, parada em (x, z): atrás dela (do lado de longe do Seu Tonho), ou de um lado; null se não cabe
+const ATRAS = 0.55, GIROS = [0, 0.9, -0.9, 1.8, -1.8];
+function lugarDaTrouxa(m, x, z) {
+  const v = m.locais.fazenda.porId[VIZINHO];
+  let dx = v ? x - (v.x + 0.5) : 1, dz = v ? z - (v.z + 0.5) : 0;
+  const n = Math.hypot(dx, dz) || 1; dx /= n; dz /= n;
+  for (const a of GIROS) {
+    const c = Math.cos(a), s = Math.sin(a), tx = x + (dx * c - dz * s) * ATRAS, tz = z + (dx * s + dz * c) * ATRAS;
+    if (trouxaServe(m, tx, tz)) return [Math.round(tx * 100) / 100, Math.round(tz * 100) / 100];
+  }
+  return null;
+}
+const fimDaChegada = (c) => c.caminho.pts[c.caminho.pts.length - 1];
+
+// a cena acabou (andou tudo, pulou, ou o jogador deu uma ordem): ela fica no fim do caminho, olhando o Seu Tonho, e
+// larga a trouxa no chão
 function terminarChegada(m, pulou) {
   const C = m.comeco, c = C.chegada, p = m.personagem;
   if (!c) return;
   C.chegada = null; C.chegou = true;
-  const fim = c.caminho.pts[c.caminho.pts.length - 1];
+  const fim = fimDaChegada(c);
   p.x = fim[0]; p.z = fim[1]; p.vel = 0; p.rota = null; p.tarefa = null; p.acao = null; p.rumando = false;
   const v = m.locais.fazenda.porId[VIZINHO];
   if (v) p.rumo = rumoPara(p.x, p.z, v.x + 0.5, v.z + 0.5);
+  if (!C.trouxa) C.trouxa = lugarDaTrouxa(m, p.x, p.z);
   elaFala(m, c); // (pulando, a fala dela vem do mesmo jeito, já no fim do caminho: as sementes são da trouxa)
   if (!C.acenouEm) C.acenouEm = m.agora;
   m.eventos.emitir('chegou', { pulou: !!pulou });
@@ -254,6 +280,19 @@ export function trechosDaCerca(m) {
   TRECHOS.set(m, { chave, lista });
   return lista;
 }
+// a porteira do vão da entrada (o desenho é de render/comeco.js): { x, z } = o meio do vão, na linha da beira, e x0, x1
+// = as pontas dele. null sem vão, ou se a terra já passou da beira ali (o lote da frente comprado)
+export function porteiraDaCerca(m) {
+  const C = dadosDoComeco(m), loc = m.locais.fazenda;
+  if (!C || !C.cerca || !C.cerca.vao.length || !m.comeco || !m.comeco.cerca) return null;
+  const z = C.cerca.vao[0][1];
+  let x0 = Infinity, x1 = -Infinity;
+  for (const [x, vz] of C.cerca.vao) {
+    if (vz !== z || !loc.ehPropria(x, z - 1) || loc.ehPropria(x, z)) return null;
+    x0 = Math.min(x0, x); x1 = Math.max(x1, x + 1);
+  }
+  return { x: (x0 + x1) / 2, z, x0, x1 };
+}
 // quanto da obra da cerca já foi feito (0..1); 1 = sem obra
 export function andamentoDaCerca(m) {
   const c = m.comeco && m.comeco.cerca;
@@ -358,7 +397,7 @@ function tornarClassica(m) {
   for (const c of T.classicas) if (!loc.porId[c.id] && loc.areaLivre(c.x, c.z, c.x + T.casas[c.tipo][0], c.z + T.casas[c.tipo][1])) adotar(m, loc.por({ id: c.id, tipo: c.tipo, x: c.x, z: c.z }), 'fazenda');
   const q = T.pontos[QUADRO], dq = defDe(m, QUADRO);
   if (q && dq && !loc.porId[QUADRO] && lugarServe(m, QUADRO, Math.floor(q[0]), Math.floor(q[1])).ok) colocar(m, QUADRO, Math.floor(q[0]), Math.floor(q[1]), { id: QUADRO, quieto: true });
-  M.humilde = false; M.cerca = null; M.chegou = true; M.chegada = null;
+  M.humilde = false; M.cerca = null; M.chegou = true; M.chegada = null; M.trouxa = null;
   aplicarGanhos(m);
   acertarCapacidade(m);
 }
@@ -425,14 +464,19 @@ registrarSistema({
   id: 'comeco',
   iniciar(m) {
     const C = dadosDoComeco(m);
-    m.comeco = { humilde: !!C, chegou: !C, chegada: null, cerca: C && C.cerca ? { tipo: C.cerca.de, para: null, obraAte: 0, obraDur: 0 } : null, esperaDosPedidos: 1, acenouEm: 0, conversas: 0, versao: versaoDoComeco(m), perguntou: 0 };
+    m.comeco = { humilde: !!C, chegou: !C, chegada: null, cerca: C && C.cerca ? { tipo: C.cerca.de, para: null, obraAte: 0, obraDur: 0 } : null, esperaDosPedidos: 1, acenouEm: 0, conversas: 0, versao: versaoDoComeco(m), perguntou: 0, trouxa: null };
     arrumarVizinho(m);
     abrirTrilha(m);
     if (C) prepararLugarDoCeleiro(m);
     m.eventos.ouvir('usouAtalhoDeTeste', (d) => darONivel(m, d.nivel));
   },
   passo(m) { if (m.comeco.chegada) andarNaChegada(m); conferirCerca(m); },
-  segundo(m) { if (ehHumilde(m)) arrumarVizinho(m); },
+  segundo(m) {
+    if (!ehHumilde(m)) return;
+    arrumarVizinho(m);
+    const t = m.comeco.trouxa;
+    if (t && !trouxaServe(m, t[0], t[1])) m.comeco.trouxa = null; // a casa foi usada: a trouxa sai
+  },
   ausencia(m) { conferirCerca(m); },
   antesDoComando(m, c) {
     if (!m.comeco.chegada || NAO_TERMINA[c.tipo]) return null;
@@ -481,11 +525,16 @@ registrarSistema({
   },
   salvar(m) {
     const C = m.comeco, c = C.cerca;
-    return { v: 1, humilde: C.humilde, chegou: true, versao: C.versao, perguntou: C.perguntou || 0, conversas: C.conversas || 0, cerca: c ? { tipo: c.tipo, para: c.para || null, obraAte: Math.round(c.obraAte || 0), obraDur: c.obraDur || 0 } : null };
+    // (gravada no meio da cena, a cena não volta: a trouxa já fica no chão, no fim do caminho)
+    const trouxa = C.trouxa || (C.chegada ? lugarDaTrouxa(m, fimDaChegada(C.chegada)[0], fimDaChegada(C.chegada)[1]) : null);
+    return { v: 1, humilde: C.humilde, chegou: true, versao: C.versao, perguntou: C.perguntou || 0, conversas: C.conversas || 0, trouxa, cerca: c ? { tipo: c.tipo, para: c.para || null, obraAte: Math.round(c.obraAte || 0), obraDur: c.obraDur || 0 } : null };
   },
   carregar(m, d) {
     const C = m.comeco;
     C.chegou = true; C.chegada = null; C.conversas = d.conversas > 0 ? Math.floor(d.conversas) : 0;
+    const t = d.trouxa;
+    // (se a casa dela já tiver outra coisa, a conferência de cada segundo tira a trouxa)
+    C.trouxa = C.humilde && Array.isArray(t) && t.length === 2 && t.every(Number.isFinite) && m.locais.fazenda.dentro(Math.floor(t[0]), Math.floor(t[1])) ? [t[0], t[1]] : null;
     if (C.humilde && C.cerca && d.cerca && typeof d.cerca === 'object') {
       const D = m.dados.construcoes;
       if (D[d.cerca.tipo]) C.cerca.tipo = d.cerca.tipo;

@@ -1,5 +1,6 @@
-// Controle de videogame: alavanca ou direcional andam, A age, B fecha ou cancela, X ou gatilho correm,
-// os ombros trocam o modo, Y ou Start abrem o menu (foco nos botões da tela), a alavanca direita dá zoom.
+// Controle de videogame: alavanca ou direcional andam, A age (segurar: a fileira do campo, ou a roda de ações do alvo
+// com mais de uma), B fecha ou cancela, X ou gatilho correm, os ombros trocam o que está na mão, Y ou Start abrem o
+// menu (foco nos botões da tela), a alavanca direita dá zoom.
 import { J } from '../contexto.js';
 import { foco } from './foco.js';
 import { painelAberto, fecharPainel } from '../ui/paineis/registro.js';
@@ -28,15 +29,16 @@ export function ligarControle(entrada) {
     if (ap(14)) sx = -1; else if (ap(15)) sx = 1;
     if (ap(12)) sy = -1; else if (ap(13)) sy = 1;
     const forca = Math.hypot(sx, sy);
-    const A = deu(0), B = deu(1), Y = deu(3) || deu(9), L = deu(4), R = deu(5);
+    const segurava = !!antes[0], A = deu(0), B = deu(1), Y = deu(3) || deu(9), L = deu(4), R = deu(5);
+    if (segurava && !ap(0)) entrada.agir.soltou('controle'); // soltou o A (também com a roda já aberta)
     if (A || B || Y || L || R || forca > MORTA) { J.meio = 'teclas'; entrada.usouTeclas(); som.destravar(); }
 
-    if (subidaAberta() || painelAberto() || foco.menu) {
+    if (subidaAberta() || painelAberto() || foco.menu || foco.popup) {
       if (rumando) { rumando = false; J.mundo.comando({ tipo: 'frear' }); }
       repete -= dt;
       if (forca > 0.6) { if (repete <= 0) { repete = 0.22; if (Math.abs(sx) > Math.abs(sy)) foco.mover(Math.sign(sx), 0); else foco.mover(0, Math.sign(sy)); } } else repete = 0;
       if (A) { if (!foco.clicar()) foco.mover(0, 1); }
-      if (B || Y) { if (!fecharSubida() && !fecharPainel()) foco.sairDoMenu(); }
+      if (B || Y) { if (!fecharSubida() && !fecharPainel() && !foco.fecharPopup()) foco.sairDoMenu(); }
       return;
     }
     if (forca > MORTA) {
@@ -45,11 +47,10 @@ export function ligarControle(entrada) {
       rumando = true;
       J.mundo.comando(cmd);
     } else if (rumando) { rumando = false; J.mundo.comando({ tipo: 'frear' }); }
-    if (A) { J.mundo.comando({ tipo: 'agir' }); entrada.fileira.apertou('controle'); } // segurar o A: a fileira do campo
-    else if (!ap(0)) entrada.fileira.soltou('controle');
+    if (A) entrada.agir.apertou('controle'); // segurar o A: a fileira do campo, ou a roda
     if (B) J.mundo.comando({ tipo: 'cancelar' });
-    if (L) J.mundo.comando({ tipo: 'trocarModo', passo: -1 });
-    if (R) J.mundo.comando({ tipo: 'trocarModo', passo: 1 });
+    if (L) J.mundo.comando({ tipo: 'trocarNaMao', passo: -1 });
+    if (R) J.mundo.comando({ tipo: 'trocarNaMao', passo: 1 });
     if (Y) foco.entrarNoMenu();
     const zy = pad.axes[3] || 0;
     if (Math.abs(zy) > 0.4) entrada.zoom(1 - zy * dt * 1.2, true);

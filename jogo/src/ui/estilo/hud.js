@@ -1,5 +1,6 @@
 // CSS do HUD (a tela do jogo), no visual aprovado: pílulas de madeira, selo do nível, botões quadrados com relevo,
-// o Menu do celular, o balão do Seu Tonho, o aviso curto, a barra de ferramentas, a alavanca e o botão de agir.
+// o Menu do celular, o balão do Seu Tonho, o aviso curto, a vaga "Na mão", o balãozinho e a roda das ações por toque,
+// a alavanca e o botão de agir.
 // Tudo dentro de #ui (vence o CSS antigo do index.html). Medidas em px do celular deitado (844 x 390); no
 // computador e na TV o #ui inteiro cresce pelo zoom (--esc, estilo/index.js).
 import { mold, img, fixa } from './pecas.js';
@@ -88,7 +89,7 @@ body.com-painel #ui .avisos{top:max(6px,env(safe-area-inset-top));left:0;right:0
 #ui .aviso canvas.ic{flex:none}
 #ui .aviso.deitar{padding:8px 16px;font-size:18px}
 
-/* ---------- embaixo: dica, fila, sementes e a barra de ferramentas ---------- */
+/* ---------- embaixo: dica, fila e a fileira de baixo ---------- */
 #ui .rodape{bottom:max(8px,env(safe-area-inset-bottom));gap:5px}
 #ui .dica{${mold('aviso', '14.3px 15px 14px 15px')}border-width:4px 6px;padding:2px 10px;max-width:100%;font-size:14px;font-weight:800;border-radius:15px}
 /* (a largura se mede na linha da dica, que ocupa a tela toda: assim ela não chega na alavanca nem no botão de ação) */
@@ -96,21 +97,56 @@ body.com-painel #ui .avisos{top:max(6px,env(safe-area-inset-top));left:0;right:0
 #ui .dica.fraca{opacity:.9}
 #ui .fila{${mold('pilula', '18px')}border-width:5px;min-height:44px;padding:0 6px 0 4px;border-radius:18px}
 #ui .fila:active{filter:brightness(.92)}
-#ui .modos,#ui .sementes{gap:5px}
+#ui .modos{gap:10px;align-items:flex-end}
+/* (a fileira de baixo guarda a vaga "Na mão" e, perto do celeiro, a porta dele, no feitio dos antigos botões de modo) */
 #ui .bt.modo{${mold('botao-hud-normal', '28px 22px 22px 22px')}width:69px;height:69px;border-width:8px 7px 9px;padding:1px 0 0;justify-content:flex-start;gap:0;font-size:15px;font-weight:800;line-height:1;border-radius:16px;color:#4a2a12}
 #ui .bt.modo>canvas.ic{width:38px!important;height:38px!important;flex:none}
 #ui .bt.modo>span:not(.conta):not(.tecla){margin:0 -6px;white-space:nowrap;letter-spacing:-.2px}
 #ui .bt.modo:active{${img('botao-hud-apertado')}transform:none}
-#ui .bt.modo.ativo,#ui .bt.semente.ativo{${img('botao-hud-selecionado')}}
-#ui .bt.modo[disabled],#ui .bt.modo.sem{filter:grayscale(.9) opacity(.75)}
-#ui .modo .conta{${fixa('bolinha-contador')}right:-9px;top:-10px;min-width:26px;width:26px;height:27px;padding:0;border:0;border-radius:50%;font-size:14px;font-weight:900;line-height:26px;color:#fff;-webkit-text-stroke:3px #12305a;paint-order:stroke fill}
-#ui .modo .conta.zero{filter:hue-rotate(155deg) saturate(1.6)}
-#ui .bt.semente{${mold('botao-hud-normal', '21px 16px 16px 16px')}width:52px;height:50px;border-width:6px 5px 7px;padding:0;border-radius:12px}
-#ui .bt.semente:active{${img('botao-hud-apertado')}transform:none}
-#ui .semente .conta{right:-7px;top:-8px;background:#fff9ec;border:2px solid #4a2f1b;color:#4a2a12}
-#ui .semente .conta.zero{background:#ffd9d0}
+#ui .bt.modo.ativo{${img('botao-hud-selecionado')}}
 #ui .bt.modo.cons-porta{${img('botao-hud-normal')}margin-left:8px}
 #ui .bt.modo.cons-porta::before{content:'';position:absolute;inset:3px;border-radius:12px;background:#fff1b8;z-index:-1;mix-blend-mode:multiply}
+
+/* ---------- as ações por toque (ui/acoes.js): a vaga "Na mão", a fileira de escolha, o balãozinho e a roda ---------- */
+#ui .mao{position:relative;display:flex;justify-content:center;padding-top:15px}
+#ui .bt.vaga-mao{${mold('botao-hud-normal', '28px 22px 22px 22px')}position:relative;min-width:150px;height:70px;border-width:8px 7px 9px;padding:9px 14px 0 6px;gap:6px;border-radius:16px;color:#4a2a12}
+#ui .bt.vaga-mao:active,#ui .bt.vaga-mao.aberta{${img('botao-hud-apertado')}transform:none}
+#ui .vaga-mao>canvas.ic{width:46px!important;height:46px!important;flex:none}
+#ui .vaga-mao .aba-mao{${mold('botao-marrom', '12px 12px 10px 12px')}position:absolute;left:50%;top:-19px;transform:translateX(-50%);height:25px;border-width:4px 5px 5px;padding:0 9px;display:flex;align-items:center;white-space:nowrap;font-size:14px;font-weight:900;line-height:1;color:#fff;-webkit-text-stroke:3px #3a1f0c;paint-order:stroke fill;border-radius:10px;pointer-events:none}
+#ui .vaga-mao .txt-mao{display:flex;flex-direction:column;align-items:center;line-height:1.02}
+#ui .vaga-mao .txt-mao b{font-size:19px;font-weight:900;white-space:nowrap}
+#ui .vaga-mao .conta-mao{font-size:22px;font-weight:900;font-variant-numeric:tabular-nums}
+#ui .vaga-mao.vazia .txt-mao b{font-size:15px;white-space:normal;width:84px;text-align:center;line-height:1.08}
+#ui .lista-mao{${mold('balao', '21px 22px 22px 22px')}position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;gap:7px;border-width:7px;padding:9px 9px 6px;width:max-content;max-width:min(580px,calc(100vw / var(--esc, 1) - 24px));z-index:5}
+#ui .lista-mao[hidden]{display:none}
+#ui .bt.carta-mao{${mold('cartao-item-normal', '21px 20px 20px 20px')}position:relative;flex-direction:column;width:76px;height:80px;min-width:0;border-width:7px;padding:1px 0 0;gap:0;border-radius:14px;color:#4a2a12;font-size:14px;font-weight:900;line-height:1.05}
+#ui .bt.carta-mao:active{transform:translateY(1px)}
+#ui .bt.carta-mao>canvas.ic{width:42px!important;height:42px!important;flex:none}
+#ui .bt.carta-mao.ativo{${mold('botao-hud-selecionado', '28px 22px 22px 22px')}border-width:8px 7px 9px;color:#fff;-webkit-text-stroke:3px #24470e;paint-order:stroke fill}
+#ui .carta-mao .nome-carta{white-space:nowrap;letter-spacing:-.4px;max-width:72px;overflow:hidden;text-overflow:ellipsis}
+#ui .carta-mao.comprar .nome-carta{font-size:13px;letter-spacing:-.5px}
+/* (com a fileira de escolha aberta, a linha de dica some: a fileira fica no lugar dela) */
+#ui .rodape:has(.vaga-mao.aberta) .linha-info{visibility:hidden}
+#ui .carta-mao .conta-carta{${mold('pilula', '9px')}position:absolute;right:-9px;top:-11px;height:22px;border-width:4px;padding:0 4px;display:flex;align-items:center;font-size:13px;font-weight:900;color:#4a2a12;-webkit-text-stroke:0;border-radius:11px}
+#ui .balao-acao{${fixa('botao-agir-normal')}position:absolute;left:0;top:0;width:58px;height:60px;margin:-76px 0 0 -29px;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:2;filter:drop-shadow(0 2px 2px rgba(60,30,10,.35))}
+#ui .balao-acao>canvas.ic{width:40px!important;height:40px!important;margin-top:-2px}
+#ui .balao-acao::before,#ui .balao-acao::after{content:'';position:absolute;left:50%;border-style:solid;border-color:transparent;border-bottom:0}
+#ui .balao-acao::before{bottom:-12px;margin-left:-10px;border-width:13px 10px 0;border-top-color:#421a02}
+#ui .balao-acao::after{bottom:-7px;margin-left:-7px;border-width:9px 7px 0;border-top-color:#e8851f}
+#ui .roda-acoes{position:absolute;left:0;top:0;width:0;height:0;z-index:6}
+#ui .bt-roda{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;gap:0;padding:0;border:0;background:none;box-shadow:none;color:#4a2a12;border-radius:16px}
+#ui .roda-circ{${fixa('botao-agir-normal')}width:66px;height:68px;display:flex;align-items:center;justify-content:center;border-radius:50%;filter:drop-shadow(0 2px 2px rgba(60,30,10,.35))}
+#ui .roda-circ>canvas.ic{width:42px!important;height:42px!important}
+#ui .bt-roda.principal .roda-circ{width:86px;height:88px;box-shadow:0 0 0 3px #ffd84a,0 0 16px 7px rgba(255,214,70,.9)}
+#ui .bt-roda.principal .roda-circ>canvas.ic{width:56px!important;height:56px!important}
+#ui .bt-roda:active .roda-circ{${fixa('botao-agir-apertado')}}
+#ui .roda-nome{${mold('pilula', '12px')}position:relative;margin-top:-9px;height:27px;border-width:4px 6px;padding:0 6px;display:flex;align-items:center;font-size:15px;font-weight:900;line-height:1;white-space:nowrap;border-radius:12px}
+#ui .bt-roda.principal .roda-nome{font-size:17px;height:29px}
+body.na-chegada #ui .rodape,body.na-chegada #ui .balao-acao{visibility:hidden}
+body.colocando #ui .balao-acao,body.colocando #ui .roda-acoes{display:none!important}
+/* o "Pular" da cena de chegada, no botão verde aprovado */
+#ui .bt.pular-chegada{${mold('botao-verde-normal', '18px 18px 15px 18px')}min-height:46px;border-width:5px 6px 6px;padding:0 18px;border-radius:12px;font-size:18px;font-weight:900;color:#fff;-webkit-text-stroke:3px #24470e;paint-order:stroke fill}
+#ui .bt.pular-chegada:active{${img('botao-verde-apertado')}transform:none}
 
 /* ---------- alavanca e botão de agir ---------- */
 #ui .alavanca{${fixa('alavanca-base')}width:112px;height:114px;border:0;border-radius:50%;left:max(16px,env(safe-area-inset-left));bottom:max(16px,env(safe-area-inset-bottom))}
@@ -123,7 +159,8 @@ body.grande #ui .bt.quadrado{width:62px;height:62px}
 body.grande #ui .bt.quadrado>canvas.ic{width:44px!important;height:44px!important}
 body.grande #ui .bt.modo{width:80px;height:78px}
 body.grande #ui .bt.modo>canvas.ic{width:44px!important;height:44px!important}
-body.grande #ui .bt.semente{width:62px;height:58px}
+body.grande #ui .bt.vaga-mao{height:74px;min-width:170px}
+body.grande #ui .vaga-mao>canvas.ic{width:52px!important;height:52px!important}
 body.grande #ui .bt.agir{width:104px;height:106px}
 body.grande #ui .bt.agir>canvas.ic{width:62px!important;height:62px!important}
 body.grande #ui .alavanca{width:132px;height:134px}
