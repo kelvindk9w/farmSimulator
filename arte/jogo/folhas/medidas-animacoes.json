@@ -133,6 +133,73 @@
    "apoio-dx": "-55"
   }
  },
+ "animal/boi/puxar-costas": {
+  "chave": "animal/boi/puxar-costas",
+  "crua": "puxar-costas.png",
+  "cruaTamanho": [
+   1536,
+   1024
+  ],
+  "linhasNaCrua": 2,
+  "figurasNaCrua": 8,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 358,
+  "emPeReal": 355,
+  "emPeFonte": 327,
+  "escala": 1.0851,
+  "casa": [
+   448,
+   376
+  ],
+  "apoio": [
+   224,
+   296
+  ],
+  "quadros": 8,
+  "desenhos": 8,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   355,
+   355,
+   355,
+   352,
+   348,
+   349,
+   348,
+   349
+  ],
+  "tamanhoPelaMassa": [
+   225.8,
+   226,
+   229.1,
+   226.8,
+   225.8,
+   225.5,
+   225.3,
+   226.9
+  ],
+  "variacaoAltura": 1.8,
+  "bytes": 268266,
+  "avisos": [
+   "a folha crua é menor que a saída (figura em pé com 327 pontos para 358): a figura foi ampliada 1.09 vezes"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/boi/puxar-costas",
+   "altura": "358",
+   "quadros": "8",
+   "qps": "8",
+   "eixo": "massa",
+   "base": "linha",
+   "chao": "0.19",
+   "tamanho-massa": "226",
+   "altura-livre": true,
+   "apoio-dx": "30"
+  }
+ },
  "animal/boi/puxar-frente": {
   "chave": "animal/boi/puxar-frente",
   "crua": "puxar-frente.png",
