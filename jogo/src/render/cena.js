@@ -305,8 +305,8 @@ export class Cena {
     let melhor = null, prof = -Infinity;
     for (let k = 0; k < ALVOS_DE_CIMA.length; k++) { const id = ALVOS_DE_CIMA[k](m, px, py, this); if (id) return id; }
     for (const e of loc.entidades) {
-      const x = e.x + e.l / 2, z = e.z + e.p / 2, sx = cam.telaX(x, z), sy = cam.telaY(x, 0, z);
-      if (Math.abs(sx - px) > 4 * S || py > sy + 2.5 * S || py < sy - 5 * S || TIPOS[e.tipo].plano || TIPOS[e.tipo].semToque) continue; // (o calçamento não tapa o toque no chão; semToque: o toque passa pelo bicho de trabalho)
+      const x = e.x + e.l / 2, z = e.z + e.p / 2, sx = cam.telaX(x, z), sy = cam.telaY(x, 0, z), st = TIPOS[e.tipo].semToque;
+      if (Math.abs(sx - px) > 4 * S || py > sy + 2.5 * S || py < sy - 5 * S || TIPOS[e.tipo].plano || (st && (st === true || st(m, e)))) continue; // (o calçamento não tapa o toque no chão; semToque: o toque passa pelo bicho de trabalho e, fora do modo Mão, pelo de estimação)
       v.quadro = 0; v.variante = 0;
       TIPOS[e.tipo].visual(m, e, v);
       if (!this.atlas.caixa(v.chave, 0, sx, sy, S, c) || !this.atlas.pronta(v.chave)) {

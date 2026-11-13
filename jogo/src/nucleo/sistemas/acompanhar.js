@@ -2,7 +2,7 @@
 // (cachorro, gato: estimacao.js). Cada bicho solto é uma entidade da fazenda que NÃO bloqueia nada, não é gravada e
 // anda por conta: quem manda é a família dele, a cada passo, com irAte() (vai para perto de um ponto, desviando das
 // construções) ou levar() (posição dada na mão, como o boi puxando o arado).
-//   tipo "bicho"            recebe toque (o afago do cachorro e do gato)
+//   tipo "bicho"            recebe toque no modo Mão (o afago do cachorro e do gato)
 //   tipo "bichoDeTrabalho"  o toque passa por ele e vale para a casa de trás (ele anda colado nela o dia inteiro)
 // A entidade: { id: 'bicho:<id do animal>', tipo, x, z (canto da casa: o centro é x + 0.5, z + 0.5), animal, especie,
 //               familia, figura (a espécie cuja arte ele usa se a dele não existir), rumo, vel, fase (casas andadas),
@@ -10,7 +10,7 @@
 // O desenho (render/trabalho.js) preenche DESENHO.bicho; a lógica não sabe como o bicho é pintado.
 import { registrarTipo } from '../registro.js';
 import { PASSO, limitar, girarPara } from '../util.js';
-import { acharCaminho, cabe } from '../caminho.js';
+import { acharCaminho } from '../caminho.js';
 
 const ACEL = 10, FREIO = 13; // unidades/s²
 const GIRO = 9; // rad/s
@@ -30,7 +30,8 @@ function visual(m, e, v) {
 const tocar = (m, e) => (TOQUE[e.familia] ? TOQUE[e.familia](m, e) : null) || { acao: null, texto: null };
 // ela para pertinho do bicho (de qualquer lado) para o afago ou para encher o regador no barril
 const AO_LADO = [[1.2, 0.5], [-0.2, 0.5], [0.5, 1.2], [0.5, -0.2]], AO_LARGO = [[1.6, 0.5], [-0.6, 0.5], [0.5, 1.6], [0.5, -0.6]];
-registrarTipo({ tipo: 'bicho', casas: [1, 1], bloqueia: false, semVeu: true, altura: 1, pontos: { ficar: AO_LADO }, acaoPossivel: tocar, visual });
+// o afago é coisa do modo Mão: com a enxada, o regador ou as sementes, o toque passa pelo bicho e vale para a casa de trás
+registrarTipo({ tipo: 'bicho', casas: [1, 1], bloqueia: false, semVeu: true, semToque: (m) => !!m.modo && m.modo.id !== 'mao', altura: 1, pontos: { ficar: AO_LADO }, acaoPossivel: tocar, visual });
 registrarTipo({ tipo: 'bichoDeTrabalho', casas: [1, 1], bloqueia: false, semVeu: true, semToque: true, altura: 2, pontos: { ficar: AO_LARGO }, acaoPossivel: tocar, visual });
 
 export const idDoBicho = (animalId) => 'bicho:' + animalId;
@@ -87,7 +88,10 @@ export function irAte(m, e, gx, gz, folga, vmax, chao, aTodoCusto) {
   const dx = gx - e.metaX, dz = gz - e.metaZ;
   if (!e.rota || (e.plano <= 0 && dx * dx + dz * dz > 0.5)) {
     e.metaX = gx; e.metaZ = gz; e.plano = REPLANEJA; e.rotaI = 0;
-    e.rota = (cabe(loc, cx, cz) ? acharCaminho(loc, cx, cz, gx, gz) : null) || (aTodoCusto ? [[gx, gz]] : null);
+    // (a procura parte da casa em que ele está, mesmo encostado numa árvore; de dentro de uma casa tomada, uma
+    // construção nova em cima dele, sai em linha reta)
+    const livre = loc.andavel(Math.floor(cx), Math.floor(cz));
+    e.rota = (livre ? acharCaminho(loc, cx, cz, gx, gz) : null) || (aTodoCusto || !livre ? [[gx, gz]] : null);
     if (!e.rota) { e.semRota = SEM_ROTA; ficar(e); return false; }
   }
   const r = e.rota, ultimo = e.rotaI >= r.length - 1;

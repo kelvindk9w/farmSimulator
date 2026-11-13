@@ -185,9 +185,10 @@
     .avisos { top: calc(max(6px, env(safe-area-inset-top)) + 78px); }
     .aviso { padding: 5px 12px; }
     /* com o balão do vizinho na tela, os avisos ficam na parte livre à esquerda dele (não cobrem a fala) */
-    body:has(.balao:not([hidden])) .avisos { right: calc(min(330px, 40%) + max(8px, env(safe-area-inset-right)) + 6px); }
+    body:has(.balao:not(.esq):not([hidden])) .avisos { right: calc(min(330px, 40%) + max(8px, env(safe-area-inset-right)) + 6px); }
+    body:has(.balao.esq:not([hidden])) .avisos { left: calc(min(330px, 40%) + max(8px, env(safe-area-inset-left)) + 6px); } /* o balão do lado esquerdo: os avisos à direita dele */
     body:has(.balao:not([hidden])) .aviso { max-width: 96%; }
-    body.com-painel:has(.balao:not([hidden])) .avisos { right: 0; } /* painel aberto: o balão fica atrás dele */
+    body.com-painel:has(.balao:not([hidden])) .avisos { left: 0; right: 0; } /* painel aberto: o balão fica atrás dele */
     .rodape.com-sementes .dica { display: none; }
     .rodape { gap: 4px; }
     .semente { width: 48px; height: 46px; }
@@ -362,6 +363,7 @@
   .cons-info b { display: block; font-weight: 800; line-height: 1.1; white-space: nowrap; }
   .cons-info span { display: block; max-width: 270px; font-size: 14px; font-weight: 600; line-height: 1.15; color: var(--marrom2); }
   .cons-info span.ruim { color: var(--ruim); font-weight: 800; }
+  .cons-info span.treme { animation: treme .25s; }
   .cons-bt { min-height: 48px; white-space: nowrap; }
   .cons-bt.sem { opacity: .5; }
   body.colocando .rodape, body.colocando .topo-dir, body.colocando .balao, body.colocando .alavanca, body.colocando .agir, body.colocando .seta-ui { display: none !important; }
@@ -537,6 +539,8 @@
   #ui.a-cavalo .chip.folego { display: none !important; }
   .trab-lado { position: absolute; right: max(8px, env(safe-area-inset-right)); top: 60px; display: flex; gap: 6px; }
   .trab-lado:empty, body.colocando .trab-lado { display: none !important; }
+  .abr-extras { align-items: flex-start; }
+  .abr-extra > .bt { align-self: stretch; }
 </style>
 </head>
 <body>

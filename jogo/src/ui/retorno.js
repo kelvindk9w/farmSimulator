@@ -25,7 +25,7 @@ export function ligarRetorno(m, tutorial) {
   ev.ouvir('chaoMudou', (d) => { if (d.tudo) cena.chao.sujarTudo(); else cena.chao.sujar(d.x, d.z); });
   ev.ouvir('carregou', () => cena.chao.sujarTudo());
 
-  ev.ouvir('faltou', (d) => { const t = frase(d.motivo, d.dados, D); if (t) avisar(t); });
+  ev.ouvir('faltou', (d) => { if (J.calarFalta) return; const t = frase(d.motivo, d.dados, D); if (t) avisar(t); }); // (calada: quem pediu já mostra o motivo)
   ev.ouvir('informou', (d) => { const t = frase(d.motivo, d.dados, D); if (t) avisar(t); });
   ev.ouvir('cansou', () => avisar(T.hud.cansada));
 

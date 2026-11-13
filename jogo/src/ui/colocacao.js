@@ -209,19 +209,27 @@ function pegar(e) {
   if (!e) { avisar(T.colocar.nadaAqui); som.tocar('erro'); return; }
   comecarMudanca(e.id, 'arrumar');
 }
+// o motivo de não servir já está escrito na barra: a recusa não vira aviso solto no alto da tela (ele ficava lá
+// depois que o fantasma já estava num lugar bom). A barra treme e toca o som de erro.
+function calado(f) { J.calarFalta = true; try { return f(); } finally { J.calarFalta = false; } }
+function recusou() {
+  conferir();
+  som.tocar('erro');
+  tInfo.classList.remove('treme'); void tInfo.offsetWidth; tInfo.classList.add('treme');
+}
 function confirmar() {
   if (!modo) return;
   const m = J.mundo;
   if (modo.tipo === 'arrumar') { pegar(construcaoEm(m, F.x, F.z)); return; }
   if (modo.tipo === 'mover') {
-    const r = m.comando({ tipo: 'moverConstrucao', entidade: modo.e.id, x: F.x, z: F.z, giro: F.giro });
-    if (!r.ok) { conferir(); return; }
+    const r = calado(() => m.comando({ tipo: 'moverConstrucao', entidade: modo.e.id, x: F.x, z: F.z, giro: F.giro }));
+    if (!r.ok) { recusou(); return; }
     som.tocar('guardar');
     if (modo.volta === 'arrumar') comecarArrumacao(); else sairDaColocacao();
     return;
   }
-  const r = m.comando({ tipo: 'construir', id: modo.id, x: F.x, z: F.z, giro: F.giro });
-  if (!r.ok) { conferir(); return; }
+  const r = calado(() => m.comando({ tipo: 'construir', id: modo.id, x: F.x, z: F.z, giro: F.giro }));
+  if (!r.ok) { recusou(); return; }
   if (!modo.seq) { sairDaColocacao(); return; }
   modo.postas++;
   conferir();

@@ -23,8 +23,24 @@ const LARGA = 2.7; // casas: parado, o bicho só sai do lugar quando ela se afas
 const CORRE_ACIMA = 3.6, DISPARA_ACIMA = 11; // casas de distância: corridinha; disparada (ela foi longe a cavalo)
 const V_ANDA = 2.3, V_CORRE = 5.6, V_DISPARA = 8.5;
 const SENTA_EM = 1.4; // segundos parado até sentar
-// cada bicho tem o seu cantinho perto dela (para dois não ficarem um em cima do outro)
-const CANTO = [[0, 0, 1.05], [0.55, -0.4, 1.5], [-0.5, 0.5, 1.6], [0.2, 0.7, 2.1], [-0.7, -0.3, 2.3]];
+// cada bicho tem o seu cantinho perto dela (para dois não ficarem um em cima do outro): [dx, dz, folga]. Os primeiros
+// ficam de lado e um pouco para a frente (+X e +Z descem na tela): atrás dela, a figura dela os cobriria
+const CANTO = [[0.95, 0.15, 0.3], [0.15, 0.95, 0.3], [1.1, -0.6, 0.5], [-0.6, 1.1, 0.5], [1.25, 1.25, 0.6]];
+// o cantinho do bicho k; se ali há árvore, pedra, construção ou planta, um dos outros que nenhum bicho tomou (tomados:
+// um bit por cantinho, zerado a cada passo); se nenhum serve, perto dela mesma. out = [x, z, folga]
+let tomados = 0;
+function cantinho(chao, p, k, out) {
+  for (let j = 0; j < CANTO.length; j++) {
+    const i = (k + 2 * j) % CANTO.length, c = CANTO[i], x = p.x + c[0], z = p.z + c[1];
+    if (tomados & (1 << i) || !chao.andavel(Math.floor(x), Math.floor(z))) continue;
+    tomados |= 1 << i;
+    out[0] = x; out[1] = z; out[2] = c[2];
+    return out;
+  }
+  out[0] = p.x; out[1] = p.z; out[2] = 1.05 + 0.45 * (k % CANTO.length);
+  return out;
+}
+const META = [0, 0, 0];
 
 // ---------- consultas ----------
 const efeitoDe = (m, a) => { const d = defDoAnimal(m, a); return d && d.efeito && d.efeito.tipo === 'mimo' ? d.efeito : null; };
@@ -87,16 +103,17 @@ TOQUE.estimacao = (m, e) => {
 // ---------- o passeio ----------
 function passear(m, loc, chao, p, e, k) {
   if (e.feliz > 0) e.feliz -= 1 / 60;
-  const c = CANTO[k % CANTO.length], d = Math.hypot(p.x - e.x - 0.5, p.z - e.z - 0.5);
-  if (esperado(m, e) || (!e.indo && d < LARGA + c[2] - 1)) { // ela vem fazer um afago, ou está por perto: fica
+  const c = cantinho(chao, p, k, META), d = Math.hypot(p.x - e.x - 0.5, p.z - e.z - 0.5);
+  if (esperado(m, e) || (!e.indo && d < LARGA + Math.max(0, c[2] - 1))) { // ela vem fazer um afago, ou está por perto: fica
     ficar(e); e.indo = false;
     e.estado = e.parado > SENTA_EM && !(e.feliz > 0) ? 'sentado' : 'parada';
     return;
   }
   // vai para o cantinho dele perto dela; se ela está no meio da lavoura, para a beira (não pisa em planta de propósito)
   const naLavoura = !!loc.plantas[Math.floor(p.z) * loc.l + Math.floor(p.x)];
-  e.indo = irSemPisar(m, e, naLavoura ? p.x : p.x + c[0], naLavoura ? p.z : p.z + c[1], c[2], d > DISPARA_ACIMA ? V_DISPARA : d > CORRE_ACIMA ? V_CORRE : V_ANDA);
-  e.estado = e.vel > 3.6 ? 'correr' : e.vel > 0.25 ? 'andar' : 'parada';
+  e.indo = irSemPisar(m, e, naLavoura ? p.x : c[0], naLavoura ? p.z : c[1], c[2], d > DISPARA_ACIMA ? V_DISPARA : d > CORRE_ACIMA ? V_CORRE : V_ANDA);
+  // (sem caminho até ela, o bicho espera onde está e, cansado de esperar, senta)
+  e.estado = e.vel > 3.6 ? 'correr' : e.vel > 0.25 ? 'andar' : e.parado > SENTA_EM && !(e.feliz > 0) ? 'sentado' : 'parada';
 }
 // um lugar livre ao lado dela para o bicho aparecer
 function aoLadoDela(m, p, k, out) {
@@ -174,6 +191,7 @@ registrarSistema({
     const B = E.bichos;
     if (!B.length) return;
     const p = m.personagem, loc = m.locais.fazenda, fora = p.local === 'fazenda', chao = chaoSemPlanta(m);
+    tomados = 0;
     for (let k = 0; k < B.length; k++) {
       const e = bichoSolto(m, B[k].id);
       if (!e) continue;
