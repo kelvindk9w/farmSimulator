@@ -9,6 +9,7 @@ import './arte/molde/index.js';
 import './arte/brinquedo/index.js';
 import './arte/lowpoly/index.js';
 import './arte/contorno/index.js';
+import './arte/figuras/index.js';
 import './arte/pintado/index.js';
 import { listarConjuntos, rotuloDoConjunto } from './arte/registro.js';
 import ALVOS from '../config/alvos.json';
@@ -39,7 +40,10 @@ function iniciar() {
   document.body.classList.toggle('sem-hud', op.semHud);
   const canvas = document.getElementById('tela');
   const hud = new Hud(document.getElementById('hud'));
+  // num computador (mouse e teclado), a primeira dica também fala das teclas
+  const DICA_TECLADO = matchMedia('(hover: hover) and (pointer: fine)').matches ? ' No teclado: setas para andar, Espaço para agir.' : '';
   let mundo = new Mundo();
+  mundo.dica += DICA_TECLADO;
   const cena = new Cena(canvas, mundo.sitio);
   const cfg = op.arte ? { padrao: op.arte, porTipo: {} } : arteCfg;
   let vista = new Vista(cena, mundo, cfg);
@@ -56,6 +60,7 @@ function iniciar() {
     const conjuntos = { ...vista.conjuntoPorTipo };
     for (const e of vista.entidades) e.visual.descartar();
     mundo = new Mundo();
+    mundo.dica += DICA_TECLADO;
     vista = new Vista(cena, mundo, { padrao: arteCfg.padrao, porTipo: conjuntos });
     roteiro = comDemo ? new Roteiro() : null;
     passosDemo = 0;
@@ -84,6 +89,7 @@ function iniciar() {
   }
 
   function umPasso() {
+    passoDoTeclado();
     if (roteiro) {
       roteiro.passo(mundo);
       passosDemo++;
@@ -98,6 +104,7 @@ function iniciar() {
   function desenhar() {
     hud.contadores(mundo.contadores());
     if (roteiro) hud.definirDica('Demonstração: ' + roteiro.legenda);
+    else if (teclado.perto) hud.definirDica('Espaço: ' + mundo.descrever(teclado.perto).texto, true);
     else if (!previa) hud.definirDica(mundo.dica !== dicaAntiga ? (dicaFixa = dicaAntiga = mundo.dica) : dicaFixa);
     hud.avisos(mundo.n, cena);
     cena.renderizar();
@@ -106,6 +113,7 @@ function iniciar() {
 
   // ---- toque e mouse ----
   let dedo = null; // { id, x, y, x0, y0, arrastou }
+  const teclado = { apertadas: new Set(), andando: false, dir: '', conta: 0, emUso: false, perto: null };
   const objetoEm = (x, y) => cena.objetoEm(x, y, mundo.alvosDeToque());
   function tocar(x, y) {
     if (roteiro) return; // durante a demonstração a tela não comanda
@@ -118,7 +126,7 @@ function iniciar() {
     if (Math.abs(gx) <= L && Math.abs(gz) <= L) mundo.tocarChao(gx, gz); else mundo.dica = 'Fora do sítio.';
     return null;
   }
-  canvas.addEventListener('pointerdown', (e) => { if (dedo) return; dedo = { id: e.pointerId, x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, arrastou: false }; try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* sem captura */ } });
+  canvas.addEventListener('pointerdown', (e) => { teclado.emUso = false; teclado.perto = null; if (dedo) return; dedo = { id: e.pointerId, x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, arrastou: false }; try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* sem captura */ } });
   canvas.addEventListener('pointermove', (e) => {
     if (dedo && e.pointerId === dedo.id) {
       if (!dedo.arrastou && Math.hypot(e.clientX - dedo.x0, e.clientY - dedo.y0) > 12 && cena.modo === 'perto') dedo.arrastou = true;
@@ -141,7 +149,55 @@ function iniciar() {
   canvas.addEventListener('pointercancel', (e) => soltar(e, false));
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
+  // ---- teclado (provisório, para testar o andar): setas ou WASD andam na direção da tela; Espaço ou Enter agem no que está perto ----
+  // Na tela, +X desce para a direita e +Z desce para a esquerda: "para cima" é (-X, -Z).
+  const DIRECAO = { ArrowUp: [-1, -1], KeyW: [-1, -1], ArrowDown: [1, 1], KeyS: [1, 1], ArrowLeft: [-1, 1], KeyA: [-1, 1], ArrowRight: [1, -1], KeyD: [1, -1] };
+  const ACAO = new Set(['Space', 'Enter', 'NumpadEnter', ' ']);
+  const nomeDaTecla = (e) => e.code || e.key; // alguns navegadores de TV não preenchem "code"
+  function passoDoTeclado() {
+    if (roteiro || !teclado.emUso) { teclado.perto = null; return; }
+    const p = mundo.personagem;
+    let dx = 0, dz = 0;
+    for (const t of teclado.apertadas) { dx += DIRECAO[t][0]; dz += DIRECAO[t][1]; }
+    if (dx || dz) {
+      // re-planeja 15 vezes por segundo, e na hora quando a direção muda
+      const dir = dx + ',' + dz;
+      if (dir !== teclado.dir || teclado.conta % 4 === 0) { if (mundo.rumar(dx, dz)) teclado.andando = true; }
+      teclado.dir = dir; teclado.conta++;
+    } else {
+      if (teclado.andando) mundo.frear();
+      teclado.andando = false; teclado.dir = ''; teclado.conta = 0;
+    }
+    // o que a tecla de ação faria agora (aparece na linha de dica); some enquanto ele já vai fazer alguma coisa
+    const ocupado = p.estado === 'agindo' || p.estado === 'celeiro' || (p.plano && p.plano.alvo);
+    if (mundo.n % 6 === 0 || ocupado) teclado.perto = ocupado ? null : mundo.aoAlcance();
+  }
+  addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const t = nomeDaTecla(e);
+    if (DIRECAO[t]) {
+      e.preventDefault();
+      if (e.repeat) return;
+      if (!teclado.emUso && !roteiro) cena.soltarArrasto(); // a câmera volta a acompanhar o personagem
+      teclado.emUso = true; previa = false;
+      teclado.apertadas.add(t);
+    } else if (ACAO.has(t)) {
+      if (document.activeElement && document.activeElement.tagName === 'BUTTON') return; // num botão em foco, a tecla aperta o botão
+      e.preventDefault();
+      if (e.repeat || roteiro) return;
+      teclado.emUso = true; previa = false;
+      teclado.apertadas.clear(); // para andar de novo é preciso apertar a direção outra vez (senão a tecla presa cancelaria a ação)
+      teclado.andando = false;
+      const id = mundo.aoAlcance();
+      if (id) { cena.soltarArrasto(); mundo.tocar(id); } else mundo.dica = 'Chegue perto de alguma coisa e aperte Espaço.';
+      teclado.perto = null;
+    }
+  });
+  addEventListener('keyup', (e) => { teclado.apertadas.delete(nomeDaTecla(e)); });
+  addEventListener('blur', () => teclado.apertadas.clear());
+
   // ---- botões ----
+  for (const b of document.querySelectorAll('#hud button')) b.addEventListener('click', () => b.blur()); // o Espaço volta a ser do jogo
   hud.btDemo.addEventListener('click', () => recomecar(!roteiro));
   hud.btArte.addEventListener('click', () => { vista.definirConjunto(vista.proximoConjunto()); lerArte(); });
   hud.btZoom.addEventListener('click', () => { cena.definirModo(cena.modo === 'perto' ? 'tudo' : 'perto'); hud.definirZoom(cena.modo === 'perto'); });
@@ -229,7 +285,7 @@ function iniciar() {
       return p;
     },
     posicao: (id) => { const o = id === 'personagem' ? mundo.personagem : mundo.objetos[id]; return [o.x, o.z, o.rumo || 0]; },
-    cena, tocar: (id) => mundo.tocar(id),
+    cena, tocar: (id) => mundo.tocar(id), tocarChao: (x, z) => mundo.tocarChao(x, z),
   });
 }
 

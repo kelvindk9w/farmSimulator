@@ -1,0 +1,45 @@
+{
+  "arquivo": "figuras-personagem-03035b50.png",
+  "largura": 2048,
+  "altura": 1023,
+  "casa": [
+    256,
+    341
+  ],
+  "colunas": 8,
+  "emPe": 317,
+  "apoio": [
+    128,
+    23
+  ],
+  "quadros": {
+    "andarFrente": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "andarCostas": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "paradaFrente": [
+      12
+    ],
+    "paradaCostas": [
+      13
+    ],
+    "trabalhar": [
+      14,
+      15,
+      16,
+      17
+    ]
+  }
+}

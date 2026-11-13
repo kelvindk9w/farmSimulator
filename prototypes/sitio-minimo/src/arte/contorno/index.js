@@ -24,4 +24,7 @@ const EXTRAS = { personagem: { objetosDeMao: D.OBJETOS_DE_MAO, avatar } };
 const vestir = (tipo, fabrica) => (ctx) => comEstilo(criarEstilo(tipo, DESENHOS, EXTRAS[tipo], ctx), () => fabrica(ctx));
 const vestidas = Object.fromEntries(Object.entries({ personagem, canteiro, poco, celeiro, vaca, galinha, ninho, arvore }).map(([tipo, f]) => [tipo, vestir(tipo, f)]));
 const semVestir = (tipo, fabrica) => (ctx) => comEstilo(criarEstilo(tipo, {}), () => fabrica(ctx));
-registrarConjunto('contorno', 'contorno', { ...vestidas, chao: semVestir('chao', chao), cerca: semVestir('cerca', cerca) }, { ambiente: AMBIENTE });
+// as fábricas são exportadas para o conjunto "figuras", que usa este cenário e troca só a personagem
+export const FABRICAS = { ...vestidas, chao: semVestir('chao', chao), cerca: semVestir('cerca', cerca) };
+export { AMBIENTE };
+registrarConjunto('contorno', 'contorno', FABRICAS, { ambiente: AMBIENTE });

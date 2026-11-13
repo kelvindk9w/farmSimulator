@@ -3,7 +3,7 @@
 Este é um protótipo jogável, pequeno, feito para responder a duas perguntas antes de começar o jogo de verdade.
 
 1. Cada tipo de objeto do sítio funciona e tem uma animação que dá gosto de ver? Aqui há um objeto de cada tipo: personagem, canteiro, poço, celeiro, vaca, galinha com ninho e laranjeira.
-2. Dá para trocar a arte de **um** objeto sem mexer nas regras do jogo? Aqui a arte de cada tipo fica atrás de uma interface pequena, e há seis conjuntos de arte que se trocam com o jogo andando.
+2. Dá para trocar a arte de **um** objeto sem mexer nas regras do jogo? Aqui a arte de cada tipo fica atrás de uma interface pequena, e há sete conjuntos de arte que se trocam com o jogo andando.
 
 Depois veio uma terceira pergunta: o quanto um 3D desenhado em tempo real, com a arte do Codex definindo formas, cores e acabamento, chega perto da imagem de estilo escolhida (`arte/estilo/rodada-01/estilo-a.png`)? O conjunto de arte `brinquedo` é essa tentativa, e é ele que abre. A seção [O conjunto brinquedo](#o-conjunto-brinquedo) diz o que ficou perto da imagem e o que ficou longe.
 
@@ -32,7 +32,7 @@ As opções vão depois de `#` no endereço, separadas por vírgula:
 | Opção | O que faz |
 |---|---|
 | `#demo` | Abre já na demonstração. |
-| `#arte-brinquedo`, `#arte-lowpoly`, `#arte-contorno`, `#arte-pintado`, `#arte-codigo` ou `#arte-molde` | Escolhe o conjunto de arte inicial. Sem a opção, abre o `brinquedo`. |
+| `#arte-figuras`, `#arte-brinquedo`, `#arte-lowpoly`, `#arte-contorno`, `#arte-pintado`, `#arte-codigo` ou `#arte-molde` | Escolhe o conjunto de arte inicial. Sem a opção, abre o `figuras`. |
 | `#perto` ou `#tudo` | Escolhe o enquadramento inicial. Sem a opção, a tela estreita abre de perto e a tela larga abre vendo tudo. |
 | `#sem-hud` | Esconde a interface. |
 | `#passo` | Modo das ferramentas: a simulação só anda quando a ferramenta manda. |
@@ -43,9 +43,10 @@ Exemplo: `http://localhost:8090/#demo,arte-molde`.
 
 - Toque ou clique num objeto. O personagem anda até ele e faz a ação que faz sentido naquele momento.
 - Toque no chão. O personagem anda até o ponto tocado.
+- No teclado, as setas (ou W, A, S, D) andam na direção da tela enquanto a tecla está apertada, e Espaço (ou Enter) age no objeto mais perto. Ao chegar perto de um objeto, a linha no pé da tela diz o que o Espaço vai fazer. Esse controle é provisório: serve para testar o andar, e o controle de TV e o de videogame ainda não existem.
 - Antes de agir, a linha no pé da tela diz o que o objeto tocado vai fazer, ou por que ainda não dá para fazer nada com ele.
 - O botão **Demonstração** recomeça o sítio e faz um passeio fixo que executa cada ação uma vez. Durante o passeio a tela não aceita comandos. Quando o passeio acaba, o controle volta sozinho. Tocar no botão antes do fim interrompe o passeio e recomeça o sítio.
-- O botão **Arte** troca o conjunto de arte de todos os objetos de uma vez, sem recarregar a página e sem parar o que está acontecendo. Ele roda pelos seis conjuntos: `brinquedo`, `lowpoly`, `contorno`, `pintado`, `codigo` e `molde`.
+- O botão **Arte** troca o conjunto de arte de todos os objetos de uma vez, sem recarregar a página e sem parar o que está acontecendo. Ele roda pelos sete conjuntos: `figuras`, `pintado`, `codigo`, `molde`, `brinquedo`, `lowpoly` e `contorno`.
 - O botão **Ver de perto / Ver tudo** troca o enquadramento. De perto, a câmera acompanha o personagem, e dá para arrastar o dedo para olhar em volta.
 - O botão **Medidor** mostra, no pé da tela, quantos quadros por segundo o aparelho está desenhando (a leitura de agora, a menor desde que o medidor foi aberto e o quadro mais demorado do último segundo), mais as chamadas de desenho e os triângulos do conjunto de arte atual. Serve para testar o mesmo sítio num celular fraco ou numa TV.
 - O botão **Ver alvo** aparece nos conjuntos que têm uma imagem-alvo (a imagem do Codex que o conjunto tenta reproduzir). Ele abre a imagem ao lado do jogo, na tela deitada, ou embaixo dele, na tela em pé. Tocar na imagem fecha.
@@ -85,6 +86,7 @@ Como a lógica é determinística, o passeio acontece sempre nos mesmos passos, 
 | `src/arte/codigo/` | O primeiro conjunto, modelado e animado por código, de formas facetadas. O personagem reaproveita o avatar de `tools/visual-refs/src/avatar/`. Os esqueletos e a animação de todos os tipos moram aqui. |
 | `src/arte/brinquedo/` | O conjunto que abre. Usa os esqueletos e a animação do `codigo` e desenha de novo cada peça, com formas roliças de brinquedo. Traz a própria luz e o próprio mapa de sombra. |
 | `src/arte/lowpoly/`, `src/arte/contorno/`, `src/arte/pintado/` | Os três conjuntos do teste de estilos (ver "O teste de estilos"). Cada pasta tem um `NOTAS.md` com o que ficou perto e longe do alvo. |
+| `src/arte/figuras/` | O conjunto que abre: o cenário do `contorno` com a personagem como figura 2D desenhada pelo Codex (ver "A personagem 2D"). |
 | `src/arte/molde/` | O conjunto de molde: formas cinza e lisas, com os mesmos estados e os mesmos pontos. |
 | `src/cena/` | A câmera, a luz (que vem do conjunto de arte que desenha o chão) e a ponte que lê a lógica e entrega o estado a cada visual. |
 | `src/ui/` | A interface em HTML por cima da tela de desenho. |
@@ -122,6 +124,18 @@ Como comparar:
 - O que ficou perto e longe do alvo, e o que só sairia por outro caminho, está no `NOTAS.md` de cada conjunto.
 
 O que este teste não responde: quantos quadros por segundo cada estilo faz num celular fraco ou numa TV. Tudo aqui rodou em WebGL por software, e só o medidor num aparelho de verdade dá esse número.
+
+## A personagem 2D
+
+Os conjuntos em 3D perdem o desenho do Codex no caminho: cada coisa é esculpida de novo por código, e do desenho só sobram as cores e as proporções. O conjunto `figuras` testa o outro caminho: a imagem do Codex entra no jogo como ela veio. Por enquanto só a personagem; o cenário e os bichos são os do `contorno`.
+
+- O Codex desenhou a personagem em cinco imagens com fundo transparente (parada de frente e de costas, andando de frente e de costas, trabalhando abaixada). Elas estão em `arte/estilo/rodada-04/codex/`. A parada de costas foi pedida duas vezes: a primeira veio no meio de um passo.
+- `src/arte/figuras/texturas/montar-atlas.mjs` junta os 18 quadros numa textura de 2048 por 1023 pontos (278 KB), baixada só quando o conjunto é usado.
+- `src/arte/figuras/personagem.js` mostra a figura num cartão em pé dentro da cena, de frente para a câmera, e troca de quadro conforme o estado que a lógica entrega. As regras do jogo não mudaram.
+
+Quando ela freia, vira no lugar ou espera a porta do celeiro, a lógica ainda diz "andar" com a velocidade perto de zero. Nesses momentos o conjunto mostra a figura parada, para ela não congelar no meio de uma passada.
+
+O que ela ainda não faz (não segura nada, as cinco ações usam a mesma animação, não há partículas) está em `src/arte/figuras/NOTAS.md`.
 
 ## O conjunto brinquedo
 
@@ -201,7 +215,7 @@ Tamanho do que o navegador baixa (pasta `dist/`):
 | `pintado-atlas.png` (só quando o conjunto `pintado` é usado) | 339,9 KB | 337,0 KB | 335,5 KB |
 | **Total** | **1.354,3 KB** | **624,5 KB** | **563,2 KB** |
 
-Os seis conjuntos de arte vão no mesmo `main.js`; não há um download por conjunto. Do `main.js`, 740 KB são a biblioteca three, 238 KB são o código deste protótipo e 31 KB são o avatar e o construtor de malhas reaproveitados de `tools/visual-refs`. Com três conjuntos (antes do teste de estilos) o código do protótipo tinha 136 KB e o total era de 910,8 KB; quando um estilo for escolhido, os outros saem e o peso volta a cair. As únicas imagens são o atlas do conjunto `pintado` e as imagens-alvo de `alvos/` (cerca de 250 KB cada), baixadas só quando alguém aperta "Ver alvo".
+Os sete conjuntos de arte vão no mesmo `main.js`; não há um download por conjunto. Do `main.js`, 740 KB são a biblioteca three, 238 KB são o código deste protótipo e 31 KB são o avatar e o construtor de malhas reaproveitados de `tools/visual-refs`. Com três conjuntos (antes do teste de estilos) o código do protótipo tinha 136 KB e o total era de 910,8 KB; quando um estilo for escolhido, os outros saem e o peso volta a cair. As únicas imagens são o atlas do conjunto `pintado`, a folha da personagem do conjunto `figuras` (277 KB) e as imagens-alvo de `alvos/` (cerca de 250 KB cada), baixadas só quando alguém aperta "Ver alvo".
 
 Desenho da cena inteira, numa tela de 1280 por 720:
 
@@ -226,13 +240,14 @@ Quadros por segundo não foram medidos. Nesta máquina o WebGL roda em software,
 `npm run verificar` passa. Ele confere, num Chromium sem janela:
 
 - A pasta `dist/` só tem arquivos `.html`, `.js`, `.json` ou `.png`, e o código não usa `?` no endereço, `alert`, `confirm`, `.glb` nem service worker.
-- A demonstração chega ao fim com cada um dos seis conjuntos (`codigo`, `molde`, `brinquedo`, `lowpoly`, `contorno` e `pintado`), em menos de 30 s, com as oito ações feitas e com a mudança esperada nos contadores depois de cada uma.
-- Os seis conjuntos passam pelos mesmos estados de jogo nos mesmos passos. A comparação é feita a cada meio segundo de demonstração.
-- Sem `#arte-...` no endereço, a página abre com o conjunto `brinquedo`.
+- A demonstração chega ao fim com cada um dos sete conjuntos (`codigo`, `molde`, `brinquedo`, `lowpoly`, `contorno`, `figuras` e `pintado`), em menos de 30 s, com as oito ações feitas e com a mudança esperada nos contadores depois de cada uma.
+- Os sete conjuntos passam pelos mesmos estados de jogo nos mesmos passos. A comparação é feita a cada meio segundo de demonstração.
+- Sem `#arte-...` no endereço, a página abre com o conjunto de `config/arte.json` (hoje o `figuras`).
 - Trocar a arte no meio da demonstração não muda o jogo. São cinco trocas: todos os tipos de uma vez, só a vaca, pelo botão "Arte", pelo endereço e de volta ao `brinquedo`.
-- O botão "Arte" passa pelos seis conjuntos e volta ao primeiro.
+- O botão "Arte" passa pelos sete conjuntos e volta ao primeiro.
 - A cada meio segundo, todos os visuais continuam cumprindo o contrato: os pontos estão no lugar e nenhuma peça tem posição, giro ou escala inválidos.
 - Toques de verdade funcionam em três telas: celular em pé (390 por 844, toque), celular deitado (844 por 390, toque) e computador (1280 por 720, mouse). Em cada uma: andar até um ponto do chão, tirar água, plantar, regar, pegar o ovo, guardar no celeiro (com a porta fechando no fim) e os botões "Arte" e "Demonstração". Nas duas telas de celular, também arrastar a câmera com o dedo sem dar comando.
+- O teclado funciona na tela de computador: cada seta anda para o seu lado da tela, ao soltar o personagem para em menos de 40 passos e fica na figura parada, a seta presa desvia do poço sem sair do terreno, o Espaço perto do poço tira água, andar reto para o fundo diante da porteira não entra no pasto, e durante a demonstração as teclas não mudam nada.
 - O laço normal do jogo, em tempo real, anda sozinho com `#demo`.
 - Nenhuma página escreve erro no console.
 
@@ -254,6 +269,7 @@ Além disso, foi conferido à mão:
 - Quadros por segundo e consumo de bateria.
 - A publicação na hospedagem. Só foi conferido que os arquivos têm os tipos aceitos e que nada depende de `?` no endereço.
 - Sessões longas. O teste mais longo no navegador andou 30 s de simulação. Só com a lógica, sem desenho, o mais longo andou 60 s.
+- O teclado num controle de TV ou num teclado de verdade. As teclas foram apertadas pelo Chromium sem janela, uma direção por vez e uma combinação de duas.
 - Ordenhar, colher a laranja e colher o milho com toques de verdade. Essas três ações só foram testadas pela demonstração, porque dependem de tempos de espera.
 
 ## Como ficaram as animações
@@ -299,6 +315,9 @@ O conjunto `brinquedo` usa as mesmas poses e os mesmos tempos do `codigo`, e o q
 | `celular-retrato-brinquedo.png` | Tela de celular em pé, como abre: conjunto `brinquedo`, de perto, acompanhando o personagem. |
 | `demonstracao-brinquedo.webm` | A demonstração inteira com o conjunto `brinquedo`, de perto, com a câmera acompanhando o personagem, em 960 por 540. |
 | `folhas/*-brinquedo.png` | Folhas de contato do conjunto `brinquedo`: a galinha andando, bicando, batendo as asas e botando; a vaca parada, pastando, andando e sendo ordenhada; o personagem andando, correndo e andando com o caixote. |
+| `comparacao-figuras.jpg`, `comparacao-figuras-jogo.jpg` | A imagem do Codex e o jogo com o conjunto `figuras` na mesma câmera, e o jogo sozinho. |
+| `acoes-figuras.jpg` | Vinte quadros do jogo com a personagem 2D: parada, andando nos quatro sentidos, abaixada trabalhando, passando atrás do poço e entrando no celeiro. |
+| `teclado-figuras.jpg` | A personagem 2D andando pelo teclado para os quatro lados da tela e parada depois de soltar a tecla. |
 | `cena-paisagem.png` | O sítio inteiro, em tela deitada, com o conjunto `codigo`. |
 | `cena-molde.png` | O mesmo instante com o conjunto `molde`. |
 | `acoes-codigo.png` | Os mesmos oito quadros de interação com o conjunto `codigo`. |

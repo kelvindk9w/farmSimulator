@@ -2,5 +2,6 @@
   "brinquedo": "./alvos/brinquedo.png",
   "lowpoly": "./alvos/lowpoly.png",
   "contorno": "./alvos/contorno.png",
-  "pintado": "./alvos/pintado.png"
+  "pintado": "./alvos/pintado.png",
+  "figuras": "./alvos/contorno.png"
 }

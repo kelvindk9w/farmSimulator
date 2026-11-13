@@ -51,6 +51,14 @@ export class Personagem {
     this.tEstado = 0;
   }
 
+  // teclado: soltou a direção. Freia e para logo adiante, no rumo em que já ia (só vale para quem anda pelo chão).
+  frear(m) {
+    if (this.estado !== 'andando' || !this.plano.chao) return;
+    const [tx, tz] = this.rota.pontos[this.rota.i], d = Math.hypot(tx - this.x, tz - this.z);
+    const f = Math.min(d, (this.vel * this.vel) / (2 * FREIO) + 0.03);
+    this._planejar(m, { chao: d > 0 ? [this.x + ((tx - this.x) / d) * f, this.z + ((tz - this.z) / d) * f] : [this.x, this.z] });
+  }
+
   _parar() { this.estado = 'parado'; this.sub = null; this.plano = null; this.rota = null; this.vel = 0; this.tEstado = 0; this.carregando = false; }
 
   passo(m) {

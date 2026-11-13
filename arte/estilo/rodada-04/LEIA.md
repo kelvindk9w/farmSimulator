@@ -26,3 +26,13 @@ São montagens sobre fotos do jogo, não o jogo rodando. Provam que o Codex devo
 Não foi testado: as outras direções de caminhada, as ações (semear, regar, ordenhar, colher, carregar), os bichos, as peças de cenário, a coerência entre dezenas de folhas, quem fica na frente de quem quando a figura passa atrás de um objeto, nem o desempenho em aparelho de verdade.
 
 Também se nota que a personagem da folha de caminhada saiu mais alta e esguia do que a da cena de referência, que é mais cabeçuda. Antes de produzir em série é preciso fixar uma folha de modelo da personagem.
+
+## Depois: a figura dentro do jogo de verdade
+
+A figura entrou no protótipo como o conjunto de arte `figuras` (`prototypes/sitio-minimo/src/arte/figuras/`, com as notas em `NOTAS.md`). Para isso o Codex desenhou mais três imagens, que estão em `codex/`:
+
+| Arquivo | Pedido | O que é |
+|---|---|---|
+| `andando-costas.png` | `pedido-andando-costas.md` | Seis quadros dela andando de costas. |
+| `trabalhando-frente.png` | `pedido-trabalhando.md` | Ela em pé e quatro quadros abaixada, mexendo no chão. |
+| `parada-costas.png` | `pedido-parada-costas.md` | Ela parada de costas, com os dois pés juntos. Substitui `personagem-costas.png` no jogo, que veio no meio de um passo e fazia parecer que ela congelava andando. |

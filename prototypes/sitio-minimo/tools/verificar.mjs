@@ -15,8 +15,8 @@ let falhas = 0;
 const ok = (cond, texto, detalhe = '') => { console.log(`  ${cond ? 'ok  ' : 'FALHOU'} ${texto}${!cond && detalhe ? '\n         ' + detalhe : ''}`); if (!cond) falhas++; return cond; };
 const titulo = (t) => console.log('\n' + t);
 // CONJUNTOS_EXTRA=nome1,nome2 acrescenta conjuntos em teste sem mexer neste arquivo (todo conjunto registrado tem de estar na lista)
-const CONJUNTOS = ['codigo', 'molde', 'brinquedo', 'lowpoly', 'contorno', 'pintado', ...(process.env.CONJUNTOS_EXTRA || '').split(',').filter(Boolean)];
-const INICIAL = 'brinquedo'; // o conjunto de config/arte.json: o que abre quando o endereço não pede outro
+const CONJUNTOS = ['codigo', 'molde', 'brinquedo', 'lowpoly', 'contorno', 'figuras', 'pintado', ...(process.env.CONJUNTOS_EXTRA || '').split(',').filter(Boolean)];
+const INICIAL = JSON.parse(fs.readFileSync(path.join(raiz, 'config/arte.json'), 'utf8')).padrao; // o conjunto que abre quando o endereço não pede outro
 const LIMITE_DEMO = 30 * 60; // a demonstração tem de caber em 30 s
 const S = (f, ...a) => `(${f})(...${JSON.stringify(a)})`;
 
@@ -219,6 +219,63 @@ try {
     ok(!!demo.demo && demo.passo === 0, 'botão "Demonstração": recomeçou o sítio e ligou o roteiro');
     const meio = await pagina.evaluate(() => window.__sitio.avancarAte(400));
     ok(meio.contadores.agua === 3 && meio.conjunto === arte, `a demonstração anda com a arte que estava escolhida ("${arte}")`);
+    ok(erros.length === 0, 'nenhum erro no console', erros.join(' | '));
+    todosErros.push(...erros);
+    await contexto.close();
+  }
+
+  // ---------- 5b. teclado: setas andam na direção da tela, Espaço age no que está perto ----------
+  titulo('Teclado (computador, 1280 x 720)');
+  {
+    const { pagina, contexto, erros } = await abrirPagina(amb, 'passo', TELAS.paisagem);
+    const info = () => pagina.evaluate(() => window.__sitio.info());
+    const anda = (n) => pagina.evaluate((k) => window.__sitio.avancarAte(window.__sitio.info().passo + k), n);
+    const dica = () => pagina.evaluate(() => document.querySelector('#hud .dica').textContent);
+    const quadroParado = () => pagina.evaluate(() => { const v = window.__sitio.visual('personagem'); return !('quadro' in v) || v.quadro === 12 || v.quadro === 13; });
+    ok((await dica()).includes('setas'), `num computador a primeira dica fala das teclas ("${await dica()}")`);
+    // as quatro setas: cada uma anda para o seu lado da tela, e ao soltar ele para
+    const LADOS = { ArrowRight: [1, -1, 'para a direita'], ArrowUp: [-1, -1, 'para cima'], ArrowLeft: [-1, 1, 'para a esquerda'], ArrowDown: [1, 1, 'para baixo'] };
+    for (const [tecla, [sx, sz, nome]] of Object.entries(LADOS)) {
+      const a = await info(), ta = await pagina.evaluate(() => window.__sitio.telaDoChao(...window.__sitio.posicao('personagem').slice(0, 2)));
+      await pagina.keyboard.down(tecla);
+      const m = await anda(30);
+      await pagina.keyboard.up(tecla);
+      const f = await anda(40), tf = await pagina.evaluate(() => window.__sitio.telaDoChao(...window.__sitio.posicao('personagem').slice(0, 2)));
+      const naTela = [tf[0] - ta[0], tf[1] - ta[1]], certo = tecla === 'ArrowRight' ? naTela[0] > 30 : tecla === 'ArrowLeft' ? naTela[0] < -30 : tecla === 'ArrowUp' ? naTela[1] < -15 : naTela[1] > 15;
+      ok(m.estado === 'andando' && m.arte === 'andar' && certo && Math.sign(f.x - a.x) !== -sx && Math.sign(f.z - a.z) !== -sz, `seta ${nome}: andou ${nome} na tela (${naTela.map((v) => v.toFixed(0)).join(', ')} px)`);
+      const g = await anda(20);
+      ok(f.estado === 'parado' && g.x === f.x && g.z === f.z && await quadroParado(), `soltou a seta: parou em menos de 40 passos, na figura parada (${f.x.toFixed(2)}, ${f.z.toFixed(2)})`);
+    }
+    // seta presa: esbarra no poço e na beira do terreno sem atravessar nada, e não fica andando no lugar
+    await pagina.keyboard.down('ArrowRight');
+    let perto = 9, fora = 0, ult = null;
+    for (let k = 0; k < 24; k++) { ult = await anda(15); perto = Math.min(perto, Math.hypot(ult.x - 4.3, ult.z - 1.7)); if (Math.abs(ult.x) > 5.16 || Math.abs(ult.z) > 5.16) fora++; }
+    await pagina.keyboard.up('ArrowRight');
+    await anda(40);
+    ok(perto >= 0.8 + 0.28 && fora === 0 && ult.estado === 'parado', `seta presa para a direita: desviou do poço (chegou a ${perto.toFixed(2)} do centro; o raio com a folga é 1,10), não saiu do terreno e parou na cerca (${ult.x.toFixed(2)}, ${ult.z.toFixed(2)})`);
+    // Espaço perto do poço: a dica avisa o que vai acontecer, e ele vai e tira água
+    await pagina.keyboard.down('ArrowDown'); await anda(50); await pagina.keyboard.up('ArrowDown'); await anda(40);
+    const antes = await dica();
+    await pagina.keyboard.press('Space');
+    let i = await esperar(pagina, (k) => livre(k) && k.contadores.agua === 3);
+    ok(antes.startsWith('Espaço: Poço') && i.contadores.agua === 3, `Espaço perto do poço: a dica dizia "${antes}" e ele tirou água (regador ${i.contadores.agua}/3)`);
+    // pelo teclado não se entra no pasto: de frente para a porteira, para cima + direita (reto para o fundo) para na porteira
+    // (o caminho até lá é mandado direto: na tela, esse pedaço de chão fica atrás da caixa de toque do poço)
+    await pagina.evaluate(() => window.__sitio.tocarChao(2.9, -0.4));
+    i = await esperar(pagina, (k) => livre(k) && Math.hypot(k.x - 2.9, k.z + 0.4) < 0.3);
+    await pagina.keyboard.down('ArrowUp'); await pagina.keyboard.down('ArrowRight');
+    let fundo = 9;
+    for (let k = 0; k < 12; k++) { const j = await anda(15); fundo = Math.min(fundo, j.z); }
+    await pagina.keyboard.up('ArrowUp'); await pagina.keyboard.up('ArrowRight');
+    const fim = await anda(40);
+    ok(Math.hypot(i.x - 2.9, i.z + 0.4) < 0.3 && fundo > -1.52 && fundo < -1.2 && fim.estado === 'parado', `de frente para a porteira, andando para o fundo: parou na porteira e não entrou no pasto (z mínimo ${fundo.toFixed(2)}; a cerca fica em -1,80)`);
+    // durante a demonstração o teclado não comanda
+    await pagina.evaluate(() => window.__sitio.demonstrar(true));
+    await pagina.keyboard.down('ArrowLeft');
+    const d1 = await anda(200);
+    await pagina.keyboard.up('ArrowLeft');
+    const semTecla = await (async () => { const o = await abrirPagina(amb, 'passo,demo', TELAS.paisagem); const r = await o.pagina.evaluate(() => window.__sitio.avancarAte(200)); await o.contexto.close(); return r; })();
+    ok(!!d1.demo && d1.x === semTecla.x && d1.z === semTecla.z, 'durante a demonstração a seta apertada não muda nada');
     ok(erros.length === 0, 'nenhum erro no console', erros.join(' | '));
     todosErros.push(...erros);
     await contexto.close();

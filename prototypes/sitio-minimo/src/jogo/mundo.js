@@ -1,9 +1,10 @@
 // O mundo: junta os objetos, o personagem e as regras. Só lógica: passo fixo de 1/60 s, determinístico, sem desenho.
-// Quem desenha lê "visual()" de cada entidade; quem comanda chama tocar(id) / tocarChao(x, z).
-import { Sorteio, localParaMundo, resumo } from './util.js';
+// Quem desenha lê "visual()" de cada entidade; quem comanda chama tocar(id) / tocarChao(x, z) ou, pelo teclado,
+// rumar(dx, dz) / frear() / aoAlcance().
+import { Sorteio, localParaMundo, resumo, limitar } from './util.js';
 import { TIPOS, ITENS, AGUA_MAX } from './contrato.js';
 import { SITIO } from './sitio.js';
-import { Navegacao } from './caminho.js';
+import { Navegacao, FOLGA } from './caminho.js';
 import { Canteiro, Poco, Celeiro, Arvore, Ninho } from './objetos.js';
 import { Vaca, Galinha } from './animais.js';
 import { Personagem } from './personagem.js';
@@ -53,6 +54,39 @@ export class Mundo {
     this.dica = 'Andando até o ponto tocado.';
     this.personagem.comandar(this, { chao: p });
     return p;
+  }
+
+  // ---- teclado e controle: direção em vez de toque ----
+  // Anda em linha reta na direção (dx, dz) do terreno; quem comanda chama várias vezes por segundo enquanto a tecla está
+  // apertada. Esbarrando em algo, desliza pelo lado livre. Não contorna nada sozinho nem entra no pasto (lá só se entra
+  // para ordenhar). Devolve o ponto para onde ele está indo, ou null se não há para onde ir.
+  rumar(dx, dz, alcance = 1) {
+    const p = this.personagem, nav = this.nav, d = Math.hypot(dx, dz);
+    if (!d || p.estado === 'agindo' || p.estado === 'celeiro') return null;
+    const ux = dx / d, uz = dz / d, fora = !nav.dentroDoPasto(p.x, p.z, FOLGA);
+    for (const [cx, cz] of [[ux, uz], [ux / 2, uz / 2], [ux / 4, uz / 4], [ux, 0], [0, uz], [ux / 2, 0], [0, uz / 2], [ux / 4, 0], [0, uz / 4]]) {
+      const x = limitar(p.x + cx * alcance, -nav.lim, nav.lim), z = limitar(p.z + cz * alcance, -nav.lim, nav.lim);
+      if (Math.hypot(x - p.x, z - p.z) < 0.1) continue;
+      if (nav.bloqueado(x, z) || (fora && nav.dentroDoPasto(x, z, FOLGA)) || !nav.livre(p.x, p.z, x, z)) continue;
+      p.comandar(this, { chao: [x, z] });
+      return [x, z];
+    }
+    return null;
+  }
+  // soltou a direção: freia e para logo adiante
+  frear() { this.personagem.frear(this); }
+  // O objeto em que a tecla de ação agiria agora: o mais perto do personagem (pela caixa de toque), até "alcance".
+  // A vaca conta pela cerca do pasto, porque pelo teclado não se entra lá.
+  aoAlcance(alcance = 1.3) {
+    const p = this.personagem, ps = this.sitio.pasto;
+    const ate = (x0, z0, x1, z1) => Math.hypot(Math.max(x0 - p.x, 0, p.x - x1), Math.max(z0 - p.z, 0, p.z - z1));
+    let melhor = null, dm = alcance;
+    for (const a of this.alvosDeToque()) {
+      let d = ate(a.min[0], a.min[2], a.max[0], a.max[2]);
+      if (this.objetos[a.id].tipo === 'vaca') d = Math.min(d, ate(ps.x0, ps.z0, ps.x1, ps.z1));
+      if (d < dm) { dm = d; melhor = a.id; }
+    }
+    return melhor ? this._alvo(melhor).id : null;
   }
 
   // ---- pontos ----
