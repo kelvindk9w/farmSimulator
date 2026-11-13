@@ -131,13 +131,15 @@ export function criarAcoes(ui, hud) {
     lista.hidden = false; A.listaAberta = true;
     classe(vaga, 'aberta', true);
     foco.abrirPopup(lista, fecharLista);
-    if (J.meio === 'teclas') { const b = lista.querySelector('.carta-mao.ativo') || lista.querySelector('.carta-mao'); if (b) foco.focar(b); }
+    if (J.meio === 'teclas' || foco.menu) { const b = lista.querySelector('.carta-mao.ativo') || lista.querySelector('.carta-mao'); if (b) foco.focar(b); }
   }
   function fecharLista() {
     if (!A.listaAberta) return false;
+    const tinhaFoco = lista.contains(document.activeElement);
     lista.hidden = true; A.listaAberta = false;
     classe(vaga, 'aberta', false);
     foco.fecharPopup(lista);
+    if (tinhaFoco) { if (foco.menu) foco.focar(vaga); else document.activeElement.blur(); } // (no menu, o foco volta para a vaga)
     return true;
   }
   A.abrirLista = abrirLista; A.fecharLista = fecharLista;
@@ -213,6 +215,7 @@ export function criarAcoes(ui, hud) {
   function fecharRoda() {
     if (!A.rodaAberta) return false;
     A.rodaAberta = false; A.rodaAlvo = null; A.rodaOpcoes = null;
+    if (roda.contains(document.activeElement)) document.activeElement.blur();
     roda.hidden = true; roda.textContent = '';
     foco.fecharPopup(roda);
     return true;

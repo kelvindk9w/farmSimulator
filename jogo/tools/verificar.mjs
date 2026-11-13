@@ -223,10 +223,19 @@ try {
     igual((await estado(pg)).missao.id, 'preparar-a-terra', 'o clique no Seu Tonho é a conversa, e vem a missão de arar');
   }
 
-  // ---- arar: botão da enxada e seis casas, com o mouse
+  // ---- arar: um clique em cada casa do campo (a ação de uma casa do campo é arar: ela pega a enxada sozinha)
   await J(pg, () => window.__jogo.olhar(27.5, 52));
-  await clicarEm('.modo[data-modo="enxada"]');
-  igual((await estado(pg)).modo.id, 'enxada', 'o clique no botão escolhe o modo enxada');
+  confere(await J(pg, () => !document.querySelector('.modo[data-modo]') && !!document.querySelector('.vaga-mao')), 'embaixo fica a vaga "Na mão", sem a barra de modos');
+  // o mouse em cima de uma casa do campo: o contorno fica dourado e o balãozinho mostra a enxada em cima dela
+  const pc = await pontoDaCasa(pg, 26, 51);
+  await pg.mouse.move(pc.x, pc.y);
+  await esperar(450);
+  await J(pg, () => window.__jogo.desenhar());
+  const bal = await J(pg, () => { const b = document.querySelector('.balao-acao'), r = b.getBoundingClientRect(); return { visivel: !b.hidden, chave: b.querySelector('canvas').dataset.chave, cor: window.__jogo.cena.destaque.cor, x: r.left + r.width / 2, baixo: r.bottom }; });
+  confere(bal.visivel, 'o mouse numa casa do campo mostra o balãozinho da ação');
+  confere(/enxada/.test(bal.chave || ''), `o balãozinho do campo mostra a enxada (veio "${bal.chave}")`);
+  igual(bal.cor, '#ffe07a', 'a casa com ação fica com o contorno dourado');
+  confere(Math.abs(bal.x - pc.x) < 30 && bal.baixo < pc.y + 4, 'o balãozinho fica em cima da casa apontada');
   for (const [x, z] of CAMPO) await clicarCasa(x, z);
   confere((await estado(pg)).personagem.fila >= 5, 'os cliques nas casas enfileiram as tarefas');
   confere(await J(pg, () => !document.querySelector('.fila').hidden), 'a fila de tarefas aparece na tela');
@@ -234,17 +243,26 @@ try {
   e = await estado(pg);
   igual(e.aradas, 6, 'seis casas aradas');
   igual(e.missao.id, 'plantar-alface', 'a missão de arar foi cumprida e veio a de plantar');
+  igual(e.modo.id, 'mao', 'por dentro, o jogo fica sempre no jeito "mão" (a ação vem do alvo)');
 
-  // ---- semear
-  await clicarEm('.modo[data-modo="semear"]');
-  confere(await J(pg, () => !document.querySelector('.sementes').hidden && document.querySelectorAll('.semente').length >= 1), 'no modo semear aparecem as sementes da bolsa');
+  // ---- semear: a vaga mostra a semente na mão e a conta; um clique em cada casa arada planta o que está na mão
+  const vg = await J(pg, () => { const v = document.querySelector('.vaga-mao'); return { chave: v.querySelector('canvas').dataset.chave, texto: v.textContent.replace(/\s+/g, ' ').trim() }; });
+  const naMao = (vg.chave || '').replace(/^icone\//, '');
+  confere(/^semente-/.test(naMao) && e.bolsa[naMao] > 0, `a vaga mostra uma semente da bolsa (veio "${vg.chave}")`);
+  confere(vg.texto.includes('×' + e.bolsa[naMao]), `a vaga mostra quantas há (${vg.texto})`);
+  const pa = await pontoDaCasa(pg, 26, 51);
+  await pg.mouse.move(pa.x, pa.y);
+  await esperar(450);
+  confere(await J(pg, (it) => { const b = document.querySelector('.balao-acao'); return !b.hidden && b.querySelector('canvas').dataset.chave === 'icone/' + it; }, naMao), 'na terra arada, o balãozinho mostra a semente da mão');
   for (const [x, z] of CAMPO) await clicarCasa(x, z);
   await ateParar(pg);
   e = await estado(pg);
   igual(e.plantas.length, 6, 'seis casas semeadas');
   confere(e.plantas.every((p) => p.estado === 'sede'), 'planta recém-semeada pede água');
+  const resta = e.bolsa[naMao] || 0, vg2 = await J(pg, () => document.querySelector('.vaga-mao').textContent);
+  confere(resta > 0 ? vg2.includes('×' + resta) : !vg2.includes('×' + (vg.texto.match(/×(\d+)/) || [])[1]), `a conta da vaga acompanha as sementes gastas (ficou "${vg2}")`);
 
-  // ---- encher o regador no poço e regar; a água acaba e é preciso voltar ao poço
+  // ---- encher o regador no poço e regar (a ação de uma planta com sede é regar); a água acaba e é preciso voltar ao poço
   const poco = await pontoDaEntidade(pg, 'poco');
   await pg.mouse.click(poco.x, poco.y);
   await ateParar(pg);
@@ -252,8 +270,6 @@ try {
   const regador = Object.keys(e.ferramentas).find((k) => /regador/.test(k));
   const cabe = await J(pg, (k) => window.__jogo.dados.itens[k].capacidade, regador);
   igual(e.ferramentas[regador].agua, cabe, 'o regador enche no poço');
-  await pg.keyboard.press('Digit1');
-  igual((await estado(pg)).modo.id, 'mao', 'a tecla 1 escolhe o modo mão');
   for (const [x, z] of CAMPO) await clicarCasa(x, z);
   // lavoura em andamento: para no meio de uma rega para a captura
   await J(pg, () => { const j = window.__jogo; for (let k = 0; k < 2400 && !(j.mundo.personagem.acao && j.mundo.personagem.acao.id === 'regar' && j.mundo.personagem.acao.feito && j.estado().plantas.filter((p) => p.estado === 'crescendo').length >= 2); k++) j.mundo.passo(); j.seguir(); });
@@ -394,26 +410,93 @@ try {
   igual(JSON.stringify(e.bolsa), JSON.stringify(antesDeImportar.bolsa), 'importar traz a bolsa de volta');
   await pg.keyboard.press('Escape');
 
-  // ---- menu pelo teclado (TV): Tab leva o foco aos botões, as setas andam, Enter escolhe, Esc volta
+  // ---- a vaga "Na mão" com duas sementes: os números e Q/E trocam o que vai na mão
+  const outra = await J(pg, () => {
+    const j = window.__jogo, D = j.dados, m = j.mundo;
+    const id = Object.keys(D.culturaDaSemente).find((s) => D.itens[s] && D.itens[s].compra && D.culturas[D.culturaDaSemente[s]].nivel <= m.progresso.nivel && !(m.posses.bolsa[s] > 0));
+    if (!id) return null;
+    if (!j.comando({ tipo: 'comprar', item: id, n: 2 }).ok) m.posses.bolsa[id] = 2; // (sem ouro: põe na bolsa direto)
+    return id;
+  });
+  confere(!!outra, 'há uma segunda semente para pôr na mão');
+  const lista = await J(pg, () => { const j = window.__jogo; return Object.keys(j.estado().bolsa).filter((s) => j.estado().bolsa[s] > 0 && j.dados.culturaDaSemente[s]); });
+  const naMaoAgora = async () => (await J(pg, () => document.querySelector('.vaga-mao canvas').dataset.chave)).replace(/^icone\//, '');
+  await pg.keyboard.press('Digit2');
+  await J(pg, () => window.__jogo.desenhar());
+  const segunda = await naMaoAgora();
+  confere(segunda !== naMao && lista.includes(segunda), `a tecla 2 põe a segunda semente na mão (veio "${segunda}")`);
+  await pg.keyboard.press('KeyQ');
+  await J(pg, () => window.__jogo.desenhar());
+  igual(await naMaoAgora(), naMao, 'Q volta para a semente anterior');
+  await pg.keyboard.press('KeyE');
+  await J(pg, () => window.__jogo.desenhar());
+  igual(await naMaoAgora(), segunda, 'E passa para a próxima');
+  igual((await estado(pg)).modo.semente, segunda, 'a escolha da vaga fica no mundo (vai na gravação)');
+
+  // ---- menu pelo teclado (TV): Tab leva o foco à vaga, Enter abre a fileira das sementes, as setas andam, Enter escolhe,
+  //      Esc volta
   await pg.keyboard.press('Tab');
   confere(await J(pg, () => window.__jogo.medidas().menu), 'Tab abre o menu (foco nos botões da tela)');
-  await pg.keyboard.press('ArrowRight');
+  confere(await J(pg, () => document.activeElement && document.activeElement.classList.contains('vaga-mao')), 'no menu, o foco começa na vaga "Na mão"');
   await pg.keyboard.press('Enter');
   await esperar(60);
-  const modoDepois = (await estado(pg)).modo.id;
-  confere(modoDepois !== 'mao', `no menu, seta e Enter trocam o modo (ficou "${modoDepois}")`);
+  confere(await J(pg, () => !document.querySelector('.lista-mao').hidden && document.querySelectorAll('.lista-mao .carta-mao[data-item]').length >= 2 && !!document.querySelector('.lista-mao [data-k="comprar-sementes"]')), 'Enter na vaga abre a fileira com as sementes e o "Comprar"');
+  confere(await J(pg, () => document.activeElement && document.activeElement.classList.contains('ativo')), 'na fileira, o foco começa na semente que está na mão');
+  await foto(pg, '02b-vaga-aberta.jpg');
+  // a outra semente: a seta para o lado e Enter
+  const ordem = await J(pg, () => [...document.querySelectorAll('.lista-mao .carta-mao[data-item]')].map((b) => b.dataset.item));
+  await pg.keyboard.press(ordem.indexOf(naMao) < ordem.indexOf(segunda) ? 'ArrowLeft' : 'ArrowRight');
+  igual(await J(pg, () => document.activeElement && document.activeElement.dataset.item), naMao, 'a seta leva o foco à outra semente');
+  await pg.keyboard.press('Enter');
+  await esperar(60);
+  igual(await naMaoAgora(), naMao, 'Enter na semente focada põe ela na mão');
+  confere(await J(pg, () => document.querySelector('.lista-mao').hidden), 'escolher fecha a fileira');
+  confere(await J(pg, () => window.__jogo.medidas().menu && document.activeElement && document.activeElement.classList.contains('vaga-mao')), 'depois de escolher, o foco volta para a vaga');
+  // Esc fecha a fileira sem trocar, e Esc de novo sai do menu
+  await pg.keyboard.press('Enter');
+  await esperar(60);
+  await pg.keyboard.press('Escape');
+  confere(await J(pg, () => document.querySelector('.lista-mao').hidden), 'Esc fecha a fileira da vaga');
+  igual(await naMaoAgora(), naMao, 'fechar a fileira não troca o que está na mão');
   await pg.keyboard.press('Escape');
   confere(!(await J(pg, () => window.__jogo.medidas().menu)), 'Esc sai do menu');
-  await pg.keyboard.press('KeyQ');
-  igual((await estado(pg)).modo.id, 'mao', 'Q volta ao modo anterior');
-  // Espaço age na casa à frente dela
-  await J(pg, () => { const j = window.__jogo; j.comando({ tipo: 'irPara', x: 30.5, z: 53.5 }); j.ateParar(); j.comando({ tipo: 'escolherModo', modo: 'enxada' }); });
+  // com o mouse: o "Comprar" da fileira abre a loja na aba das sementes
+  await clicarEm('.vaga-mao');
+  confere(await J(pg, () => !document.querySelector('.lista-mao').hidden), 'o clique na vaga abre a fileira');
+  await clicarEm('.lista-mao [data-k="comprar-sementes"]');
+  igual(await J(pg, () => window.__jogo.painelAberto()), 'loja', 'o "Comprar" da fileira abre a loja');
+  confere(await J(pg, () => !!document.querySelector('.veu [data-k="aba-sementes"].ativo') && !!document.querySelector('.veu .oferta[data-item^="semente-"]')), 'a loja abre na aba das sementes');
+  await pg.keyboard.press('Escape');
+  // o clique fora da fileira fecha (e não vira ordem para ela)
+  await clicarEm('.vaga-mao');
+  const filaAntes = (await estado(pg)).personagem.fila;
+  const livre = await pontoDaCasa(pg, 30, 50);
+  await pg.mouse.click(livre.x, livre.y);
+  confere(await J(pg, () => document.querySelector('.lista-mao').hidden), 'o clique fora da fileira fecha');
+  confere(!(await estado(pg)).personagem.ocupada && (await estado(pg)).personagem.fila === filaAntes, 'o clique que fechou a fileira não vira ordem');
+  // sem sementes na bolsa, a vaga vira "Comprar sementes" e abre a loja
+  const guardadas = await J(pg, () => { const B = window.__jogo.mundo.posses.bolsa, g = {}; for (const k in B) if (window.__jogo.dados.culturaDaSemente[k] || /^muda-/.test(k)) { g[k] = B[k]; delete B[k]; } window.__jogo.desenhar(); return g; });
+  confere(await J(pg, () => { const v = document.querySelector('.vaga-mao'); return v.classList.contains('vazia') && /comprar sementes/i.test(v.textContent) && v.querySelector('canvas').dataset.chave === 'ui/comprar-sementes'; }), 'sem sementes, a vaga vira "Comprar sementes"');
+  await clicarEm('.vaga-mao');
+  igual(await J(pg, () => window.__jogo.painelAberto()), 'loja', 'sem sementes, a vaga abre a loja');
+  await pg.keyboard.press('Escape');
+  await J(pg, (g) => { Object.assign(window.__jogo.mundo.posses.bolsa, g); window.__jogo.desenhar(); }, guardadas);
+
+  // ---- teclado: Espaço age na casa à frente dela (sem escolher ferramenta: a casa do campo se ara), com o contorno
+  //      dourado nela e o desenho da ação no botão de agir
+  await J(pg, () => { const j = window.__jogo; j.comando({ tipo: 'irPara', x: 30.5, z: 51.6 }); j.ateParar(); });
   await pg.keyboard.down('ArrowLeft'); await J(pg, () => window.__jogo.avancar(0.25)); await pg.keyboard.up('ArrowLeft');
+  await esperar(300);
+  await J(pg, () => window.__jogo.desenhar());
+  const fr = await J(pg, () => { const j = window.__jogo, p = j.mundo.personagem, x = Math.floor(p.x + Math.sin(p.rumo) * 0.85), z = Math.floor(p.z + Math.cos(p.rumo) * 0.85), d = j.cena.destaque; return { x, z, dx: d.x, dz: d.z, cor: d.cor, agir: !document.querySelector('.agir').hidden, ic: document.querySelector('.agir canvas') && document.querySelector('.agir canvas').dataset.chave }; });
+  confere(fr.dx === fr.x && fr.dz === fr.z, `nas teclas, o destaque fica na casa à frente dela (${fr.x}, ${fr.z}; veio ${fr.dx}, ${fr.dz})`);
+  confere(await J(pg, ([x, z]) => window.__jogo.mundo.local.chao[z * window.__jogo.mundo.local.l + x] === 6, [fr.x, fr.z]), `a casa à frente dela é do campo, sem arar (${fr.x}, ${fr.z})`);
+  igual(fr.cor, '#ffe07a', 'a casa à frente, com ação, fica com o contorno dourado');
+  confere(fr.agir && /enxada/.test(fr.ic || ''), `nas teclas aparece o botão de agir com o desenho da ação (veio "${fr.ic}")`);
   const aradasAntes = (await estado(pg)).aradas;
   await pg.keyboard.press('Space');
   await ateParar(pg);
   igual((await estado(pg)).aradas, aradasAntes + 1, 'Espaço ara a casa destacada à frente dela');
-  await pg.keyboard.press('Digit1');
 
   // ---- gravar e recarregar
   await J(pg, () => window.__jogo.gravar());
@@ -450,7 +533,7 @@ try {
   confere(pequenos.length === 0, 'celular deitado: ' + pequenos.slice(0, 4).join('; '));
   // as peças do HUD não ficam umas em cima das outras nem saem da tela
   const sobre = await J(pg, () => {
-    const nomes = ['.topo-esq', '.topo-dir', '.balao', '.modos', '.alavanca:not(.solta)', '.agir', '.linha-info'], cx = [];
+    const nomes = ['.topo-esq', '.topo-dir', '.balao', '.vaga-mao', '.alavanca:not(.solta)', '.agir', '.linha-info'], cx = [];
     for (const s of nomes) { const e = document.querySelector(s); if (e && !e.hidden && e.offsetParent) { const r = e.getBoundingClientRect(); if (r.width > 0) cx.push([s, r]); } }
     const ruins = [];
     for (const [s, r] of cx) if (r.left < -1 || r.top < -1 || r.right > innerWidth + 1 || r.bottom > innerHeight + 1) ruins.push(`${s} sai da tela`);
@@ -460,31 +543,79 @@ try {
   confere(sobre.length === 0, 'celular deitado: ' + sobre.join('; '));
   await foto(pg, '05-celular-deitado.jpg');
 
-  // toque no botão de modo e toque numa casa
+  // toque numa casa do campo: com o dedo encostado aparece o balãozinho da ação (a enxada); a ação vem ao soltar
   await J(pg, () => window.__jogo.olhar(27.5, 52));
-  let c = await centroDe(pg, '.modo[data-modo="enxada"]');
-  await dedo(cdp, [[c.x, c.y]]);
-  igual((await estado(pg)).modo.id, 'enxada', 'o toque no botão escolhe a enxada');
-  let p = await pontoDaCasa(pg, 27, 52);
-  await dedo(cdp, [[p.x, p.y]]);
+  let c, p = await pontoDaCasa(pg, 27, 52);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: p.x, y: p.y, id: 1 }] });
+  await esperar(220); // (menos que o tempo de segurar: segurando, o campo faz a fileira inteira)
+  await J(pg, () => window.__jogo.desenhar());
+  const bt = await J(pg, () => { const b = document.querySelector('.balao-acao'); return { visivel: !b.hidden, chave: b.querySelector('canvas').dataset.chave, fila: window.__jogo.estado().personagem.fila, ocupada: window.__jogo.ocupada() }; });
+  confere(bt.visivel && /enxada/.test(bt.chave || ''), `com o dedo encostado no campo, aparece o balãozinho da enxada (veio ${bt.visivel ? bt.chave : 'nada'})`);
+  confere(!bt.ocupada && bt.fila === 0, 'com o dedo ainda encostado, nada acontece');
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await esperar(60);
   await ateParar(pg);
-  igual((await estado(pg)).aradas, 1, 'um toque na casa ara');
-  // arrastar com a enxada pinta as casas
+  igual((await estado(pg)).aradas, 1, 'soltar o dedo na casa do campo ara');
+  // arrastar a partir de uma casa do campo repete a ação dela nas casas por onde o dedo passa
   await J(pg, () => window.__jogo.olhar(27.5, 52));
   const de = await pontoDaCasa(pg, 26, 51), ate = await pontoDaCasa(pg, 28, 51), caminho = [];
   for (let k = 0; k <= 8; k++) caminho.push([de.x + ((ate.x - de.x) * k) / 8, de.y + ((ate.y - de.y) * k) / 8]);
   await dedo(cdp, caminho);
-  confere((await estado(pg)).personagem.fila + 1 >= 3, 'arrastar o dedo com a enxada enfileira as casas por onde passa');
+  confere((await estado(pg)).personagem.fila + 1 >= 3, 'arrastar o dedo no campo enfileira as casas por onde passa');
   await ateParar(pg);
   igual((await estado(pg)).aradas, 4, 'as três casas pintadas ficam aradas');
-  // no modo mão, arrastar o dedo anda como alavanca
-  c = await centroDe(pg, '.modo[data-modo="mao"]');
-  await dedo(cdp, [[c.x, c.y]]);
-  const p0 = (await estado(pg)).personagem;
+  // arrastar por cima de plantas prontas não colhe (colher é só no toque): o arrasto vira alavanca
+  await J(pg, () => {
+    const j = window.__jogo, m = j.mundo, D = j.dados, B = m.posses.bolsa;
+    const s = Object.keys(B).find((k) => B[k] > 0 && D.culturaDaSemente[k]) || 'semente-rabanete';
+    if (!(B[s] >= 3)) B[s] = 3;
+    j.comando({ tipo: 'naMao', item: s });
+    for (const [x, z] of [[26, 51], [27, 51], [28, 51]]) j.comando({ tipo: 'agirNoAlvo', x, z });
+    j.ateParar();
+    const reg = Object.keys(m.posses.ferramentas).find((k) => /regador/.test(k));
+    m.posses.ferramentas[reg].agua = D.itens[reg].capacidade || 6;
+    for (const [x, z] of [[26, 51], [27, 51], [28, 51]]) { m.posses.ferramentas[reg].agua = Math.max(m.posses.ferramentas[reg].agua, 3); j.comando({ tipo: 'agirNoAlvo', x, z }); j.ateParar(); }
+    j.pular(Math.max(...Object.values(D.culturas).map((c) => c.tempoSeg)) + 5);
+    j.olhar(27.5, 52);
+  });
+  let e2 = await estado(pg);
+  const prontas = e2.plantas.filter((q) => q.estado === 'pronta' && q.z === 51).length, cesto0 = Object.values(e2.cesto).reduce((a, b) => a + b, 0);
+  igual(prontas, 3, 'três plantas prontas para o teste do arrasto');
+  {
+    const de2 = await pontoDaCasa(pg, 26, 51), ate2 = await pontoDaCasa(pg, 28, 51);
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: de2.x, y: de2.y, id: 1 }] });
+    for (let k = 1; k <= 8; k++) { await esperar(25); await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: de2.x + ((ate2.x - de2.x) * k) / 8, y: de2.y + ((ate2.y - de2.y) * k) / 8, id: 1 }] }); }
+    confere(await J(pg, () => !document.querySelector('.alavanca.solta').hidden), 'arrastar a partir de uma planta pronta mostra a alavanca (anda, não colhe)');
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await J(pg, () => window.__jogo.avancar(1));
+    await ateParar(pg);
+  }
+  e2 = await estado(pg);
+  igual(e2.plantas.filter((q) => q.estado === 'pronta' && q.z === 51).length, 3, 'o arrasto por cima das plantas prontas não colhe nenhuma');
+  igual(Object.values(e2.cesto).reduce((a, b) => a + b, 0), cesto0, 'nada entra no cesto com o arrasto');
+  await J(pg, () => window.__jogo.olhar(27.5, 52));
+  p = await pontoDaCasa(pg, 27, 51);
+  await dedo(cdp, [[p.x, p.y]]);
+  await ateParar(pg);
+  e2 = await estado(pg);
+  igual(e2.plantas.filter((q) => q.estado === 'pronta' && q.z === 51).length, 2, 'um toque na planta pronta colhe só ela');
+  // arrastar a partir da grama anda como alavanca
+  const grama = await J(pg, () => {
+    const j = window.__jogo, m = j.mundo, loc = m.local, p = m.personagem;
+    for (let r = 2; r < 8; r++) for (let dx = -r; dx <= r; dx++) for (let dz = -r; dz <= r; dz++) {
+      const x = Math.floor(p.x) + dx, z = Math.floor(p.z) + dz;
+      if (!loc.dentro(x, z) || loc.chao[z * loc.l + x] !== 0 || loc.entidadeEm(x, z)) continue;
+      let perto = false; for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) if (loc.dentro(x + a, z + b) && loc.chao[(z + b) * loc.l + x + a] !== 0) perto = true;
+      if (!perto) return [x, z];
+    }
+    return null;
+  });
   await J(pg, () => window.__jogo.seguir());
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 420, y: 200, id: 1 }] });
-  for (let k = 1; k <= 6; k++) { await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 420 + k * 10, y: 200, id: 1 }] }); await esperar(15); }
-  confere(await J(pg, () => !document.querySelector('.alavanca.solta').hidden), 'arrastar no modo mão mostra a alavanca solta');
+  const g0 = grama ? await pontoDaCasa(pg, grama[0], grama[1]) : { x: 420, y: 200 };
+  const p0 = (await estado(pg)).personagem;
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: g0.x, y: g0.y, id: 1 }] });
+  for (let k = 1; k <= 6; k++) { await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: g0.x + k * 10, y: g0.y, id: 1 }] }); await esperar(15); }
+  confere(await J(pg, () => !document.querySelector('.alavanca.solta').hidden), 'arrastar a partir da grama mostra a alavanca solta');
   await J(pg, () => window.__jogo.avancar(0.7));
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   await J(pg, () => window.__jogo.avancar(0.3));
@@ -502,7 +633,7 @@ try {
   await esperar(1100);
   confere(await J(pg, () => window.__jogo.J.prefs.zoom > 1.2), 'o zoom escolhido fica guardado nas preferências');
   // botão de ação: age na casa à frente dela
-  await J(pg, () => { const j = window.__jogo; j.comando({ tipo: 'irPara', x: 30.5, z: 53.5 }); j.ateParar(); j.comando({ tipo: 'rumar', dx: -1, dz: 0 }); j.avancar(0.2); j.comando({ tipo: 'frear' }); j.comando({ tipo: 'escolherModo', modo: 'enxada' }); j.desenhar(); });
+  await J(pg, () => { const j = window.__jogo; j.comando({ tipo: 'irPara', x: 30.5, z: 53.5 }); j.ateParar(); j.comando({ tipo: 'rumar', dx: -1, dz: 0 }); j.avancar(0.2); j.comando({ tipo: 'frear' }); j.desenhar(); });
   const ar0 = (await estado(pg)).aradas;
   c = await centroDe(pg, '.agir');
   await dedo(cdp, [[c.x, c.y]]);
@@ -528,9 +659,10 @@ try {
   await foto(pg, '06-celular-em-pe.jpg');
   confere(await J(pg, () => { const d = document.querySelector('.deitar'); return document.body.classList.contains('em-pe') && !!d; }), 'em pé aparece o aviso para deitar o celular');
   await J(pg, () => window.__jogo.olhar(27.5, 52));
-  c = await centroDe(pg, '.modo[data-modo="enxada"]');
+  c = await centroDe(pg, '.vaga-mao');
   await dedo(cdp, [[c.x, c.y]]);
-  igual((await estado(pg)).modo.id, 'enxada', 'em pé, o toque no botão girado escolhe a enxada');
+  confere(await J(pg, () => { const l = document.querySelector('.lista-mao'); if (l.hidden) return document.querySelector('.veu') !== null; const r = l.getBoundingClientRect(); return r.width > 0 && r.left >= -1 && r.top >= -1 && r.right <= innerWidth + 1 && r.bottom <= innerHeight + 1; }), 'em pé, o toque na vaga girada abre a fileira (ou a loja), dentro da tela');
+  await J(pg, () => { window.__jogo.acoes.fecharLista(); window.__jogo.fecharPainel(); });
   p = await pontoDaCasa(pg, 27, 52);
   await dedo(cdp, [[p.x, p.y]]);
   await ateParar(pg);
