@@ -558,6 +558,11 @@
    "pedido": "gato-andar-frente.md",
    "rodadas": 1,
    "nota": "Trote leve de 6 quadros, rabo erguido; mesmo tamanho da espera (pela massa)."
+  },
+  "animal/gato/andar-costas": {
+   "pedido": "gato-andar-costas.md",
+   "rodadas": 1,
+   "nota": "Trote leve de 6 quadros visto por trás; mesmo tamanho da espera (pela massa)."
   }
  },
  "geral": [

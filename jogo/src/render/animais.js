@@ -10,7 +10,7 @@ import { SOLTAS, ALVOS_DE_CIMA, registrarCamada, COR_DA_ACAO } from './cena.js';
 import { TRACO, figuraDeReserva, desenharReserva } from './reserva.js';
 import { pintarIconeDeReserva } from './icones.js';
 import { TIPOS } from '../nucleo/registro.js';
-import { ARADA } from '../nucleo/local.js';
+import { GRAMA, CAMINHO } from '../nucleo/local.js';
 import { comportamento } from '../nucleo/sistemas/construcao.js';
 import { pedidoDoAbrigo } from '../nucleo/sistemas/producao.js';
 
@@ -48,12 +48,12 @@ function chaveDe(base, estado, frente) {
 function semente(texto) { let h = 2166136261; for (let i = 0; i < texto.length; i++) h = Math.imul(h ^ texto.charCodeAt(i), 16777619); return h | 0; }
 function r(b) { b.s = (Math.imul(b.s, 1664525) + 1013904223) | 0; return (b.s >>> 8) / 16777216; }
 
-// a casa serve para um bicho solto pisar? (terra do jogador, sem construção, sem lavoura)
+// a casa serve para um bicho solto pisar? (grama ou caminho, sem construção; lavoura e terra de plantio, não)
 function livre(loc, x, z) {
   const cx = Math.floor(x), cz = Math.floor(z);
   if (!loc.andavel(cx, cz)) return false;
-  const i = loc.i(cx, cz);
-  return !loc.plantas[i] && loc.chao[i] !== ARADA;
+  const i = loc.i(cx, cz), chao = loc.chao[i];
+  return !loc.plantas[i] && (chao === GRAMA || chao === CAMINHO);
 }
 // (x, z) serve para o bicho b? solto: em volta da base do abrigo, sem entrar nela; cercado: dentro de uma zona
 function serve(m, b, x, z) {
@@ -72,9 +72,10 @@ function caminhoServe(m, b, x, z) {
   for (let k = 1; k <= 4; k++) if (!serve(m, b, b.x + ((x - b.x) * k) / 4, b.z + ((z - b.z) * k) / 4)) return false;
   return true;
 }
-// longe o bastante dos outros do mesmo abrigo (para não ficarem um em cima do outro)
+// longe o bastante dos outros do mesmo abrigo (para não ficarem um em cima do outro). No cercado o espaço é
+// pouco e a figura é grande: com poucos bichos eles se espalham mais; com muitos, aceita-se ficar mais junto.
 function folgado(b, x, z) {
-  const L = b.vizinhos, d = b.j.raio * 1.7;
+  const L = b.vizinhos, d = b.cercado ? Math.max(b.j.raio * 1.7, Math.min(1.6, 2.8 / L.length + 0.2)) : b.j.raio * 1.7;
   for (let k = 0; k < L.length; k++) { const o = L[k]; if (o !== b && Math.abs(o.ax - x) < d && Math.abs(o.az - z) < d) return false; }
   return true;
 }
@@ -118,11 +119,12 @@ function andar(m, b, dt) {
   } else if ((b.t -= dt) <= 0) escolher(m, b);
 }
 
+// a ovelha tosquiada fica pelada até a lã crescer de novo (só depois da primeira tosquia)
+function figuraDe(b) { const a = b.a; return b.pelada && a.produzidos > 0 && !(a.pronto > 0) && !a.fim ? b.pelada : b.especie; }
 // a figura do bicho com o apoio em (sx, sy)
 function desenharBicho(g, cena, sx, sy, S) {
   const b = this, A = cena.atlas;
-  // a ovelha tosquiada fica pelada até a lã crescer de novo
-  const a = b.a, base = b.pelada && a.produzidos > 0 && !(a.pronto > 0) && !a.fim ? b.pelada : b.especie;
+  const base = figuraDe(b);
   let chave = chaveDe(base, b.estado, b.frente);
   if (!A.tem(chave)) chave = chaveDe(base, b.estado === 'andar' ? 'andar' : 'parada', b.frente);
   if (!A.tem(chave)) chave = chaveDe(base, 'parada', true);
@@ -263,8 +265,8 @@ registrarCamada('cima', (g, cam, m, S, cena, dt) => {
       balao(g, x, y, raio, bom);
       icone(g, A, chave, x, y, raio * (bom ? 1.5 : 1.3), m.dados);
       if (aviso) exclamacao(g, x + raio * 0.72, y - raio * 0.72, raio * 0.36);
-      if (nAlvos >= alvos.length) alvos.push({ id: '', x: 0, y: 0, r: 0 });
-      const t = alvos[nAlvos++]; t.id = e.id; t.x = x; t.y = y; t.r = raio * 1.25;
+      if (nAlvos >= alvos.length) alvos.push({ id: '', x: 0, y: 0, r: 0, chave: '' });
+      const t = alvos[nAlvos++]; t.id = e.id; t.x = x; t.y = y; t.r = raio * 1.25; t.chave = chave;
       x += passo;
     };
     if (P.produto) um(iconeDe(P.produto), true, false);
@@ -288,5 +290,7 @@ ALVOS_DE_CIMA.push((m, px, py, cena) => {
   return achou;
 });
 
-// para as ferramentas de conferência: onde está cada bicho desenhado
-export function bichosNoTerreno() { const out = []; for (const b of V.porId.values()) out.push({ id: b.id, especie: b.especie, x: b.x, z: b.z, estado: b.estado, abrigo: b.e ? b.e.id : null, cercado: !!b.cercado, fora: b.fora }); return out; }
+// para as ferramentas de conferência: os balões do último quadro (em pontos da tela, não do aparelho) e onde está
+// cada bicho desenhado
+export function bichosNoTerreno() { const out = []; for (const b of V.porId.values()) out.push({ id: b.id, especie: b.especie, figura: figuraDe(b), x: b.x, z: b.z, estado: b.estado, abrigo: b.e ? b.e.id : null, cercado: !!b.cercado, fora: b.fora }); return out; }
+export function baloesNoTerreno(cena) { const out = [], k = cena ? cena.cam.dpr : 1; for (let i = 0; i < nAlvos; i++) { const t = alvos[i]; out.push({ abrigo: t.id, icone: t.chave, x: t.x / k, y: t.y / k, raio: t.r / k }); } return out; }

@@ -1475,6 +1475,68 @@
    "sequencia": "1,2,2,1,3,3,1,4"
   }
  },
+ "animal/gato/andar-costas": {
+  "chave": "animal/gato/andar-costas",
+  "crua": "andar-costas.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 6,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 107,
+  "emPeReal": 111,
+  "emPeFonte": 378,
+  "escala": 0.2927,
+  "casa": [
+   128,
+   136
+  ],
+  "apoio": [
+   64,
+   114
+  ],
+  "quadros": 6,
+  "desenhos": 6,
+  "qps": 9,
+  "laco": true,
+  "alturas": [
+   111,
+   107,
+   107,
+   111,
+   109,
+   109
+  ],
+  "tamanhoPelaMassa": [
+   76.2,
+   73.4,
+   72,
+   76,
+   74,
+   73.6
+  ],
+  "variacaoAltura": 3.7,
+  "bytes": 35719,
+  "avisos": [
+   "altura varia 3.7% entre quadros (111 107 107 111 109 109), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/gato/andar-costas",
+   "altura": "107",
+   "quadros": "6",
+   "qps": "9",
+   "eixo": "massa",
+   "base": "linha",
+   "chao": "0.09",
+   "tamanho-massa": "74",
+   "altura-livre": true
+  }
+ },
  "animal/gato/andar-frente": {
   "chave": "animal/gato/andar-frente",
   "crua": "andar-frente.png",

@@ -3,27 +3,27 @@
 // A casa também mora aqui, por enquanto só como construção.
 import { registrarAcao, registrarTipo, registrarEvento } from '../registro.js';
 import { somar } from '../util.js';
-import { noCesto, espacoNoCesto, noCeleiro, espacoNoCeleiro, ferramentaNoCinto, ferramentaNoSuporte, pegarDoSuporte } from './posses.js';
+import { noCesto, espacoNoCesto, noCeleiro, espacoNoCeleiro, ferramentaNoCinto, ferramentaNoSuporte, pegarDoSuporte, cestoECargas, naCarga } from './posses.js';
 import { filaTem } from './personagem.js';
 
 registrarAcao({
   id: 'guardar', dur: 0.9, efeitoEm: 0.5, estadoVisual: 'entregar',
   pode(m) {
-    if (!(noCesto(m) > 0)) return { ok: false, motivo: 'cesto-vazio' };
+    if (!(noCesto(m) + naCarga(m) > 0)) return { ok: false, motivo: 'cesto-vazio' };
     if (!(espacoNoCeleiro(m) > 0)) return { ok: false, motivo: 'celeiro-cheio' };
     return { ok: true };
   },
   aoEfeito(m, alvo) {
-    const c = m.posses.cesto.itens, cel = m.posses.celeiro.itens, itens = {};
+    const cel = m.posses.celeiro.itens, itens = {};
     let cabe = espacoNoCeleiro(m), n = 0;
-    for (const item in c) {
+    for (const c of cestoECargas(m)) for (const item in c) { // o cesto e o que veio na carroça
       const vai = Math.min(c[item], cabe);
       if (vai <= 0) break;
       somar(c, item, -vai); somar(cel, item, vai);
-      itens[item] = vai; cabe -= vai; n += vai;
+      somar(itens, item, vai); cabe -= vai; n += vai;
     }
     m.eventos.emitir('guardou', { itens, n, entidade: alvo.entidade });
-    if (noCesto(m) > 0) m.eventos.emitir('faltou', { motivo: 'celeiro-cheio', entidade: alvo.entidade });
+    if (noCesto(m) + naCarga(m) > 0) m.eventos.emitir('faltou', { motivo: 'celeiro-cheio', entidade: alvo.entidade });
   },
 });
 
@@ -66,7 +66,7 @@ registrarTipo({
   tipo: 'celeiro', casas: [5, 4], bloqueia: true, suporte: true,
   pontos: { ficar: (e) => [[e.l / 2, e.p + 0.5]] }, // diante da porta, no meio da face de +Z (a que olha para a câmera, à esquerda)
   acaoPossivel(m) {
-    if (noCesto(m) > 0 || filaTem(m, 'colher')) return espacoNoCeleiro(m) > 0 ? { acao: 'guardar', dados: { n: noCesto(m), livre: espacoNoCeleiro(m) } } : { acao: null, texto: 'celeiro-cheio' };
+    if (noCesto(m) + naCarga(m) > 0 || filaTem(m, 'colher')) return espacoNoCeleiro(m) > 0 ? { acao: 'guardar', dados: { n: noCesto(m) + naCarga(m), livre: espacoNoCeleiro(m) } } : { acao: null, texto: 'celeiro-cheio' };
     if (noCeleiro(m) > 0) return { acao: 'pegar', dados: { n: noCeleiro(m) } };
     return { acao: null, texto: 'celeiro-vazio' };
   },

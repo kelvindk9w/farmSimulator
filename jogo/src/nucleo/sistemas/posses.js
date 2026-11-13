@@ -48,6 +48,13 @@ export function valorDoCesto(m) {
   return v;
 }
 
+// ---------- cargas que viajam com ela além do cesto (a carroça do jumento: sistemas/trabalho.js) ----------
+// CARGAS.push((m) → { item: n } | null): o que há nelas descarrega no celeiro e vende na banca junto com o cesto
+export const CARGAS = [];
+export function cestoECargas(m) { const out = [m.posses.cesto.itens]; for (const f of CARGAS) { const c = f(m); if (c) out.push(c); } return out; }
+export function naCarga(m) { let n = 0; for (const f of CARGAS) { const c = f(m); if (c) n += total(c); } return n; }
+export function valorDaCarga(m) { let v = 0; for (const f of CARGAS) { const c = f(m); if (c) for (const k in c) v += c[k] * m.dados.itens[k].venda; } return v; }
+
 // ---------- celeiro (estoque) ----------
 export const noCeleiro = (m) => total(m.posses.celeiro.itens);
 export const espacoNoCeleiro = (m) => m.posses.celeiro.capacidade - noCeleiro(m);

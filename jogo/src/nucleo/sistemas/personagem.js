@@ -15,6 +15,13 @@ const VOLTA_A_CORRER = 0.25; // depois de cansar, só corre de novo com esta fra
 const PARADA_ABAIXO_DE = 0.35; // unidades/s: abaixo disto a figura é a parada (nunca um passo congelado)
 const PASSADA = { andar: 1.5, correr: 2.3 }; // unidades de chão por ciclo do desenho (dois passos)
 
+// Pontos de extensão (a montaria e o barril do jumento moram em sistemas/trabalho.js):
+//   DESLOCAMENTO.velocidade(m, p) → unidades/s (> 0 = ela se desloca nesta velocidade SEM correr: não gasta fôlego)
+//   DESLOCAMENTO.visual(m, out)   → ajusta a figura dela (montada, por exemplo), depois de visualDaPersonagem
+//   PREPAROS.push((m, p, tarefa) → { acao, entidade | x, z } | null): um passo a fazer ANTES da tarefa (uma vez por tarefa)
+export const DESLOCAMENTO = { velocidade: null, visual: null };
+export const PREPAROS = [];
+
 // ---------- fila ----------
 const mesma = (a, b) => a && b && a.tipo === 'agir' && b.tipo === 'agir' && a.acao === b.acao && a.x === b.x && a.z === b.z && a.entidade === b.entidade;
 // há na fila (ou em andamento) a ação "acao" para a casa (x, z)? Sem casa, qualquer uma serve.
@@ -114,6 +121,10 @@ function iniciarTarefa(m, p, t) {
   const a = ACOES[t.acao];
   if (!a) { falhar(m, p, t, { motivo: 'acao-desconhecida', dados: { acao: t.acao } }); return; }
   if (t.entidade !== undefined && !loc.porId[t.entidade]) return; // a entidade sumiu
+  if (!t.preparada) for (let i = 0; i < PREPAROS.length; i++) {
+    const antes = PREPAROS[i](m, p, t);
+    if (antes) { t.preparada = true; p.fila.unshift({ tipo: 'agir', args: null, auto: true, ...antes }, t); return; }
+  }
   const r = a.pode(m, t, t.args);
   if (!r.ok) { falhar(m, p, t, r); return; }
   if (a.ferramenta && !ferramentaNoCinto(m, a.ferramenta)) {
@@ -156,8 +167,9 @@ function podeCorrer(p) { return !p.cansada && p.folego > 0; }
 function seguirRota(m, p) {
   const R = m.dados.regras, rota = p.rota;
   const resto = comprimento(p.x, p.z, rota, p.rotaI);
-  p.correndo = (p.rotaLonga || p.querCorrer) && podeCorrer(p) && (p.correndo || resto > 1.5);
-  const vmax = p.correndo ? R.correr : R.andar;
+  const outra = DESLOCAMENTO.velocidade ? DESLOCAMENTO.velocidade(m, p) : 0; // a cavalo: outra velocidade, sem fôlego
+  p.correndo = !outra && (p.rotaLonga || p.querCorrer) && podeCorrer(p) && (p.correndo || resto > 1.5);
+  const vmax = outra || (p.correndo ? R.correr : R.andar);
   const vAlvo = Math.min(vmax, Math.max(0.5, Math.sqrt(2 * FREIO * 0.8 * resto)));
   p.vel += limitar(vAlvo - p.vel, -FREIO * PASSO, ACEL * PASSO);
   let anda = p.vel * PASSO;
@@ -182,8 +194,9 @@ function seguirRota(m, p) {
 // teclado, controle e alavanca: anda na direção pedida, deslizando no que esbarrar; devolve true se saiu do lugar
 function andarDireto(m, p) {
   const R = m.dados.regras, loc = m.locais[p.local];
-  p.correndo = p.querCorrer && podeCorrer(p);
-  const vmax = (p.correndo ? R.correr : R.andar) * p.forca;
+  const outra = DESLOCAMENTO.velocidade ? DESLOCAMENTO.velocidade(m, p) : 0;
+  p.correndo = !outra && p.querCorrer && podeCorrer(p);
+  const vmax = (outra || (p.correndo ? R.correr : R.andar)) * p.forca;
   p.vel += limitar(vmax - p.vel, -FREIO * PASSO, ACEL * PASSO);
   const anda = p.vel * PASSO, nx = p.x + p.dx * anda, nz = p.z + p.dz * anda;
   p.rumo = girarPara(p.rumo, Math.atan2(p.dx, p.dz), GIRO * PASSO);
@@ -338,7 +351,7 @@ registrarSistema({
         if (!c.arrasto) m.eventos.emitir('faltou', { motivo: 'terra-a-venda', x, z });
         return { ok: false, motivo: 'terra-a-venda' };
       }
-      const modo = MODOS[m.modo.id], d = modo.acaoNaCasa(m, x, z);
+      const modo = MODOS[m.modo.id], d = modo.acaoNaCasa(m, x, z, c); // c: o modo pode querer saber se o dedo está pintando
       if (d && d.texto === 'na-fila') return { ok: true, repetida: true }; // já prometida: o toque repetido não muda nada
       if (d && d.acao) return enfileirar(m, { tipo: 'agir', acao: d.acao, x, z, args: d.args || null });
       if (d && d.info) { // só uma informação (planta crescendo): diz e não mexe na fila
@@ -406,5 +419,6 @@ export function visualDaPersonagem(m, out) {
   // andando com colheita no cesto, a figura é a de carregar
   out.estado = a ? ACOES[a.id].estadoVisual : p.vel > PARADA_ABAIXO_DE ? (p.correndo ? 'correr' : noCesto(m) > 0 ? 'carregar' : 'andar') : 'parada';
   out.t = a ? a.t : 0; out.p = a ? a.t / a.dur : 0; out.acao = a ? a.id : null;
+  if (DESLOCAMENTO.visual) DESLOCAMENTO.visual(m, out);
   return out;
 }

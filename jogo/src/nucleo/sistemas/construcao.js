@@ -11,6 +11,7 @@
 // lugar onde ela estava (dentro do celeiro ampliado, por exemplo) já existir quando a personagem for posta.
 import { registrarSistema, registrarAcao, registrarTipo, registrarEvento, TIPOS } from '../registro.js';
 import { Local, GRAMA, ARADA, CAMINHO } from '../local.js';
+import * as CHAOS from '../local.js'; // (o CAMPO, terra de plantio da frente do campo de plantação: enquanto não existir lá, fica indefinido e não casa com nada)
 import { registrarConcluivel } from '../concluir.js';
 import { gastarOuro, oQueFalta, gastarItens } from './posses.js';
 import { darXp, MOSTRA_LIBERADO } from './niveis.js';
@@ -153,7 +154,8 @@ function assentar(m, e) {
   for (let z = e.z; z < e.z + e.p; z++) for (let x = e.x; x < e.x + e.l; x++) {
     if (!loc.dentro(x, z)) continue;
     const i = loc.i(x, z), c = loc.chao[i];
-    const novo = (c === GRAMA || c === ARADA) && !loc.plantas[i] ? (pisa(def) ? CAMINHO : GRAMA) : c;
+    // (terra arada e campo de plantio vazios valem como grama: debaixo da construção o chão volta a ser grama)
+    const novo = (c === GRAMA || c === ARADA || c === CHAOS.CAMPO) && !loc.plantas[i] ? (pisa(def) ? CAMINHO : GRAMA) : c;
     if (novo !== c) { loc.chao[i] = novo; m.eventos.emitir('chaoMudou', { local: loc.id, x, z }); }
   }
 }

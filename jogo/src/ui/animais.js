@@ -2,7 +2,7 @@
 // comprado, cocho cheio, ovo recolhido, fim de vida), o que há na caixa de ovos e no balde (HUD), o resumo da volta
 // de uma ausência e o que o Seu Tonho explica na primeira vez de cada coisa. Tudo se liga a cada mundo instalado.
 import './textos/animais.js';
-import { bichosNoTerreno } from '../render/animais.js';
+import { bichosNoTerreno, baloesNoTerreno } from '../render/animais.js';
 import { aoInstalarMundo } from './ligacoes.js';
 import { el, icone, por, classe } from './dom.js';
 import { T } from './textos.js';
@@ -158,4 +158,4 @@ aoInstalarMundo((m, ctx) => {
 });
 
 // para as ferramentas de conferência
-if (typeof window !== 'undefined') window.__bichos = bichosNoTerreno;
+if (typeof window !== 'undefined') { window.__bichos = bichosNoTerreno; window.__baloes = () => baloesNoTerreno(J.cena); }

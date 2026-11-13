@@ -294,9 +294,12 @@ registrarModo({
   },
 });
 
+// AGUA_A_MAO.push((m) → bool): há água ao alcance sem ir ao poço (o barril na carroça do jumento: sistemas/trabalho.js)
+export const AGUA_A_MAO = [];
 // o regador do cinto não tem água para mais uma rega além das que já estão na fila? (com ida ao poço na fila, tem)
 function semAgua(m) {
   const reg = ferramentaNoCinto(m, 'regador');
+  for (let i = 0; i < AGUA_A_MAO.length; i++) if (AGUA_A_MAO[i](m)) return false;
   if (!reg || filaTem(m, 'encher')) return false; // sem regador no cinto ela vai buscar; a conta se faz lá
   return m.posses.ferramentas[reg].agua - contarNaFila(m, 'regar') <= 0;
 }

@@ -153,7 +153,7 @@ export class Cena {
         v.quadro = 0; v.espelhar = false; v.variante = 0; v.desenhar = null;
         TIPOS[e.tipo].visual(m, e, v);
         // o que está na frente da personagem ou de uma casa-alvo fica meio transparente (some e volta com suavidade)
-        const alvo = this._tapa(it, e, v, sx, sy, S) ? 0.38 : 1;
+        const alvo = !TIPOS[e.tipo].semVeu && this._tapa(it, e, v, sx, sy, S) ? 0.38 : 1; // (semVeu: bicho solto, que anda colado nela, não fica transparente)
         e.va = e.va === undefined ? alvo : e.va + (alvo - e.va) * Math.min(1, dt * 9 + (dt === 0 ? 1 : 0));
         if (e.va < 0.985) g.globalAlpha = e.va;
         if (v.desenhar) v.desenhar(g, this, m, e, sx, sy, S); // o tipo desenha a si mesmo (obra, cerca em trechos, camadas): v.chave continua valendo para a caixa do toque
@@ -306,7 +306,7 @@ export class Cena {
     for (let k = 0; k < ALVOS_DE_CIMA.length; k++) { const id = ALVOS_DE_CIMA[k](m, px, py, this); if (id) return id; }
     for (const e of loc.entidades) {
       const x = e.x + e.l / 2, z = e.z + e.p / 2, sx = cam.telaX(x, z), sy = cam.telaY(x, 0, z);
-      if (Math.abs(sx - px) > 4 * S || py > sy + 2.5 * S || py < sy - 5 * S || TIPOS[e.tipo].plano) continue; // (o calçamento não tapa o toque no chão)
+      if (Math.abs(sx - px) > 4 * S || py > sy + 2.5 * S || py < sy - 5 * S || TIPOS[e.tipo].plano || TIPOS[e.tipo].semToque) continue; // (o calçamento não tapa o toque no chão; semToque: o toque passa pelo bicho de trabalho)
       v.quadro = 0; v.variante = 0;
       TIPOS[e.tipo].visual(m, e, v);
       if (!this.atlas.caixa(v.chave, 0, sx, sy, S, c) || !this.atlas.pronta(v.chave)) {
