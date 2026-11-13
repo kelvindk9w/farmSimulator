@@ -71,6 +71,7 @@ let grave = null;
 const t0 = Date.now();
 function sessao(ate) {
   S.sessoes++;
+  J.fimSessao = perfil.sessoes ? ate : 0; // o fim da sessão (a lavoura cresce para o tempo fora)
   let livreEm = 0, motivo = null, semOuro = null; // livreEm: quando ela toca de novo; motivo: por que está parada
   while (m.agora < ate) {
     if (m.agora >= livreEm) {
@@ -109,7 +110,7 @@ for (let i = 0; i < S.dias.length; i++) if (!S.dias[i]) S.dias[i] = { ...S.dias[
 const cfg = { perfil: perfil.nome, horas: HORAS, rodou: (Date.now() - t0) / 1000, fora: FORA, desligadas: DESLIGADAS, grave };
 if (tem('resumo')) {
   const a = X.missoes ? X.missoes.missaoAtual(m) : null;
-  const fim = a ? `missão no fim: ${a.missao.id} (${a.conta}/${a.n}${a.esperaNivel ? `, espera o nível ${a.esperaNivel}` : ''})${grave ? ' | O JOGO QUEBROU: ' + grave : ''}` : (grave ? 'O JOGO QUEBROU: ' + grave : 'sem missão no fim');
+  const fim = a ? `missão no fim: ${a.missao.id} (${a.conta}/${a.n}${a.esperaNivel ? `, espera o nível ${a.esperaNivel}` : ''})${grave ? ' | O JOGO QUEBROU: ' + grave : ''}` : (grave ? 'O JOGO QUEBROU: ' + grave : 'missão no fim: nenhuma (cumpriu todas)');
   console.log(resumo(S, fim));
 }
 else console.log(relato(J, S, cfg));

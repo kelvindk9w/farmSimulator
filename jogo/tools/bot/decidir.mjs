@@ -34,6 +34,12 @@ export function decidir(J) {
     if (J.dentroPara) { const s = tenta(J, 'construir', () => montarMovel(J, J.dentroPara)); if (s) return s; J.dentroPara = null; }
     return cmd(J, { tipo: 'sair' }, 1, 'sair');
   }
+  // cercada (árvore e mato em volta: o jogo deixa plantar a muda que a tranca): limpa o que der para sair
+  if (!ocupada(J) && tenta(J, 'terras', () => TE.alcanceDela(J)) < 30) {
+    if (!J.cercada) { J.cercada = true; J.S.preso.push([(m.agora - J.T0) / 1000, `a personagem ficou cercada em ${J.p.x.toFixed(1)},${J.p.z.toFixed(1)} (alcança ${TE.alcanceDela(J)} casas): limpa o obstáculo para sair`]); }
+    const s = tenta(J, 'terras', () => TE.limpar(J, null));
+    if (s) { s.hab = 'sair do cerco'; return s; }
+  } else J.cercada = false;
   // vai entrar no celeiro (montar um móvel): não põe tarefa nova até a fila acabar (no máximo 1 min)
   if (J.vaiEntrar && m.agora - J.vaiEntrar < 60000) {
     if (ocupada(J)) return passo(J, 'aguardar');

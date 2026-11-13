@@ -8,7 +8,7 @@ export function criarMedidas() {
     jogado: 0, ausente: 0, sessoes: 0, toques: 0,
     niveis: [], missoes: [], ganho: {}, gasto: {}, cash: {}, cashGasto: {}, recusas: {}, parado: {}, colhido: {}, comprado: {},
     conta: {}, construido: [], ampliado: [], animais: { comprou: {}, vendeu: {} }, produziu: {}, limpou: {}, pedidos: { entregues: 0, ouro: 0, trocados: 0, trocasPagas: 0 },
-    idas: { poco: 0, celeiro: 0, banca: 0 }, dias: [], linha: [], projetos: {}, semOuro: 0, semOuroPor: {}, xpPor: {}, preso: [],
+    idas: { poco: 0, celeiro: 0, banca: 0 }, dias: [], linha: [], projetos: {}, semOuro: 0, semOuroPor: {}, xpPor: {}, preso: [], porqueSemente: {},
   };
 }
 
@@ -100,6 +100,7 @@ export function relato(J, S, cfg) {
   L(`Pedidos: entregou ${S.pedidos.entregues} (${S.pedidos.ouro} de ouro); trocou ${S.pedidos.trocados} (${S.pedidos.trocasPagas} sem ser a grátis).`);
   L(`Colheu e recolheu: ${lista(S.colhido)}. Comprou: ${lista(S.comprado)}.`);
   L(`Limpou: ${lista(S.limpou)}.`);
+  if (J.zona) { const loc = J.m.locais.fazenda; let pl = 0; for (const i of J.zona) if (loc.plantas[i]) pl++; L(`Lavoura no fim: ${J.aradas || 0} casas aradas, ${pl} plantadas (a terra própria que serve de lavoura: ${J.zona.length - (J.zonaObst || 0)} casas). Lotes: ${J.m.terras.lotes.length}. Árvores: ${J.m.arvores ? J.m.arvores.todas.length : 0}.`); }
   L('');
   L(`O tempo dela (${hm(ativo)}): andando ${pc(C.andando, ativo)}, correndo ${pc(C.correndo, ativo)}, trabalhando ${pc(C.agindo, ativo)}, parada ${pc(C.parada, ativo)}. Andou ${Math.round(C.distancia)} casas. Toques: ${S.toques} (${(S.toques / Math.max(1, S.jogado / 60)).toFixed(1)} por minuto jogado).`);
   L(`Idas ao poço: ${S.idas.poco} (${S.conta.regou ? (S.conta.regou / Math.max(1, S.idas.poco)).toFixed(1) : 0} regas por ida). Idas ao celeiro: ${S.idas.celeiro}. Vendas na banca: ${S.idas.banca}.`);
@@ -111,7 +112,7 @@ export function relato(J, S, cfg) {
   if (S.semOuro > 1) L(`Tempo jogado com a meta da vez travada por ouro: ${hm(S.semOuro)} (${lista(S.semOuroPor, (k, v) => `${k} ${hm(v)}`)}).`);
   const rec = Object.entries(S.recusas).sort((x, y) => y[1] - x[1]);
   if (rec.length) { L(''); L('Recusas do jogo (toques que não valeram e faltas no meio da fila): ' + rec.slice(0, 25).map(([k, v]) => `${k} ×${v}`).join(', ')); }
-  if (S.preso.length) { L(''); L('Bicho de estimação preso (não segue mais e o afago não chega): ' + S.preso.map(([t, txt]) => `${txt} (visto aos ${hm(t)})`).join(' · ')); }
+  if (S.preso.length) { L(''); L('Presos (o bicho que não segue mais; ela cercada): ' + S.preso.map(([t, txt]) => `${txt} (visto aos ${hm(t)})`).join(' · ')); }
   const des = Object.entries(J.desligou);
   if (des.length || cfg.fora.length || cfg.desligadas.length) {
     L('');

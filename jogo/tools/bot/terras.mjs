@@ -28,6 +28,26 @@ export function obstaculos(J) {
   for (const e of loc.entidades) if (TIPOS[e.tipo] && TIPOS[e.tipo].obstaculo && loc.ehPropria(e.x, e.z)) J.obst.push(e);
   return J.obst;
 }
+// quantas casas ela alcança a pé de onde está (o alcance é refeito quando o mapa muda)
+export function alcanceDela(J) {
+  obstaculos(J);
+  if (J.alcanceN !== undefined && J.alcanceChave === J.obstChave) return J.alcanceN;
+  let n = 0;
+  for (let i = 0; i < J.alcance.length; i++) n += J.alcance[i];
+  J.alcanceChave = J.obstChave; J.alcanceN = n;
+  return n;
+}
+// a árvore em (x, z) deixaria uma casa vizinha sem saída (beco de uma casa só)? (o jogo não confere: dá para se trancar)
+function fazBeco(loc, x, z) {
+  for (const [dx, dz] of VIZ) {
+    const nx = x + dx, nz = z + dz;
+    if (!loc.andavel(nx, nz)) continue;
+    let saidas = 0;
+    for (const [ex, ez] of VIZ) { const vx = nx + ex, vz = nz + ez; if ((vx !== x || vz !== z) && loc.andavel(vx, vz)) saidas++; }
+    if (saidas <= 1) return true;
+  }
+  return false;
+}
 const alcanca = (J, loc, e) => VIZ.some(([dx, dz]) => loc.dentro(e.x + dx, e.z + dz) && J.alcance[(e.z + dz) * loc.l + e.x + dx] === 1);
 const ferramentaDe = (J, funcao) => X.posses.ferramentaNoCinto(J.m, funcao) || X.posses.ferramentaNoSuporte(J.m, funcao);
 // dá para limpar este tipo de obstáculo com o que ela tem?
@@ -92,7 +112,7 @@ function casaDoPomar(J, id) {
   const Z = zona(J), loc = fazenda(J), m = J.m;
   for (let k = Z.length - 1; k >= Math.floor(Z.length * 0.45); k--) {
     const i = Z[k], x = i % loc.l, z = (i - x) / loc.l;
-    if (loc.chao[i] !== X.local.GRAMA || loc.ocupa[i] || loc.plantas[i] || filaTem(J, 'plantarMuda', x, z) || !alcanca(J, loc, { x, z })) continue;
+    if (loc.chao[i] !== X.local.GRAMA || loc.ocupa[i] || loc.plantas[i] || filaTem(J, 'plantarMuda', x, z) || !alcanca(J, loc, { x, z }) || fazBeco(loc, x, z)) continue;
     if (X.arvores.podePlantarArvore(m, x, z, id).ok) return [x, z];
   }
   // a zona não tem lugar: qualquer grama própria fora dela, perto da casa
@@ -100,7 +120,7 @@ function casaDoPomar(J, id) {
   let melhor = null, dm = Infinity;
   for (let z = 0; z < loc.p; z++) for (let x = 0; x < loc.l; x++) {
     const i = z * loc.l + x;
-    if (!loc.propria[i] || loc.ocupa[i] || loc.chao[i] !== X.local.GRAMA || J.zonaSet[i] || !alcanca(J, loc, { x, z })) continue;
+    if (!loc.propria[i] || loc.ocupa[i] || loc.chao[i] !== X.local.GRAMA || J.zonaSet[i] || !alcanca(J, loc, { x, z }) || fazBeco(loc, x, z)) continue;
     const d = Math.abs(x - casa[0]) + Math.abs(z - casa[1]);
     if (d < dm && X.arvores.podePlantarArvore(m, x, z, id).ok) { dm = d; melhor = [x, z]; }
   }

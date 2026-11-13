@@ -67,14 +67,9 @@ export function afagar(J) {
     if (!b.mimo) continue;
     const loc = fazenda(J), e = loc.porId['bicho:' + b.id];
     if (!e || evitado(J, 'afago:' + b.id)) continue;
-    // o bicho ficou dentro de uma obra (o jogo deixa construir em cima dele): não sai mais de lá; só anota
+    // o bicho está passando por cima de uma obra (ou ficou dentro dela): ela não chega; tenta daqui a pouco
     const cx = Math.floor(e.x + 0.5), cz = Math.floor(e.z + 0.5);
-    if (loc.dentro(cx, cz) && loc.ocupa[loc.i(cx, cz)] && loc.porNum[loc.ocupa[loc.i(cx, cz)]] !== e) {
-      if (!J.presos) J.presos = {};
-      if (!J.presos[b.id]) { J.presos[b.id] = true; J.S.preso.push([(J.m.agora - J.T0) / 1000, `${b.nome} (${b.id}) em ${e.x.toFixed(2)},${e.z.toFixed(2)} dentro de ${loc.porNum[loc.ocupa[loc.i(cx, cz)]].tipo}`]); }
-      evitar(J, 'afago:' + b.id, 3600);
-      continue;
-    }
+    if (loc.dentro(cx, cz) && loc.ocupa[loc.i(cx, cz)] && loc.porNum[loc.ocupa[loc.i(cx, cz)]] !== e) { evitar(J, 'afago:' + b.id, 300); continue; }
     // o afago de antes não rendeu (o mimo continua) e o bicho não saiu do lugar: ela não chega nele
     const T = (J.afagos = J.afagos || {}), t = T[b.id];
     if (t && t.x === e.x && t.z === e.z) {

@@ -3,6 +3,7 @@
 // dados demarcarem um campo de plantação (frente do campo), ele vem primeiro. O resto do terreno é para as obras.
 import { X, precisa, registro } from './jogo.mjs';
 import { passo, emModo, nota, evitado, evitar, naFazenda, fazenda, tem, filaTem, contarNaFila, livre, nivel, presenca, comando } from './contexto.mjs';
+import { obstaculos } from './terras.mjs';
 
 export const LIGADA = precisa('lavoura', {
   lavoura: ['estadoDaPlanta', 'proximoAcontecimento', 'regaPrometida'],
@@ -54,8 +55,15 @@ function aravel(J, loc, i, x, z) {
   return loc.chao[i] === GRAMA || (CAMPO !== undefined && loc.chao[i] === CAMPO);
 }
 
-// quantas casas a lavoura quer ter aradas ou plantadas agora
-export function campoAlvo(J) { return Math.min(zona(J).length, 6 + 2 * (nivel(J) - 1) + J.campoExtra, 200); }
+// quantas casas a lavoura quer ter aradas ou plantadas agora. Jogando, o campo é o que ela dá conta de cuidar; nos
+// últimos minutos da sessão, a terra toda: o que ela plantar agora cresce com o jogo fechado e é colhido na volta
+export const FIM_DA_SESSAO = 4 * 60000;
+const campoBase = (J) => Math.min(zona(J).length, 6 + 2 * (nivel(J) - 1) + J.campoExtra, 1000);
+export function campoAlvo(J) {
+  const Z = zona(J), base = campoBase(J);
+  if (J.fimSessao && J.fimSessao - J.m.agora < FIM_DA_SESSAO) return Math.max(base, Math.min(Z.length - (J.zonaObst || 0), 400));
+  return base;
+}
 
 // ---------- sementes ----------
 const culturaDe = (J, s) => J.D.culturas[J.D.culturaDaSemente[s]];
@@ -78,7 +86,8 @@ function ocupacao(J, c) {
 function notaDaSemente(J, it, apertado) {
   const c = culturaDe(J, it.id), valor = c.rende * J.I[c.produto].venda - it.compra + c.xp;
   const trabalho = 7 + 1.5 * c.regas;
-  return valor / (trabalho + (apertado ? 0.1 : 0.02) * ocupacao(J, c));
+  // com terra sobrando, o que limita é o trabalho dela: a casa presa quase não pesa (a cultura longa rende mais por toque)
+  return apertado ? valor / (trabalho + 0.1 * ocupacao(J, c)) : valor / trabalho;
 }
 // quanto de cada produto de cultura já vem (plantado ou prometido na fila)
 function vindo(J) {
@@ -96,16 +105,19 @@ export function escolherSemente(J, so) {
   if (J.metaSemente && lista.some((it) => it.id === J.metaSemente)) return J.I[J.metaSemente];
   const v = vindo(J);
   let falta = null, maior = 0;
+  // o que pedido, trato, obra e missão pedem (a receita "por conta" das indústrias não escolhe a semente)
+  const Q = J.querBase || J.quer;
   for (const it of lista) {
-    const c = culturaDe(J, it.id), q = J.quer[c.produto] || 0;
+    const c = culturaDe(J, it.id), q = Q[c.produto] || 0;
     if (!q) continue;
     const f = (q - tem(J, c.produto) - (v[c.produto] || 0)) * J.I[c.produto].venda;
     if (f > maior) { maior = f; falta = it; }
   }
-  if (falta) return falta;
-  const apertado = zona(J).length - J.zonaObst <= campoAlvo(J) + 2;
+  if (falta) { if (J.S) J.S.porqueSemente['falta ' + falta.id] = (J.S.porqueSemente['falta ' + falta.id] || 0) + 1; return falta; }
+  const apertado = zona(J).length - J.zonaObst <= campoBase(J) + 2;
   let melhor = null, n = -Infinity;
   for (const it of lista) { const x = notaDaSemente(J, it, apertado); if (x > n) { n = x; melhor = it; } }
+  if (J.S && melhor) { const k = (apertado ? 'apertado ' : 'rende ') + melhor.id; J.S.porqueSemente[k] = (J.S.porqueSemente[k] || 0) + 1; }
   return melhor;
 }
 
@@ -184,7 +196,9 @@ export function esvaziar(J, forcar) {
   let guardar = J.metaCesto === 'guardar' || (cocho && PO.espacoNoCeleiro(m) > 0) || (J.metaCesto !== 'vender' && !J.vendaDoCeleiro && cestoTemQuerido(J));
   // carga misturada (o que se quer e o que sobra): guarda tudo só se o celeiro tem folga; senão vende tudo
   // (a banca e o celeiro levam o cesto inteiro: não dá para escolher item)
-  if (guardar && J.metaCesto !== 'guardar' && !cocho) { const sobra = sobraNoCesto(J); if (sobra > 0 && PO.espacoNoCeleiro(m) < sobra + 0.25 * J.P.celeiro.capacidade) guardar = false; }
+  // o que a missão pede (os 12 ovos da dúzia) vai para o celeiro mesmo com carga misturada, se couber tudo
+  const daMissao = Object.keys(J.reservados || {}).some((k) => (J.P.cesto.itens[k] || 0) > 0);
+  if (guardar && J.metaCesto !== 'guardar' && !cocho && !(daMissao && PO.espacoNoCeleiro(m) >= n)) { const sobra = sobraNoCesto(J); if (sobra > 0 && PO.espacoNoCeleiro(m) < sobra + 0.25 * J.P.celeiro.capacidade) guardar = false; }
   if (guardar && !(PO.espacoNoCeleiro(m) > 0)) { guardar = false; nota(J, 'celeiro cheio: vendeu o que queria guardar'); J.S && (J.S.celeiroCheio = (J.S.celeiroCheio || 0) + 1); }
   return passo(J, 'entidade', { id: guardar ? 'celeiro' : 'banca' });
 }
@@ -196,6 +210,9 @@ export function venderDoCeleiro(J, forcar) {
   for (const k in C) if (J.I[k] && J.I[k].venda > 0) sobra += Math.max(0, C[k] - (J.quer[k] || 0));
   const espaco = PO.espacoNoCeleiro(J.m);
   const cap = J.P.celeiro.capacidade;
+  // o que a missão guarda (a banca levaria junto): só com o celeiro cheio
+  const daMissao = Object.keys(J.reservados || {}).some((k) => (C[k] || 0) > 0);
+  if (daMissao && forcar !== 'cheio') return null;
   if (forcar === 'cheio') { if (espaco > 0.1 * cap || sobra < Math.min(20, 0.1 * cap)) return null; }
   else if (sobra <= 0 || (!forcar && espaco > 0.25 * cap && sobra < 0.3 * cap)) return null;
   if (evitado(J, 'pegar')) return null;
@@ -209,8 +226,11 @@ export function venderDoCeleiro(J, forcar) {
 export function plantar(J, opc = {}) {
   if (!LIGADA || !naFazenda(J)) return null;
   const m = J.m, loc = fazenda(J), Z = zona(J), p = J.p;
+  obstaculos(J); // o alcance a pé: a casa cercada de mato (lote novo) fica para depois de limpar
+  const A = J.alcance;
   let vazia = null, dv = Infinity, vazias = 0, aradas = 0, araveis = 0, arar = null;
   for (const i of Z) {
+    if (A && !A[i]) continue;
     const x = i % loc.l, z = (i - x) / loc.l;
     if (loc.chao[i] === ARADA) {
       aradas++;

@@ -162,7 +162,12 @@ export function lerMissao(J) {
     if (o.evento === 'tratou') M.tratar = true;
     if (o.evento === 'recolheu') M.recolher = true;
   }
-  if (o.evento === 'produziu' && f.item) { M.receitas.push({ item: um(f.item), n: M.falta + tem(J, um(f.item)), prio: 3 }); M.reservados[um(f.item)] = M.falta; }
+  if (o.evento === 'produziu' && f.item) {
+    M.receitas.push({ item: um(f.item), n: M.falta + tem(J, um(f.item)), prio: 3 }); M.reservados[um(f.item)] = M.falta;
+    // os ingredientes também ficam guardados (os 12 ovos da dúzia não vão para a banca junto com o resto do cesto)
+    const r = receitaPara(J, um(f.item)) || (receitas(J).porItem[um(f.item)] || [])[0];
+    if (r) for (const i in r.entra) M.reservados[i] = (M.reservados[i] || 0) + r.entra[i] * Math.max(1, Math.ceil(M.falta / r.n));
+  }
   return (J.meta = M);
 }
 
