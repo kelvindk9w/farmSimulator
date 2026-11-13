@@ -86,7 +86,9 @@ body.com-painel #ui .avisos{top:max(6px,env(safe-area-inset-top));left:0;right:0
 
 /* ---------- embaixo: dica, fila, sementes e a barra de ferramentas ---------- */
 #ui .rodape{bottom:max(8px,env(safe-area-inset-bottom));gap:5px}
-#ui .dica{${mold('aviso', '14.3px 15px 14px 15px')}border-width:4px 6px;padding:2px 10px;max-width:min(560px,calc(100% - 290px));font-size:14px;font-weight:800;border-radius:15px}
+#ui .dica{${mold('aviso', '14.3px 15px 14px 15px')}border-width:4px 6px;padding:2px 10px;max-width:100%;font-size:14px;font-weight:800;border-radius:15px}
+/* (a largura se mede na linha da dica, que ocupa a tela toda: assim ela não chega na alavanca nem no botão de ação) */
+#ui .linha-info{max-width:min(560px,calc(100% - 290px))}
 #ui .dica.fraca{opacity:.9}
 #ui .fila{${mold('pilula', '18px')}border-width:5px;min-height:44px;padding:0 6px 0 4px;border-radius:18px}
 #ui .fila:active{filter:brightness(.92)}

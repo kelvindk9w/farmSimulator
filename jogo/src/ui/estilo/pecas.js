@@ -39,9 +39,14 @@ const NOVE = {
 };
 const FIXAS = ['botao-fechar-normal', 'botao-fechar-apertado', 'selo-nivel', 'botao-agir-normal', 'botao-agir-apertado', 'bolinha-contador', 'bolinha-novidade', 'alavanca-base', 'alavanca-pino', 'raios'];
 
-const r2 = (n) => Math.round(n * 100) / 100;
 // as fatias da imagem pela metade (a montagem arredonda os lados; as fatias seguem o mesmo fator)
-function meia([w, h, t, d, b, e]) { const kw = Math.round(w / 2) / w, kh = Math.round(h / 2) / h; return [r2(t * kh), r2(d * kw), r2(b * kh), r2(e * kw)]; }
+// (arredondadas para baixo e sempre com pelo menos 1 px no meio: sem o meio, o navegador não pinta o recheio da peça)
+function meia([w, h, t, d, b, e]) {
+  const W = Math.round(w / 2), H = Math.round(h / 2);
+  const par = (x, y, total) => { x = Math.floor(x); y = Math.floor(y); while (x + y > total - 1) { if (x >= y) x--; else y--; } return [x, y]; };
+  const [t2, b2] = par(t * H / h, b * H / h, H), [e2, d2] = par(e * W / w, d * W / w, W);
+  return [t2, d2, b2, e2];
+}
 
 export function variaveis() {
   const inteira = [], leve = [];

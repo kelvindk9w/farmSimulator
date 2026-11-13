@@ -486,10 +486,14 @@ async function cenario(a, f) {
   await foto('celeiro-cheio');
   await J(() => { const m = window.__jogo.mundo; m.posses.celeiro.itens = { alface: 70 }; m.posses.cesto.itens = {}; });
 
-  // ---- a loja leva ao catálogo
+  // ---- o catálogo tem botão próprio no alto (saiu da loja; a loja ficou com a aba "Enfeites")
+  await tocarEm('.topo-dir [data-painel="construir"]');
+  igual(await painel(), 'construir', 'o botão "Construir" do alto abre o catálogo');
+  await fecharPainel();
   await tocarEm('.topo-dir [data-painel="loja"]');
-  await tocarEm('[data-k="aba-construir"]');
-  igual(await painel(), 'construir', 'a aba "Construir" da loja abre o catálogo');
+  confere(await J(() => !document.querySelector('[data-k="aba-construir"]') && !!document.querySelector('[data-k="aba-enfeites"]')), 'a loja não tem mais a aba "Construir", e tem a aba "Enfeites"');
+  await tocarEm('[data-k="aba-enfeites"]');
+  confere(await J(() => window.__jogo.painelAberto() === 'construir' && !!document.querySelector('.veu.da-loja .oferta.cons-oferta')), 'a aba "Enfeites" mostra as cercas e os enfeites com as abas da loja');
   await fecharPainel();
 
   // ---- gravar e recarregar: tudo no lugar, e abrir dentro do celeiro também funciona

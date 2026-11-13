@@ -372,10 +372,12 @@ async function cenario(a, f) {
   await esperar(1200);
   igual(await J(() => document.querySelector('.chip.conserto').hidden), true, 'consertada, o aviso some');
 
-  // ---- a aba "Terras" da loja leva ao painel dos lotes; gravar e recarregar traz tudo de volta
-  await tocarEm('.topo-dir [data-painel="loja"]');
-  await tocarEm('[data-k="aba-terras"]');
-  igual(await J(() => window.__jogo.painelAberto()), 'terras', 'a aba "Terras" da loja abre o painel dos lotes');
+  // ---- "Minha fazenda" leva ao painel dos lotes (a aba "Terras" saiu da loja); gravar e recarregar traz tudo de volta
+  confere(await J(() => window.__jogo.abrirPainel('loja') && !document.querySelector('[data-k="aba-terras"]')), 'a loja não tem mais a aba "Terras"');
+  await fecharPainel();
+  await J(() => window.__jogo.abrirPainel('fazenda'));
+  await tocarEm('[data-k="ir-terras"]');
+  igual(await J(() => window.__jogo.painelAberto()), 'terras', '"Terras", em Minha fazenda, abre o painel dos lotes');
   confere(await J(() => !!document.querySelector('.oferta.lote.comprado')), 'o lote comprado aparece como seu');
   const medidas = await J(() => {
     const ruins = [];
