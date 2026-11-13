@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { dadosDeTeste, ateParar, ouvirTudo, modo, tocar, tocarEm, arar, pular } from './apoio.mjs';
-import { comTerras, mundoDasTerras } from './apoio-terras.mjs';
+import { comTerras, mundoDasTerras, porObstaculo } from './apoio-terras.mjs';
 import { Mundo } from '../src/nucleo/mundo.js';
 import { ARADA, GRAMA } from '../src/nucleo/local.js';
 import { descreverCasa, descreverEntidade } from '../src/nucleo/sistemas/personagem.js';
@@ -81,6 +81,22 @@ test('espaçamento: perto demais de outra árvore não planta, e o motivo diz qu
   // a casa sugerida pelo guia respeita o espaçamento
   const c = casaParaArvore(m, 'bananeira');
   assert.ok(c && podePlantarArvore(m, c[0], c[1], 'bananeira').ok);
+});
+
+test('a muda não tranca nada: casa que fecharia a passagem é recusada (a árvore não se arranca)', () => {
+  const m = mundoDasTerras();
+  m.posses.bolsa[MUDA] = 5;
+  // um vão de uma casa em (12, 12): mato a leste e a oeste, bananeira ao norte
+  porObstaculo(m, 'mato', 11, 12); porObstaculo(m, 'mato', 13, 12);
+  plantar(m, 12, 11);
+  const p = m.personagem; p.x = 16.5; p.z = 16.5; // ela longe dali
+  assert.equal(podePlantarArvore(m, 12, 13, 'bananeira').motivo, 'arvore-fecha-caminho', 'ao sul, a casa (12, 12) ficaria isolada');
+  modo(m, 'semear', MUDA);
+  assert.equal(tocar(m, 12, 13).ok, false);
+  assert.equal(podePlantarArvore(m, 12, 14, 'bananeira').ok, true, 'uma casa adiante, o vão continua aberto');
+  // ela mesma não fica presa: com ela no vão, a muda que a fecharia é recusada
+  p.x = 12.5; p.z = 12.5;
+  assert.equal(podePlantarArvore(m, 12, 13, 'bananeira').motivo, 'arvore-fecha-caminho');
 });
 
 test('cresce pelo relógio: muda, jovem, adulta; a primeira safra vem depois, espera no pé e guarda uma só', () => {

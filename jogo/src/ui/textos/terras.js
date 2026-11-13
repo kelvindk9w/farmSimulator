@@ -43,6 +43,7 @@ Object.assign(T.motivos, {
   'lote-desconhecido': () => 'Este lote não existe',
   // árvores
   'sem-mudas': (d, D) => `Precisa de ${minus(nomeI(D, d && d.item))}: compre na loja`,
+  'arvore-fecha-caminho': () => 'Aqui a árvore fecharia a passagem: plante numa casa mais aberta',
   'muito-perto': (d) => `Perto demais de outra árvore: deixe ${d && d.casas > 2 ? d.casas - 1 + ' casas' : 'uma casa'} entre elas`,
   'casa-ocupada': () => 'Aqui não cabe: a casa está ocupada',
   'no-caminho': () => 'No caminho não se planta',

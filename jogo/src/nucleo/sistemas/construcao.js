@@ -276,6 +276,37 @@ export function lugarServe(m, tipo, x, z, opc = {}) {
   return { ok: true };
 }
 
+// Fechar uma casa só em (x, z) (uma árvore, por exemplo) isola alguma coisa: um pedaço de terra, uma construção
+// ou a personagem? true = isola. A conta rápida (os vizinhos livres continuam ligados entre si pelas diagonais) resolve
+// quase sempre; o alagamento do mapa inteiro só roda quando ela não basta (é chamada para muitas casas por segundo).
+export function casaFechaCaminho(m, loc, x, z) {
+  const livre = (cx, cz) => { if (!loc.dentro(cx, cz)) return false; const i = loc.i(cx, cz); return loc.propria[i] === 1 && loc.ocupa[i] === 0; };
+  const n = livre(x, z - 1), l = livre(x + 1, z), s = livre(x, z + 1), o = livre(x - 1, z);
+  const vizinhos = n + l + s + o;
+  const ligas = (n && l && livre(x + 1, z - 1)) + (l && s && livre(x + 1, z + 1)) + (s && o && livre(x - 1, z + 1)) + (o && n && livre(x - 1, z - 1));
+  const p = m.personagem, ela = p && p.local === loc.id && Math.floor(p.x) === x && Math.floor(p.z) === z;
+  let duvida = ela || vizinhos - ligas > 1;
+  if (!duvida) for (const e of m.construcao.todas) { // a casa é a única entrada de alguma construção?
+    if (e.local !== loc.id || !TIPOS[e.tipo].bloqueia) continue;
+    const c = casasDeAcesso(e);
+    for (let k = 0; k < c.length && !duvida; k += 2) if (c[k] === x && c[k + 1] === z) duvida = true;
+    if (duvida) break;
+  }
+  if (!duvida) return false;
+  reservar(loc);
+  area.x = x; area.z = z; area.l = 1; area.p = 1; area.tipo = '';
+  if (!ancora(m, loc, area, anc)) return true;
+  if (!alagar(loc, anc[0], anc[1], visto0, null, null)) return false; // a âncora já estava isolada: não há o que comparar
+  alagar(loc, anc[0], anc[1], visto1, area, null);
+  for (let i = 0; i < loc.l * loc.p; i++) if (visto0[i] && !visto1[i] && i !== loc.i(x, z)) return true;
+  for (const e of m.construcao.todas) {
+    if (e.local !== loc.id || !TIPOS[e.tipo].bloqueia) continue;
+    const c = casasDeAcesso(e);
+    if (tem(loc, visto0, c) && !tem(loc, visto1, c)) return true;
+  }
+  return false;
+}
+
 // O jogador pode pagar por "tipo" agora (sem olhar o lugar)? Motivos: nao-existe, nao-constroi (já vem na fazenda),
 // nivel-baixo { nivel }, exige { construcao }, limite { limite }, so-com-cash { cash }, sem-ouro { falta },
 // falta-material { item, precisa, tem, falta }. Com uma guardada do mesmo tipo, recolocar não custa nada.

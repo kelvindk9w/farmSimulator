@@ -15,6 +15,7 @@ import { VENDAVEL } from './loja.js';
 import { PLANTIOS } from './lavoura.js';
 import { filaTem, contarNaFila } from './personagem.js';
 import { registrarGuia } from '../guia.js';
+import { casaFechaCaminho } from './construcao.js';
 
 const NAO = (motivo, dados, limpar) => ({ ok: false, motivo, dados, limpar });
 const SIM = { ok: true };
@@ -70,6 +71,8 @@ export function podePlantarArvore(m, x, z, id, semFila) {
     const p = m.personagem, perto = (t) => t && t.tipo === 'agir' && t.acao === 'plantarMuda' && !(t.x === x && t.z === z) && Math.max(Math.abs(t.x - x), Math.abs(t.z - z)) < Math.max(a.espacamento, (m.dados.arvores[m.dados.arvoreDaMuda[t.args.muda]] || a).espacamento);
     if (perto(p.tarefa) || p.fila.some(perto)) return NAO('muito-perto', { casas: a.espacamento, arvore: id });
   }
+  // a árvore não se arranca: não pode trancar a personagem, um pedaço de terra nem a entrada de uma construção
+  if (casaFechaCaminho(m, loc, x, z)) return NAO('arvore-fecha-caminho');
   return SIM;
 }
 // as mudas deste item que ainda não estão prometidas na fila
