@@ -9,8 +9,10 @@ import { podeArar, casasDaFileira, fileiraDe, plantaEm, estadoDaPlanta, FORMATO_
 import { guiaDaMissao } from '../src/nucleo/guia.js';
 import { gravacao } from '../src/plataforma/gravacao.js';
 
-// o campo dos testes: x 8..13, z 12..15 (6 por 4 casas; fileiras de 6 ao longo de X)
-const RET = [8, 12, 14, 16];
+// o campo dos testes: x 8..13, z 12..13 (duas fileiras de 6 ao longo de X, como o do jogo)
+const RET = [8, 12, 14, 14];
+// o campo grande de antes (6 por 4): as gravações feitas com ele abrem com ele
+const GRANDE = [8, 12, 14, 16];
 const comCampo = (mais) => (b) => { b.terras.inicial.campo = [...RET]; if (mais) mais(b); };
 const novo = (mais) => novoMundo(comCampo(mais));
 const dados = (mais) => dadosDeTeste(comCampo(mais));
@@ -21,10 +23,10 @@ const copia = (o) => JSON.parse(JSON.stringify(o));
 
 test('a fazenda nasce com o campo de plantação demarcado: terra sem sulco, sem mato, com o caminho de fora', () => {
   const m = novo();
-  for (let z = 12; z < 16; z++) for (let x = 8; x < 14; x++) assert.equal(chao(m, x, z), CAMPO, `(${x}, ${z})`);
+  for (let z = 12; z < 14; z++) for (let x = 8; x < 14; x++) assert.equal(chao(m, x, z), CAMPO, `(${x}, ${z})`);
   assert.equal(chao(m, 7, 12), GRAMA);
   assert.equal(chao(m, 14, 12), GRAMA);
-  assert.equal(chao(m, 8, 16), GRAMA);
+  assert.equal(chao(m, 8, 14), GRAMA);
   // por cima do caminho e de construção o campo não passa
   const n = novoMundo((b) => { b.terras.inicial.campo = [13, 5, 19, 11]; });
   assert.equal(chao(n, 15, 9), CAMINHO, 'o caminho segue caminho');
@@ -88,9 +90,9 @@ test('fileira: as casas de campo seguidas ao longo de X, da ponta mais perto da 
   assert.deepEqual(casasDaFileira(m, 16, 12), [], 'grama não é fileira');
   arar(m, [[11, 13]]);
   assert.equal(casasDaFileira(m, 9, 13).length, 6, 'a arada continua a fileira');
-  porConstrucao(m, 'cerca-de-madeira', 10, 14);
-  assert.equal(chao(m, 10, 14), GRAMA, 'construção no campo vazio: a casa volta a ser grama');
-  assert.equal(casasDaFileira(m, 12, 14).length, 3, 'a cerca corta a fileira');
+  porConstrucao(m, 'cerca-de-madeira', 10, 13);
+  assert.equal(chao(m, 10, 13), GRAMA, 'construção no campo vazio: a casa volta a ser grama');
+  assert.equal(casasDaFileira(m, 12, 13).length, 3, 'a cerca corta a fileira');
 });
 
 test('segurar numa casa do campo, no modo enxada, ara a fileira toda', () => {
@@ -145,14 +147,14 @@ test('a fileira respeita a fila (filaMax), as sementes e a água', () => {
 test('na mão, a fileira colhe o que está pronto e rega o que tem sede', () => {
   const m = novo();
   m.posses.bolsa['semente-rabanete'] = 6;
-  const prontas = fileira(14, 8, 10), sede = fileira(14, 11, 13);
+  const prontas = fileira(13, 8, 10), sede = fileira(13, 11, 13);
   plantarAtePronta(m, prontas);
   arar(m, sede); semear(m, sede); encher(m);
   modo(m, 'mao');
-  const f = fileiraDe(m, 10, 14);
+  const f = fileiraDe(m, 10, 13);
   assert.equal(f.n, 6);
   assert.deepEqual(f.alvo.map((a) => a[2]).sort(), ['colher', 'colher', 'colher', 'regar', 'regar', 'regar']);
-  m.comando({ tipo: 'fileira', x: 10, z: 14 }); ateParar(m);
+  m.comando({ tipo: 'fileira', x: 10, z: 13 }); ateParar(m);
   for (const [x, z] of prontas) assert.equal(plantaEm(m, x, z), null);
   for (const [x, z] of sede) assert.equal(estadoDaPlanta(m, plantaEm(m, x, z)), 'crescendo');
 });
@@ -180,13 +182,13 @@ test('gravar e carregar guarda o campo: terra sem sulco, arada, plantada e o cam
   assert.equal(chao(n, 16, 13), CAMPO);
   assert.equal(chao(n, 9, 12), ARADA);
   assert.equal(plantaEm(n, 8, 12).cultura, 'rabanete');
-  assert.equal(chao(n, 13, 15), CAMPO);
+  assert.equal(chao(n, 13, 13), CAMPO);
   // casa do campo inicial que deixou de ser campo (uma construção passou por ali) segue grama
   const k = novo();
-  k.local.chao[k.local.i(13, 15)] = GRAMA;
+  k.local.chao[k.local.i(13, 13)] = GRAMA;
   const q = Mundo.carregar(dados(), copia(k.salvar()));
-  assert.equal(chao(q, 13, 15), GRAMA);
-  assert.equal(chao(q, 12, 15), CAMPO);
+  assert.equal(chao(q, 13, 13), GRAMA);
+  assert.equal(chao(q, 12, 13), CAMPO);
 });
 
 test('gravação de antes do campo abre: ganha o campo nas casas livres e a terra arada volta', () => {
@@ -194,7 +196,7 @@ test('gravação de antes do campo abre: ganha o campo nas casas livres e a terr
   const velho = novoMundo();
   velho.posses.bolsa['semente-rabanete'] = 3;
   arar(velho, [[9, 13], [17, 13]]); semear(velho, [[9, 13]]);
-  porConstrucao(velho, 'cerca-de-madeira', 12, 14);
+  porConstrucao(velho, 'cerca-de-madeira', 12, 13);
   const g = copia(velho.salvar());
   // a lavoura no formato 1: { local: [[índice, cultura, feitas, secaEm] | [índice]] }
   const v = velho.local, antiga = [];
@@ -204,9 +206,33 @@ test('gravação de antes do campo abre: ganha o campo nas casas livres e a terr
   assert.equal(chao(n, 9, 13), ARADA); assert.equal(plantaEm(n, 9, 13).cultura, 'rabanete');
   assert.equal(chao(n, 17, 13), ARADA, 'a arada de fora do campo volta');
   assert.equal(chao(n, 10, 13), CAMPO, 'as casas livres do retângulo viram campo');
-  assert.equal(chao(n, 12, 14), GRAMA, 'debaixo da cerca fica grama');
+  assert.equal(chao(n, 12, 13), GRAMA, 'debaixo da cerca fica grama');
   assert.equal(copia(n.salvar()).sistemas.lavoura.formato, FORMATO_DA_LAVOURA, 'e grava no formato novo');
   n.avancar(2);
+});
+
+test('gravação feita com o campo grande de antes abre com o campo grande (e o jogo novo nasce com o pequeno)', () => {
+  // o jogo de antes: campo de 6 por 4, uma fileira de baixo arada e plantada, o resto sem sulco
+  const velho = novoMundo((b) => { b.terras.inicial.campo = [...GRANDE]; });
+  velho.posses.bolsa['semente-rabanete'] = 2;
+  arar(velho, [[9, 15], [10, 15]]); semear(velho, [[9, 15]]);
+  const g = copia(velho.salvar());
+  // abre com os dados de agora (campo de 6 por 2): quem já tinha o campo grande fica com ele
+  const n = Mundo.carregar(dados(), g);
+  for (let z = 12; z < 16; z++) for (let x = 8; x < 14; x++) assert.ok(deLavoura(chao(n, x, z)), `(${x}, ${z}) segue campo`);
+  assert.equal(chao(n, 9, 15), ARADA); assert.equal(plantaEm(n, 9, 15).cultura, 'rabanete');
+  assert.equal(chao(n, 8, 14), CAMPO);
+  assert.equal(casasDaFileira(n, 11, 15).length, 6, 'a fileira de baixo segue inteira');
+  // o jogo novo, com os mesmos dados, nasce só com as duas fileiras
+  const novoJogo = novo();
+  let casas = 0;
+  for (let i = 0; i < novoJogo.local.chao.length; i++) if (deLavoura(novoJogo.local.chao[i])) casas++;
+  assert.equal(casas, 12);
+  assert.equal(chao(novoJogo, 8, 14), GRAMA);
+  // e o campo cresce arando a grama do lado (a fileira de baixo de antes)
+  assert.equal(podeArar(novoJogo, 8, 14), true);
+  arar(novoJogo, [[8, 14]]);
+  assert.equal(casasDaFileira(novoJogo, 8, 14).length, 1);
 });
 
 test('exportar e importar por texto leva o campo junto', () => {
