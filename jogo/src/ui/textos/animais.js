@@ -130,6 +130,9 @@ T.animais = {
   ninhoCheio: (d, D) => jeitoDe(d, D).cheio(d),
   semTrato: (falta, D, item) => `${falta.comida && falta.agua ? `Sem ${minus(nomeI(D, item))} e sem água` : falta.comida ? `Sem ${minus(nomeI(D, item))}` : 'Sem água'}: produz a metade`,
   semTratoCurto: 'Com fome ou com sede: produz a metade',
+  semTratoTrabalho: 'Com fome ou com sede: trabalha pela metade',
+  // bicho de trabalho: um de cada basta (só um trabalha)
+  umBasta: (nome) => `Você já tem ${um(nome)}: um basta para o serviço`,
   parou: (d, D) => maiuscula(jeitoDe(d, D).parou),
   estimacao: 'De estimação: não produz mais',
   velhinha: (d, D, n) => `Só mais ${jeitoDe(d, D).conta(n)} e ${ela(d ? d.nome : '')} para`,

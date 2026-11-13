@@ -14,6 +14,8 @@ import { ofertasDeAnimais, abrigosProntos } from '../../nucleo/sistemas/animais.
 
 const TRAVADAS_A_MOSTRA = 2; // dos bichos que o nível ainda não libera, mostra só os próximos
 export const INFO_DO_ANIMAL = [];
+// bicho de trabalho: só um de cada espécie trabalha, então o segundo não se vende (nem aqui, nem no abrigo)
+export const umBasta = (o) => o.familia === 'trabalho' && o.tem > 0;
 function infoDe(m, d) {
   for (const f of INFO_DO_ANIMAL) { const t = f(m, d); if (t) return t; }
   return T.animais.resumo(d, m.dados) || d.descricao || '';
@@ -47,7 +49,8 @@ registrarPainel({
         }
         c.append(el('div', 'info', infoDe(m, d)));
         const bs = el('div', 'botoes'), motivo = o.pode.ok ? null : o.pode.motivo;
-        if (motivo === 'sem-abrigo') {
+        if (umBasta(o)) c.append(el('div', 'info falta', T.animais.umBasta(o.nome)));
+        else if (motivo === 'sem-abrigo') {
           // falta o abrigo: o cartão diz qual e leva ao catálogo de construir
           c.append(el('div', 'info falta', T.animais.precisaDe(D, o.abrigo)));
           const b = botao({ icone: 'icone/martelo', tamanho: 22, texto: T.animais.construirAbrigo(D, o.abrigo), aoClicar: () => { som.tocar('toque'); abrirPainel('construir', { id: o.abrigo, categoria: 'abrigo' }); } });

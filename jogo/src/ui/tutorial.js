@@ -85,6 +85,7 @@ export function criarTutorial(ui, hud) {
       // com a loja aberta, a seta aponta a oferta pedida (ou a primeira que dá para comprar)
       let alvo = null;
       if (g.tipo === 'painel' && painel === g.painel) alvo = (g.item && ui.querySelector(`.oferta[data-item="${g.item}"] .bt`)) || ui.querySelector('.oferta:not(.travada) .bt');
+      else if (g.tipo === 'painel') alvo = ui.querySelector(`.aba[data-k="aba-${g.painel}"]`); // o painel pedido é uma aba de fora da loja
       apontarUi(alvo);
       return;
     }

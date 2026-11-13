@@ -42,8 +42,8 @@ async function pronto(pg) {
       missoes(ate, so) { const m = j.mundo, L = m.dados.missoes.vizinho.map((x) => x.id); m.missoes.feitas = so ? L.filter((x) => x !== so) : L.slice(0, L.indexOf(ate)); m.missoes.de = null; m.missoes.conta = 0; },
       nivel(n, menos = 0) { const m = j.mundo; m.progresso.nivel = n; m.progresso.xp = m.dados.niveis.limiar[n] + (menos ? m.dados.niveis.limiar[n + 1] - m.dados.niveis.limiar[n] - menos : 0); },
       pedidos() { return JSON.parse(JSON.stringify(j.mundo.pedidos.vagas.map((v) => (v.pedido ? { ...v.pedido } : null)))); },
-      serve(x, z) { const loc = j.mundo.local, i = loc.dentro(x, z) ? loc.i(x, z) : -1; return i >= 0 && loc.propria[i] === 1 && loc.chao[i] === 0 && !loc.ocupa[i] && !loc.plantas[i] && !loc.entidadeEm(x, z); },
-      // retângulos l × p de grama livre (com uma casa de folga em volta), do mais perto de (cx, cz) ao mais longe
+      serve(x, z) { const loc = j.mundo.local, i = loc.dentro(x, z) ? loc.i(x, z) : -1; return i >= 0 && loc.propria[i] === 1 && (loc.chao[i] === 0 || loc.chao[i] === 6) && !loc.ocupa[i] && !loc.plantas[i] && !loc.entidadeEm(x, z); },
+      // retângulos l × p de grama ou campo vazio (com uma casa de folga em volta), do mais perto de (cx, cz) ao mais longe
       livres(l, p, cx, cz) {
         const loc = j.mundo.local, out = [];
         for (let z = 1; z <= loc.p - p - 1; z++) for (let x = 1; x <= loc.l - l - 1; x++) {

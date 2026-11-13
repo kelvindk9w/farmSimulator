@@ -224,6 +224,22 @@ async function cenario(a, f) {
   confere(await J(() => !!document.querySelector('.veu .oferta[data-item="galinheiro"]')), 'o catálogo mostra o galinheiro');
   await fecharPainel();
 
+  // ---- a seta do guia num passo que pede a aba "Animais" (a missão do companheiro): a loja, a aba e o cartão do bicho
+  await J(() => { window.__a.nivel(16); window.__a.missoes(null, 'companheiro'); });
+  await fecharTelas();
+  igual(await A('missao'), 'companheiro', 'a missão da vez é a do companheiro');
+  const marcado = (s) => J((q) => { const e = document.querySelector(q); return !!e && e.classList.contains('alvo-tutorial'); }, s);
+  await quadro(700);
+  confere(await marcado('.topo-dir [data-painel="loja"]'), 'a seta do guia aponta o botão da loja (o painel dos bichos não tem botão próprio)');
+  await tocarEm('.topo-dir [data-painel="loja"]'); await quadro(700);
+  confere(await marcado('[data-k="aba-animais"]'), 'com a loja aberta, a seta aponta a aba "Animais"');
+  await tocarEm('[data-k="aba-animais"]'); await quadro(700);
+  const alvoNaAba = await J(() => { const b = document.querySelector('.oferta.animal .alvo-tutorial'); return b ? b.closest('.oferta').dataset.item : null; });
+  confere(!!alvoNaAba && (await J((id) => window.__jogo.mundo.dados.animais[id].familia, alvoNaAba)) === 'estimacao', `na aba "Animais", a seta aponta um bicho de estimação (${alvoNaAba})`);
+  await fecharPainel();
+  await J(() => { window.__a.missoes('galinheiro'); window.__a.nivel(7); });
+  await fecharTelas();
+
   // ---- o galinheiro (pelo comando: a obra é da frente de construir) e o nível de quem já tem bancada
   await J(() => window.__a.nivel(16));
   const banc = await A('erguer', 'bancada-de-carpintaria');
@@ -516,6 +532,22 @@ async function cenario(a, f) {
   igual((await A('bichos', 'galinheiro')).length, 2, 'ficam a de estimação e a que ainda produz');
   await foto('depois-do-destino');
   await fecharPainel();
+
+  // ---- bicho de trabalho no painel do abrigo (o estábulo e o boi são da frente de trabalho): um de cada basta
+  await J(() => { window.__jogo.mundo.posses.ouro += 20000; window.__a.dar({ tabua: 40, pedra: 20, prego: 40 }); });
+  const est = await A('erguer', 'estabulo');
+  if (confere(!!est, 'o estábulo fica pronto')) {
+    await J(() => window.__jogo.mundo.comando({ tipo: 'comprarAnimal', animal: 'boi' }));
+    igual((await A('bichos', 'estabulo')).filter((b) => b.especie === 'boi').length, 1, 'há um boi no estábulo');
+    await J((id) => window.__jogo.abrirPainel('abrigo', { entidade: id }), est.id); await quadro(400);
+    confere(await J(() => !!document.querySelector('.veu .abr-bicho') && !document.querySelector('.veu [data-k="comprar-boi"]')), 'com um boi no estábulo, o painel não vende outro');
+    const cartaoDoBoi = await J(() => { const c = document.querySelector('.veu .abr-bicho'); return c ? { fome: c.classList.contains('fome'), texto: c.textContent } : null; });
+    confere(!cartaoDoBoi.fome || /trabalha pela metade/.test(cartaoDoBoi.texto), `o boi sem trato "trabalha pela metade", não "produz" (${cartaoDoBoi.texto})`);
+    await fecharPainel();
+    await abrirAbaAnimais();
+    confere(await J(() => { const c = document.querySelector('.oferta.animal[data-item="boi"]'); return !!c && /um basta/.test(c.textContent) && !c.querySelector('[data-k="comprar-boi"]'); }), 'na loja, o cartão do boi diz que um basta e não vende outro');
+    await fecharPainel();
+  }
   confere(a.erros.length === 0, `${f}: erro no console: ${a.erros.slice(0, 3).join(' | ')}`);
 }
 

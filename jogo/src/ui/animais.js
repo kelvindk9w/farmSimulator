@@ -76,6 +76,10 @@ aoInstalarMundo((m, ctx) => {
   const cena = J.cena, part = cena.part, D = m.dados, ev = m.eventos, tutorial = ctx && ctx.tutorial, F = T.animais.tonho;
   prepararChips(ctx && ctx.hud);
   atualizarChips();
+  // o painel "animais" não tem botão no alto: a seta do guia (passo { tipo: 'painel', painel: 'animais' }) aponta a loja,
+  // e com a loja aberta, a aba "Animais" (ui/tutorial.js)
+  const hud = ctx && ctx.hud;
+  if (hud && hud.paineis && !hud.paineis.animais && hud.paineis.loja) hud.paineis.animais = hud.paineis.loja;
   const centro = (id) => { const e = id ? construcaoPorId(m, id) : null; return e && e.local === m.personagem.local ? [e.x + e.l / 2, e.z + e.p / 2, e] : null; };
   const deProducao = (id) => { const d = D.animais[id]; return d && d.familia === 'producao' ? d : null; };
 

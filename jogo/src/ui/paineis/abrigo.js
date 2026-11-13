@@ -15,6 +15,7 @@ import { J } from '../../contexto.js';
 import { registrarPainel, abrirPainel } from './registro.js';
 import { linhaDeArrumar, iconeDaConstrucao } from './construcao.js';
 import { extrasDoAbrigo } from './extras-do-abrigo.js';
+import { umBasta } from './animais.js';
 import { perguntar } from '../dialogo.js';
 import { botaoConcluir } from '../concluir.js';
 import { som } from '../../plataforma/som.js';
@@ -123,7 +124,7 @@ registrarPainel({
         // bicho de outra família (trabalho): aqui só se vê se está tratado
         const tratado = estaTratado(m, a);
         if (!tratado) c.classList.add('fome');
-        info.append(el('span', tratado ? '' : 'ruim', tratado ? d.descricao || '' : T.animais.semTratoCurto));
+        info.append(el('span', tratado ? '' : 'ruim', tratado ? d.descricao || '' : a.familia === 'trabalho' ? T.animais.semTratoTrabalho : T.animais.semTratoCurto));
         c.append(info);
         return c;
       }
@@ -239,11 +240,12 @@ registrarPainel({
         }
         caixa.append(linha);
       }
-      // comprar: um botão por espécie que mora neste abrigo, enquanto houver vaga
-      if (ofertas.length) {
+      // comprar: um botão por espécie que mora neste abrigo, enquanto houver vaga (bicho de trabalho: um de cada basta)
+      const aVenda = ofertas.filter((o) => !umBasta(o));
+      if (aVenda.length) {
         const linha = el('div', 'abr-comprar');
         if (st.ocupadas >= st.vagas) linha.append(el('span', 'nota', T.animais.semVagas));
-        else for (const o of ofertas) {
+        else for (const o of aVenda) {
           if (!o.liberado) { const t = el('span', 'abr-trava'); t.append(icone('ui/cadeado', 18), figuraDoBicho(o.animal, 28), el('span', '', `${o.nome}: ${T.animais.nivel(o.nivel).toLowerCase()}`)); linha.append(t); continue; }
           const b = botao({ classe: 'verde', aoClicar: () => { const r = mandar({ tipo: 'comprarAnimal', animal: o.animal, abrigo: e.id }); if (r.ok) som.tocar('moeda'); } });
           b.append(figuraDoBicho(o.animal, 30), el('span', '', T.animais.comprarBicho(o.nome)), preco(o.preco));
