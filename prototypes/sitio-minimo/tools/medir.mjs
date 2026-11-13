@@ -21,7 +21,7 @@ console.log(`  ${'total'.padEnd(12)} bruto ${kb(tot[0])}   gzip ${kb(tot[1])}   
 const amb = await abrirNavegador();
 try {
   console.log('\nDesenho da cena inteira (tela 1280 x 720, enquadramento "tudo")');
-  for (const c of ['codigo', 'molde', 'brinquedo']) {
+  for (const c of ['codigo', 'molde', 'brinquedo', ...(process.env.CONJUNTOS_EXTRA || '').split(',').filter(Boolean)]) {
     const { pagina, contexto } = await abrirPagina(amb, `passo,demo,tudo,arte-${c}`, TELAS.paisagem);
     const r = await pagina.evaluate(() => {
       const S = window.__sitio, ini = S.estatisticas();

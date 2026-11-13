@@ -14,7 +14,8 @@ import { abrirNavegador, abrirPagina, TELAS, dist, raiz } from './comum.mjs';
 let falhas = 0;
 const ok = (cond, texto, detalhe = '') => { console.log(`  ${cond ? 'ok  ' : 'FALHOU'} ${texto}${!cond && detalhe ? '\n         ' + detalhe : ''}`); if (!cond) falhas++; return cond; };
 const titulo = (t) => console.log('\n' + t);
-const CONJUNTOS = ['codigo', 'molde', 'brinquedo'];
+// CONJUNTOS_EXTRA=nome1,nome2 acrescenta conjuntos em teste sem mexer neste arquivo (todo conjunto registrado tem de estar na lista)
+const CONJUNTOS = ['codigo', 'molde', 'brinquedo', ...(process.env.CONJUNTOS_EXTRA || '').split(',').filter(Boolean)];
 const INICIAL = 'brinquedo'; // o conjunto de config/arte.json: o que abre quando o endereço não pede outro
 const LIMITE_DEMO = 30 * 60; // a demonstração tem de caber em 30 s
 const S = (f, ...a) => `(${f})(...${JSON.stringify(a)})`;
