@@ -109,6 +109,11 @@ function fechar() {
   relogios.length = 0;
   aberta.remove(); aberta = null;
   if (fila.length) proxima();
-  else { segurarAvisos(false); const cv = document.getElementById('tela'); try { if (cv) cv.focus({ preventScroll: true }); } catch { /* sem foco */ } }
+  else {
+    segurarAvisos(false);
+    // o foco volta para o painel que estiver aberto por baixo (quem navega pelas setas continua nele), ou para o jogo
+    const volta = document.querySelector('#ui .veu .corpo button:not([disabled])') || document.querySelector('#ui .veu .fechar') || document.getElementById('tela');
+    try { if (volta) volta.focus({ preventScroll: true }); } catch { /* sem foco */ }
+  }
   return true;
 }

@@ -268,6 +268,398 @@
    "apoio-dx": "-20"
   }
  },
+ "animal/cavalo/andar-costas": {
+  "chave": "animal/cavalo/andar-costas",
+  "crua": "andar-costas.png",
+  "cruaTamanho": [
+   1536,
+   1024
+  ],
+  "linhasNaCrua": 2,
+  "figurasNaCrua": 8,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 354,
+  "emPeReal": 356,
+  "emPeFonte": 419,
+  "escala": 0.8504,
+  "casa": [
+   288,
+   376
+  ],
+  "apoio": [
+   144,
+   332
+  ],
+  "quadros": 8,
+  "desenhos": 8,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   353,
+   352,
+   355,
+   348,
+   356,
+   350,
+   355,
+   346
+  ],
+  "tamanhoPelaMassa": [
+   208.3,
+   209.8,
+   209.9,
+   207.3,
+   210,
+   210.1,
+   210.1,
+   212.2
+  ],
+  "variacaoAltura": 2.9,
+  "bytes": 244275,
+  "avisos": [],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/cavalo/andar-costas",
+   "altura": "354",
+   "quadros": "8",
+   "qps": "8",
+   "eixo": "massa",
+   "base": "linha",
+   "chao": "0.09",
+   "tamanho-massa": "210",
+   "altura-livre": true
+  }
+ },
+ "animal/cavalo/andar-frente": {
+  "chave": "animal/cavalo/andar-frente",
+  "crua": "andar-frente.png",
+  "cruaTamanho": [
+   1536,
+   1024
+  ],
+  "linhasNaCrua": 2,
+  "figurasNaCrua": 8,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 335,
+  "emPeReal": 331,
+  "emPeFonte": 366,
+  "escala": 0.9039,
+  "casa": [
+   352,
+   352
+  ],
+  "apoio": [
+   176,
+   310
+  ],
+  "quadros": 8,
+  "desenhos": 8,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   327,
+   326,
+   326,
+   314,
+   326,
+   328,
+   331,
+   319
+  ],
+  "tamanhoPelaMassa": [
+   223.8,
+   224.9,
+   225,
+   226,
+   229,
+   229.7,
+   229.1,
+   231.2
+  ],
+  "variacaoAltura": 5.2,
+  "bytes": 280631,
+  "avisos": [
+   "altura varia 5.2% entre quadros (327 326 326 314 326 328 331 319), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/cavalo/andar-frente",
+   "altura": "335",
+   "quadros": "8",
+   "qps": "8",
+   "eixo": "massa",
+   "base": "linha",
+   "chao": "0.09",
+   "tamanho-massa": "229",
+   "altura-livre": true
+  }
+ },
+ "animal/cavalo/galope-costas": {
+  "chave": "animal/cavalo/galope-costas",
+  "crua": "galope-costas.png",
+  "cruaTamanho": [
+   1536,
+   1024
+  ],
+  "linhasNaCrua": 2,
+  "figurasNaCrua": 8,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 354,
+  "emPeReal": 315,
+  "emPeFonte": 352,
+  "escala": 0.8963,
+  "casa": [
+   392,
+   344
+  ],
+  "apoio": [
+   196,
+   300
+  ],
+  "quadros": 8,
+  "desenhos": 8,
+  "qps": 12,
+  "laco": true,
+  "alturas": [
+   267,
+   315,
+   308,
+   304,
+   289,
+   285,
+   272,
+   268
+  ],
+  "tamanhoPelaMassa": [
+   198.5,
+   210,
+   210.6,
+   216.8,
+   211.2,
+   209,
+   207.3,
+   203.9
+  ],
+  "variacaoAltura": 15.3,
+  "bytes": 242317,
+  "avisos": [
+   "altura varia 15.3% entre quadros (267 315 308 304 289 285 272 268), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/cavalo/galope-costas",
+   "altura": "354",
+   "quadros": "8",
+   "qps": "12",
+   "eixo": "massa",
+   "base": "linha",
+   "chao": "0.09",
+   "tamanho-massa": "210",
+   "altura-livre": true
+  }
+ },
+ "animal/cavalo/galope-frente": {
+  "chave": "animal/cavalo/galope-frente",
+  "crua": "galope-frente.png",
+  "cruaTamanho": [
+   1536,
+   1024
+  ],
+  "linhasNaCrua": 2,
+  "figurasNaCrua": 8,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 335,
+  "emPeReal": 300,
+  "emPeFonte": 306,
+  "escala": 0.9803,
+  "casa": [
+   472,
+   352
+  ],
+  "apoio": [
+   236,
+   310
+  ],
+  "quadros": 8,
+  "desenhos": 8,
+  "qps": 12,
+  "laco": true,
+  "alturas": [
+   257,
+   293,
+   280,
+   300,
+   298,
+   296,
+   264,
+   256
+  ],
+  "tamanhoPelaMassa": [
+   218.1,
+   229,
+   232.1,
+   234.7,
+   230.6,
+   227.4,
+   224.8,
+   219
+  ],
+  "variacaoAltura": 14.7,
+  "bytes": 283830,
+  "avisos": [
+   "altura varia 14.7% entre quadros (257 293 280 300 298 296 264 256), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/cavalo/galope-frente",
+   "altura": "335",
+   "quadros": "8",
+   "qps": "12",
+   "eixo": "massa",
+   "base": "linha",
+   "chao": "0.09",
+   "tamanho-massa": "229",
+   "altura-livre": true
+  }
+ },
+ "animal/cavalo/parado-costas": {
+  "chave": "animal/cavalo/parado-costas",
+  "crua": "parado-costas.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 4,
+  "referencia": false,
+  "modo": "molde",
+  "emPe": 354,
+  "emPeReal": 354,
+  "emPeFonte": 619,
+  "escala": 0.5719,
+  "casa": [
+   288,
+   376
+  ],
+  "apoio": [
+   144,
+   332
+  ],
+  "quadros": 8,
+  "desenhos": 4,
+  "qps": 4,
+  "laco": true,
+  "alturas": [
+   354,
+   353,
+   357,
+   351
+  ],
+  "tamanhoPelaMassa": [
+   208.9,
+   212,
+   215.3,
+   208.4
+  ],
+  "variacaoAltura": 1.9,
+  "custosDoMolde": [
+   0,
+   52,
+   67,
+   19
+  ],
+  "bytes": 132822,
+  "avisos": [],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/cavalo/parado-costas",
+   "altura": "354",
+   "quadros": "4",
+   "qps": "4",
+   "alinhar": "molde",
+   "molde": "0.5-1",
+   "em-pe-quadro": "1",
+   "faixa-pes": "0.25",
+   "chao": "0.09",
+   "sequencia": "1,2,2,3,3,1,4,1",
+   "altura-livre": true
+  }
+ },
+ "animal/cavalo/parado-frente": {
+  "chave": "animal/cavalo/parado-frente",
+  "crua": "parado-frente.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 4,
+  "referencia": false,
+  "modo": "molde",
+  "emPe": 335,
+  "emPeReal": 335,
+  "emPeFonte": 530,
+  "escala": 0.6321,
+  "casa": [
+   344,
+   368
+  ],
+  "apoio": [
+   172,
+   326
+  ],
+  "quadros": 8,
+  "desenhos": 4,
+  "qps": 4,
+  "laco": true,
+  "alturas": [
+   335,
+   333,
+   344,
+   330
+  ],
+  "tamanhoPelaMassa": [
+   228.7,
+   228.6,
+   232.5,
+   226.9
+  ],
+  "variacaoAltura": 4.2,
+  "custosDoMolde": [
+   0,
+   41,
+   71,
+   25
+  ],
+  "bytes": 153230,
+  "avisos": [
+   "altura varia 4.2% entre quadros (335 333 344 330), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/cavalo/parado-frente",
+   "altura": "335",
+   "quadros": "4",
+   "qps": "4",
+   "alinhar": "molde",
+   "molde": "0.5-1",
+   "em-pe-quadro": "1",
+   "faixa-pes": "0.25",
+   "chao": "0.09",
+   "sequencia": "1,2,2,3,3,1,4,1",
+   "altura-livre": true
+  }
+ },
  "animal/galinha/andar-costas": {
   "chave": "animal/galinha/andar-costas",
   "crua": "andar-costas.png",
@@ -697,6 +1089,71 @@
    "cor-ref": "236,40,40",
    "altura-livre": true,
    "sequencia": "1,2,2,1,3,3,1,4"
+  }
+ },
+ "animal/jumento/parado-frente": {
+  "chave": "animal/jumento/parado-frente",
+  "crua": "parado-frente.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 4,
+  "referencia": false,
+  "modo": "molde",
+  "emPe": 255,
+  "emPeReal": 255,
+  "emPeFonte": 366,
+  "escala": 0.6967,
+  "casa": [
+   456,
+   280
+  ],
+  "apoio": [
+   228,
+   245
+  ],
+  "quadros": 8,
+  "desenhos": 4,
+  "qps": 4,
+  "laco": true,
+  "alturas": [
+   255,
+   255,
+   248,
+   253
+  ],
+  "tamanhoPelaMassa": [
+   219.1,
+   219.8,
+   219.7,
+   218.8
+  ],
+  "variacaoAltura": 2.7,
+  "custosDoMolde": [
+   0,
+   35,
+   73,
+   44
+  ],
+  "bytes": 150038,
+  "avisos": [],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/jumento/parado-frente",
+   "altura": "255",
+   "quadros": "4",
+   "qps": "4",
+   "alinhar": "molde",
+   "molde": "0.4-1",
+   "em-pe-quadro": "1",
+   "faixa-pes": "0.25",
+   "chao": "0.09",
+   "sequencia": "1,2,2,3,3,1,4,1",
+   "altura-livre": true,
+   "apoio-dx": "-70"
   }
  },
  "animal/ovelha-tosquiada/andar-costas": {
@@ -3026,6 +3483,313 @@
    "tamanho-cor": "47.5",
    "altura-livre": true,
    "qps": "8"
+  }
+ },
+ "personagem/montada-andar-costas": {
+  "chave": "personagem/montada-andar-costas",
+  "crua": "montada-andar-costas.png",
+  "cruaTamanho": [
+   1536,
+   1024
+  ],
+  "linhasNaCrua": 2,
+  "figurasNaCrua": 8,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 458,
+  "emPeReal": 458,
+  "emPeFonte": 441,
+  "escala": 1.0385,
+  "casa": [
+   352,
+   480
+  ],
+  "apoio": [
+   176,
+   439
+  ],
+  "quadros": 8,
+  "desenhos": 8,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   449,
+   446,
+   453,
+   446,
+   458,
+   456,
+   458,
+   453
+  ],
+  "tamanhoPelaMassa": [
+   256.3,
+   258.5,
+   261.7,
+   263.1,
+   264,
+   267.3,
+   267,
+   268.8
+  ],
+  "variacaoAltura": 2.7,
+  "tamanhoPelaCor": [
+   124.3,
+   131.6,
+   131.6,
+   128.2,
+   134.3,
+   135.7,
+   135.2,
+   135.5
+  ],
+  "bytes": 329071,
+  "avisos": [
+   "a folha crua é menor que a saída (figura em pé com 441 pontos para 458): a figura foi ampliada 1.04 vezes"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "personagem/montada-andar-costas",
+   "altura": "458",
+   "quadros": "8",
+   "qps": "8",
+   "eixo": "massa",
+   "base": "linha",
+   "chao": "0.064",
+   "altura-livre": true
+  }
+ },
+ "personagem/montada-andar-frente": {
+  "chave": "personagem/montada-andar-frente",
+  "crua": "montada-andar-frente.png",
+  "cruaTamanho": [
+   1536,
+   1024
+  ],
+  "linhasNaCrua": 2,
+  "figurasNaCrua": 8,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 452,
+  "emPeReal": 452,
+  "emPeFonte": 432,
+  "escala": 1.1091,
+  "casa": [
+   392,
+   504
+  ],
+  "apoio": [
+   196,
+   462
+  ],
+  "quadros": 8,
+  "desenhos": 8,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   475,
+   474,
+   475,
+   470,
+   478,
+   472,
+   479,
+   475
+  ],
+  "tamanhoPelaMassa": [
+   290.4,
+   292.4,
+   289.5,
+   292.7,
+   291.4,
+   293.4,
+   290.9,
+   295.9
+  ],
+  "variacaoAltura": 1.9,
+  "tamanhoPelaCor": [
+   148.1,
+   147.8,
+   147.5,
+   148.7,
+   150.2,
+   149.9,
+   148,
+   149.9
+  ],
+  "bytes": 401238,
+  "avisos": [
+   "a folha crua é menor que a saída (figura em pé com 432 pontos para 452): a figura foi ampliada 1.11 vezes"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "personagem/montada-andar-frente",
+   "altura": "452",
+   "quadros": "8",
+   "qps": "8",
+   "eixo": "massa",
+   "base": "linha",
+   "chao": "0.066",
+   "altura-livre": true,
+   "ajuste": "1.06"
+  }
+ },
+ "personagem/montada-galope-costas": {
+  "chave": "personagem/montada-galope-costas",
+  "crua": "montada-galope-costas.png",
+  "cruaTamanho": [
+   1536,
+   1024
+  ],
+  "linhasNaCrua": 2,
+  "figurasNaCrua": 8,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 458,
+  "emPeReal": 426,
+  "emPeFonte": 408,
+  "escala": 1.0445,
+  "casa": [
+   456,
+   456
+  ],
+  "apoio": [
+   228,
+   415
+  ],
+  "quadros": 8,
+  "desenhos": 8,
+  "qps": 12,
+  "laco": true,
+  "alturas": [
+   373,
+   426,
+   415,
+   409,
+   375,
+   374,
+   343,
+   354
+  ],
+  "tamanhoPelaMassa": [
+   250.8,
+   268.4,
+   270.6,
+   279.6,
+   263,
+   259,
+   252.6,
+   252.9
+  ],
+  "variacaoAltura": 19.6,
+  "tamanhoPelaCor": [
+   118.2,
+   129.2,
+   134.3,
+   138.9,
+   127.1,
+   126,
+   125.3,
+   121.7
+  ],
+  "bytes": 308590,
+  "avisos": [
+   "a folha crua é menor que a saída (figura em pé com 408 pontos para 458): a figura foi ampliada 1.04 vezes",
+   "altura varia 19.6% entre quadros (373 426 415 409 375 374 343 354), esperado nesta ação",
+   "tamanho pela cor de referência varia 16% entre quadros (118 129 134 139 127 126 125 122): confira se a figura muda de tamanho"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "personagem/montada-galope-costas",
+   "altura": "458",
+   "quadros": "8",
+   "qps": "12",
+   "eixo": "massa",
+   "base": "linha",
+   "chao": "0.064",
+   "tamanho-massa": "263",
+   "altura-livre": true
+  }
+ },
+ "personagem/montada-galope-frente": {
+  "chave": "personagem/montada-galope-frente",
+  "crua": "montada-galope-frente.png",
+  "cruaTamanho": [
+   1536,
+   1024
+  ],
+  "linhasNaCrua": 2,
+  "figurasNaCrua": 8,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 479,
+  "emPeReal": 444,
+  "emPeFonte": 408,
+  "escala": 1.089,
+  "casa": [
+   520,
+   488
+  ],
+  "apoio": [
+   260,
+   446
+  ],
+  "quadros": 8,
+  "desenhos": 8,
+  "qps": 12,
+  "laco": true,
+  "alturas": [
+   389,
+   444,
+   427,
+   431,
+   443,
+   436,
+   396,
+   382
+  ],
+  "tamanhoPelaMassa": [
+   277.3,
+   292.2,
+   299.6,
+   298.1,
+   291,
+   289.3,
+   288.7,
+   272.9
+  ],
+  "variacaoAltura": 14,
+  "tamanhoPelaCor": [
+   126.8,
+   134.9,
+   140.9,
+   138.8,
+   132.7,
+   131.4,
+   132.2,
+   122.1
+  ],
+  "bytes": 401119,
+  "avisos": [
+   "a folha crua é menor que a saída (figura em pé com 408 pontos para 479): a figura foi ampliada 1.09 vezes",
+   "altura varia 14.0% entre quadros (389 444 427 431 443 436 396 382), esperado nesta ação",
+   "tamanho pela cor de referência varia 14% entre quadros (127 135 141 139 133 131 132 122): confira se a figura muda de tamanho"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "personagem/montada-galope-frente",
+   "altura": "479",
+   "quadros": "8",
+   "qps": "12",
+   "eixo": "massa",
+   "base": "linha",
+   "chao": "0.062",
+   "tamanho-massa": "291",
+   "altura-livre": true
   }
  },
  "personagem/ordenhar-costas": {

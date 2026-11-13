@@ -3,7 +3,6 @@ Use a sua ferramenta própria de geração de imagens. Não escreva código para
 As imagens anexas são de um jogo de fazenda original, em desenho com contorno:
 - `referencias/var-2-contorno.png`: a cena do jogo (dá o estilo e a câmera);
 - `referencias/personagem.png`: a FOLHA DE MODELO da personagem (parada de frente três quartos, de costas três quartos e de perfil). Ela manda nas proporções, nas cores e na roupa.
-- `referencias/cavalo.png`: a FOLHA DE MODELO do cavalo com sela.
 - `referencias/montaria.png`: a FOLHA DE MODELO DA MONTARIA (a personagem montada no cavalo, de frente três quartos, de costas três quartos e de perfil). Ela manda na pose dela na sela e no tamanho de uma figura em relação à outra.
 - `referencias/cavalo-galope-costas.png`: a folha de animação já pronta do MESMO cavalo, SEM ninguém montado, na mesma ação e na mesma vista. O cavalo desta folha nova faz EXATAMENTE o mesmo movimento, quadro a quadro, na mesma ordem e no mesmo formato de folha; a diferença é que agora a personagem vai montada.
 - `referencias/montada-galope-frente.png`: a folha já pronta da mesma ação com a personagem montada, vista de frente (dá o jeito dela na sela; aqui tudo é visto de costas).

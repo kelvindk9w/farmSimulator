@@ -5,8 +5,12 @@
 // (lavoura.js, REGA_SOZINHA). A que já estava com sede começa a crescer no segundo seguinte.
 import { registrarSistema } from '../registro.js';
 import { REGA_SOZINHA, molharCasa, resolver } from './lavoura.js';
+import { comportamento } from './construcao.js';
 
 export const TIPO_DO_ASPERSOR = 'aspersor';
+// o tipo de entidade é o padrão das construções (o toque abre o cartão dela, de onde se muda de lugar); daqui vai
+// só a altura, para a seta do tutorial. A área regada quem mostra é o desenho (render/terras.js).
+comportamento(TIPO_DO_ASPERSOR, { altura: 1.2 });
 // quantas casas o aspersor alcança para cada lado (2 = as 24 casas em volta)
 export function raioDoAspersor(m) {
   const c = (m.dados.construcoes && m.dados.construcoes[TIPO_DO_ASPERSOR]) || (m.dados.bruto.construcoes || {})[TIPO_DO_ASPERSOR];

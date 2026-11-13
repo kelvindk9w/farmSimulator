@@ -673,6 +673,8 @@ ${FIM}
 }
 
 // ---------- montaria: folha de modelo da interação e a personagem montada (cavalo e personagem num desenho só) ----------
+// A ferramenta de imagens do Codex aceita no máximo 5 imagens de referência (contando a cena de estilo): de costas, a folha de
+// modelo do cavalo fica de fora (a da montaria já mostra o cavalo) para caber a folha de frente da mesma ação.
 
 pedidos['modelo-montaria'] = `${CABECA}
 ${P_MODELO}
@@ -706,8 +708,7 @@ for (const vista of ['frente', 'costas']) {
   ]) {
     pedidos[`personagem-montada-${acao}-${vista}`] = `${CABECA}
 ${P_MODELO}
-- \`referencias/cavalo.png\`: a FOLHA DE MODELO do cavalo com sela.
-- \`referencias/montaria.png\`: a FOLHA DE MODELO DA MONTARIA (a personagem montada no cavalo, de frente três quartos, de costas três quartos e de perfil). Ela manda na pose dela na sela e no tamanho de uma figura em relação à outra.
+${vista === 'frente' ? '- `referencias/cavalo.png`: a FOLHA DE MODELO do cavalo com sela.\n' : ''}- \`referencias/montaria.png\`: a FOLHA DE MODELO DA MONTARIA (a personagem montada no cavalo, de frente três quartos, de costas três quartos e de perfil). Ela manda na pose dela na sela e no tamanho de uma figura em relação à outra.
 - \`referencias/cavalo-${acao}-${vista}.png\`: a folha de animação já pronta do MESMO cavalo, SEM ninguém montado, na mesma ação e na mesma vista. O cavalo desta folha nova faz EXATAMENTE o mesmo movimento, quadro a quadro, na mesma ordem e no mesmo formato de folha; a diferença é que agora a personagem vai montada.
 ${vista === 'costas' ? `- \`referencias/montada-${acao}-frente.png\`: a folha já pronta da mesma ação com a personagem montada, vista de frente (dá o jeito dela na sela; aqui tudo é visto de costas).\n` : ''}
 Preciso da folha de animação da personagem MONTADA NO CAVALO, ${titulo}, vista ${vista === 'frente' ? 'de FRENTE' : 'de COSTAS'} três quartos, para usar como figura 2D animada dentro do jogo. O cavalo e a personagem são um desenho só em cada quadro.

@@ -90,11 +90,29 @@ registrarSistema({
       if (p) construcoes.push(loc.por({ id: tipo, tipo, x: Math.round(p[0]), z: Math.round(p[1]), l: casas ? casas[0] : 0, p: casas ? casas[1] : 0 }));
     }
     loc.entrada = T.pontos.personagem ? [T.pontos.personagem[0], T.pontos.personagem[1]] : [T.inicial[0] + 0.5, T.inicial[1] + 0.5];
-    // uma placa por lote, na casa do lote mais perto do meio da área inicial
-    const cx = (T.inicial[0] + T.inicial[2]) / 2, cz = (T.inicial[1] + T.inicial[3]) / 2;
+    // uma placa por lote, na casa do lote mais perto do meio da área inicial (ou onde terras.json mandar: "placa").
+    // A câmera olha de +X+Z: se ali a placa nasceria atrás da figura de uma construção, ela escorrega pela beirada
+    // do lote até a casa mais perto que fica à vista.
+    const cx = Math.round((T.inicial[0] + T.inicial[2]) / 2), cz = Math.round((T.inicial[1] + T.inicial[3]) / 2);
+    const serve = (x, z) => loc.dentro(x, z) && !loc.ocupa[loc.i(x, z)] && !loc.propria[loc.i(x, z)];
+    // (uma unidade de altura sobe na tela o mesmo que duas casas de fundo; construção grande tem umas 4 de altura)
+    const tapada = (x, z) => construcoes.some((e) => {
+      const u = x - z, s = x + z + 1, alto = e.l * e.p >= 9 ? 4 : 2.5;
+      return u > e.x - e.z - e.p - 1.5 && u < e.x + e.l - e.z + 1.5 && s < e.x + e.l + e.z + e.p && s > e.x + e.z + Math.abs(u - e.x + e.z) - 2 * alto;
+    });
     for (const l of T.lotes) {
-      const a = l.area, px = Math.max(a[0], Math.min(a[2] - 1, Math.round(l.placa ? l.placa[0] : cx))), pz = Math.max(a[1], Math.min(a[3] - 1, Math.round(l.placa ? l.placa[1] : cz)));
-      if (loc.dentro(px, pz) && !loc.ocupa[loc.i(px, pz)] && !loc.propria[loc.i(px, pz)]) loc.por({ id: 'placa-' + l.id, tipo: 'placa', x: px, z: pz, lote: l.id });
+      const a = l.area, px = Math.max(a[0], Math.min(a[2] - 1, l.placa ? Math.round(l.placa[0]) : cx)), pz = Math.max(a[1], Math.min(a[3] - 1, l.placa ? Math.round(l.placa[1]) : cz));
+      let x = px, z = pz;
+      if (!l.placa && tapada(px, pz)) {
+        const naLinha = pz !== cz, naColuna = px !== cx; // a beirada do lote que encosta na área inicial
+        let melhor = Infinity;
+        for (let qz = a[1]; qz < a[3]; qz++) for (let qx = a[0]; qx < a[2]; qx++) {
+          if (!((naLinha && qz === pz) || (naColuna && qx === px))) continue;
+          const d = Math.abs(qx - px) + Math.abs(qz - pz);
+          if (d < melhor && serve(qx, qz) && !tapada(qx, qz)) { melhor = d; x = qx; z = qz; }
+        }
+      }
+      if (serve(x, z)) loc.por({ id: 'placa-' + l.id, tipo: 'placa', x, z, lote: l.id });
     }
     // natureza: cada lote tem a sua mistura; fora dos lotes vale a geral; na área inicial, só fora do miolo limpo
     const limpo = T.limpo || T.inicial, daCasa = (x, z) => (loc.propria[loc.i(x, z)] ? T.naturezaInicial : (T.lotes.find((l) => dentroDe(l.area, x, z)) || T).natureza || T.natureza);

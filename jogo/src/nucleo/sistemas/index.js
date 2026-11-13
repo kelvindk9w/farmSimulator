@@ -10,6 +10,7 @@ import './banca.js';
 import './celeiro.js';
 import './loja.js';
 import './missoes.js';
+import './celeiro-dentro.js'; // frente de construir: entrar e sair do celeiro, e o espaço que vem dos móveis (depois da personagem e das missões)
 // frente das terras: comprar lote, limpar a terra, desgaste e conserto, árvores frutíferas e o aspersor
 import './lotes.js';
 import './limpeza.js';
@@ -23,3 +24,9 @@ import './amigos.js';
 import './roupas.js';
 import './cash.js';
 import './correio.js';
+// frente dos animais: a base comum (compra, abrigo, cocho e bebedouro, ciclo com ausência) e os de produção
+import './animais.js'; // depois de construcao.js e de cash.js (troca ENTREGAS.animal)
+import './producao.js';
+// frente das indústrias e dos pedidos: receitas com fila (bancadas, moinho, cozinha, laticínio) e o quadro de pedidos
+import './industria.js'; // depois de construcao.js, de loja.js e de cash.js
+import './pedidos.js'; // depois de industria.js (o quadro só pede receita de indústria pronta)

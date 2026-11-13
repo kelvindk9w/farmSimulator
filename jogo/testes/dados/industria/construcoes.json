@@ -1,0 +1,11 @@
+{
+  "moinho": {
+    "nome": "Moinho", "tipo": "industria", "onde": "fazenda", "casas": [2, 2], "custo": { "ouro": 10 }, "obraSeg": 30, "nivel": 1, "exige": [], "fila": 2, "limite": 1, "xp": 5,
+    "ampliacoes": [
+      { "nome": "Terceira vaga na fila", "nivel": 2, "custo": { "ouro": 20 }, "cash": 2, "obraSeg": 0, "fila": 3 },
+      { "nome": "Quarta vaga na fila", "nivel": 3, "custo": { "ouro": 40 }, "cash": 3, "obraSeg": 0, "fila": 4 }
+    ]
+  },
+  "cozinha": { "nome": "Cozinha", "tipo": "industria", "onde": "fazenda", "casas": [2, 2], "custo": { "ouro": 10 }, "obraSeg": 30, "nivel": 2, "exige": [], "fila": 2, "limite": 1, "xp": 5 },
+  "quadro-de-pedidos": { "nome": "Quadro de pedidos", "tipo": "util", "onde": "fazenda", "casas": [1, 1], "inicial": true, "nivel": 2 }
+}

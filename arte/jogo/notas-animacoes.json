@@ -54,6 +54,16 @@
    "arquivo": "montaria.png",
    "pedido": "modelo-montaria.md",
    "nota": "Folha de modelo da INTERAÇÃO: a personagem montada no cavalo selado (pés nos estribos, mãos nas rédeas), de frente, de costas e de perfil. Anexada aos pedidos da personagem montada. A folha veio com um véu de sujeira quase transparente no fundo, que foi limpo antes de guardar. Uma rodada."
+  },
+  "jumento": {
+   "arquivo": "jumento.png",
+   "pedido": "modelo-jumento.md",
+   "nota": "Jumento cinza atrelado à carroça de madeira de duas rodas, vazia: frente, costas e perfil. A carroça faz parte da figura. Uma rodada."
+  },
+  "cachorro": {
+   "arquivo": "cachorro.png",
+   "pedido": "modelo-cachorro.md",
+   "nota": "Vira-lata caramelo de coleira vermelha, peito, patas e ponta do rabo brancos: frente, costas e perfil. Uma rodada."
   }
  },
  "folhas": {
@@ -338,6 +348,56 @@
    "pedido": "boi-puxar-costas.md",
    "rodadas": 1,
    "nota": "Par da de frente, em duas fileiras de 4; ampliada 1,09 vez. Apoio sob o corpo do boi (--chao 0.19 --apoio-dx 30)."
+  },
+  "animal/cavalo/parado-frente": {
+   "pedido": "cavalo-parado-frente.md",
+   "rodadas": 1,
+   "nota": "Cavalo selado, sem ninguém: mexe as orelhas, sacode a crina, pisca, balança o rabo. 335 pontos de altura (lombo um pouco acima do da vaca; fora da tabela de escala). Tamanho pela massa 229."
+  },
+  "animal/cavalo/andar-frente": {
+   "pedido": "cavalo-andar-frente.md",
+   "rodadas": 1,
+   "nota": "Passo de quatro tempos, uma pata por vez; a cabeça balança. Em duas fileiras de 4. No quadro 8 ele pisca."
+  },
+  "animal/cavalo/galope-frente": {
+   "pedido": "cavalo-galope-frente.md",
+   "rodadas": 1,
+   "nota": "Galope de oito tempos: recolhe no ar, pousa atrás, estica, pousa na frente, impulso e voo esticado; crina e rabo voando. Em duas fileiras de 4."
+  },
+  "animal/cavalo/parado-costas": {
+   "pedido": "cavalo-parado-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente (354 pontos de altura; tamanho pela massa 210)."
+  },
+  "animal/cavalo/andar-costas": {
+   "pedido": "cavalo-andar-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente."
+  },
+  "animal/cavalo/galope-costas": {
+   "pedido": "cavalo-galope-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente; nos quadros 5 a 7 o corpo esticado fica quase de lado."
+  },
+  "personagem/montada-andar-frente": {
+   "pedido": "personagem-montada-andar-frente.md",
+   "rodadas": 1,
+   "nota": "Cavalo e personagem num desenho só (o jogo troca as duas figuras por esta): o cavalo faz o mesmo passo da folha dele, ela acompanha na sela com as rédeas na mão. Em duas fileiras de 4. A personagem veio um pouco pequena para o cavalo: --ajuste 1.06 reparte a diferença (cavalo 6% maior que o solto, cabeça dela uns 10% menor que a pé). Tamanho pela massa 291."
+  },
+  "personagem/montada-galope-frente": {
+   "pedido": "personagem-montada-galope-frente.md",
+   "rodadas": 1,
+   "nota": "Cavalo e personagem num desenho só, no galope da folha do cavalo; ela vai inclinada para a frente, o lenço voando. Em duas fileiras de 4; ampliada 1,09 vez. Mesma escala da montada andando (tamanho pela massa 291)."
+  },
+  "personagem/montada-andar-costas": {
+   "pedido": "personagem-montada-andar-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente. Figura inteira com 458 pontos: o cavalo fica uns 5% maior que o solto e a cabeça dela do tamanho da de a pé. Tamanho pela massa 263. O pedido foi com seis referências e a ferramenta do Codex só aceita cinco (ele mesmo descartou uma)."
+  },
+  "personagem/montada-galope-costas": {
+   "pedido": "personagem-montada-galope-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente, na escala da montada andando de costas (tamanho pela massa 263). Pedido com cinco referências (sem a folha de modelo do cavalo, que a da montaria já mostra)."
   }
  },
  "geral": [

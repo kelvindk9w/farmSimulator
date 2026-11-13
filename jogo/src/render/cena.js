@@ -11,7 +11,16 @@ import { estadoDaPlanta, estagioDaPlanta } from '../nucleo/sistemas/lavoura.js';
 
 const MAX = 1200; // figuras num quadro
 const ENT = 0, PLANTA = 1, PERS = 2;
-const COR_DA_ACAO = { arar: '#c98a45', semear: '#74b83a', regar: '#4aa9e6', colher: '#f6c12c', encher: '#4aa9e6', vender: '#f6c12c', guardar: '#f6e3b5', pegar: '#f6e3b5' };
+export const COR_DA_ACAO = { arar: '#c98a45', semear: '#74b83a', regar: '#4aa9e6', colher: '#f6c12c', encher: '#4aa9e6', vender: '#f6c12c', guardar: '#f6e3b5', pegar: '#f6e3b5' }; // (as frentes acrescentam as suas)
+// o que as frentes desenham a mais, cada uma no seu arquivo: registrarCamada('chao' | 'cima', (g, cam, mundo, S, cena, dt) => ...)
+//   'chao' = rente ao chão, depois das marcas e antes das figuras; 'cima' = por cima de tudo, depois dos avisos das plantas
+//   'fundo' = logo depois do chão, antes das marcas (calçamento, o piso do celeiro por dentro)
+export const CAMADAS = { fundo: [], chao: [], cima: [] };
+export function registrarCamada(onde, f) { CAMADAS[onde].push(f); }
+// estado visual da personagem sem peça própria no catálogo: usa a de um gesto parecido
+export const GESTO_PARECIDO = {};
+// o que uma camada desenha por cima de tudo e recebe toque (a etiqueta de um lote): (mundo, px, py, cena) → id da entidade | null
+export const ALVOS_DE_CIMA = [];
 const PASSADA = { andar: true, correr: true, carregar: true }; // estados em que os quadros seguem o passo, não o relógio
 const FOLGA = 0.25; // folga para a figura não ficar trocando de lado quando o rumo está na divisa
 
@@ -34,7 +43,7 @@ export class Cena {
     this.v = { chave: '', quadro: 0, fase: 0, espelhar: false, variante: 0 };
     this.pv = { x: 0, z: 0, rumo: 0, vel: 0, fase: 0, estado: 'parada', t: 0, p: 0, acao: null };
     this.pers = { frente: true, direita: false, primeira: true, resolvido: {} };
-    this.destaque = { x: -1, z: -1, entidade: null, cor: '#ffffff' }; // casa ou entidade sob o cursor ou à frente dela
+    this.destaque = { x: -1, z: -1, entidade: null, cor: '#ffffff', casas: null }; // casa ou entidade sob o cursor ou à frente dela (casas = todas as que a ação alcança)
     this.seta = { ligada: false, x: 0, z: 0, alto: 0 }; // seta do tutorial sobre um ponto do mundo
     this.mostrarFila = true;
     this.tempo = 0;
@@ -60,6 +69,7 @@ export class Cena {
     const A = this.atlas, dir = lado ? 'costas' : 'frente';
     const tenta = [[estado, dir]];
     if (estado === 'correr' || estado === 'carregar') tenta.push(['andar', dir]);
+    if (GESTO_PARECIDO[estado]) tenta.push([estado, 'frente'], [GESTO_PARECIDO[estado], dir], [GESTO_PARECIDO[estado], 'frente']);
     if (!PASSADA[estado] && estado !== 'parada') tenta.push([estado, 'frente'], ['trabalhar', dir], ['trabalhar', 'frente']);
     let achou = null;
     for (const [e, d] of tenta) if (A.tem('personagem/' + e + '-' + d)) { achou = { chave: 'personagem/' + e + '-' + d, deFrente: d === 'frente', reserva: false, estado: e }; break; }
@@ -76,8 +86,10 @@ export class Cena {
     cam.preparar();
     this.part.atualizar(dt);
     this.chao.desenhar(g, cam, m, dt, orcamentoDoChao);
+    for (let k = 0; k < CAMADAS.fundo.length; k++) CAMADAS.fundo[k](g, cam, m, S, this, dt);
 
     this._marcasNoChao(g, cam, m, loc, S);
+    for (let k = 0; k < CAMADAS.chao.length; k++) CAMADAS.chao[k](g, cam, m, S, this, dt);
     this.part.desenharNoChao(g, cam);
 
     // junta o que aparece
@@ -86,6 +98,7 @@ export class Cena {
     const E = loc.entidades;
     for (let k = 0; k < E.length && n < MAX - 2; k++) {
       const e = E[k], cx = e.x + e.l / 2, cz = e.z + e.p / 2, sx = cam.telaX(cx, cz), sy = cam.telaY(cx, 0, cz), meia = ((e.l + e.p) / 2) * KX * S + hx;
+      if (TIPOS[e.tipo].plano) continue; // rente ao chão (calçamento): quem desenha é a camada de fundo da sua frente
       if (sx + meia < 0 || sx - meia > W || sy + ((e.l + e.p) / 2) * KY * S + hy < 0 || sy - 5 * S > H) continue;
       const it = itens[n++]; it.tipo = ENT; it.ref = e; it.x = cx; it.z = cz; it.prof = cx + cz;
     }
@@ -124,13 +137,14 @@ export class Cena {
       const it = itens[o[k]], sx = cam.telaX(it.x, it.z), sy = cam.telaY(it.x, 0, it.z);
       if (it.tipo === ENT) {
         const e = it.ref, v = this.v;
-        v.quadro = 0; v.espelhar = false; v.variante = 0;
+        v.quadro = 0; v.espelhar = false; v.variante = 0; v.desenhar = null;
         TIPOS[e.tipo].visual(m, e, v);
         // o que está na frente da personagem ou de uma casa-alvo fica meio transparente (some e volta com suavidade)
         const alvo = this._tapa(it, e, v, sx, sy, S) ? 0.38 : 1;
         e.va = e.va === undefined ? alvo : e.va + (alvo - e.va) * Math.min(1, dt * 9 + (dt === 0 ? 1 : 0));
         if (e.va < 0.985) g.globalAlpha = e.va;
-        if (!this.atlas.desenhar(g, v.chave, v.quadro, sx, sy, S, v.espelhar)) desenharReserva(g, figuraDeReserva(v.chave, 0, e.l, e.p, v.variante), sx, sy, S, v.espelhar);
+        if (v.desenhar) v.desenhar(g, this, m, e, sx, sy, S); // o tipo desenha a si mesmo (obra, cerca em trechos, camadas): v.chave continua valendo para a caixa do toque
+        else if (!this.atlas.desenhar(g, v.chave, v.quadro, sx, sy, S, v.espelhar)) desenharReserva(g, figuraDeReserva(v.chave, 0, e.l, e.p, v.variante), sx, sy, S, v.espelhar);
         g.globalAlpha = 1;
       } else if (it.tipo === PLANTA) {
         const pl = it.ref, chave = this.chaveDaCultura(pl.cultura, estagioDaPlanta(m, pl));
@@ -139,6 +153,7 @@ export class Cena {
     }
 
     this._avisosDasPlantas(g, cam, m, S);
+    for (let k = 0; k < CAMADAS.cima.length; k++) CAMADAS.cima[k](g, cam, m, S, this, dt);
     this.part.desenhar(g, cam);
     if (this.seta.ligada) this._seta(g, cam, S);
   }
@@ -274,9 +289,10 @@ export class Cena {
   entidadeEm(m, cx, cy) {
     const cam = this.cam, loc = m.local, S = cam.S, px = cx * cam.dpr, py = cy * cam.dpr, c = this.caixa, v = this.v;
     let melhor = null, prof = -Infinity;
+    for (let k = 0; k < ALVOS_DE_CIMA.length; k++) { const id = ALVOS_DE_CIMA[k](m, px, py, this); if (id) return id; }
     for (const e of loc.entidades) {
       const x = e.x + e.l / 2, z = e.z + e.p / 2, sx = cam.telaX(x, z), sy = cam.telaY(x, 0, z);
-      if (Math.abs(sx - px) > 4 * S || py > sy + 2.5 * S || py < sy - 5 * S) continue;
+      if (Math.abs(sx - px) > 4 * S || py > sy + 2.5 * S || py < sy - 5 * S || TIPOS[e.tipo].plano) continue; // (o calçamento não tapa o toque no chão)
       v.quadro = 0; v.variante = 0;
       TIPOS[e.tipo].visual(m, e, v);
       if (!this.atlas.caixa(v.chave, 0, sx, sy, S, c) || !this.atlas.pronta(v.chave)) {

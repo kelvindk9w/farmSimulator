@@ -54,7 +54,7 @@ export function ligarTeclado(entrada) {
     if (e.code === 'Space' || e.code === 'Enter' || e.code === 'NumpadEnter') { e.preventDefault(); if (!e.repeat) { J.meio = 'teclas'; entrada.usouTeclas(); J.mundo.comando({ tipo: 'agir' }); } return; }
     if (e.repeat) return;
     if (e.code === 'KeyQ' || e.code === 'KeyE') { J.mundo.comando({ tipo: 'trocarModo', passo: e.code === 'KeyQ' ? -1 : 1 }); som.tocar('toque'); return; }
-    if (/^Digit[1-9]$/.test(e.code)) { const md = modosEmOrdem()[+e.code.slice(5) - 1]; if (md) { J.mundo.comando({ tipo: 'escolherModo', modo: md.id }); som.tocar('toque'); } return; }
+    if (/^Digit[1-9]$/.test(e.code)) { const md = modosEmOrdem().filter((x) => !x.disponivel || x.disponivel(J.mundo))[+e.code.slice(5) - 1]; if (md) { J.mundo.comando({ tipo: 'escolherModo', modo: md.id }); som.tocar('toque'); } return; }
     if (e.code === 'Equal' || e.code === 'NumpadAdd') { entrada.zoom(1.2); return; }
     if (e.code === 'Minus' || e.code === 'NumpadSubtract') { entrada.zoom(1 / 1.2); return; }
     if (ATALHO[e.code]) { abrirPainel(ATALHO[e.code]); return; }

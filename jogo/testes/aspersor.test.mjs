@@ -1,20 +1,21 @@
 // O aspersor rega sozinho as casas em volta, também com o jogo fechado. Quem o coloca no terreno é o sistema de
-// construir; aqui a entidade é posta à mão (basta existir uma de tipo "aspersor", pronta).
+// construir; para a rega basta existir no local uma entidade de tipo "aspersor", pronta (aqui, posta à mão ou como construção).
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { dadosDeTeste, ouvirTudo, arar, semear, pular, modo, tocar, ateParar } from './apoio.mjs';
+import { dadosDeTeste, ouvirTudo, arar, semear, pular, modo, tocar, porConstrucao } from './apoio.mjs';
 import { comTerras, mundoDasTerras } from './apoio-terras.mjs';
 import { Mundo } from '../src/nucleo/mundo.js';
-import { TIPOS, registrarTipo } from '../src/nucleo/registro.js';
 import { plantaEm, estadoDaPlanta } from '../src/nucleo/sistemas/lavoura.js';
 import { raioDoAspersor, casasDoAspersor, regadaPorAspersor, aspersoresDe } from '../src/nucleo/sistemas/aspersor.js';
 
-if (!TIPOS.aspersor) registrarTipo({ tipo: 'aspersor', casas: [1, 1], bloqueia: true }); // nos dados pequenos não há a construção
+// nos dados pequenos não há a construção: entra aqui, com o mesmo formato de construcoes.json
+const ASPERSOR = { nome: 'Aspersor', tipo: 'util', onde: 'fazenda', casas: [1, 1], custo: { ouro: 5 }, obraSeg: 30, nivel: 1, exige: [], efeito: { tipo: 'regar', raio: 2 } };
+const comAspersor = (b) => { comTerras(b); b.construcoes.aspersor = { ...ASPERSOR }; };
 const estado = (m, x, z) => { const pl = plantaEm(m, x, z); return pl ? estadoDaPlanta(m, pl) : null; };
 // milho (2 regas, 600 s) perto e longe do lugar do aspersor
 const PERTO = [[11, 13], [12, 14]], LONGE = [[16, 13]];
-function comMilho(mais) {
-  const m = mundoDasTerras(mais);
+function comMilho() {
+  const m = mundoDasTerras(comAspersor);
   m.progresso.nivel = 2; m.posses.bolsa['semente-milho'] = 5;
   arar(m, [...PERTO, ...LONGE]); semear(m, [...PERTO, ...LONGE], 'semente-milho');
   return m;
@@ -22,11 +23,11 @@ function comMilho(mais) {
 const porAspersor = (m, x, z, mais) => m.local.por({ id: 'aspersor-1', tipo: 'aspersor', x, z, ...mais });
 
 test('o alcance vem dos dados (padrão 2: as 24 casas em volta)', () => {
-  const m = mundoDasTerras();
+  const m = mundoDasTerras(comAspersor);
   assert.equal(raioDoAspersor(m), 2);
   assert.equal(casasDoAspersor(m, m.local, 12, 12).length, 24);
   assert.equal(casasDoAspersor(m, m.local, 0, 0).length, 8, 'na quina do mapa, só o que existe');
-  const m2 = mundoDasTerras((b) => { b.construcoes.aspersor = { nome: 'Aspersor', tipo: 'util', onde: 'fazenda', casas: [1, 1], custo: { ouro: 5 }, obraSeg: 0, nivel: 1, efeito: { tipo: 'regar', raio: 1 } }; });
+  const m2 = mundoDasTerras((b) => { comAspersor(b); b.construcoes.aspersor.efeito = { tipo: 'regar', raio: 1 }; });
   assert.equal(raioDoAspersor(m2), 1);
   assert.equal(casasDoAspersor(m2, m2.local, 12, 12).length, 8);
 });
@@ -82,7 +83,7 @@ test('aspersor em obra ainda não rega; pronta a obra, começa', () => {
 });
 
 test('o que se planta depois, ao alcance, é regado no segundo seguinte; a rega à mão continua valendo fora dele', () => {
-  const m = mundoDasTerras();
+  const m = mundoDasTerras(comAspersor);
   porAspersor(m, 12, 12);
   arar(m, [[12, 13], [16, 16]]); semear(m, [[12, 13], [16, 16]]);
   m.avancar(1.1);
@@ -94,13 +95,25 @@ test('o que se planta depois, ao alcance, é regado no segundo seguinte; a rega 
   assert.equal(estado(m, 12, 13), 'pronta');
 });
 
-test('gravar e carregar com aspersor: a lavoura ao alcance continua crescendo sozinha', () => {
+test('colocado como construção (o contrato do sistema de construir): rega quando a obra acaba, e volta da gravação regando', () => {
   const m = comMilho();
-  porAspersor(m, 12, 13);
-  m.avancar(2);
+  const e = porConstrucao(m, 'aspersor', 12, 13, { obraSeg: 30 });
+  assert.equal(e.tipo, 'aspersor'); assert.ok(e.obraAte > m.agora);
+  m.avancar(5);
+  assert.equal(estado(m, 11, 13), 'sede', 'em obra, não rega');
+  m.avancar(27);
+  assert.equal(e.obraAte, 0, 'a obra acabou');
+  assert.equal(estado(m, 11, 13), 'crescendo');
   const g = JSON.parse(JSON.stringify(m.salvar()));
-  const m2 = Mundo.carregar(dadosDeTeste(comTerras), g);
-  porAspersor(m2, 12, 13); // (quem regrava a entidade é o sistema de construir; aqui, à mão)
+  const m2 = Mundo.carregar(dadosDeTeste(comAspersor), g);
+  assert.equal(aspersoresDe(m2.local).length, 1, 'o sistema de construir regrava a entidade');
   pular(m2, 3600);
   assert.equal(estado(m2, 11, 13), 'pronta');
+  assert.equal(estado(m2, 16, 13), 'sede');
+  // mudado de lugar, passa a regar o que está perto do lugar novo
+  const m3 = comMilho();
+  const a = porConstrucao(m3, 'aspersor', 12, 13);
+  assert.equal(m3.comando({ tipo: 'moverConstrucao', entidade: a.id, x: 16, z: 14 }).ok, true);
+  m3.avancar(1.1);
+  assert.equal(estado(m3, 16, 13), 'crescendo');
 });

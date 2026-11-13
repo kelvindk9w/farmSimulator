@@ -103,11 +103,15 @@ export function guiaDaMissao(m, out = passo) {
   out.tipo = null; out.item = null;
   const a = missaoAtual(m);
   if (!a || a.esperaNivel) return guiaLivre(m, out);
-  const o = a.missao.objetivo, f = o.filtro || {};
+  return guiaDoEvento(m, a.missao.objetivo.evento, a.missao.objetivo.filtro || {}, out);
+}
+// O próximo passo para fazer acontecer o evento "evento" com o filtro "f". O guia de um evento pode pedir o de outro:
+// o de "entregou" pede o de "colheu" do item que falta no pedido; o de "produziu", o do ingrediente que falta.
+export function guiaDoEvento(m, evento, f = {}, out = passo) {
   const culturaDoItem = (it) => { for (const c of Object.values(m.dados.culturas)) if (c.produto === it) return c.id; return null; };
-  const outros = GUIAS[o.evento];
+  const outros = GUIAS[evento];
   if (outros) for (let k = 0; k < outros.length; k++) { const r = outros[k](m, f, out); if (r) return r; }
-  switch (o.evento) {
+  switch (evento) {
     case 'arou': return passoArar(m, out);
     case 'plantou': return passoPlantar(m, um(f.item) || sementeDa(m, um(f.cultura)), out);
     case 'encheu': return entidade(out, 'poco');

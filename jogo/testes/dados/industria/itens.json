@@ -1,0 +1,8 @@
+{
+  "fuba": { "nome": "Fubá", "tipo": "produto", "venda": 12 },
+  "racao": { "nome": "Ração", "tipo": "racao", "venda": 2 },
+  "bolo": { "nome": "Bolo de fubá", "tipo": "produto", "venda": 50 },
+  "duzia": { "nome": "Dúzia de ovos", "tipo": "produto", "venda": 70 },
+  "cartela": { "nome": "Cartela vazia", "tipo": "embalagem", "compra": 3, "nivel": 1 },
+  "banana": { "nome": "Banana", "tipo": "colheita", "venda": 6 }
+}

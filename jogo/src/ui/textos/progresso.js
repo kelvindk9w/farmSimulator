@@ -53,6 +53,12 @@ T.fazenda = {
   conquistas: 'Conquistas', presentes: 'Presente do dia', amigos: 'Amigos', roupas: 'Guarda-roupa', cash: 'Loja de cash', caderno: 'Caderno do vizinho',
   conquistasProntas: (n) => (n === 1 ? 'Um prêmio de conquista' : `${n} prêmios de conquista`),
   presenteDoDia: 'O presente de hoje', presenteDeConvite: 'O presente de boas-vindas', presentesDeAmigos: (n) => (n === 1 ? 'Um presente de amigo' : `${n} presentes de amigos`),
+  // a linha pequena de cada atalho
+  resumo: {
+    conquistas: (feitos, total) => `${feitos} de ${total} prêmios`, presenteHoje: 'Tem presente hoje!', presenteAmanha: 'Amanhã tem outro',
+    amigos: 'Convite e foto da fazenda', roupas: (n) => (n === 0 ? 'Nenhuma peça ainda' : n === 1 ? 'Uma peça' : `${n} peças`), cash: (n) => `Você tem ${n}`,
+    caderno: (n) => (n === 0 ? 'As lições do vizinho' : n === 1 ? 'Uma lição' : `${n} lições`),
+  },
 };
 
 T.conquistas = {
@@ -115,7 +121,7 @@ T.amigos = {
 };
 
 T.cash = {
-  titulo: 'Loja de cash', teste: 'Versão de teste: nenhuma cobrança é feita. A compra é de mentira e o cash entra na hora.',
+  titulo: 'Loja de cash', aba: 'Cash', teste: 'Versão de teste: nenhuma cobrança é feita. A compra é de mentira e o cash entra na hora.',
   pacotes: 'Pacotes de cash', reais, comprar: 'Comprar', ofertas: 'Para gastar', roupas: 'Roupas', enfeites: 'Enfeites da fazenda', animais: 'Bichos especiais',
   tempo: 'Concluir na hora', tempoInfo: (g) => `Onde houver um relógio (obra, fila de produção, muda crescendo) aparece o botão de concluir. Faltando até ${tempo(g)}, é de graça.`,
   tempoEscada: (lista) => lista.map(([seg, n]) => `${tempo(seg)}: ${n}`).join(' · '),
@@ -132,13 +138,13 @@ T.cash = {
 };
 
 T.concluir = {
-  botao: 'Concluir', gratis: 'grátis', titulo: 'Concluir agora?',
+  botao: 'Concluir', gratis: 'grátis', titulo: 'Concluir agora?', teste: 'Relógio de teste',
   pergunta: (nome, seg, cash) => `${nome ? nome + ': f' : 'F'}alta ${tempo(seg)}. Concluir agora por ${numero(cash)} de cash?`,
   sim: (cash) => `Concluir (${numero(cash)})`, nao: 'Esperar', concluiu: (d) => (d.nome ? `${d.nome}: pronto!` : 'Pronto!'),
 };
 
 T.roupas = {
-  titulo: 'Guarda-roupa', partes: { chapeu: 'Na cabeça', roupa: 'Roupa', calcado: 'Nos pés', pintura: 'Ferramentas' },
+  titulo: 'Guarda-roupa', aba: 'Roupas', usando: 'Usando', premioCurto: 'Prêmio', partes: { chapeu: 'Na cabeça', roupa: 'Roupa', calcado: 'Nos pés', pintura: 'Ferramentas' },
   vestir: 'Vestir', tirar: 'Tirar', vestindo: 'Está usando', comprarOuro: 'Comprar', comprarCash: 'Comprar',
   emBreve: 'Em breve: o desenho desta peça ainda não está pronto.', nivel: (n) => `Libera no nível ${n}`,
   premio: 'É prêmio: não se compra.', escolha: 'Toque numa peça para provar.', provando: 'Provando', tem: 'É sua',

@@ -44,9 +44,11 @@ export function ligarEntrada(hud) {
       if (relogio > 0) return;
       relogio = 0.2;
       let texto = '';
+      d.casas = null;
       if (ent !== null || x >= 0) {
         const q = ent !== null ? descreverEntidade(m, ent) : descreverCasa(m, x, z);
         if (q) texto = q.acao ? fraseDaAcao(q.acao, q.dados, m.dados) : frase(q.texto, q.dados, m.dados);
+        if (q && q.acao && q.casas) d.casas = q.casas; // ferramenta com área: todas as casas que a ação alcança ficam marcadas
       }
       hud.dica(texto);
     },

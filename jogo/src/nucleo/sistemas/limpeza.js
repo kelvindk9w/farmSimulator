@@ -7,6 +7,7 @@ import { registrarAcao, registrarTipo, registrarModo, registrarEvento, TIPOS } f
 import { ferramentaNoCinto, ferramentaNoSuporte, darItem } from './posses.js';
 import { darXp } from './niveis.js';
 import { OBSTACULOS, tirarObstaculo } from './terras.js';
+import { cabe, acharCaminho } from '../caminho.js';
 import { registrarGuia } from '../guia.js';
 
 const ACAO_DA = { foice: 'rocar', machado: 'cortar', picareta: 'quebrar' };
@@ -43,6 +44,18 @@ export function levaJunto(m, e) {
     if (o && o.tipo === e.tipo && loc.ehPropria(x, z) && !limpezaPrometida(m, o.id)) out.push(o.id);
   }
   return out;
+}
+
+// A personagem chega a algum lado do obstáculo? Num lote recém-comprado quase tudo está fechado por outros
+// obstáculos: limpa-se da beirada para dentro.
+const LADOS = [[0.5, -0.5], [0.5, 1.5], [-0.5, 0.5], [1.5, 0.5]];
+export function alcancaObstaculo(m, e) {
+  const loc = m.local, p = m.personagem;
+  for (let k = 0; k < LADOS.length; k++) {
+    const x = e.x + LADOS[k][0], z = e.z + LADOS[k][1];
+    if (cabe(loc, x, z) && (Math.hypot(x - p.x, z - p.z) < 0.3 || acharCaminho(loc, p.x, p.z, x, z))) return true;
+  }
+  return false;
 }
 
 // o que o toque num obstáculo faz
@@ -84,6 +97,8 @@ function registrarLimpeza(id, ferramenta, visual, dur) {
       if (!m.local.ehPropria(e.x, e.z)) return NAO('terra-a-venda');
       const fer = ferramentaDe(m, ferramenta);
       if (fer && forcaDe(m, fer) < O.forcaMinima) return NAO('ferramenta-fraca', { obstaculo: e.tipo, nome: O.nome, funcao: ferramenta, item: fer }, true);
+      // fechado por outros obstáculos: diz o que fazer, em vez de um "não dá para chegar lá"
+      if (!alcancaObstaculo(m, e)) return NAO('caminho-fechado', { obstaculo: e.tipo, nome: O.nome });
       return { ok: true };
     },
     aoEfeito(m, alvo, args) {
@@ -113,7 +128,7 @@ export function temFerramentaDeLimpar(m) {
 
 // modo "limpar": o toque num obstáculo já limpa em qualquer modo; neste, arrastar o dedo pinta vários de uma vez
 registrarModo({
-  id: 'limpar', ordem: 40,
+  id: 'limpar', ordem: 40, icone: 'icone/foice-velha', // (até existir a peça "ui/limpar")
   disponivel: temFerramentaDeLimpar,
   pintaEntidade: (m, e) => !!TIPOS[e.tipo].obstaculo,
   acaoNaCasa: () => null, // casa livre: só anda
@@ -123,19 +138,25 @@ registrarEvento('limpou', { campos: ['obstaculo', 'x', 'z', 'itens', 'n'], aceit
 registrarEvento('golpeou', { campos: ['obstaculo', 'x', 'z', 'entidade', 'falta'] });
 
 // o obstáculo mais perto da personagem que dá para limpar agora (em terra própria, com a ferramenta que ela tem,
-// ainda fora da fila e com algum lado livre para chegar); tipos = lista de tipos que servem (null = qualquer um)
+// ainda fora da fila e com um lado livre aonde ela chega); tipos = lista de tipos que servem (null = qualquer um)
+const pertos = [];
 export function obstaculoPerto(m, tipos) {
   const loc = m.local, p = m.personagem;
-  let melhor = Infinity, achou = null;
+  pertos.length = 0;
   for (const e of loc.entidades) {
     if (!TIPOS[e.tipo].obstaculo || (tipos && !tipos.includes(e.tipo)) || !loc.ehPropria(e.x, e.z)) continue;
-    const d = Math.hypot(e.x + 0.5 - p.x, e.z + 0.5 - p.z);
-    if (d >= melhor) continue;
     if (!(loc.andavel(e.x + 1, e.z) || loc.andavel(e.x - 1, e.z) || loc.andavel(e.x, e.z + 1) || loc.andavel(e.x, e.z - 1))) continue;
-    if (!acaoNoObstaculo(m, e).acao) continue;
-    melhor = d; achou = e;
+    pertos.push(e);
   }
-  return achou;
+  pertos.sort((a, b) => Math.hypot(a.x + 0.5 - p.x, a.z + 0.5 - p.z) - Math.hypot(b.x + 0.5 - p.x, b.z + 0.5 - p.z));
+  // (o caminho só se confere nos mais próximos: o que está perto e fechado não esconde o resto, mas a conta fica curta)
+  for (let k = 0, n = 0; k < pertos.length && n < 12; k++) {
+    const e = pertos[k];
+    if (!acaoNoObstaculo(m, e).acao) continue;
+    n++;
+    if (alcancaObstaculo(m, e)) return e;
+  }
+  return null;
 }
 // missão de limpar: o guia aponta o obstáculo mais perto do tipo pedido
 registrarGuia('limpou', (m, f, out) => {

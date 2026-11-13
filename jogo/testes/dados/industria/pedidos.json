@@ -1,0 +1,16 @@
+{
+  "nivel": 2,
+  "vagas": [{ "nivel": 2, "vagas": 2 }, { "nivel": 4, "vagas": 3 }],
+  "valorAlvo": { "base": 10, "expoente": 1, "variacao": [0.8, 1.2] },
+  "bonusOuro": 1.5,
+  "xpPorOuro": 0.5,
+  "esperaSeg": { "base": 100, "porNivel": 10, "max": 125 },
+  "descartar": { "esperaVezes": 2 },
+  "trocaGratisAposSeg": 1000,
+  "linhas": [{ "ateNivel": 2, "pesos": [1] }, { "ateNivel": 99, "pesos": [0.5, 0.5] }],
+  "categorias": { "cultura": 0.4, "fruta": 0.1, "animal": 0.2, "receita": 0.3 },
+  "loteMaximo": { "cultura": [{ "ateSeg": 100, "n": 8 }, { "ateSeg": 99999, "n": 4 }], "fruta": 4, "animal": 4, "receita": [{ "ateSeg": 100, "n": 3 }, { "ateSeg": 99999, "n": 2 }] },
+  "regras": { "soPedeOQueOJogadorProduz": true, "semItemRepetido": true, "fracaoMinimaDaLinha": 0.4, "viesDeEstoque": 0.5, "pesoDaNovidade": 3, "niveisDeNovidade": 1 },
+  "fora": ["racao"],
+  "clientes": [{ "id": "dona-zefa", "nome": "Dona Zefa" }, { "id": "seu-juca", "nome": "Seu Juca" }, { "id": "escola", "nome": "Merenda da escola" }]
+}

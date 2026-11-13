@@ -2,17 +2,22 @@
 import { el, icone, botao } from '../dom.js';
 import { T, numero, frase } from '../textos.js';
 import { J } from '../../contexto.js';
-import { registrarPainel } from './registro.js';
+import { registrarPainel, abrirPainel } from './registro.js';
 import { ofertasDaLoja } from '../../nucleo/sistemas/loja.js';
 import { avisar } from '../avisos.js';
 import { som } from '../../plataforma/som.js';
 
 const TRAVADAS_A_MOSTRA = 2; // das ofertas que o nível ainda não libera, mostra só as próximas
+// abas que levam a outro painel (terras, animais, construir...): cada frente acrescenta a sua { id, nome, painel, arg }
+export const ABAS_DE_FORA = [];
+// a linha de informação de uma oferta: cada frente acrescenta (mundo, item) → texto | null para o que é dela
+export const INFO_DA_OFERTA = [];
 
 function preco(n) { const s = el('span', 'preco'); s.append(icone('icone/ouro', 18), el('span', '', numero(n))); return s; }
 
 function infoDe(m, it) {
   const D = m.dados;
+  for (const f of INFO_DA_OFERTA) { const t = f(m, it); if (t) return t; }
   if (it.tipo === 'semente') { const c = D.culturas[D.culturaDaSemente[it.id]]; return c ? T.loja.cultura(c, D.itens[c.produto]) : ''; }
   if (it.funcao === 'regador') return T.loja.capacidadeRegador(it.capacidade);
   if (it.funcao === 'cesto') return T.loja.capacidadeCesto(it.capacidade);
@@ -35,13 +40,14 @@ registrarPainel({
       ctx.saldo.append(icone('icone/ouro', 20), el('span', '', numero(m.posses.ouro)));
       if (!abas.length) { corpo.append(el('div', 'vazio', T.loja.vazio)); return; }
       if (!abas.some((a) => a.id === aba)) aba = (arg && arg.item && (abas.find((a) => a.ofertas.some((o) => o.item === arg.item)) || {}).id) || abas[0].id;
-      if (abas.length > 1) {
+      if (abas.length + ABAS_DE_FORA.length > 1) {
         const linha = el('div', 'abas');
         for (const a of abas) {
           const b = botao({ texto: a.nome, classe: 'aba' + (a.id === aba ? ' ativo' : ''), aoClicar: () => { aba = a.id; som.tocar('toque'); desenhar(); const n = corpo.querySelector(`[data-k="aba-${a.id}"]`); if (n) n.focus({ preventScroll: true }); } });
           b.dataset.k = 'aba-' + a.id;
           linha.append(b);
         }
+        for (const a of ABAS_DE_FORA) { const b = botao({ texto: a.nome, classe: 'aba', aoClicar: () => { som.tocar('toque'); abrirPainel(a.painel, a.arg); } }); b.dataset.k = 'aba-' + a.id; linha.append(b); }
         corpo.append(linha);
       }
       const grade = el('div', 'grade');

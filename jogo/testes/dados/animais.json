@@ -1,0 +1,3 @@
+{
+  "galinha": { "nome": "Galinha", "familia": "producao", "abrigo": "galinheiro", "preco": { "ouro": 10 }, "nivel": 1, "come": { "milho": 1 }, "bebe": 1, "produto": "ovo", "rende": 1, "cicloSeg": 100, "acumula": 3, "ferramenta": "caixa-de-ovos", "vidaProdutiva": 20, "fimDeVida": { "frigorifico": 4, "fazendeiro": 6 }, "xp": 2 }
+}

@@ -9,7 +9,7 @@ import { ARADA } from '../src/nucleo/local.js';
 import { descreverEntidade } from '../src/nucleo/sistemas/personagem.js';
 import { situacaoDoLote, situacaoDosLotes } from '../src/nucleo/sistemas/lotes.js';
 import { loteDe } from '../src/nucleo/sistemas/terras.js';
-import { golpesQueFaltam, obstaculoPerto, temFerramentaDeLimpar } from '../src/nucleo/sistemas/limpeza.js';
+import { golpesQueFaltam, obstaculoPerto, temFerramentaDeLimpar, alcancaObstaculo } from '../src/nucleo/sistemas/limpeza.js';
 import { missaoPossivel, missaoAtual } from '../src/nucleo/sistemas/missoes.js';
 import { guiaDaMissao } from '../src/nucleo/guia.js';
 import { EVENTOS } from '../src/nucleo/registro.js';
@@ -171,6 +171,24 @@ test('foice com área leva o mato vizinho na mesma passada; o que vai de carona 
   assert.equal(ev.de('limpou').length, 4);
   assert.equal(m.posses.bolsa.fibra, 4);
   assert.equal(m.posses.ferramentas['foice-de-ferro'].usos, 2, 'duas passadas para quatro matos');
+});
+
+test('mato fechado por outros obstáculos: o toque diz para limpar antes o caminho; aberto o caminho, ele sai', () => {
+  const m = mundoDasTerras(), loc = m.local, ev = ouvirTudo(m);
+  darFerramenta(m, 'foice'); darFerramenta(m, 'picareta');
+  const meio = porObstaculo(m, 'mato', 14, 16);
+  const cerca = [[13, 16], [15, 16], [14, 15], [14, 17]].map(([x, z]) => porObstaculo(m, 'pedra', x, z));
+  assert.equal(alcancaObstaculo(m, meio), false); assert.equal(alcancaObstaculo(m, cerca[0]), true);
+  // o guia não aponta o que está fechado
+  assert.equal(obstaculoPerto(m, ['mato']), null);
+  tocarEm(m, meio.id); ateParar(m);
+  assert.ok(loc.porId[meio.id], 'fechado, o mato fica');
+  assert.equal(ev.de('faltou').at(-1).motivo, 'caminho-fechado');
+  assert.equal(ev.de('faltou').filter((d) => d.motivo === 'sem-caminho').length, 0);
+  // uma pedra a menos e o mato fica ao alcance: na mesma fila, um depois do outro
+  tocarEm(m, cerca[0].id); tocarEm(m, meio.id); ateParar(m);
+  assert.ok(!loc.porId[cerca[0].id] && !loc.porId[meio.id]);
+  assert.equal(obstaculoPerto(m, ['mato']), null);
 });
 
 test('modo limpar: arrastar o dedo pinta vários obstáculos; nos outros modos o arrasto não mexe neles', () => {

@@ -25,7 +25,15 @@ export function ganharCash(m, n, origem) {
 // (o cesto gasto leva menos até o conserto: sistemas/desgaste.js)
 export const capacidadeDoCesto = (m) => { const it = m.dados.itens[m.posses.cesto.item]; return m.desgaste && m.desgaste.gastas[it.id] ? Math.max(1, Math.floor(it.capacidade * m.dados.desgaste.rendeQuandoGasta)) : it.capacidade; };
 export const noCesto = (m) => total(m.posses.cesto.itens);
-export const espacoNoCesto = (m) => capacidadeDoCesto(m) - noCesto(m);
+// O produto que tem recipiente próprio (ovo na caixa, leite no balde: dados.recipienteDoProduto, da frente dos animais)
+// viaja junto com o cesto e esvazia com ele, no celeiro ou na banca, mas não ocupa o lugar do cesto.
+export function foraDoCesto(m) {
+  const R = m.dados.recipienteDoProduto, c = m.posses.cesto.itens;
+  let n = 0;
+  if (R) for (const k in c) if (R[k]) n += c[k];
+  return n;
+}
+export const espacoNoCesto = (m) => capacidadeDoCesto(m) - (noCesto(m) - foraDoCesto(m));
 // põe até n; devolve quantos couberam
 export function porNoCesto(m, item, n) {
   const cabe = Math.min(n, espacoNoCesto(m));

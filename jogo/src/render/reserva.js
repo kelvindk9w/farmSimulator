@@ -281,6 +281,15 @@ export function figuraDeReserva(chave, quadro = 0, l = 1, p = 1, variante = 0) {
   } else if (grupo === 'cultura') {
     const m = /^(.*)-(\d+)$/.exec(nome), id = m ? m[1] : nome, e = m ? +m[2] : 1, n = DADOS && DADOS.culturas[id] ? DADOS.culturas[id].estagios : 4;
     f = novaFigura(1.5 * E0, 1.7 * E0, 0.35 * E0, (g) => pintarCultura(g, id, e, n));
+  } else if (grupo === 'arvore') {
+    // árvore frutífera: muda (broto), jovem (copa pequena), adulta, fruta (copa com frutas)
+    const fase = (/-(muda|jovem|adulta|fruta)$/.exec(nome) || [null, 'adulta'])[1], k = fase === 'muda' ? 0.32 : fase === 'jovem' ? 0.62 : 1;
+    f = novaFigura(2.2 * E0, 3.1 * E0, 0.4 * E0, (g) => {
+      g.fillStyle = '#9a5a2b'; g.beginPath(); g.moveTo(-9 * k, 0); g.lineTo(-6 * k, -1.2 * E0 * k); g.lineTo(6 * k, -1.2 * E0 * k); g.lineTo(10 * k, 0); g.closePath(); g.fill(); g.stroke();
+      const r = 0.5 * E0 * k, y = -1.65 * E0 * k;
+      bolas(g, [[-r * 0.8, y + r * 0.35, r * 0.78], [r * 0.8, y + r * 0.3, r * 0.8], [0, y - r * 0.45, r], [0, y + r * 0.5, r * 0.8]], '#57ad3f', '#73c452');
+      if (fase === 'fruta') for (const [dx, dy] of [[-0.55, 0.2], [0.5, 0.35], [0.05, -0.5], [-0.15, 0.6], [0.6, -0.2]]) elipse(g, dx * r * 1.4, y + dy * r * 1.3, 8, 8, '#f4c532');
+    });
   } else if (grupo === 'personagem') {
     const m = /^(.*)-(frente|costas)$/.exec(nome) || [null, nome, 'frente'];
     f = novaFigura(1.6 * E0, 2.7 * E0, 0.3 * E0, (g) => pintarPersonagem(g, m[1], m[2] === 'costas', quadro));

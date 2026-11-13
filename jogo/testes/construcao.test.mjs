@@ -73,7 +73,7 @@ test('um toque manda construir: ela vai até lá, martela, paga na martelada e a
   const m = rico(novoMundo(), MAT), ev = ouvirTudo(m);
   const r = construir(m, 'bancada-de-carpintaria', 12, 12);
   assert.ok(r.ok); assert.ok(r.dados.naFila);
-  assert.deepEqual(planejadas(m), [{ id: 'bancada-de-carpintaria', x: 12, z: 12, local: 'fazenda' }]);
+  assert.deepEqual(planejadas(m), [{ id: 'bancada-de-carpintaria', x: 12, z: 12, local: 'fazenda', giro: 0 }]);
   assert.equal(m.posses.ouro, 1020, 'ainda não pagou');
   assert.ok(construir(m, 'bancada-de-carpintaria', 12, 12).repetida, 'o mesmo pedido de novo não muda nada');
   assert.equal(construir(m, 'canteiro-de-flores', 13, 12).motivo, 'lugar-ocupado', 'o lugar já está prometido');
@@ -88,7 +88,7 @@ test('um toque manda construir: ela vai até lá, martela, paga na martelada e a
   const p = m.personagem;
   assert.ok(Math.abs(p.x - 12.5) <= 1.5 && Math.abs(p.z - 12.5) <= 1.5 && m.locais.fazenda.andavel(Math.floor(p.x), Math.floor(p.z)), 'ela ficou encostada na obra, do lado de fora');
   assert.equal(ev.de('construiu').length, 0);
-  assert.equal(TIPOS[e.tipo].visual(m, e, {}).chave, 'objeto/bancada-de-carpintaria-obra');
+  assert.equal(TIPOS[e.tipo].visual(m, e, {}).chave, 'objeto/bancada-de-carpintaria', 'a peça é a mesma: quem mostra a obra é o desenho (DESENHO.visual)');
   m.avancar(10);
   assert.ok(Math.abs(andamentoDaObra(m, e) - 0.5) < 0.1, 'a barra da obra vai pela metade');
   m.avancar(faltaDaObra(m, e) + 0.05);
@@ -192,7 +192,7 @@ test('mudar de lugar é de graça e a qualquer hora; lugar ruim é recusado e na
   const loc = m.locais.fazenda;
   assert.equal(loc.entidadeEm(5, 14), b); assert.equal(loc.entidadeEm(6, 14), b); assert.equal(loc.entidadeEm(17, 16), null); assert.equal(loc.entidadeEm(18, 16), null);
   assert.equal(m.posses.ouro, ouro);
-  assert.deepEqual(ev.de('moveuConstrucao').at(-1).antes, { x: 17, z: 16 });
+  assert.deepEqual(ev.de('moveuConstrucao').at(-1).antes, { x: 17, z: 16, l: 2, p: 1 });
   // as que já vêm na fazenda também mudam de lugar, e em obra também
   assert.ok(m.comando({ tipo: 'moverConstrucao', entidade: 'poco', x: 14, z: 14 }).ok);
   assert.equal(loc.entidadeEm(15, 15).id, 'poco');
@@ -360,7 +360,7 @@ test('comportamento: outra frente dá vida a um tipo no arquivo dela, em qualque
     assert.deepEqual(TIPOS.galinheiro.pontos.ficar(g), [[1.5, 3.5]], 'os pontos de parada passam para o tipo');
     // em obra, o toque e a figura são os da obra, não os do comportamento
     assert.equal(TIPOS.galinheiro.acaoPossivel(m, g).texto, 'em-obra');
-    assert.equal(TIPOS.galinheiro.visual(m, g, {}).chave, 'objeto/galinheiro-obra');
+    assert.equal(TIPOS.galinheiro.visual(m, g, {}).chave, 'objeto/galinheiro');
     assert.deepEqual(visto, []);
     pular(m, 61);
     assert.deepEqual(visto, ['pronta ' + g.id]);

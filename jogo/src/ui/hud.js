@@ -7,11 +7,13 @@ import { J } from '../contexto.js';
 import { modosEmOrdem } from '../nucleo/registro.js';
 import { barraDeXp } from '../nucleo/sistemas/niveis.js';
 import { noCesto, capacidadeDoCesto, ferramentaNoCinto, ferramentaNoSuporte } from '../nucleo/sistemas/posses.js';
+import { plantavel } from '../nucleo/sistemas/lavoura.js';
 import { PAINEIS, abrirPainel, painelAberto } from './paineis/registro.js';
 import { tela } from '../plataforma/tela.js';
 import { som } from '../plataforma/som.js';
 
-const ICONE_DA_ACAO = { arar: 'ui/enxada', semear: 'ui/semear', regar: 'ui/regar', colher: 'ui/mao', encher: 'icone/gota', vender: 'icone/ouro', guardar: 'ui/mochila', pegar: 'ui/mochila', pegarFerramenta: 'ui/mochila', andar: 'ui/seta' };
+// (as frentes acrescentam as suas ações; o valor pode ser uma função da tarefa: (t) => 'icone/' + t.args.muda)
+export const ICONE_DA_ACAO = { arar: 'ui/enxada', semear: 'ui/semear', regar: 'ui/regar', colher: 'ui/mao', encher: 'icone/gota', vender: 'icone/ouro', guardar: 'ui/mochila', pegar: 'ui/mochila', pegarFerramenta: 'ui/mochila', andar: 'ui/seta' };
 const NA_FILA = 7; // ícones da fila à mostra; o resto vira "+N"
 
 // número num elemento, sem refazer o texto quando não mudou
@@ -59,8 +61,8 @@ export function criarHud(ui) {
   const sementes = el('div', 'sementes'); sementes.hidden = true;
   const modos = el('div', 'modos');
   for (const md of modosEmOrdem()) {
-    const b = botao({ icone: 'ui/' + md.id, tamanho: 30, texto: T.modos[md.id] || md.id, classe: 'modo', aoClicar: () => { som.tocar('toque'); J.mundo.comando({ tipo: 'escolherModo', modo: md.id }); } });
-    b.dataset.modo = md.id;
+    const b = botao({ icone: md.icone || 'ui/' + md.id, tamanho: 30, texto: T.modos[md.id] || md.id, classe: 'modo', aoClicar: () => { som.tocar('toque'); J.mundo.comando({ tipo: 'escolherModo', modo: md.id }); } });
+    b.dataset.modo = md.id; b._modo = md;
     const conta = el('span', 'conta'); conta.hidden = true; b.append(conta); b._conta = conta;
     hud.modos[md.id] = b;
     modos.append(b);
@@ -81,7 +83,7 @@ export function criarHud(ui) {
     sementes.textContent = '';
     hud.sementes = {};
     const B = m.posses.bolsa, lista = [];
-    for (const id of m.dados.loja.ouro) if (m.dados.culturaDaSemente[id] && (B[id] > 0 || id === m.modo.semente)) lista.push(id);
+    for (const id of m.dados.loja.ouro) if (plantavel(m.dados, id) && (B[id] > 0 || id === m.modo.semente)) lista.push(id);
     for (const id of lista.slice(0, 8)) {
       const b = botao({ icone: 'icone/' + id, tamanho: 34, classe: 'semente', rotulo: m.dados.itens[id].nome, aoClicar: () => { som.tocar('toque'); J.mundo.comando({ tipo: 'escolherModo', modo: 'semear', semente: id }); } });
       b.dataset.semente = id;
@@ -114,7 +116,7 @@ export function criarHud(ui) {
     if (!cheio) { fracao(fioF, p.folego / F.max); classe(barraF, 'cansada', p.cansada); }
 
     // modo ativo e os números da barra
-    for (const id in hud.modos) classe(hud.modos[id], 'ativo', m.modo.id === id);
+    for (const id in hud.modos) { const b = hud.modos[id], some = !!b._modo.disponivel && !b._modo.disponivel(m); classe(b, 'ativo', m.modo.id === id); if (b.hidden !== some) b.hidden = some; } // modo que ainda não vale (sem a ferramenta) não aparece
     const bReg = hud.modos.regar;
     if (bReg && rs) { const c = bReg._conta; if (c.hidden) c.hidden = false; num(c, P.ferramentas[rs].agua); classe(c, 'zero', P.ferramentas[rs].agua === 0); }
     const bSem = hud.modos.semear;
@@ -126,7 +128,7 @@ export function criarHud(ui) {
     classe(rodape, 'com-sementes', mostra);
     if (mostra) {
       let a = '';
-      for (const id of D.loja.ouro) if (D.culturaDaSemente[id] && (P.bolsa[id] > 0 || id === m.modo.semente)) a += id + ',';
+      for (const id of D.loja.ouro) if (plantavel(D, id) && (P.bolsa[id] > 0 || id === m.modo.semente)) a += id + ',';
       if (a !== assinatura) { assinatura = a; refazerSementes(m); }
       for (const id in hud.sementes) { const b = hud.sementes[id], n = P.bolsa[id] || 0; classe(b, 'ativo', m.modo.semente === id); classe(b, 'vazia', n === 0); num(b._conta, n); }
     }
@@ -145,7 +147,8 @@ export function criarHud(ui) {
           const t = i < 0 ? p.tarefa : p.fila[i];
           if (!t) continue;
           const c = filaIc[k++];
-          trocarIcone(c, t.acao === 'semear' && t.args ? 'icone/' + t.args.semente : ICONE_DA_ACAO[t.acao || 'andar'] || 'ui/mao');
+          const ic = ICONE_DA_ACAO[t.acao || 'andar'] || 'ui/mao';
+          trocarIcone(c, t.acao === 'semear' && t.args ? 'icone/' + t.args.semente : typeof ic === 'function' ? ic(t) : ic);
           if (c.hidden) c.hidden = false;
         }
         for (; k < NA_FILA; k++) if (!filaIc[k].hidden) filaIc[k].hidden = true;

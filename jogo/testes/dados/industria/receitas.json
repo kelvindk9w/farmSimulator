@@ -1,0 +1,7 @@
+{
+  "tabua": { "nome": "Tábua", "onde": "bancada-de-carpintaria", "entra": { "madeira": 2 }, "sai": { "tabua": 1 }, "tempoSeg": 20, "xp": 1, "nivel": 1 },
+  "fuba": { "nome": "Fubá", "onde": "moinho", "entra": { "milho": 3 }, "sai": { "fuba": 1 }, "tempoSeg": 120, "xp": 4, "nivel": 1 },
+  "racao": { "nome": "Ração", "onde": "moinho", "entra": { "milho": 3 }, "sai": { "racao": 2 }, "tempoSeg": 60, "xp": 2, "nivel": 1 },
+  "duzia": { "nome": "Dúzia de ovos", "onde": "moinho", "entra": { "ovo": 12, "cartela": 1 }, "sai": { "duzia": 1 }, "tempoSeg": 20, "xp": 2, "nivel": 2 },
+  "bolo": { "nome": "Bolo de fubá", "onde": "cozinha", "entra": { "fuba": 2, "ovo": 2 }, "sai": { "bolo": 1 }, "tempoSeg": 600, "xp": 9, "nivel": 3 }
+}

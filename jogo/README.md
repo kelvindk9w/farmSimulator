@@ -17,6 +17,7 @@ npm run validar      # confere dados/ do jeito que o jogo lê
 - `node build.mjs --legivel` monta sem minificar.
 - Várias frentes na mesma pasta: `JOGO_DIST=dist-minha-frente` muda a pasta de saída do build, do servidor e da verificação; `JOGO_CAPTURAS=capturas-minha-frente` muda a das fotos; `JOGO_PORTA` muda a porta do servidor.
 - `npm run verificar` usa o Playwright instalado na máquina (não é dependência do jogo).
+- `node tools/verificar-terras.mjs` (depois do build) joga a frente das terras do mesmo jeito: limpar, comprar lote, bananeira, regador de área, desgaste e conserto, em 1280x720 e 844x390.
 - O endereço com `#teste` (por exemplo `http://127.0.0.1:8091/#teste`) abre o modo em que o tempo só anda quando a ferramenta manda, por `window.__jogo`.
 - Perfis do bot: `direto` (não fecha o jogo), `casual`, `regular`, `engajado` (sessões por dia, como no modelo de `tools/economia/ritmo.mjs`).
 
@@ -26,6 +27,7 @@ npm run validar      # confere dados/ do jeito que o jogo lê
 - **Teclado**: setas ou WASD andam, Shift corre, Espaço age na casa à frente, Q/E ou 1 a 4 trocam o modo, L loja, B mochila, M missões, C configurações, F tela cheia, Tab leva o foco aos botões, Esc cancela ou fecha.
 - **Controle de videogame e de TV**: direcional ou alavanca andam, A/OK age, B/voltar cancela ou fecha, ombros trocam o modo.
 - O poço enche o regador, a banca compra o que está no cesto, o celeiro guarda o cesto (e é onde fica o suporte de ferramentas).
+- **Terras**: a placa de um lote (ou a etiqueta do preço em cima dela) abre a compra; a aba "Terras" da loja mostra todos. Mato, toco e pedra saem com um toque (modo mão) ou arrastando no modo "Limpar", que aparece quando há foice, machado ou picareta; toco e pedra pedem vários golpes, num toque só. A muda de árvore aparece na barra de sementes: as casas onde ela cabe ficam marcadas. Regador e foice melhores alcançam várias casas (marcadas antes do toque). Ferramenta gasta não quebra: rende menos até o conserto, pelo aviso no alto da tela ou pelo botão "Ferramentas e conserto" da mochila.
 - Configurações: som, esquema de toque (só toque, alavanca com botão, os dois), tamanho dos botões, tela cheia, exportar e importar a fazenda por texto, recomeçar.
 
 ## Organização
@@ -71,8 +73,7 @@ Funcionalidade nova entra por registro, em arquivo próprio: `registrarSistema`,
 
 ## O que ainda não existe (fica para os próximos marcos)
 
-- Limpar mato, pedra e toco, e comprar lote: o mapa, os lotes e as placas já existem; o toque explica que é para depois.
+- Mudar uma árvore frutífera de lugar (ela fica onde foi plantada).
 - O celeiro por dentro, construir, animais, árvores, indústria, pedidos, conquistas, recompensa diária, cash.
-- Desgaste e conserto das ferramentas (`regras.desgaste`), ferramenta que age em várias casas (`area`).
 - Cercas, porteira, o quadro de pedidos e o Seu Tonho em pessoa no terreno (hoje ele aparece no balão).
 - O fôlego segue `regras.json` (`folego`): hoje são 10 s de corrida e volta em 5 s andando ou 3 s parada.

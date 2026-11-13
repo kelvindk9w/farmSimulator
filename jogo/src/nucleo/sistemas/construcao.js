@@ -63,6 +63,8 @@ export function valorDe(m, e, campo) {
 // a próxima ampliação da construção, ou null
 export function proximaAmpliacao(m, e) { const def = defDe(m, e.tipo); return (def && def.ampliacoes[(e.nivel || 1) - 1]) || null; }
 // enfeite, cerca e móvel voltam para o depósito; o resto só muda de lugar
+// a base da construção: [l, p]; girada (só as que têm "gira" nos dados: a porteira), troca largura por profundidade
+export const casasDe = (def, giro) => (giro && def.gira ? [def.casas[1], def.casas[0]] : def.casas);
 export const guardavel = (def) => !!def && !def.inicial && (def.tipo === 'decoracao' || def.tipo === 'movel');
 export const quantasGuardadas = (m, id) => m.construcao.guardadas[id] || 0;
 const quantasTem = (m, id) => construcoesDe(m, id).length + quantasGuardadas(m, id);
@@ -78,7 +80,10 @@ export function planejadas(m, out = []) {
 }
 
 // ---------- o tipo de entidade padrão de uma construção ----------
-const CHAVES = {}, CHAVES_OBRA = {};
+const CHAVES = {};
+// o que só o navegador sabe desenhar entra por aqui (a lógica roda sem ele): DESENHO.visual(m, e, v) é chamado no fim
+// do visual de toda construção e pode trocar v.chave ou pôr v.desenhar
+export const DESENHO = { visual: null };
 function tipoPadrao(def) {
   const id = def.id, c = COMPORTAMENTOS[id] || {};
   return {
@@ -93,10 +98,10 @@ function tipoPadrao(def) {
     },
     visual(m, e, v) {
       v.variante = e.v || 0;
-      if (e.obraAte > 0) { v.chave = CHAVES_OBRA[e.tipo] || (CHAVES_OBRA[e.tipo] = 'objeto/' + e.tipo + '-obra'); return v; }
+      if (e.giro) v.espelhar = true; // girada: a mesma figura, espelhada (o X da peça vira Z)
       v.chave = CHAVES[e.tipo] || (CHAVES[e.tipo] = 'objeto/' + e.tipo);
-      const f = gancho(e, 'visual');
-      if (f) f(m, e, v);
+      if (!(e.obraAte > 0)) { const f = gancho(e, 'visual'); if (f) f(m, e, v); } // em obra, o comportamento ainda não manda no desenho
+      if (DESENHO.visual) DESENHO.visual(m, e, v); // (render/construcao.js: a obra subindo, a peça que está sendo mudada)
       return v;
     },
   };
@@ -153,10 +158,10 @@ function assentar(m, e) {
   }
 }
 // a construção já saiu de (x0, z0): o chão batido que só ela cobria volta a ser o do mapa
-function desassentar(m, e, x0, z0) {
+function desassentar(m, e, x0, z0, l0 = e.l, p0 = e.p) {
   const loc = m.locais[e.local], base = m.construcao.chaoBase[e.local];
   if (!base || !pisa(defDe(m, e.tipo))) return;
-  for (let z = z0; z < z0 + e.p; z++) for (let x = x0; x < x0 + e.l; x++) {
+  for (let z = z0; z < z0 + p0; z++) for (let x = x0; x < x0 + l0; x++) {
     if (!loc.dentro(x, z)) continue;
     const i = loc.i(x, z);
     if (loc.chao[i] !== CAMINHO || base[i] === CAMINHO) continue;
@@ -223,12 +228,14 @@ const anc = [0, 0], area = { x: 0, z: 0, l: 1, p: 1, tipo: '' };
 
 // A área de (x, z) serve para a construção "tipo"? Não olha preço, nível nem limite: só o lugar.
 //   opc.local   (padrão: o "onde" da construção)       opc.mudando = a entidade que está sendo mudada de lugar
+//   opc.giro    1 = girada (padrão: como a que está sendo mudada, ou 0)
 // Motivos: fora-do-mapa, terra-a-venda, na-porta, lugar-ocupado { por }, tem-planta, fecha-caminho { construcao },
 // sem-acesso (não daria para chegar até ela).
 export function lugarServe(m, tipo, x, z, opc = {}) {
   const def = defDe(m, tipo);
   if (!def) return { ok: false, motivo: 'nao-existe', dados: { construcao: tipo } };
-  const loc = m.locais[opc.local || def.onde], solta = opc.mudando || null, l = def.casas[0], p = def.casas[1];
+  const loc = m.locais[opc.local || def.onde], solta = opc.mudando || null;
+  const cs = casasDe(def, opc.giro === undefined ? (solta ? solta.giro : 0) : opc.giro), l = cs[0], p = cs[1];
   if (!loc) return { ok: false, motivo: 'nao-existe', dados: { construcao: tipo } };
   if (!Number.isInteger(x) || !Number.isInteger(z)) return { ok: false, motivo: 'fora-do-mapa' };
   for (let cz = z; cz < z + p; cz++) for (let cx = x; cx < x + l; cx++) {
@@ -313,13 +320,14 @@ function desviarPersonagem(m, e) {
 function marcarProxima(m, ate) { const C = m.construcao; if (ate > 0 && ate < C.proxima) C.proxima = ate; }
 
 // Põe a construção no local, sem conferir nem cobrar (quem confere é o comando). Para testes, presentes e gravação.
-//   opc = { local, id, nivel, obraSeg (0 ou ausente = já pronta), quieto (pronta sem evento nem experiência) }
+//   opc = { local, id, nivel, giro, obraSeg (0 ou ausente = já pronta), quieto (pronta sem evento nem experiência) }
 export function colocar(m, tipo, x, z, opc = {}) {
   const def = defDe(m, tipo), C = m.construcao;
   if (!def) throw new Error(`construção desconhecida: "${tipo}"`);
   const local = opc.local || def.onde, loc = m.locais[local];
   if (!loc) throw new Error(`a construção "${tipo}" pede o local "${local}", que não existe`);
-  const e = loc.por({ id: opc.id || `${tipo}-${++C.seq}`, tipo, local, x, z, l: def.casas[0], p: def.casas[1], nivel: opc.nivel || 1, obraAte: 0, ampliaAte: 0, obraDur: 0 });
+  const giro = opc.giro && def.gira ? 1 : 0, cs = casasDe(def, giro);
+  const e = loc.por({ id: opc.id || `${tipo}-${++C.seq}`, tipo, local, x, z, l: cs[0], p: cs[1], giro, nivel: opc.nivel || 1, obraAte: 0, ampliaAte: 0, obraDur: 0 });
   C.todas.push(e);
   assentar(m, e);
   desviarPersonagem(m, e);
@@ -392,13 +400,13 @@ function tirarDoLocal(m, e) {
 }
 
 // cobra e ergue: usa uma guardada do mesmo tipo, se houver; senão, ouro e material
-function erguer(m, def, x, z, local) {
+function erguer(m, def, x, z, local, giro) {
   const C = m.construcao;
   let guardada = false;
   if (quantasGuardadas(m, def.id) > 0) { guardada = true; if (--C.guardadas[def.id] <= 0) delete C.guardadas[def.id]; }
   else { if (def.custo.ouro > 0) gastarOuro(m, def.custo.ouro, 'construcao'); gastarItens(m, def.custo.itens); }
   // o que volta do depósito já está montado: não tem obra de novo, nem conta como construção nova
-  const e = colocar(m, def.id, x, z, { local, obraSeg: guardada ? 0 : def.obraSeg, quieto: guardada });
+  const e = colocar(m, def.id, x, z, { local, giro, obraSeg: guardada ? 0 : def.obraSeg, quieto: guardada });
   if (guardada) m.eventos.emitir('recolocou', { entidade: e.id, construcao: e.tipo, local, x, z });
   return e;
 }
@@ -427,8 +435,8 @@ const falha = (m, r, emite = true) => { if (emite) m.eventos.emitir('faltou', { 
 for (const id of ['colocarConstrucao', 'montarMovel']) {
   registrarAcao({
     id, dur: id === 'montarMovel' ? 2.5 : 2, efeitoEm: id === 'montarMovel' ? 1.9 : 1.5, estadoVisual: 'martelar',
-    pode: (m, alvo, args) => podeConstruir(m, args.id, args.x, args.z, { local: args.local }),
-    aoEfeito(m, alvo, args) { erguer(m, defDe(m, args.id), args.x, args.z, args.local); },
+    pode: (m, alvo, args) => podeConstruir(m, args.id, args.x, args.z, { local: args.local, giro: args.giro }),
+    aoEfeito(m, alvo, args) { erguer(m, defDe(m, args.id), args.x, args.z, args.local, args.giro); },
   });
 }
 // uma martelada de acabamento, sem efeito (a personagem dá um jeito no que acabou de ser posto)
@@ -477,10 +485,11 @@ registrarConcluivel({
 
 // ---------- gravação ----------
 // a área está dentro do mapa, em terra própria e sem nada em cima? (só para repor o que veio de uma gravação)
-function lugarLivre(m, def, x, z, local) {
+function lugarLivre(m, def, x, z, local, giro) {
   const loc = m.locais[local];
   if (!loc || !Number.isInteger(x) || !Number.isInteger(z)) return false;
-  for (let cz = z; cz < z + def.casas[1]; cz++) for (let cx = x; cx < x + def.casas[0]; cx++) if (!loc.dentro(cx, cz) || loc.propria[loc.i(cx, cz)] !== 1 || loc.ocupa[loc.i(cx, cz)] !== 0) return false;
+  const cs = casasDe(def, giro);
+  for (let cz = z; cz < z + cs[1]; cz++) for (let cx = x; cx < x + cs[0]; cx++) if (!loc.dentro(cx, cz) || loc.propria[loc.i(cx, cz)] !== 1 || loc.ocupa[loc.i(cx, cz)] !== 0) return false;
   return true;
 }
 // o lugar livre mais perto de (x, z) para a construção, ou null
@@ -517,41 +526,42 @@ registrarSistema({
   ausencia: conferirObras,
 
   comandos: {
-    // construir { id, x, z, local, jaJa }: (x, z) é o canto de menor X e Z da base; local = onde a personagem está.
+    // construir { id, x, z, local, giro, jaJa }: (x, z) é o canto de menor X e Z da base; local = onde a personagem está.
     // Enfeite sem obra e o que volta do depósito nascem na hora; o resto, a personagem vai até lá e martela (o preço
     // sai na martelada: cancelar antes não custa nada). jaJa: true ergue na hora, sem ela (ferramentas e testes).
     // Devolve dados.entidade (nasceu na hora) ou dados.naFila.
     construir(m, c) {
       const def = defDe(m, c.id), p = m.personagem;
       if (!def) return falha(m, { motivo: 'nao-existe', dados: { construcao: c.id } }, false);
-      const local = c.local || (c.jaJa ? def.onde : p.local), q = !c.quieto;
-      const r = podeConstruir(m, c.id, c.x, c.z, { local });
+      const local = c.local || (c.jaJa ? def.onde : p.local), q = !c.quieto, giro = c.giro && def.gira ? 1 : 0, cs = casasDe(def, giro);
+      const r = podeConstruir(m, c.id, c.x, c.z, { local, giro });
       if (!r.ok) return falha(m, r, q);
       for (const a of planejadas(m)) {
-        const ad = defDe(m, a.id);
-        if (a.local !== local || !(a.x < c.x + def.casas[0] && c.x < a.x + ad.casas[0] && a.z < c.z + def.casas[1] && c.z < a.z + ad.casas[1])) continue;
+        const ac = casasDe(defDe(m, a.id), a.giro);
+        if (a.local !== local || !(a.x < c.x + cs[0] && c.x < a.x + ac[0] && a.z < c.z + cs[1] && c.z < a.z + ac[1])) continue;
         return a.id === c.id && a.x === c.x && a.z === c.z ? { ok: true, repetida: true, dados: { naFila: true } } : falha(m, { motivo: 'lugar-ocupado', dados: { por: a.id } }, q);
       }
       const naHora = c.jaJa || p.local !== local || quantasGuardadas(m, c.id) > 0 || (def.tipo === 'decoracao' && !(def.obraSeg > 0));
-      if (naHora) return { ok: true, dados: { entidade: erguer(m, def, c.x, c.z, local).id } };
+      if (naHora) return { ok: true, dados: { entidade: erguer(m, def, c.x, c.z, local, giro).id } };
       if (p.fila.length + 2 > m.dados.regras.filaMax) return falha(m, { motivo: 'fila-cheia' }, q);
-      const onde = pontoDeObra(m, m.locais[local], c.x, c.z, def.casas[0], def.casas[1]);
+      const onde = pontoDeObra(m, m.locais[local], c.x, c.z, cs[0], cs[1]);
       if (!onde) return falha(m, { motivo: 'sem-acesso' }, q);
       p.rumando = false;
-      p.fila.push({ tipo: 'andar', x: onde.sx + 0.5, z: onde.sz + 0.5 }, { tipo: 'agir', acao: def.tipo === 'movel' ? 'montarMovel' : 'colocarConstrucao', x: onde.fx, z: onde.fz, args: { id: c.id, x: c.x, z: c.z, local } });
+      p.fila.push({ tipo: 'andar', x: onde.sx + 0.5, z: onde.sz + 0.5 }, { tipo: 'agir', acao: def.tipo === 'movel' ? 'montarMovel' : 'colocarConstrucao', x: onde.fx, z: onde.fz, args: { id: c.id, x: c.x, z: c.z, local, giro } });
       return { ok: true, dados: { naFila: true } };
     },
 
-    // moverConstrucao { entidade, x, z }: de graça, a qualquer hora (regra 8 do plano), em obra ou pronta
+    // moverConstrucao { entidade, x, z, giro }: de graça, a qualquer hora (regra 8 do plano), em obra ou pronta
     moverConstrucao(m, c) {
       const e = construcaoPorId(m, c.entidade);
       if (!e) return falha(m, { motivo: 'nao-existe' }, false);
-      if (e.x === c.x && e.z === c.z) return { ok: true, dados: { entidade: e.id } };
-      const r = lugarServe(m, e.tipo, c.x, c.z, { local: e.local, mudando: e });
+      const def = defDe(m, e.tipo), giro = c.giro === undefined ? e.giro || 0 : c.giro && def.gira ? 1 : 0, cs = casasDe(def, giro);
+      if (e.x === c.x && e.z === c.z && giro === (e.giro || 0)) return { ok: true, dados: { entidade: e.id } };
+      const r = lugarServe(m, e.tipo, c.x, c.z, { local: e.local, mudando: e, giro });
       if (!r.ok) return falha(m, r, !c.quieto);
-      const loc = m.locais[e.local], antes = { x: e.x, z: e.z };
-      loc.tirar(e.id); e.x = c.x; e.z = c.z; loc.por(e);
-      desassentar(m, e, antes.x, antes.z);
+      const loc = m.locais[e.local], antes = { x: e.x, z: e.z, l: e.l, p: e.p };
+      loc.tirar(e.id); e.x = c.x; e.z = c.z; e.giro = giro; e.l = cs[0]; e.p = cs[1]; loc.por(e);
+      desassentar(m, e, antes.x, antes.z, antes.l, antes.p);
       assentar(m, e);
       desviarPersonagem(m, e);
       const f = gancho(e, 'aoMover');
@@ -608,7 +618,7 @@ registrarSistema({
     const C = m.construcao;
     return {
       seq: C.seq, guardadas: { ...C.guardadas },
-      lista: C.todas.map((e) => ({ id: e.id, tipo: e.tipo, local: e.local, x: e.x, z: e.z, nivel: e.nivel || 1, obraAte: Math.round(e.obraAte || 0), ampliaAte: Math.round(e.ampliaAte || 0), obraDur: e.obraDur || 0 })),
+      lista: C.todas.map((e) => ({ id: e.id, tipo: e.tipo, local: e.local, x: e.x, z: e.z, nivel: e.nivel || 1, giro: e.giro ? 1 : 0, obraAte: Math.round(e.obraAte || 0), ampliaAte: Math.round(e.ampliaAte || 0), obraDur: e.obraDur || 0 })),
     };
   },
   // Uma gravação do M1 não traz este sistema: aí vale o que iniciar() montou (o celeiro com os móveis do começo).
@@ -625,7 +635,9 @@ registrarSistema({
     refazerInterior(m, Math.max(1, Math.min(D.celeiro ? D.celeiro.ampliacoes.length + 1 : 1, (cel && Math.round(cel.nivel)) || 1)));
     const repor = (g, x, z) => {
       const def = D[g.tipo], e = antes.get(g.id) || { id: g.id, tipo: g.tipo };
-      e.local = g.local; e.x = x; e.z = z; e.l = def.casas[0]; e.p = def.casas[1];
+      e.giro = g.giro && def.gira ? 1 : 0;
+      const cs = casasDe(def, e.giro);
+      e.local = g.local; e.x = x; e.z = z; e.l = cs[0]; e.p = cs[1];
       e.nivel = Math.max(1, Math.min(def.ampliacoes.length + 1, Math.round(g.nivel) || 1));
       e.obraAte = g.obraAte > 0 ? g.obraAte : 0; e.ampliaAte = g.ampliaAte > 0 && e.nivel <= def.ampliacoes.length ? g.ampliaAte : 0; e.obraDur = g.obraDur > 0 ? g.obraDur : 0;
       m.locais[g.local].por(e);
@@ -636,7 +648,7 @@ registrarSistema({
     for (const g of lista) {
       if (postas.has(g.id)) continue;
       postas.add(g.id);
-      if (lugarLivre(m, D[g.tipo], g.x, g.z, g.local)) repor(g, g.x, g.z); else sobrou.push(g);
+      if (lugarLivre(m, D[g.tipo], g.x, g.z, g.local, g.giro)) repor(g, g.x, g.z); else sobrou.push(g);
     }
     for (const g of sobrou) {
       const def = D[g.tipo], pt = def.inicial && g.local === 'fazenda' ? lugarPerto(m, def, g.x, g.z, g.local) : null;

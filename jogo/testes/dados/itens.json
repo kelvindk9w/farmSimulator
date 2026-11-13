@@ -11,5 +11,7 @@
   "madeira": { "nome": "Madeira", "tipo": "material", "venda": 1 },
   "tabua": { "nome": "Tábua", "tipo": "material", "venda": 2 },
   "prego": { "nome": "Prego", "tipo": "material", "venda": 1 },
-  "pedra": { "nome": "Pedra", "tipo": "material", "venda": 1 }
+  "pedra": { "nome": "Pedra", "tipo": "material", "venda": 1 },
+  "ovo": { "nome": "Ovo", "tipo": "produto", "venda": 3 },
+  "caixa-de-ovos": { "nome": "Caixa de ovos", "tipo": "recipiente", "funcao": "caixa-de-ovos", "capacidade": 4, "compra": 6, "nivel": 1 }
 }

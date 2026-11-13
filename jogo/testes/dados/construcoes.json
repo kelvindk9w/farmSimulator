@@ -15,8 +15,8 @@
     "ampliacoes": [{ "nome": "Terceira vaga na fila", "nivel": 1, "custo": { "ouro": 10 }, "cash": 2, "obraSeg": 0, "fila": 3 }]
   },
   "galinheiro": {
-    "nome": "Galinheiro", "tipo": "abrigo", "onde": "fazenda", "casas": [3, 3], "custo": { "ouro": 20, "itens": { "tabua": 2, "prego": 4 } }, "obraSeg": 60, "nivel": 3, "exige": ["bancada-de-carpintaria"], "vagas": 4, "limite": 1, "xp": 6,
-    "ampliacoes": [{ "nome": "Galinheiro para 8", "nivel": 3, "custo": { "ouro": 50, "itens": { "tabua": 4 } }, "obraSeg": 200, "vagas": 8, "xp": 9 }]
+    "nome": "Galinheiro", "tipo": "abrigo", "onde": "fazenda", "casas": [3, 3], "custo": { "ouro": 20, "itens": { "tabua": 2, "prego": 4 } }, "obraSeg": 60, "nivel": 3, "exige": ["bancada-de-carpintaria"], "vagas": 4, "cocho": 6, "bebedouro": 8, "limite": 1, "xp": 6,
+    "ampliacoes": [{ "nome": "Galinheiro para 8", "nivel": 3, "custo": { "ouro": 50, "itens": { "tabua": 4 } }, "obraSeg": 200, "vagas": 8, "cocho": 12, "bebedouro": 16, "xp": 9 }]
   },
   "cerca-de-madeira": { "nome": "Cerca de madeira", "tipo": "decoracao", "onde": "fazenda", "casas": [1, 1], "custo": { "ouro": 1, "itens": { "madeira": 1 } }, "obraSeg": 0, "nivel": 1, "exige": ["bancada-de-carpintaria"] },
   "porteira": { "nome": "Porteira", "tipo": "decoracao", "onde": "fazenda", "casas": [1, 1], "bloqueia": false, "chao": "caminho", "custo": { "ouro": 1, "itens": { "madeira": 1 } }, "obraSeg": 0, "nivel": 1, "exige": ["bancada-de-carpintaria"] },

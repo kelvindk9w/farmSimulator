@@ -3,6 +3,7 @@
 // prepararDados(bruto) → { dados, problemas: [{ grave, arquivo, texto }] }. Com problema grave o jogo não começa.
 import { prepararConstrucoes } from './dados-construcao.js';
 import { prepararTerras } from './dados-terras.js';
+import { prepararAnimais } from './dados-animais.js';
 
 const TIPOS_DE_ITEM = ['colheita', 'produto', 'semente', 'muda', 'material', 'racao', 'embalagem', 'ferramenta', 'recipiente', 'cosmetico'];
 const num = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -200,6 +201,7 @@ export function prepararDados(bruto) {
   const construcoes = prepararConstrucoes(bruto, itens, erro, aviso); // frente A: o que se constrói (dados-construcao.js)
   const dados = { regras, itens, culturas, culturaDaSemente, terras, niveis, missoes, loja, construcoes, bruto };
   Object.assign(dados, prepararTerras(bruto, itens, erro, aviso)); // frente E: obstaculos, arvores, arvoreDaMuda, desgaste (dados-terras.js)
+  Object.assign(dados, prepararAnimais(bruto, itens, construcoes, erro, aviso)); // frente B: animais, trato, comidaDoAbrigo (dados-animais.js)
   return { dados, problemas };
 }
 
