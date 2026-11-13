@@ -40,6 +40,7 @@ const ARQUIVOS = {
   estimacao: ['../../src/nucleo/sistemas/estimacao.js', () => temSistema('estimacao')],
   comeco: ['../../src/nucleo/sistemas/comeco.js', () => temSistema('comeco')],
   banca: ['../../src/nucleo/sistemas/banca.js', () => temSistema('banca')],
+  campo: ['../../src/nucleo/sistemas/campo.js', () => temSistema('campo')], // o campo que cresce preparando a terra
 };
 
 export const X = {};

@@ -67,7 +67,7 @@ test('lavoura: terra arada planta o que está na mão; sem semente, a falta; a p
   assert.equal(fila(m).length, 0, 'o toque na planta crescendo não anda nem desmancha a fila');
   pular(m, 61);
   o = principal(m, { x: 12, z: 13 });
-  assert.deepEqual([o.id, o.modo], ['colher', undefined], 'colher não se repete arrastando');
+  assert.deepEqual([o.id, o.modo, o.arrasta], ['colher', 'mao', undefined], 'colher não se repete arrastando (segurar colhe a fileira: o modo "mão")');
   agir(m, { x: 12, z: 13 }); ateParar(m);
   assert.equal(m.posses.cesto.itens.rabanete, 2);
   // as sementes acabaram: a terra arada diz que falta semente (a vaga vira "Comprar sementes")
@@ -126,10 +126,16 @@ test('arrastar repete a ação da primeira casa (arar, plantar, regar) e nunca c
   assert.deepEqual(fila(m).filter((a) => a !== 'pegarFerramenta'), ['regar'], 'só a que tinha sede');
   ateParar(m);
   assert.equal([12, 13, 14].filter((x) => plantaEm(m, x, 13)).length, 3, 'as prontas continuam no pé');
-  // começar o arrasto numa casa pronta não pinta (colher não tem modo): a interface vira alavanca ou câmera
-  assert.equal(principal(m, { x: 12, z: 13 }).modo, undefined);
+  // começar o arrasto numa casa pronta não pinta (colher não tem "arrasta"): a interface vira alavanca ou câmera
+  assert.equal(principal(m, { x: 12, z: 13 }).arrasta, undefined);
   assert.equal(agir(m, { x: 12, z: 13, arrasto: true }).ok, false);
   assert.equal(m.personagem.fila.length, 0);
+  // segurar na planta pronta colhe a fileira toda (as prontas dela)
+  const cesto = m.posses.cesto.itens.rabanete || 0;
+  assert.equal(agir(m, { x: 12, z: 13, fileira: true }).ok, true);
+  ateParar(m);
+  assert.equal([12, 13, 14].filter((x) => plantaEm(m, x, 13)).length, 0, 'segurar colheu a fileira');
+  assert.ok((m.posses.cesto.itens.rabanete || 0) > cesto);
 });
 
 test('o arrasto só começa no campo e nas plantas; da grama encostada no campo, o toque ara mas o arrasto anda', () => {

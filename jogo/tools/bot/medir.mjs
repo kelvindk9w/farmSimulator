@@ -153,8 +153,8 @@ export function relato(J, S, cfg) {
 }
 
 export function resumo(S, fim = '') {
-  const out = ['dia  nível     ouro  missões'];
-  for (const d of S.dias) out.push(`${String(d.dia).padStart(3)}  ${String(d.nivel).padStart(5)} ${String(d.ouro).padStart(8)} ${String(d.missoes).padStart(8)}`);
+  const out = ['dia  nível     ouro  missões  campo'];
+  for (const d of S.dias) out.push(`${String(d.dia).padStart(3)}  ${String(d.nivel).padStart(5)} ${String(d.ouro).padStart(8)} ${String(d.missoes).padStart(8)} ${String(d.campo ?? '-').padStart(6)}`);
   if (fim) out.push(fim);
   return out.join('\n');
 }

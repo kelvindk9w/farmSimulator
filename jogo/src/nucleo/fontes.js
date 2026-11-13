@@ -15,6 +15,7 @@ import { missaoAtual, missaoPossivel } from './sistemas/missoes.js';
 import { progressoDe } from './premios.js';
 import { temPresente } from './sistemas/diaria.js';
 import { loteDaCasa, loteComprado } from './sistemas/terras.js';
+import { regrasDoCampo, estadoDoCampo, custoDoPreparo, soNoCampo } from './sistemas/campo.js';
 
 const obj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
 const TIPOS = ['loja', 'limpar', 'receita', 'bicho', 'premios'];
@@ -145,7 +146,7 @@ export function fontesDoItem(m, item) {
 
 // ---------- para que o item serve ----------
 // o que o jogador ainda vai construir, reformar, ampliar ou fazer com o item, o mais perto primeiro:
-// [{ tipo: 'construcao' | 'reforma' | 'ampliacao' | 'receita', id, nome, nivel, precisa, ja (o nível já deixa) }]
+// [{ tipo: 'construcao' | 'reforma' | 'ampliacao' | 'receita' | 'campo', id, nome, nivel, precisa, ja (o nível já deixa) }]
 export function paraQueServe(m, item, quantos = 3) {
   const D = m.dados, agora = m.progresso.nivel, out = [], vistos = new Set();
   const por = (x) => { const k = x.tipo + ':' + x.id; if (vistos.has(k)) return; vistos.add(k); x.ja = x.nivel <= agora; out.push(x); };
@@ -166,6 +167,11 @@ export function paraQueServe(m, item, quantos = 3) {
     if (!(r.entra[item] > 0)) continue;
     por({ tipo: 'receita', id: r.id, nome: r.nome, nivel: Math.max(r.nivel, (D.construcoes[r.onde] || {}).nivel || 1), precisa: r.entra[item] });
   }
+  // preparar terra nova no campo (enquanto o nível de agora ou um que vem deixa o campo crescer)
+  if (m.campo && soNoCampo(m)) {
+    const C = estadoDoCampo(m), q = C.item === item && C.porCasa.adubo > 0 ? Math.ceil(C.porCasa.adubo * C.fileira.n - 1e-9) : 0;
+    if (q > 0 && (C.restam > 0 || C.proximo)) por({ tipo: 'campo', id: 'campo', nome: 'Campo', nivel: C.restam > 0 ? agora : C.proximo.nivel, precisa: q });
+  }
   out.sort((a, b) => (b.ja - a.ja) || a.nivel - b.nivel);
   return out.slice(0, quantos);
 }
@@ -184,7 +190,8 @@ export function usosDoPremio(m, itens, quantos = 2) {
 }
 
 // ---------- o que a missão da vez pede de material ----------
-// { itens: { item: n }, nome } ou null: construir/montar (o preço), reformar (o da reforma), produzir (os ingredientes)
+// { itens: { item: n }, nome } ou null: construir/montar (o preço), reformar (o da reforma), preparar a terra (o adubo
+// das casas que faltam), produzir (os ingredientes)
 export function materialDaMissao(m) {
   const a = missaoAtual(m);
   if (!a || a.esperaNivel) return null;
@@ -196,6 +203,10 @@ export function materialDaMissao(m) {
   if (o.evento === 'reformou' && f.construcao) {
     const r = reformas(m).find((x) => x.de === um(f.construcao) && !(x.obra > 0));
     if (r && r.custo.itens) return { itens: r.custo.itens, nome: r.nome };
+  }
+  if (o.evento === 'preparou' && m.campo && soNoCampo(m)) {
+    const c = custoDoPreparo(m, Math.max(1, o.n - (a.conta || 0)));
+    if (Object.keys(c.itens).length) return { itens: c.itens, nome: 'Campo' };
   }
   if (o.evento === 'produziu' && f.item) {
     const lista = receitasDe(m.dados).porItem[um(f.item)], r = lista && (lista.find((x) => x.nivel <= m.progresso.nivel) || lista[0]);
@@ -250,5 +261,9 @@ export function pedidosDeMaterial(D) {
     if (obj(r) && obj(r.custo)) de(r.custo.itens, r.nivel || 1, `construcoes.json "${c.id}" (reforma)`);
   }
   for (const r of Object.values(receitasDe(D).todas)) de(r.entra, Math.max(r.nivel, (D.construcoes[r.onde] || {}).nivel || 1), `receitas.json "${r.id}"`);
+  // preparar terra nova no campo (regras.json "campo", sistemas/campo.js): o adubo de uma fileira, a partir do nível em
+  // que o limite do campo passa do inicial
+  const C = regrasDoCampo(D), cresce = C.limite.find((e) => C.limite.length && e.casas > C.limite[0].casas);
+  if (C.item && C.aduboPorCasa > 0 && cresce) de({ [C.item]: Math.ceil(C.aduboPorCasa * C.fileira - 1e-9) }, cresce.nivel, 'regras.json "campo" (preparar a terra)');
   return out;
 }

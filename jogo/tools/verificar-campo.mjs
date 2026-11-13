@@ -1,14 +1,16 @@
 // Confere o campo de plantação no jogo montado, num Chromium sem janela, com mouse, teclado e toque de verdade:
 //   1280x720 (computador: mouse e teclado) e 844x390 (celular deitado, toque).
 // O campo inicial (pequeno: 12 casas, duas fileiras de 6 ao lado do poço) aparece e o guia marca a primeira fileira;
-// ela começa com a enxada na mão e o regador no chão ao lado do poço; segurar o mouse (ou o dedo) numa casa do campo
-// mostra a fileira e, ao soltar, ara a fileira toda; segurar Espaço semeia a fileira à frente; escolher Regar (clique)
-// ou tocar no regador (dedo) faz ela ir buscar o regador e encher no poço; segurar o botão de agir da tela ara a
-// fileira à frente; mexer o dedo cancela; regar, colher e vender fileira por fileira; colheu, segue campo; arar a grama
-// do lado aumenta o campo; gravar e recarregar a página guarda o campo; nada pequeno demais; nenhum erro no console.
+// ela começa com a enxada na mão e o regador no chão ao lado do poço. Com as ações por toque não há modo para
+// escolher: a casa do campo se ara, a arada recebe a semente da mão, a planta com sede se rega, a pronta se colhe.
+// Segurar o mouse (ou o dedo) numa casa do campo mostra a fileira e, ao soltar, faz a ação dela na fileira toda;
+// segurar Espaço semeia a fileira à frente; clicar (ou tocar) no regador do chão faz ela ir buscar e encher no poço;
+// segurar o botão de agir da tela ara a fileira à frente; mexer o dedo cancela; regar, colher e vender fileira por
+// fileira; colheu, segue campo; arrastar o dedo na grama anda (não ara); gravar e recarregar a página guarda o campo;
+// nada pequeno demais; nenhum erro no console.
 // Grava as fotos (JPEG) do começo, do campo vazio, da primeira fileira, dela buscando o regador, do campo meio arado e
-// meio plantado com parte molhada, do campo todo pronto, depois da colheita e aumentado. Termina com "Tudo certo." ou
-// com a lista das falhas.
+// meio plantado com parte molhada, do campo todo pronto e depois da colheita. Termina com "Tudo certo." ou com a lista
+// das falhas.
 //   JOGO_DIST=dist-g JOGO_CAPTURAS=capturas-g JOGO_PORTA=8107 node tools/verificar-campo.mjs   (monte antes)
 import fs from 'node:fs';
 import path from 'node:path';
@@ -84,45 +86,54 @@ async function dedo(cdp, x, y) { await toqueCDP(cdp, 'touchStart', x, y); await 
 const posicionar = (pg, x, z) => J(pg, ([x, z]) => { const p = window.__jogo.mundo.personagem; p.x = x; p.z = z; p.rumo = 0; p.rota = null; window.__jogo.desenhar(); }, [x, z]);
 const semErros = (a, onde) => confere(a.erros.length === 0, `${onde}: erro no console: ${a.erros.slice(0, 3).join(' | ')}`);
 
+// o toque das ações por toque, pela ferramenta: { x, z } (a casa), fileira = segurar nela
+const agir = (pg, c) => comando(pg, { tipo: 'agirNoAlvo', ...c });
+// a primeira casa da fileira z que pede a ação "t" ('campo' sem sulco, 'arada' vazia, 'sede', 'pronta'), ou -1
+const casaQuePede = (pg, z, t) => J(pg, ([z, t]) => {
+  const j = window.__jogo, m = j.mundo, loc = m.local, C = m.dados.terras.campo;
+  for (let x = C[0]; x < C[2]; x++) {
+    const i = z * loc.l + x, pl = loc.plantas[i];
+    if (t === 'campo' ? loc.chao[i] === 6 : t === 'arada' ? loc.chao[i] === 1 && !pl : !!pl && (j.estado().plantas.find((p) => p.x === x && p.z === z) || {}).estado === t) return x;
+  }
+  return -1;
+}, [z, t]);
+// segura na primeira casa da fileira z que pede "t": a ação dela vai para a fileira toda
+async function fileiraDo(pg, z, t) { const x = await casaQuePede(pg, z, t); if (x < 0) return null; const r = await agir(pg, { x, z, fileira: true }); if (r.ok) await ateParar(pg); return r; }
+
 // as duas fileiras aradas, a 51 semeada de alface e a 52 só em parte (3 casas), a 51 toda regada e a 52 seca
 // (o "meio a meio" das fotos; o regador velho leva 4 regas: duas idas ao poço)
 async function meioAMeio(pg) {
   await J(pg, () => { window.__jogo.mundo.posses.bolsa['semente-alface'] = 60; });
-  await comando(pg, { tipo: 'escolherModo', modo: 'enxada' });
-  for (const z of [51, 52]) if ((await fileiraEm(pg, z, 'arada')) < 6) { await comando(pg, { tipo: 'fileira', x: 24, z }); await ateParar(pg); }
-  await comando(pg, { tipo: 'escolherModo', modo: 'semear', semente: 'semente-alface' });
-  if ((await fileiraEm(pg, 51, 'plantada')) < 6) { await comando(pg, { tipo: 'fileira', x: 24, z: 51 }); await ateParar(pg); }
-  for (const x of [24, 25, 26]) await comando(pg, { tipo: 'tocarCasa', x: x + 0.5, z: 52.5 });
+  await comando(pg, { tipo: 'naMao', item: 'semente-alface' });
+  for (const z of [51, 52]) await fileiraDo(pg, z, 'campo');
+  await fileiraDo(pg, 51, 'arada');
+  for (const x of [24, 25, 26]) await agir(pg, { x, z: 52 });
   await ateParar(pg);
   for (let volta = 0; volta < 3 && (await fileiraEm(pg, 51, 'molhada')) < 6; volta++) {
-    await comando(pg, { tipo: 'tocarEntidade', id: 'poco' }); await ateParar(pg);
-    await comando(pg, { tipo: 'escolherModo', modo: 'regar' });
-    const r = await comando(pg, { tipo: 'fileira', x: 24, z: 51 }); if (r.ok) await ateParar(pg);
+    await agir(pg, { entidade: 'poco' }); await ateParar(pg);
+    await fileiraDo(pg, 51, 'sede');
   }
 }
 // o campo todo arado, plantado e regado (com quantas idas ao poço forem precisas), e o relógio adiante: tudo pronto
 const regadorCheio = (pg) => J(pg, () => { const j = window.__jogo, f = j.mundo.posses.ferramentas, k = Object.keys(f).find((id) => /regador/.test(id)); return !k || f[k].agua >= j.dados.itens[k].capacidade; });
 async function campoTodoPronto(pg) {
   await J(pg, () => { window.__jogo.mundo.posses.bolsa['semente-alface'] = 60; });
-  await comando(pg, { tipo: 'escolherModo', modo: 'enxada' });
-  for (let z = 51; z < 53; z++) if ((await fileiraEm(pg, z, 'arada')) < 6) { await comando(pg, { tipo: 'fileira', x: 24, z }); await ateParar(pg); }
-  await comando(pg, { tipo: 'escolherModo', modo: 'semear', semente: 'semente-alface' });
-  for (let z = 51; z < 53; z++) if ((await fileiraEm(pg, z, 'plantada')) < 6) { await comando(pg, { tipo: 'fileira', x: 24, z }); await ateParar(pg); }
-  await comando(pg, { tipo: 'escolherModo', modo: 'regar' });
+  await comando(pg, { tipo: 'naMao', item: 'semente-alface' });
+  for (let z = 51; z < 53; z++) await fileiraDo(pg, z, 'campo');
+  for (let z = 51; z < 53; z++) await fileiraDo(pg, z, 'arada');
   for (let volta = 0; volta < 40 && (await campo(pg)).sede > 0; volta++) {
-    if (!(await regadorCheio(pg))) { await comando(pg, { tipo: 'tocarEntidade', id: 'poco' }); await ateParar(pg); }
+    if (!(await regadorCheio(pg))) { await agir(pg, { entidade: 'poco' }); await ateParar(pg); }
     const z = await J(pg, () => { const j = window.__jogo; const p = j.estado().plantas.find((q) => q.estado === 'sede'); return p ? p.z : 51; });
-    const r = await comando(pg, { tipo: 'fileira', x: 24, z }); if (r.ok) await ateParar(pg);
+    await fileiraDo(pg, z, 'sede');
   }
   await J(pg, () => window.__jogo.pular(3600));
 }
-// colhe fileira por fileira no modo mão, vendendo na banca quando o cesto enche
+// colhe fileira por fileira (segurar na planta pronta), vendendo na banca quando o cesto enche
 async function colherTudo(pg) {
-  await comando(pg, { tipo: 'escolherModo', modo: 'mao' });
   for (let volta = 0; volta < 60 && (await campo(pg)).plantas > 0; volta++) {
     const z = await J(pg, () => { const p = window.__jogo.estado().plantas.find((q) => q.estado === 'pronta'); return p ? p.z : 51; });
-    const r = await comando(pg, { tipo: 'fileira', x: 24, z }); if (r.ok) await ateParar(pg);
-    if ((await estado(pg)).noCesto >= 6) { await comando(pg, { tipo: 'tocarEntidade', id: 'banca' }); await ateParar(pg); }
+    await fileiraDo(pg, z, 'pronta');
+    if ((await estado(pg)).noCesto >= 6) { await agir(pg, { entidade: 'banca' }); await ateParar(pg); }
   }
 }
 
@@ -148,10 +159,8 @@ try {
   igual((await estado(pg)).missao.id, 'preparar-a-terra', 'o clique no Seu Tonho cumpre a conversa');
   await olharCampo(pg);
   await foto(pg, 'g-1280-0-comeco.jpg');
-  await pg.mouse.click(...Object.values(await centroDe(pg, '.modo[data-modo="enxada"]')));
-  await esperar(80);
-  igual((await estado(pg)).modo.id, 'enxada', 'o clique escolhe a enxada');
-  igual((await estado(pg)).personagem.fila, 0, 'com a enxada na mão, escolher Enxada não manda buscar nada');
+  confere(await J(pg, () => !document.querySelector('.modo[data-modo]') && !!document.querySelector('.vaga-mao')), 'sem barra de modos: embaixo fica a vaga "Na mão"');
+  igual((await estado(pg)).personagem.fila, 0, 'com a enxada na mão, nada a buscar antes de arar');
   let g = await J(pg, () => window.__jogo.guia());
   confere(g.tipo === 'casa' && g.z === 51 && g.casas && g.casas.length === 6, `o guia aponta a primeira fileira (z = 51) com as 6 casas (veio ${JSON.stringify(g)})`);
   await esperar(400); // a seta do tutorial se acerta umas vezes por segundo
@@ -176,23 +185,24 @@ try {
   await esperar(1800);
   await olharCampo(pg);
   await foto(pg, 'g-1280-3-primeira-fileira.jpg');
-  // segurar Espaço com ela de frente para a fileira: semeia a fileira toda
-  await pg.mouse.click(...Object.values(await centroDe(pg, '.modo[data-modo="semear"]')));
-  await J(pg, () => { window.__jogo.mundo.posses.bolsa['semente-alface'] = 60; window.__jogo.comando({ tipo: 'escolherModo', modo: 'semear', semente: 'semente-alface' }); });
+  // segurar Espaço com ela de frente para a fileira arada: semeia a fileira toda com a semente da mão
+  await J(pg, () => { window.__jogo.mundo.posses.bolsa['semente-alface'] = 60; window.__jogo.comando({ tipo: 'naMao', item: 'semente-alface' }); });
   await posicionar(pg, 26.5, 50.5);
   await pg.keyboard.down('Space'); await esperar(SEGURAR);
   confere(/solte/i.test(await dica(pg)), `segurando Espaço, a dica diz o que acontece ao soltar (veio "${await dica(pg)}")`);
   await pg.keyboard.up('Space'); await esperar(80);
   await ateParar(pg);
   igual(await fileiraEm(pg, 51, 'plantada'), 6, 'segurar Espaço semeou a fileira toda');
-  // a missão do poço: a seta aponta o regador no chão; o clique em Regar faz ela ir buscar e encher sozinha
+  // a missão do poço: a seta aponta o regador no chão; o clique nele faz ela ir buscar e encher sozinha
   igual((await estado(pg)).missao.id, 'agua-do-poco', 'depois de plantar, a missão é pegar o regador e encher');
   g = await J(pg, () => window.__jogo.guia());
   confere(g.tipo === 'entidade' && g.id === 'lugar:regador-velho', `o guia aponta o regador no chão (veio ${JSON.stringify(g)})`);
-  await pg.mouse.click(...Object.values(await centroDe(pg, '.modo[data-modo="regar"]')));
+  await J(pg, () => window.__jogo.olhar(31.5, 52.5));
+  const rg = await J(pg, () => window.__jogo.daEntidade('lugar:regador-velho', 0.25));
+  confere(await J(pg, ([x, y]) => { const e = document.elementFromPoint(x, y); return !!e && e.id === 'tela'; }, [rg.x, rg.y]), 'o regador do chão está livre para o clique');
+  await pg.mouse.click(rg.x, rg.y);
   await esperar(80);
-  igual((await estado(pg)).modo.id, 'regar', 'o clique escolhe Regar');
-  confere((await estado(pg)).personagem.fila >= 1 || (await estado(pg)).personagem.ocupada, 'sem o regador, escolher Regar manda ela buscar');
+  confere((await estado(pg)).personagem.fila >= 1 || (await estado(pg)).personagem.ocupada, 'o clique no regador do chão manda ela buscar');
   await J(pg, () => window.__jogo.avancar(1.4));
   await J(pg, () => window.__jogo.olhar(31.5, 52.5));
   await foto(pg, 'g-1280-4-buscando-regador.jpg');
@@ -200,9 +210,9 @@ try {
   igual(await ferramentas(pg), { 'enxada-velha': 'cinto', 'regador-velho': 'cinto', agua: 4 }, 'ela pegou o regador e encheu no poço (e a enxada segue no cinto)');
   igual((await estado(pg)).missao.id, 'regar', 'pegar e encher cumpre a missão do poço');
   igual(await J(pg, () => { const c = document.querySelector('.chip[title="Regador"]'); return c ? c.textContent.trim() : ''; }), '4/4', 'o chip do regador mostra a água');
-  // trocar de modo não devolve o regador: ele fica no cinto
-  await comando(pg, { tipo: 'escolherModo', modo: 'enxada' }); await ateParar(pg);
-  igual((await ferramentas(pg))['regador-velho'], 'cinto', 'trocou de modo: o regador segue no cinto (nada de voltar ao poço)');
+  // arar de novo com a enxada não devolve o regador: ele fica no cinto
+  await agir(pg, { x: 29, z: 52 }); await ateParar(pg);
+  igual((await ferramentas(pg))['regador-velho'], 'cinto', 'arou com a enxada: o regador segue no cinto (nada de voltar ao poço)');
   // mexer o mouse segurando cancela
   await olharCampo(pg);
   p = await pontoDaCasa(pg, 26, 52);
@@ -228,8 +238,7 @@ try {
   await esperar(1800);
   await olharCampo(pg);
   await foto(pg, 'g-1280-6-pronto.jpg');
-  // na mão, segurar mostra a colheita da fileira; mexer cancela
-  await comando(pg, { tipo: 'escolherModo', modo: 'mao' });
+  // segurar numa planta pronta mostra a colheita da fileira; mexer cancela
   p = await pontoDaCasa(pg, 27, 52);
   await pg.mouse.move(p.x, p.y); await pg.mouse.down(); await esperar(SEGURAR);
   confere(/solte para colher 6/i.test(await dica(pg)), `na mão, segurar mostra a colheita da fileira (veio "${await dica(pg)}")`);
@@ -244,22 +253,7 @@ try {
   await esperar(1800);
   await olharCampo(pg);
   await foto(pg, 'g-1280-7-colhido.jpg');
-  // a enxada na grama colada no campo: o campo cresce
-  await comando(pg, { tipo: 'escolherModo', modo: 'enxada' });
-  await olharCampo(pg);
-  // uma fileira nova na grama da frente (z = 53), arrastando o mouse; e três casas atrás (z = 50), com cliques
-  p = await pontoDaCasa(pg, 24, 53);
-  const q = await pontoDaCasa(pg, 29, 53);
-  await pg.mouse.move(p.x, p.y); await pg.mouse.down(); await pg.mouse.move(q.x, q.y, { steps: 12 }); await pg.mouse.up();
-  for (const [x, z] of [[25, 50], [26, 50], [27, 50]]) { p = await pontoDaCasa(pg, x, z); await pg.mouse.click(p.x, p.y); await esperar(30); }
-  await ateParar(pg);
-  const fora = await J(pg, () => { const loc = window.__jogo.mundo.local; return [[24, 53], [25, 53], [26, 53], [27, 53], [28, 53], [29, 53], [25, 50], [26, 50], [27, 50]].filter(([x, z]) => loc.chao[z * loc.l + x] === 1).length; });
-  igual(fora, 9, 'a grama arada do lado do campo virou terra arada (o campo cresceu: uma fileira nova e um pedaço de outra)');
-  igual(await J(pg, () => window.__jogo.mundo.comando({ tipo: 'fileira', x: 26, z: 53 }).motivo), 'fileira-em-dia', 'a fileira nova é fileira do campo (arada toda: nada a arar)');
-  await olharCampo(pg);
-  await esperar(1800);
-  await olharCampo(pg);
-  await foto(pg, 'g-1280-8-maior.jpg');
+  // (a grama do lado do campo: o toque não ara; o campo cresce pelo "Preparar a terra": o bloco "ampliar o campo")
   // gravar e recarregar: o campo volta igual
   const antes = await campo(pg), est = await estado(pg);
   await J(pg, () => window.__jogo.gravar());
@@ -285,9 +279,7 @@ try {
   igual((await estado(pg)).missao.id, 'preparar-a-terra', 'o toque no Seu Tonho cumpre a conversa');
   await olharCampo(pg);
   await foto(pg, 'g-844-0-comeco.jpg');
-  let b = await centroDe(pg, '.modo[data-modo="enxada"]');
-  await dedo(cdp, b.x, b.y);
-  igual((await estado(pg)).modo.id, 'enxada', 'o toque no botão escolhe a enxada');
+  let b;
   await esperar(400);
   await olharCampo(pg);
   await foto(pg, 'g-844-1-campo-vazio.jpg');
@@ -315,19 +307,18 @@ try {
   await foto(pg, 'g-844-4-buscando-regador.jpg');
   await ateParar(pg);
   igual(await ferramentas(pg), { 'enxada-velha': 'cinto', 'regador-velho': 'cinto', agua: 4 }, 'no celular, o toque no regador: pegou e encheu');
+  // um toque curto numa casa do campo ara uma casa só
+  await olharCampo(pg);
+  p = await pontoDaCasa(pg, 29, 52);
+  await dedo(cdp, p.x, p.y); await ateParar(pg);
+  igual(await fileiraEm(pg, 52, 'arada'), 1, 'um toque curto ara uma casa só');
   // segurar o botão de agir da tela, de frente para a segunda fileira
-  await comando(pg, { tipo: 'escolherModo', modo: 'enxada' });
   await posicionar(pg, 26.5, 51.5);
   b = await centroDe(pg, '.agir');
   await toqueCDP(cdp, 'touchStart', b.x, b.y); await esperar(SEGURAR);
   await toqueCDP(cdp, 'touchEnd'); await esperar(80);
   await ateParar(pg);
   igual(await fileiraEm(pg, 52, 'arada'), 6, 'segurar o botão de agir arou a fileira da frente');
-  // um toque curto na grama do lado continua sendo uma casa só (e aumenta o campo)
-  await olharCampo(pg);
-  p = await pontoDaCasa(pg, 27, 53);
-  await dedo(cdp, p.x, p.y); await ateParar(pg);
-  igual(await fileiraEm(pg, 53, 'arada'), 1, 'um toque curto ara uma casa só');
   await meioAMeio(pg);
   await J(pg, () => window.__jogo.seguir());
   await olharCampo(pg);
@@ -346,22 +337,18 @@ try {
   await esperar(1800);
   await olharCampo(pg);
   await foto(pg, 'g-844-7-colhido.jpg');
-  await comando(pg, { tipo: 'escolherModo', modo: 'enxada' });
   await olharCampo(pg);
-  // o dedo arrasta pela grama de trás (z = 50): uma fileira nova
+  // o dedo arrasta pela grama de trás (z = 50): não ara nada (só se ara no campo); o arrasto na grama anda
   {
     const pts = [];
     for (let x = 24; x <= 29; x += 0.5) pts.push(await J(pg, ([x]) => window.__jogo.naTela(x + 0.5, 50.5), [x]));
     await toqueCDP(cdp, 'touchStart', pts[0].x, pts[0].y);
     for (const t of pts.slice(1)) { await esperar(25); await toqueCDP(cdp, 'touchMove', t.x, t.y); }
+    confere(await J(pg, () => !document.querySelector('.alavanca.solta').hidden), 'no celular, arrastar o dedo na grama mostra a alavanca (anda)');
     await esperar(30); await toqueCDP(cdp, 'touchEnd'); await esperar(60);
   }
   await ateParar(pg);
-  igual(await J(pg, () => { const loc = window.__jogo.mundo.local; let n = 0; for (let x = 24; x < 30; x++) if (loc.chao[50 * loc.l + x] === 1) n++; return n; }), 6, 'no celular, o dedo arrastando na grama do lado abriu uma fileira nova');
-  await olharCampo(pg);
-  await esperar(1800);
-  await olharCampo(pg);
-  await foto(pg, 'g-844-8-maior.jpg');
+  igual(await J(pg, () => { const loc = window.__jogo.mundo.local; let n = 0; for (let x = 24; x < 30; x++) if (loc.chao[50 * loc.l + x] === 1) n++; return n; }), 0, 'no celular, o dedo arrastando na grama do lado não ara nada');
   // nada pequeno demais: texto de 14 px para cima e botões de 44 px para cima
   const pequenos = await J(pg, () => {
     const ruins = [];

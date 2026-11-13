@@ -75,7 +75,9 @@ export function acaoNaturalNaCasa(m, x, z, c) {
   if (loc.plantas[i]) { // a planta: colher a pronta, regar a com sede; crescendo, só informa
     const d = MODOS.mao.acaoNaCasa(m, x, z);
     if (d && d.acao === 'regar' && !temFerramenta(m, 'regador')) return { acao: null, texto: 'sem-ferramenta', dados: { funcao: 'regador' }, falta: true };
-    return d && d.acao === 'regar' ? { ...d, modo: 'regar', arrasta: true } : d;
+    if (d && d.acao === 'regar') return { ...d, modo: 'regar', arrasta: true };
+    // colher: segurar colhe a fileira (o modo "mão" dela); arrastar o dedo nunca colhe (sem "arrasta": o arrasto anda)
+    return d && d.acao === 'colher' ? { ...d, modo: 'mao' } : d;
   }
   const chao = loc.chao[i], item = itemNaMao(m), muda = ehMuda(m, item);
   if (chao === ARADA || filaTem(m, 'arar', x, z)) { // (a casa que a enxada vai arar já aceita a semente)

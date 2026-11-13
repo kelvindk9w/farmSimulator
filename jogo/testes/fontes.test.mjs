@@ -12,7 +12,7 @@ import { adquirirFerramenta } from '../src/nucleo/sistemas/posses.js';
 import { construcoesDe } from '../src/nucleo/sistemas/construcao.js';
 import {
   fontesDoItem, faltasDe, temFontes, comoConseguir, paraQueServe, materialDaMissao, conferirFontes, nivelDaFonte,
-  usosDoPremio, materialParaExplicar, jaExplicou, dicaDoMaterial, premiosCom,
+  usosDoPremio, materialParaExplicar, jaExplicou, dicaDoMaterial, premiosCom, pedidosDeMaterial,
 } from '../src/nucleo/fontes.js';
 import { T } from '../src/ui/textos.js';
 import '../src/ui/textos/fontes.js';
@@ -184,4 +184,48 @@ test('o prêmio com material diz para que ele serve', () => {
   assert.equal(T.fontes.nota(m.dados, { tabua: 1 }, [{ tipo: 'construcao', nome: 'Galinheiro' }]), '+1 tábua: serve para o galinheiro');
   assert.equal(T.fontes.nota(m.dados, { 'cartela-vazia': 5 }, [{ tipo: 'receita', nome: 'Dúzia de ovos' }]), '+5 cartelas vazias: servem para fazer dúzia de ovos');
   assert.equal(T.fontes.nota(m.dados, { prego: 4 }, [{ tipo: 'ampliacao', nome: 'Bancada de carpintaria' }, { tipo: 'reforma', nome: 'Cerca nova' }]), '+4 pregos: servem para ampliar a bancada de carpintaria e a cerca nova');
+});
+
+// o adubo (frente da área de plantio): preparar terra nova no campo pede adubo; os números aqui são de teste
+function comAdubo(b) {
+  if (!b.itens.adubo) b.itens.adubo = { nome: 'Adubo', tipo: 'material', compra: 3, venda: 1, nivel: 3, descricao: 'teste' };
+  b.itens.adubo.fontes = [{ tipo: 'loja' }, { tipo: 'premios' }];
+  b.itens.adubo.comoConseguir = 'Adubo se compra na loja, em Materiais.';
+  b.regras.campo = { limite: [{ nivel: 1, casas: 12 }, { nivel: 3, casas: 18 }, { nivel: 6, casas: 30 }], preparo: { ouroPorCasa: 2, aduboPorCasa: 1 } };
+  const r = b.missoes.vizinho.find((x) => x.id === 'regador-novo').recompensa;
+  r.itens = { ...(r.itens || {}), adubo: 6 };
+  if (!b.missoes.vizinho.some((x) => x.objetivo.evento === 'preparou')) b.missoes.vizinho.unshift({ id: 'teste-preparar', nivel: 1, titulo: 'Preparar', fala: 'Prepare a terra.', objetivo: { evento: 'preparou', n: 6 }, recompensa: { xp: 1 } });
+}
+
+test('adubo: o validador pede fonte para ele, e o prêmio diz que serve para ampliar o campo', () => {
+  const D = dadosDeVerdade(comAdubo);
+  assert.deepEqual(conferirFontes(D).filter((p) => p.grave), []);
+  const p = pedidosDeMaterial(D).find((x) => x.item === 'adubo');
+  assert.deepEqual([p.n, p.nivel], [6, 3], 'uma fileira de 6 casas, no nível em que o campo pode crescer');
+  assert.match(conferirFontes(dadosDeVerdade((b) => { comAdubo(b); delete b.itens.adubo.fontes; })).map((x) => x.texto).join('\n'), /não diz de onde adubo vem/);
+  assert.match(conferirFontes(dadosDeVerdade((b) => { comAdubo(b); b.itens.adubo.fontes = [{ tipo: 'loja' }]; b.itens.adubo.nivel = 5; })).map((x) => x.texto).join('\n'), /pede adubo no nível 3, mas a primeira fonte de adubo só abre no nível 5/);
+  const m = new Mundo(D, { agora: 1_700_000_000_000 });
+  let u = paraQueServe(m, 'adubo');
+  assert.deepEqual(u.map((x) => [x.tipo, x.nivel, x.ja, x.precisa]), [['campo', 3, false, 6]]);
+  m.progresso.nivel = 3;
+  assert.deepEqual(paraQueServe(m, 'adubo').map((x) => [x.tipo, x.ja]), [['campo', true]]);
+  u = usosDoPremio(m, { adubo: 6 });
+  assert.equal(T.fontes.nota(m.dados, u.mats, u.usos), '+6 adubos: servem para ampliar o campo');
+  // o campo no maior tamanho que os dados deixam: o adubo não serve para mais nada
+  m.progresso.nivel = 6; m.campo.tamanho = 30;
+  assert.deepEqual(paraQueServe(m, 'adubo'), []);
+  // as fontes no cartão: a loja (nível 3) e a missão do regador
+  m.progresso.nivel = 1; m.campo.tamanho = -1;
+  const f = fontesDoItem(m, 'adubo');
+  assert.deepEqual(tipos(f), ['premios', 'loja']);
+  assert.equal(f[0].missao.id, 'regador-novo'); assert.equal(f[1].nivel, 3);
+});
+
+test('adubo: a missão de preparar a terra mostra o adubo das casas que faltam', () => {
+  const m = new Mundo(dadosDeVerdade(comAdubo), { agora: 1_700_000_000_000 });
+  const lista = m.dados.missoes.vizinho, i = lista.findIndex((x) => x.objetivo.evento === 'preparou');
+  m.missoes.feitas = lista.slice(0, i).map((x) => x.id); m.progresso.nivel = Math.max(1, lista[i].nivel || 1);
+  assert.deepEqual(materialDaMissao(m), { itens: { adubo: lista[i].objetivo.n }, nome: 'Campo' });
+  m.missoes.de = lista[i].id; m.missoes.conta = 2;
+  assert.deepEqual(materialDaMissao(m).itens, { adubo: lista[i].objetivo.n - 2 });
 });

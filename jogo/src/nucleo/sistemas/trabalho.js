@@ -34,6 +34,7 @@ export const MONTAR_ACIMA_DE = 6; // casas: viagem mais longa que isto é feita 
 const MONTA_SE_SOBRAR = 2.5; // casas que ainda faltam quando o cavalo a alcança: menos que isto, nem vale subir
 const SEM_TRATO_ARA = 3; // casas por passada com o boi sem trato
 const BOI_OCIOSO = 40; // segundos no modo "Arado" sem arar nada: o boi volta sozinho para o estábulo
+const BOI_SOLTO = 15; // segundos que o boi espera a próxima passada pedida pelo toque (sem o modo "Arado") antes de voltar
 const PERTO = 5; // casas: até aqui o jumento está "junto" (o cesto passa para a carroça)
 const DIRS = [[1, 0], [0, 1], [-1, 0], [0, -1]]; // a ordem de preferência das fileiras do arado, no empate
 const ENTRA = 0.14; // fração da passada que o boi leva para chegar à ponta da fileira
@@ -636,8 +637,9 @@ registrarSistema({
     let boiFora = false;
     if (boi && fora) {
       const naFila = !!ac || filaTem(m, 'ararComBoi');
-      if (naFila) { T.boiOcioso = 0; T.boiSolto = true; } else if (m.modo.id === 'arado' || T.boiSolto) T.boiOcioso += PASSO;
-      boiFora = naFila || ((m.modo.id === 'arado' || T.boiSolto) && T.boiOcioso < BOI_OCIOSO);
+      // (boiSolto: a passada pedida pelo toque das ações por toque, no jeito "mão"; a espera é mais curta, para não ficar no caminho)
+      if (naFila) { T.boiOcioso = 0; if (m.modo.id === 'mao') T.boiSolto = true; } else if (m.modo.id === 'arado' || T.boiSolto) T.boiOcioso += PASSO;
+      boiFora = naFila || (m.modo.id === 'arado' ? T.boiOcioso < BOI_OCIOSO : T.boiSolto && T.boiOcioso < BOI_SOLTO);
       if (!boiFora) T.boiSolto = false;
       if (boiFora) {
         const e = bichoSolto(m, boi.id) || sair(m, boi, p);

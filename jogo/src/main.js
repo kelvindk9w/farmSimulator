@@ -10,6 +10,7 @@ import { prepararDados, listarProblemas } from './nucleo/dados.js';
 import { Mundo } from './nucleo/mundo.js';
 import { ocupada } from './nucleo/sistemas/personagem.js';
 import { estadoDaPlanta } from './nucleo/sistemas/lavoura.js';
+import { acoesDoAlvo } from './nucleo/sistemas/acoes.js';
 import { missaoAtual } from './nucleo/sistemas/missoes.js';
 import { guiaDaMissao } from './nucleo/guia.js';
 import { noCesto } from './nucleo/sistemas/posses.js';
@@ -233,6 +234,8 @@ function comecar() {
     avisos: () => [...avisosNaTela(), ...avisosEmEspera()], // os que estão na tela e os que esperam a vez
     avisosNaTela,
     guia: () => ({ ...guiaDaMissao(J.mundo) }),
+    // as ações por toque de um alvo ({ x, z } | { entidade }), a principal primeiro (só lê)
+    opcoes: (alvo) => acoesDoAlvo(J.mundo, alvo).map((o) => ({ id: o.id, ok: o.ok, texto: o.texto || null, modo: o.modo || null, arrasta: !!o.arrasta, casas: o.casas ? o.casas.length : 0 })),
     medidas: () => ({ w: tela.w, h: tela.h, emPe: tela.emPe, dpr: cam.dpr, E: cam.E, imagemLeve: atlas.leve, fps: Math.round(fps), quadros, blocosDoChao: cena.chao.pintados, figuras: cena.n, menu: foco.menu }),
     arteBaixada: () => atlas.tudoPronto(),
     baixarArte: () => atlas.baixarTudo(),

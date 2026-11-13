@@ -63,7 +63,10 @@ const diaDe = (t) => Math.floor((t + FUSO_MIN * 60000) / DIA);
 const dia0 = diaDe(T0);
 function fotoDoDia() {
   const d = diaDe(m.agora - 1) - dia0 + 1;
-  S.dias[d - 1] = { dia: d, nivel: m.progresso.nivel, xp: m.progresso.xp, ouro: m.posses.ouro, missoes: S.missoes.length, jogado: S.jogado };
+  const loc = m.locais.fazenda;
+  let campo = 0; // o tamanho do campo de plantação (casas sem sulco, aradas ou plantadas)
+  for (let i = 0; i < loc.chao.length; i++) if (X.local.deLavoura(loc.chao[i])) campo++;
+  S.dias[d - 1] = { dia: d, nivel: m.progresso.nivel, xp: m.progresso.xp, ouro: m.posses.ouro, missoes: S.missoes.length, jogado: S.jogado, campo };
 }
 
 // ---------- jogar ----------

@@ -73,7 +73,7 @@ T.fontes = {
   saiaDoCeleiro: 'Saia do celeiro para ver',
   semAlvo: 'Não achei nenhum perto agora',
   // para que o material do prêmio serve: "+10 pregos e +4 tábuas: servem para o estábulo e o galinheiro"
-  uso: (x) => (x.tipo === 'construcao' ? o(x.nome) : x.tipo === 'reforma' ? (ehVerbo(x.nome) ? minus(x.nome) : o(x.nome)) : x.tipo === 'ampliacao' ? `ampliar ${o(x.nome)}` : `fazer ${minus(x.nome)}`),
+  uso: (x) => (x.tipo === 'construcao' ? o(x.nome) : x.tipo === 'reforma' ? (ehVerbo(x.nome) ? minus(x.nome) : o(x.nome)) : x.tipo === 'ampliacao' ? `ampliar ${o(x.nome)}` : x.tipo === 'campo' ? 'ampliar o campo' : `fazer ${minus(x.nome)}`),
   nota: (D, itens, usos) => {
     const partes = Object.entries(itens).map(([k, n]) => `+${qtd(n, nomeI(D, k))}`), um = partes.length === 1 && Object.values(itens)[0] === 1;
     return `${juntar(partes)}: ${um ? 'serve' : 'servem'} para ${juntar(usos.map(T.fontes.uso))}`;

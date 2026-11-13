@@ -135,27 +135,31 @@ async function cenario(a, f) {
 
   // ---- começo: ouro e nível pelo gancho de teste
   await mundo(() => { const m = window.__jogo.mundo; m.posses.ouro = 60000; m.progresso.nivel = 12; m.progresso.xp = m.dados.niveis.limiar[12] + 100; });
-  igual(await J(() => !!document.querySelector('.modo[data-modo="limpar"]') && document.querySelector('.modo[data-modo="limpar"]').hidden), true, 'sem ferramenta de limpar, o botão "Limpar" não aparece');
+  // sem barra de modos: a ação do mato vem dele (sem a foice, falta a ferramenta; com ela, "Limpar")
+  const principalDe = (alvo) => J((a) => window.__jogo.opcoes(a)[0] || null, alvo);
+  let matoSem = (await J(() => window.__t.obst('mato')))[0];
+  if (matoSem) {
+    const o = await principalDe({ x: matoSem.x, z: matoSem.z });
+    confere(!!o && !o.ok && o.texto === 'sem-ferramenta', `sem ferramenta de limpar, o mato diz que falta a ferramenta (veio ${JSON.stringify(o)})`);
+  }
 
   // ---- comprar a foice e roçar: um toque no mato faz a cadeia (busca a foice no celeiro, vai e roça)
   await comprar('ferramentas', 'foice-de-ferro');
   await foto('loja-ferramentas');
   await fecharPainel();
-  igual(await J(() => document.querySelector('.modo[data-modo="limpar"]').hidden), false, 'com a foice, o botão "Limpar" aparece');
   let matos = await J(() => window.__t.obst('mato', true));
+  if (matos[0]) { const o = await principalDe({ x: matos[0].x, z: matos[0].z }); confere(!!o && o.ok && o.id === 'rocar' && !o.arrasta, `com a foice, a ação do mato é limpar (e não se repete arrastando) (veio ${JSON.stringify(o)})`); }
   confere(matos.length > 0, 'há mato com vizinho de mato em terra própria');
   const nMato = await J(() => window.__t.quantos('mato'));
   await tocarCasa(matos[0].x, matos[0].z);
-  confere(await J(() => window.__jogo.estado().personagem.fila >= 1 || window.__jogo.ocupada()), 'o toque no mato (modo mão) enfileira a limpeza');
+  confere(await J(() => window.__jogo.estado().personagem.fila >= 1 || window.__jogo.ocupada()), 'o toque no mato enfileira a limpeza');
   await ateParar();
   confere(!(await J((id) => window.__t.tem(id), matos[0].id)), 'o mato tocado saiu');
   confere((await J(() => window.__t.quantos('mato'))) <= nMato - 2, 'a foice de ferro leva o mato vizinho na mesma passada');
   igual(await J(() => window.__jogo.estado().noCesto), 0, 'a fibra não ocupa o cesto da colheita');
   igual(await J(() => window.__jogo.estado().ferramentas['foice-de-ferro'].onde), 'cinto', 'ela buscou a foice no suporte do celeiro');
 
-  // ---- modo limpar: arrastar pinta vários de uma vez
-  await tocarEm('.modo[data-modo="limpar"]');
-  igual(await J(() => window.__jogo.estado().modo.id), 'limpar', 'o botão escolhe o modo limpar');
+  // ---- vários toques no mato enfileiram a limpeza de cada um; arrastar a partir do mato não limpa (anda ou move a câmera)
   matos = await J(() => window.__t.obst('mato'));
   const fileira = matos.filter((e) => e.z === matos[0].z && Math.abs(e.x - matos[0].x) <= 3).sort((p, q) => p.x - q.x);
   const alvos = fileira.length >= 2 ? fileira : matos.slice(0, 2);
@@ -165,16 +169,20 @@ async function cenario(a, f) {
   if (comDedo) await dedo(cdp, [pts[0], ...pts.flatMap((p, i) => (i ? [[(pts[i - 1][0] + p[0]) / 2, (pts[i - 1][1] + p[1]) / 2], p] : [])), pts[pts.length - 1]]);
   else { await pg.mouse.move(pts[0][0], pts[0][1]); await pg.mouse.down(); for (const p of pts) await pg.mouse.move(p[0], p[1], { steps: 6 }); await pg.mouse.up(); }
   await esperar(80);
-  confere(await J(() => window.__jogo.estado().personagem.fila >= 1 || window.__jogo.ocupada()), 'arrastar no modo limpar enfileira a limpeza');
-  await foto('limpar-arrastando');
+  igual(await J(() => window.__jogo.estado().personagem.fila), 0, 'arrastar a partir do mato não enfileira limpeza (limpar é só no toque)');
+  await J(() => { window.__jogo.comando({ tipo: 'frear' }); window.__jogo.ateParar(); });
+  confere((await J((ids) => ids.filter((id) => window.__t.tem(id)).length, alvos.map((e) => e.id))) === alvos.length, 'o arrasto não tirou mato nenhum');
+  await J(([x, z]) => window.__jogo.olhar(x, z), [alvos[0].x + 0.5, alvos[0].z + 0.5]);
+  for (const e of alvos) { const p = await J(([x, z]) => window.__jogo.naTela(x + 0.5, z + 0.5), [e.x, e.z]); await tocarXY(p.x, p.y); }
+  confere(await J(() => window.__jogo.estado().personagem.fila >= 1 || window.__jogo.ocupada()), 'um toque em cada mato enfileira a limpeza');
+  await foto('limpar-varios');
   await ateParar();
-  confere((await J((ids) => ids.filter((id) => window.__t.tem(id)).length, alvos.map((e) => e.id))) === 0, 'todo o mato pintado saiu');
+  confere((await J((ids) => ids.filter((id) => window.__t.tem(id)).length, alvos.map((e) => e.id))) === 0, 'todo o mato tocado saiu');
 
   // ---- machado e picareta: toco e pedra pedem mais de um golpe, num toque só
   await comprar('ferramentas', 'machado-de-ferro');
   await comprar('ferramentas', 'picareta-de-ferro');
   await fecharPainel();
-  await tocarEm('.modo[data-modo="mao"]');
   const toco = (await J(() => window.__t.obst('toco')))[0], pedra = (await J(() => window.__t.obst('pedra')))[0];
   if (!confere(!!toco && !!pedra, 'há toco e pedra à vista em terra própria')) return;
   await tocarCasa(toco.x, toco.z);
@@ -264,9 +272,10 @@ async function cenario(a, f) {
   // ---- plantar uma bananeira no lote, avançar o relógio e colher
   await comprar('sementes', 'muda-bananeira');
   await fecharPainel();
-  await tocarEm('.modo[data-modo="semear"]');
-  await tocarEm('.semente[data-semente="muda-bananeira"]');
-  igual(await J(() => window.__jogo.estado().modo.semente), 'muda-bananeira', 'a muda aparece na barra de sementes e pode ser escolhida');
+  await tocarEm('.vaga-mao');
+  await tocarEm('.lista-mao .carta-mao[data-item="muda-bananeira"]');
+  igual(await J(() => window.__jogo.estado().modo.semente), 'muda-bananeira', 'a muda aparece na fileira da vaga "Na mão" e pode ser escolhida');
+  igual(await J(() => document.querySelector('.vaga-mao canvas').dataset.chave), 'icone/muda-bananeira', 'a vaga mostra a muda na mão');
   const lugar = await J((a) => window.__t.livre(a, 35, 40, true), ABRIR);
   if (!confere(!!lugar, 'há lugar para a bananeira no lote novo')) return;
   await J(([x, z]) => window.__jogo.olhar(x, z), [lugar[0] + 0.5, lugar[1] + 0.5]);
@@ -278,7 +287,7 @@ async function cenario(a, f) {
   if (!igual(arvores.length, 1, 'a bananeira foi plantada')) return;
   confere(arvores[0].x === lugar[0] && arvores[0].z === lugar[1], 'na casa tocada');
   igual(await J(() => window.__jogo.estado().bolsa['muda-bananeira'] || 0), 0, 'a muda saiu da bolsa');
-  await tocarEm('.modo[data-modo="mao"]');
+  confere(await J(() => document.querySelector('.vaga-mao canvas').dataset.chave !== 'icone/muda-bananeira'), 'plantada a muda, a vaga volta para a semente');
   await tocarEntidade(arvores[0].id, 0.4);
   confere(await J(() => window.__jogo.avisos().some((t) => /crescendo/i.test(t))), 'o toque na muda diz quanto falta');
   await J(() => { window.__jogo.pular(4 * 3600 + 2 * 3600 + 60); window.__jogo.avancar(1.2); });
@@ -293,7 +302,6 @@ async function cenario(a, f) {
 
   // ---- regador de área: comprar os degraus até o de crivo; uma rega molha três casas em linha
   // (o regador velho ficou no suporte enquanto ela limpava: um toque no poço traz ele de volta ao cinto)
-  await tocarEm('.modo[data-modo="mao"]');
   await tocarEntidade('poco', 0.7);
   await ateParar();
   igual(await J(() => window.__jogo.estado().ferramentas['regador-velho'].onde), 'cinto', 'para encher, ela busca o regador no suporte sozinha');
@@ -302,14 +310,12 @@ async function cenario(a, f) {
   confere(await J(() => window.__jogo.avisos().some((t) => /suporte/i.test(t))), 'a troca de ferramenta é avisada (a velha vai para o suporte)');
   igual(await J(() => window.__jogo.estado().ferramentas['regador-de-crivo'].onde), 'cinto', 'o regador novo toma o lugar do velho no cinto');
   const CAMPO = [[26, 51], [27, 51], [28, 51]];
-  await tocarEm('.modo[data-modo="enxada"]');
-  for (const [x, z] of CAMPO) await tocarCasa(x, z);
+  for (const [x, z] of CAMPO) await tocarCasa(x, z); // (a casa do campo se ara)
   await ateParar();
-  await tocarEm('.modo[data-modo="semear"]');
-  await tocarEm('.semente[data-semente="semente-alface"]');
-  for (const [x, z] of CAMPO) await tocarCasa(x, z);
+  await tocarEm('.vaga-mao');
+  await tocarEm('.lista-mao .carta-mao[data-item="semente-alface"]');
+  for (const [x, z] of CAMPO) await tocarCasa(x, z); // (a arada recebe a semente da mão)
   await ateParar();
-  await tocarEm('.modo[data-modo="mao"]');
   await tocarEntidade('poco', 0.7);
   await ateParar();
   // o poço velho do começo humilde tira no máximo 8 regas de uma vez; consertado (a reforma), enche o crivo inteiro
@@ -323,7 +329,6 @@ async function cenario(a, f) {
   }
   const agua = await J(() => window.__jogo.estado().ferramentas['regador-de-crivo'].agua);
   igual(agua, 16, 'o regador de crivo enche no poço');
-  await tocarEm('.modo[data-modo="regar"]');
   if (!comDedo) {
     const p = await pontoDoMundo(27.5, 51.5);
     await pg.mouse.move(p.x, p.y, { steps: 3 });
@@ -340,7 +345,6 @@ async function cenario(a, f) {
   // ---- desgaste e conserto: perto do fim avisa, gasta rende menos (não quebra), e o conserto é um toque
   igual(await J(() => document.querySelector('.chip.conserto').hidden), true, 'sem ferramenta gasta, o aviso de conserto não aparece');
   await mundo(() => { const m = window.__jogo.mundo; m.posses.ferramentas['foice-de-ferro'].usos = m.dados.itens['foice-de-ferro'].usos - 2; });
-  await tocarEm('.modo[data-modo="mao"]');
   for (let k = 0; k < 2; k++) {
     const mt = (await J(() => window.__t.obst('mato')))[0];
     if (!mt) { confere(false, 'faltou mato para gastar a foice'); break; }
