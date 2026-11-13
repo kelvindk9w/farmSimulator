@@ -27,3 +27,17 @@ A lição do conjunto `brinquedo` foi: estilo que depende de acabamento macio pe
 | 2. Contorno | Em parte: cor chapada é fácil, o contorno pede uma passada a mais de desenho. | Médio. |
 | 4. Massinha | Difícil: as marcas de dedo e a luz macia são o que o `brinquedo` não conseguiu. | Médio a pesado. |
 | 5. Aquarela | Não em 3D: viraria imagem 2D, o que foi descartado antes. | — |
+
+## O teste no jogo (feito depois da avaliação acima)
+
+As direções 1, 2 e 3 foram montadas no sítio mínimo (`prototypes/sitio-minimo`, conjuntos `lowpoly`, `contorno` e `pintado`) e passaram na verificação completa. O resultado está em `teste-no-jogo.jpg` (cada estilo ao lado do alvo) e em `teste-no-jogo-celular.jpg` (os três numa tela de celular em pé).
+
+| Direção | O que chegou perto | O que ficou longe |
+|---|---|---|
+| 1. Low poly | Facetas, luz dourada, sombra nítida, celeiro, poço, cerca, caminho. É o mais leve: cerca de 26 mil triângulos. | Uma cor só por face (o alvo tem dégradé), rosto do personagem pouco legível de longe, laranjas num galho baixo e não na copa. |
+| 2. Contorno | Traço escuro em volta de tudo, cor chapada e viva, telhado em grade, personagem com rosto legível. Sem mapa de sombra. | Traço de espessura única (o alvo é de mão), poucas linhas de dentro, sem sombra projetada, laranjas no galho baixo. |
+| 3. Pintado à mão | Cenário: telhado, tábuas, pedra, terra, grama e copa com pintura. Uma textura de 340 KB. | Personagem, vaca e galinhas continuam bonecos de brinquedo sem rosto pintado; falta a luz pintada peça por peça; o ladrilho da grama aparece de longe. |
+
+A avaliação anterior acertou no low poly e errou para menos no contorno, que chegou mais perto do que o previsto. No pintado, a textura resolveu o cenário e não resolveu personagem e bichos, que pedem modelo e pintura próprios.
+
+Nenhum dos três foi medido em aparelho de verdade. As notas completas estão em `prototypes/sitio-minimo/src/arte/<conjunto>/NOTAS.md`.

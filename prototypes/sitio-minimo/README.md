@@ -3,7 +3,7 @@
 Este é um protótipo jogável, pequeno, feito para responder a duas perguntas antes de começar o jogo de verdade.
 
 1. Cada tipo de objeto do sítio funciona e tem uma animação que dá gosto de ver? Aqui há um objeto de cada tipo: personagem, canteiro, poço, celeiro, vaca, galinha com ninho e laranjeira.
-2. Dá para trocar a arte de **um** objeto sem mexer nas regras do jogo? Aqui a arte de cada tipo fica atrás de uma interface pequena, e há três conjuntos de arte que se trocam com o jogo andando.
+2. Dá para trocar a arte de **um** objeto sem mexer nas regras do jogo? Aqui a arte de cada tipo fica atrás de uma interface pequena, e há seis conjuntos de arte que se trocam com o jogo andando.
 
 Depois veio uma terceira pergunta: o quanto um 3D desenhado em tempo real, com a arte do Codex definindo formas, cores e acabamento, chega perto da imagem de estilo escolhida (`arte/estilo/rodada-01/estilo-a.png`)? O conjunto de arte `brinquedo` é essa tentativa, e é ele que abre. A seção [O conjunto brinquedo](#o-conjunto-brinquedo) diz o que ficou perto da imagem e o que ficou longe.
 
@@ -32,7 +32,7 @@ As opções vão depois de `#` no endereço, separadas por vírgula:
 | Opção | O que faz |
 |---|---|
 | `#demo` | Abre já na demonstração. |
-| `#arte-brinquedo`, `#arte-codigo` ou `#arte-molde` | Escolhe o conjunto de arte inicial. Sem a opção, abre o `brinquedo`. |
+| `#arte-brinquedo`, `#arte-lowpoly`, `#arte-contorno`, `#arte-pintado`, `#arte-codigo` ou `#arte-molde` | Escolhe o conjunto de arte inicial. Sem a opção, abre o `brinquedo`. |
 | `#perto` ou `#tudo` | Escolhe o enquadramento inicial. Sem a opção, a tela estreita abre de perto e a tela larga abre vendo tudo. |
 | `#sem-hud` | Esconde a interface. |
 | `#passo` | Modo das ferramentas: a simulação só anda quando a ferramenta manda. |
@@ -45,7 +45,7 @@ Exemplo: `http://localhost:8090/#demo,arte-molde`.
 - Toque no chão. O personagem anda até o ponto tocado.
 - Antes de agir, a linha no pé da tela diz o que o objeto tocado vai fazer, ou por que ainda não dá para fazer nada com ele.
 - O botão **Demonstração** recomeça o sítio e faz um passeio fixo que executa cada ação uma vez. Durante o passeio a tela não aceita comandos. Quando o passeio acaba, o controle volta sozinho. Tocar no botão antes do fim interrompe o passeio e recomeça o sítio.
-- O botão **Arte** troca o conjunto de arte de todos os objetos de uma vez, sem recarregar a página e sem parar o que está acontecendo. Ele roda pelos três conjuntos: `brinquedo`, `codigo` e `molde`.
+- O botão **Arte** troca o conjunto de arte de todos os objetos de uma vez, sem recarregar a página e sem parar o que está acontecendo. Ele roda pelos seis conjuntos: `brinquedo`, `lowpoly`, `contorno`, `pintado`, `codigo` e `molde`.
 - O botão **Ver de perto / Ver tudo** troca o enquadramento. De perto, a câmera acompanha o personagem, e dá para arrastar o dedo para olhar em volta.
 - O botão **Medidor** mostra, no pé da tela, quantos quadros por segundo o aparelho está desenhando (a leitura de agora, a menor desde que o medidor foi aberto e o quadro mais demorado do último segundo), mais as chamadas de desenho e os triângulos do conjunto de arte atual. Serve para testar o mesmo sítio num celular fraco ou numa TV.
 - O botão **Ver alvo** aparece nos conjuntos que têm uma imagem-alvo (a imagem do Codex que o conjunto tenta reproduzir). Ele abre a imagem ao lado do jogo, na tela deitada, ou embaixo dele, na tela em pé. Tocar na imagem fecha.
@@ -84,6 +84,7 @@ Como a lógica é determinística, o passeio acontece sempre nos mesmos passos, 
 | `src/arte/registro.js` | O registro `conjunto de arte → tipo de objeto → fábrica` e a conferência do contrato. |
 | `src/arte/codigo/` | O primeiro conjunto, modelado e animado por código, de formas facetadas. O personagem reaproveita o avatar de `tools/visual-refs/src/avatar/`. Os esqueletos e a animação de todos os tipos moram aqui. |
 | `src/arte/brinquedo/` | O conjunto que abre. Usa os esqueletos e a animação do `codigo` e desenha de novo cada peça, com formas roliças de brinquedo. Traz a própria luz e o próprio mapa de sombra. |
+| `src/arte/lowpoly/`, `src/arte/contorno/`, `src/arte/pintado/` | Os três conjuntos do teste de estilos (ver "O teste de estilos"). Cada pasta tem um `NOTAS.md` com o que ficou perto e longe do alvo. |
 | `src/arte/molde/` | O conjunto de molde: formas cinza e lisas, com os mesmos estados e os mesmos pontos. |
 | `src/cena/` | A câmera, a luz (que vem do conjunto de arte que desenha o chão) e a ponte que lê a lógica e entrega o estado a cada visual. |
 | `src/ui/` | A interface em HTML por cima da tela de desenho. |
@@ -101,6 +102,26 @@ Como a lógica é determinística, o passeio acontece sempre nos mesmos passos, 
 O arquivo de configuração entra no `main.js` na hora do build. Por isso, mudar a configuração pede um build novo. Com a página aberta, a troca é feita pelo botão "Arte".
 
 Os estados, os dados e os pontos que cada tipo tem de suportar estão em [CONTRATO-DE-ARTE.md](CONTRATO-DE-ARTE.md). O conjunto `molde` cabe num arquivo só e serve de exemplo curto.
+
+## O teste de estilos
+
+O estilo `brinquedo` melhorou o jogo, mas ficou longe da imagem que o inspirou. Antes de escolher outra direção de arte, três das seis direções de `arte/estilo/rodada-03/` foram montadas no jogo de verdade, para a escolha ser feita vendo cada uma rodar e não pela imagem.
+
+| Conjunto | Alvo | Como é feito | No começo | Pico na demonstração |
+|---|---|---|---|---|
+| `lowpoly` | `var-1-low-poly.png` | Facetas à vista, uma cor por face, sol baixo e um mapa de sombra de 2048. Sem textura. | 27 chamadas e 25.642 triângulos | 34 chamadas e 26.290 triângulos |
+| `contorno` | `var-2-contorno.png` | Formas do `brinquedo` com menos gomos, três tons chapados por cor e traço escuro feito por casca virada. Sem mapa de sombra e sem efeito de tela inteira. | 36 chamadas e 66.881 triângulos | 43 chamadas e 69.009 triângulos |
+| `pintado` | `var-3-pintado.png` | Modelos simples com uma textura pintada no Codex (um atlas de 1024 por 1024, 340 KB, baixado só quando o conjunto é usado) e um mapa de sombra de 1024. | 32 chamadas e 73.820 triângulos | 39 chamadas e 76.616 triângulos |
+
+Os números são da cena inteira numa tela de 1280 por 720 e somam a passada de sombra quando ela existe. Os três ficam dentro do limite combinado para aparelho fraco (cerca de 80 mil triângulos e 60 chamadas).
+
+Como comparar:
+
+- Na tela do jogo, o botão **Arte** troca de estilo, o botão **Ver alvo** mostra a imagem que o estilo tenta alcançar e o botão **Medidor** mostra os quadros por segundo no aparelho em uso.
+- `arte/estilo/rodada-03/teste-no-jogo.jpg` traz os três estilos lado a lado com o alvo de cada um, e `teste-no-jogo-celular.jpg` traz os três numa tela de celular em pé.
+- O que ficou perto e longe do alvo, e o que só sairia por outro caminho, está no `NOTAS.md` de cada conjunto.
+
+O que este teste não responde: quantos quadros por segundo cada estilo faz num celular fraco ou numa TV. Tudo aqui rodou em WebGL por software, e só o medidor num aparelho de verdade dá esse número.
 
 ## O conjunto brinquedo
 
@@ -161,8 +182,9 @@ A única textura do conjunto é a mancha da sombra de contato, de 64 por 64 pont
 | `npm run simular` | Roda a demonstração só com a lógica, no Node, sem navegador. Confere que o passeio chega ao fim e que duas execuções dão o mesmo resultado. |
 | `npm run verificar` | A verificação completa, descrita abaixo. Leva alguns minutos. |
 | `npm run capturas` | Refaz tudo o que está em `capturas/`. Os vídeos são a parte demorada; `node tools/capturar.mjs --sem-video` pula os vídeos, `--so-video` faz só os vídeos e `--so-brinquedo` faz só o que é do conjunto `brinquedo`. |
-| `npm run medir` | Mede o tamanho do download, as chamadas de desenho e os triângulos dos três conjuntos. |
+| `npm run medir` | Mede o tamanho do download, as chamadas de desenho e os triângulos de cada conjunto. |
 | `node tools/comparar.mjs <conjunto> <alvo.png> <saída>` | Leva o sítio ao estado das imagens de referência (sementes num canteiro, milho pronto no outro, ovo no ninho, leite pronto) e grava o alvo e o jogo lado a lado. |
+| `node tools/folha-acoes.mjs <conjunto> [saída.png]` | Faz a folha com um quadro do meio de cada uma das oito interações, para qualquer conjunto registrado. |
 | `node tools/alvos.mjs` | Refaz as imagens reduzidas de `alvos/`, que o botão "Ver alvo" mostra. A lista de conjuntos com alvo está em `config/alvos.json`. |
 | `node tools/olhar.mjs` e `node tools/folha.mjs` | Ferramentas de trabalho: uma foto num passo qualquer e uma folha com vários instantes lado a lado. O modo de usar está no começo de cada arquivo. |
 
@@ -174,11 +196,12 @@ Tamanho do que o navegador baixa (pasta `dist/`):
 
 | Arquivo | Bruto | gzip | brotli |
 |---|---|---|---|
-| `index.html` | 3,5 KB | 1,4 KB | 1,1 KB |
-| `main.js` | 907,3 KB | 250,3 KB | 205,2 KB |
-| **Total** | **910,8 KB** | **251,8 KB** | **206,4 KB** |
+| `index.html` | 4,5 KB | 1,7 KB | 1,4 KB |
+| `main.js` | 1.010,0 KB | 285,8 KB | 226,4 KB |
+| `pintado-atlas.png` (só quando o conjunto `pintado` é usado) | 339,9 KB | 337,0 KB | 335,5 KB |
+| **Total** | **1.354,3 KB** | **624,5 KB** | **563,2 KB** |
 
-Os três conjuntos de arte vão no mesmo `main.js`; não há um download por conjunto. Do `main.js`, 740 KB são a biblioteca three, 136 KB são o código deste protótipo e 31 KB são o avatar e o construtor de malhas reaproveitados de `tools/visual-refs`. Antes do conjunto `brinquedo` o código do protótipo tinha 99 KB e o total era de 870,8 KB. Não há imagens nem modelos para baixar: tudo é gerado por código.
+Os seis conjuntos de arte vão no mesmo `main.js`; não há um download por conjunto. Do `main.js`, 740 KB são a biblioteca three, 238 KB são o código deste protótipo e 31 KB são o avatar e o construtor de malhas reaproveitados de `tools/visual-refs`. Com três conjuntos (antes do teste de estilos) o código do protótipo tinha 136 KB e o total era de 910,8 KB; quando um estilo for escolhido, os outros saem e o peso volta a cair. As únicas imagens são o atlas do conjunto `pintado` e as imagens-alvo de `alvos/` (cerca de 250 KB cada), baixadas só quando alguém aperta "Ver alvo".
 
 Desenho da cena inteira, numa tela de 1280 por 720:
 
@@ -203,11 +226,11 @@ Quadros por segundo não foram medidos. Nesta máquina o WebGL roda em software,
 `npm run verificar` passa. Ele confere, num Chromium sem janela:
 
 - A pasta `dist/` só tem arquivos `.html`, `.js`, `.json` ou `.png`, e o código não usa `?` no endereço, `alert`, `confirm`, `.glb` nem service worker.
-- A demonstração chega ao fim com cada um dos três conjuntos (`codigo`, `molde` e `brinquedo`), em menos de 30 s, com as oito ações feitas e com a mudança esperada nos contadores depois de cada uma.
-- Os três conjuntos passam pelos mesmos estados de jogo nos mesmos passos. A comparação é feita a cada meio segundo de demonstração.
+- A demonstração chega ao fim com cada um dos seis conjuntos (`codigo`, `molde`, `brinquedo`, `lowpoly`, `contorno` e `pintado`), em menos de 30 s, com as oito ações feitas e com a mudança esperada nos contadores depois de cada uma.
+- Os seis conjuntos passam pelos mesmos estados de jogo nos mesmos passos. A comparação é feita a cada meio segundo de demonstração.
 - Sem `#arte-...` no endereço, a página abre com o conjunto `brinquedo`.
 - Trocar a arte no meio da demonstração não muda o jogo. São cinco trocas: todos os tipos de uma vez, só a vaca, pelo botão "Arte", pelo endereço e de volta ao `brinquedo`.
-- O botão "Arte" passa pelos três conjuntos e volta ao primeiro.
+- O botão "Arte" passa pelos seis conjuntos e volta ao primeiro.
 - A cada meio segundo, todos os visuais continuam cumprindo o contrato: os pontos estão no lugar e nenhuma peça tem posição, giro ou escala inválidos.
 - Toques de verdade funcionam em três telas: celular em pé (390 por 844, toque), celular deitado (844 por 390, toque) e computador (1280 por 720, mouse). Em cada uma: andar até um ponto do chão, tirar água, plantar, regar, pegar o ovo, guardar no celeiro (com a porta fechando no fim) e os botões "Arte" e "Demonstração". Nas duas telas de celular, também arrastar a câmera com o dedo sem dar comando.
 - O laço normal do jogo, em tempo real, anda sozinho com `#demo`.

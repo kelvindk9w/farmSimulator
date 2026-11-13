@@ -10,7 +10,7 @@ import { abrirNavegador, abrirPagina, TELAS, dist } from './comum.mjs';
 const kb = (n) => (n / 1024).toFixed(1).padStart(7) + ' KB';
 console.log('Download (pasta dist/)');
 let tot = [0, 0, 0];
-for (const nome of fs.readdirSync(dist).sort()) {
+for (const nome of fs.readdirSync(dist).sort().filter((n) => fs.statSync(path.join(dist, n)).isFile())) { // as imagens-alvo de dist/alvos/ ficam de fora: só baixam a pedido
   const buf = fs.readFileSync(path.join(dist, nome));
   const g = zlib.gzipSync(buf, { level: 9 }).length, b = zlib.brotliCompressSync(buf, { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 11 } }).length;
   tot = [tot[0] + buf.length, tot[1] + g, tot[2] + b];
@@ -21,7 +21,7 @@ console.log(`  ${'total'.padEnd(12)} bruto ${kb(tot[0])}   gzip ${kb(tot[1])}   
 const amb = await abrirNavegador();
 try {
   console.log('\nDesenho da cena inteira (tela 1280 x 720, enquadramento "tudo")');
-  for (const c of ['codigo', 'molde', 'brinquedo', 'pintado', ...(process.env.CONJUNTOS_EXTRA || '').split(',').filter(Boolean)]) {
+  for (const c of ['codigo', 'molde', 'brinquedo', 'lowpoly', 'contorno', 'pintado', ...(process.env.CONJUNTOS_EXTRA || '').split(',').filter(Boolean)]) {
     const { pagina, contexto } = await abrirPagina(amb, `passo,demo,tudo,arte-${c}`, TELAS.paisagem);
     const r = await pagina.evaluate(() => {
       const S = window.__sitio, ini = S.estatisticas();
