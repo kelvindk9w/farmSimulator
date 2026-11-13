@@ -55,6 +55,7 @@
     "animal/ovelha/andar-frente": { "arquivo": "animais/ovelha/andar-frente.png", "quadros": 6, "casa": [208, 224], "apoio": [104, 195], "qps": 9, "laco": true },
     "animal/ovelha/parada-costas": { "arquivo": "animais/ovelha/parada-costas.png", "quadros": 8, "casa": [208, 224], "apoio": [104, 194], "qps": 4, "laco": true },
     "animal/ovelha/parada-frente": { "arquivo": "animais/ovelha/parada-frente.png", "quadros": 8, "casa": [224, 216], "apoio": [112, 187], "qps": 4, "laco": true },
+    "animal/seu-tonho/parado-frente": { "arquivo": "animais/seu-tonho/parado-frente.png", "quadros": 8, "casa": [176, 312], "apoio": [88, 282], "qps": 4, "laco": true },
     "animal/vaca/andar-costas": { "arquivo": "animais/vaca/andar-costas.png", "quadros": 8, "casa": [312, 336], "apoio": [156, 297], "qps": 8, "laco": true },
     "animal/vaca/andar-frente": { "arquivo": "animais/vaca/andar-frente.png", "quadros": 8, "casa": [320, 320], "apoio": [160, 283], "qps": 8, "laco": true },
     "animal/vaca/parada-costas": { "arquivo": "animais/vaca/parada-costas.png", "quadros": 8, "casa": [312, 320], "apoio": [156, 281], "qps": 4, "laco": true },

@@ -30,6 +30,8 @@ npm run validar      # confere dados/ do jeito que o jogo lê
 - O poço enche o regador, a banca compra o que está no cesto, o celeiro guarda o cesto (e é onde fica o suporte de ferramentas).
 - **Terras**: a placa de um lote (ou a etiqueta do preço em cima dela) abre a compra; a aba "Terras" da loja mostra todos. Mato, toco e pedra saem com um toque (modo mão) ou arrastando no modo "Limpar", que aparece quando há foice, machado ou picareta; toco e pedra pedem vários golpes, num toque só. A muda de árvore aparece na barra de sementes: as casas onde ela cabe ficam marcadas. Regador e foice melhores alcançam várias casas (marcadas antes do toque). Ferramenta gasta não quebra: rende menos até o conserto, pelo aviso no alto da tela ou pelo botão "Ferramentas e conserto" da mochila.
 - **Minha fazenda** (o troféu no alto): conquistas, presente do dia, amigos (convite por link e foto da fazenda), guarda-roupa, loja de cash e o caderno com as lições do vizinho. Quando há presente esperando, aparece a caixa de correio no alto: um toque abre. A loja de cash é de teste: nenhuma cobrança é feita. Nada de útil é só de cash, e convidar nunca é obrigatório.
+- **Construir** (o martelo no alto; a bancada de carpintaria vem primeiro): o catálogo por abas mostra custo, o que falta e o nível. Escolhida a peça, o fantasma segue o dedo, o mouse ou as setas (casas verdes servem, vermelhas não; R ou "Girar" vira a porteira) e "Confirmar" (ou Enter) manda a personagem martelar; a obra mostra a barra e o relógio. Cerca, calçamento e canteiro seguem colocando: um toque põe um, arrastar pinta a fileira. Tocar numa construção abre o cartão dela, com "Mudar de lugar" e "Guardar"; "Mudar coisas de lugar" no catálogo pega qualquer uma.
+- **Celeiro por dentro**: o toque no celeiro guarda o cesto; perto da porta aparece "Entrar" na fileira dos modos (no teclado, Esc ou Tab e Enter; ou andar contra a porta). Lá dentro se montam prateleiras (produtos), baús (materiais) e suportes (ferramentas), e cada um aumenta só o seu espaço. A mochila mostra quanto cabe em cada um. "Sair" ou pisar na soleira volta para a fazenda.
 - Configurações: som, esquema de toque (só toque, alavanca com botão, os dois), tamanho dos botões, tela cheia, exportar e importar a fazenda por texto, recomeçar.
 
 ## Organização
@@ -72,11 +74,12 @@ Funcionalidade nova entra por registro, em arquivo próprio: `registrarSistema`,
 - Safari e Firefox. A trava de orientação e a tela cheia dependem do navegador.
 - O som: é da coordenação; aqui só se confere que ligar e desligar grava a preferência.
 - Partidas longas com gravação de verdade (dias): só pelo bot e pelos testes de ausência.
+- Construir e o celeiro por dentro: `tools/verificar-construcao.mjs` joga tudo com mouse, teclado e toque (fotos `capturas/a-*.jpg`), mas não com controle de videogame.
 
 ## O que ainda não existe (fica para os próximos marcos)
 
 - Mudar uma árvore frutífera de lugar (ela fica onde foi plantada).
-- O celeiro por dentro, construir, animais, árvores, indústria, pedidos.
+- Animais, indústria, pedidos (cada frente descreve o seu em `docs/jogo/ARQUITETURA.md`).
 - Progresso: não há servidor (o jogo não fica sabendo sozinho que o amigo convidado chegou: há um botão de teste), a compra de cash é simulada, chapéus, vestido e pintura das ferramentas estão "em breve" (pedem desenho novo) e a caixa de correio ainda não existe como objeto no terreno (só no HUD).
-- Cercas, porteira, o quadro de pedidos e o Seu Tonho em pessoa no terreno (hoje ele aparece no balão).
+- O quadro de pedidos e o Seu Tonho em pessoa no terreno (hoje ele aparece no balão).
 - O fôlego segue `regras.json` (`folego`): hoje são 10 s de corrida e volta em 5 s andando ou 3 s parada.

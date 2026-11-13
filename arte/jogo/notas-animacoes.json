@@ -69,6 +69,11 @@
    "arquivo": "gato.png",
    "pedido": "modelo-gato.md",
    "nota": "Gato rajado laranja, de peito, focinho e patas brancos, olhos verdes e rabo erguido; frente, costas e perfil."
+  },
+  "seu-tonho": {
+   "arquivo": "seu-tonho.png",
+   "pedido": "20-modelo-seu-tonho.md",
+   "nota": "Feita pela frente de retratos; usada aqui para a figura de corpo inteiro."
   }
  },
  "folhas": {
@@ -573,6 +578,21 @@
    "pedido": "gato-sentado-costas.md",
    "rodadas": 1,
    "nota": "Sentado visto por trás: vira a cabeça, lambe a pata e pisca; 4 desenhos em 8 quadros."
+  },
+  "animal/seu-tonho/parado-frente": {
+   "pedido": "seu-tonho-parado-frente.md",
+   "rodadas": 1,
+   "nota": "Seu Tonho de corpo inteiro no terreiro, com a folha de modelo dele (arte/jogo/modelos/seu-tonho.png, feita pela outra frente): descansa, respira, toca a aba do chapéu cumprimentando e pisca; 4 desenhos em 8 quadros, na altura da personagem (294 px com o chapéu)."
+  },
+  "personagem/foice-frente": {
+   "pedido": "personagem-foice-frente.md",
+   "rodadas": 1,
+   "nota": "Roçada com a foice de cabo comprido nas duas mãos: recua, varre rente ao chão e volta, com os joelhos dobrando no golpe; 6 quadros em laço. A foice não está na folha de ferramentas (o pedido usa o cabo da enxada como medida). O arco da lâmina é mais curto que o pedido, mas lê bem."
+  },
+  "personagem/plantar-muda-frente": {
+   "pedido": "personagem-plantar-muda-frente.md",
+   "rodadas": 1,
+   "nota": "Segura a muda com torrão nas duas mãos, agacha, pousa e firma a terra (a muda fica em pé no chão no quadro 5) e levanta de mãos vazias (o jogo desenha a muda plantada); 6 quadros."
   }
  },
  "geral": [

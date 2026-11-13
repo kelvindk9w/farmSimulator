@@ -79,6 +79,8 @@ async function pronto(pg) {
         if (r.left < -1 || r.top < -1 || r.right > innerWidth + 1 || r.bottom > innerHeight + 1) ruins.push(`o cartão sai da tela (${Math.round(r.left)}, ${Math.round(r.top)}, ${Math.round(r.right)}, ${Math.round(r.bottom)})`);
         if (corpo.scrollWidth > corpo.clientWidth + 1) ruins.push(`o painel vaza para os lados (${corpo.scrollWidth} em ${corpo.clientWidth})`);
         for (const n of corpo.querySelectorAll('.oferta, .ped-bilhete, .ind-fazendo, .ind-espera, .ind-vaga, .ind-pronto, .ind-dica')) { if (n.scrollWidth > n.clientWidth + 2) ruins.push(`"${n.className}" não cabe na largura (${n.scrollWidth} em ${n.clientWidth}): ${n.textContent.slice(0, 30)}`); }
+        // nome cortado com reticências também conta como "não cabe"
+        for (const n of corpo.querySelectorAll('.ind *, .ped *')) { if (getComputedStyle(n).textOverflow === 'ellipsis' && n.scrollWidth > n.clientWidth + 1) ruins.push(`texto cortado: "${n.textContent.slice(0, 30)}"`); }
         return ruins.join('; ');
       },
     };
@@ -500,6 +502,11 @@ try {
   confere(await J(() => /fica vazia por 1 h 30 min/.test((document.querySelector('.dialogo') || { textContent: '' }).textContent)), 'sem a troca grátis, a pergunta diz quanto a vaga fica vazia (o dobro da espera)');
   await o.tocarEm('.dialogo [data-k="sim"]');
   confere(await J(() => document.querySelector('.ped-bilhete[data-vaga="2"]').classList.contains('espera')), 'a vaga trocada sem a grátis fica esperando');
+  // os nomes mais compridos que um pedido pode trazer cabem no bilhete (o pedido da vaga 3 é trocado só para a foto)
+  const compridos = await J(() => { const m = window.__jogo.mundo, I = m.dados.itens, v = m.pedidos.vagas[3]; const nomes = Object.keys(I).filter((k) => I[k].tipo === 'colheita' || I[k].tipo === 'produto').sort((a, b) => I[b].nome.length - I[a].nome.length).slice(0, 2); if (v && v.pedido) { v.pedido.itens = { [nomes[0]]: 12, [nomes[1]]: 999 }; m.eventos.emitir('verificou', {}); } return nomes.map((k) => I[k].nome); });
+  await o.quadro(200);
+  confere(await J((n) => n.every((x) => document.querySelector('.ped-bilhete[data-vaga="3"]').textContent.includes(x)), compridos), `o bilhete mostra os nomes compridos inteiros (${compridos.join(', ')})`);
+  await o.tamanhos('quadro com nomes compridos');
   await o.foto('22-quadro-espera');
   // a espera não se pula com cash; passa com o relógio, mesmo com o jogo fechado
   igual(await J(() => window.__jogo.comando({ tipo: 'concluir', relogio: 'pedido', alvo: 0 }).ok), false, 'a espera do pedido não se pula com cash');
