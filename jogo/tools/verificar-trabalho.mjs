@@ -3,14 +3,17 @@
 // Joga de ponta a ponta:
 //   o gato e o cachorro pela aba "Animais" da loja; eles seguem e sentam; o afago (corações), o mimo do dia, o
 //   segundo afago sem mimo, o dia seguinte com mimo de novo; gravar e abrir;
-//   o boi e o arado (o que falta, comprado pelo atalho do estábulo); o modo "Arado" com as casas marcadas antes de
-//   confirmar; sem trato, três casas; com trato, trinta casas em passadas de cinco (uma delas arrastando o dedo);
+//   o boi velho do Seu Tonho (nível 4): a baia pronta cumpre a missão e ele chega com o arado simples; o modo "Arado";
+//   segurar o dedo (o mouse) no campo do começo marca a fileira do boi (6 casas) antes de soltar; a segunda fileira com
+//   um toque (no computador, Espaço); doze casas cumprem a missão; sem trato, três casas; com trato, o toque na ponta
+//   de uma fileira quase feita vai pela coluna (o lado com mais casas), quatro fileiras de cinco e uma arrastando o
+//   dedo; o arado de ferro (10 casas); gravar e abrir;
 //   o jumento, a carroça e o barril: o botão (tecla J), o barril cheio no poço, regar o campo todo sem voltar ao poço,
 //   colher até o cesto passar para a carroça, gravar e abrir, vender tudo na banca; segurar o dedo na fileira do campo
 //   com o boi;
 //   o cavalo e a sela: o botão (tecla H, controle, botão do estábulo), a viagem longa montada sem gastar fôlego, apear
 //   e colher; montar pelas teclas; gravar e abrir.
-// Confere as missões "companheiro", "boi-de-arado", "jumento", "barril" e "cavalo"; o que o Seu Tonho explica; os
+// Confere as missões "companheiro", "baia-do-boi", "boi-de-arado", "jumento", "barril" e "cavalo"; o que o Seu Tonho explica; os
 // tamanhos mínimos (texto de 14 px, botão de 44 px); que os botões e contadores desta frente não encostam em nada do
 // HUD nem saem da tela; e que não há erro no console. As fotos vão para a pasta de capturas (JPEG).
 //   JOGO_DIST=dist-f JOGO_CAPTURAS=capturas-f JOGO_PORTA=8106 node tools/verificar-trabalho.mjs   (monte antes)
@@ -257,6 +260,20 @@ async function cenario(a, f) {
     else { await pg.mouse.move(lista[0][0], lista[0][1]); await pg.mouse.down(); for (const p of lista.slice(1)) { await pg.mouse.move(p[0], p[1], { steps: 5 }); await esperar(40); } await pg.mouse.up(); }
     await esperar(80);
   }
+  // segurar o dedo (o botão do mouse) parado na casa (x, z); "durante" roda ainda segurando, antes de soltar
+  async function segurarCasa(x, z, durante, ms = 750) {
+    const q = await A('pontoDaCasa', x, z);
+    if (!confere(!q.quem, `a casa (${x}, ${z}) fica livre para segurar o dedo (na frente: ${q.quem})`)) return false;
+    if (cdp) await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: q.x, y: q.y, id: 1 }] });
+    else { await pg.mouse.move(q.x, q.y); await esperar(60); await pg.mouse.down(); }
+    await esperar(ms);
+    if (durante) await durante();
+    if (cdp) await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    else await pg.mouse.up();
+    await esperar(80);
+    await quadro();
+    return true;
+  }
   async function tocarEntidade(id, nome) {
     const q = await A('pontoDaEntidade', id);
     if (!confere(!!q, `o toque chega em ${nome || id} (nada na frente)`)) return false;
@@ -379,87 +396,126 @@ async function cenario(a, f) {
   await ateParar();
   igual((await A('eventos', 'ganhouMimo')).length, 0, 'depois de abrir, o mimo de hoje já foi');
 
-  // ================= o boi e o arado =================
-  await J(() => window.__t.missoes('boi-de-arado'));
+  // ================= o boi velho do Seu Tonho e o arado simples (nível 4) =================
+  // a missão "baia-do-boi": o estábulo já está de pé, então ela se cumpre sozinha e o boi chega com o arado
+  await J(() => { window.__t.missoes('baia-do-boi'); window.__t.limpar(); });
+  await avancar(1.5);
   await fecharTelas();
+  confere(await A('feita', 'baia-do-boi'), 'com o estábulo de pé, a missão "baia-do-boi" se cumpre');
+  confere(!!(await A('animal', 'boi')), 'o boi velho do Seu Tonho chega ao estábulo');
+  igual(await A('tem', 'arado'), 1, 'o boi vem com o arado simples');
   igual(await A('missao'), 'boi-de-arado', 'a missão da vez é a do boi de arado');
-  await abrirAbaAnimais();
-  confere(await J(() => { const c = document.querySelector('.oferta.animal[data-item="boi"]'); return !!c && /arado/i.test(c.textContent) && !!c.querySelector('[data-k="comprar-boi"]'); }), 'o cartão do boi diz que ele trabalha com o arado e deixa comprar sem ele');
-  await comprar('.oferta[data-item="boi"] [data-k="comprar-boi"]');
-  await fecharPainel();
-  await fecharTelas();
-  confere(!!(await A('animal', 'boi')), 'o boi chega ao estábulo');
-  confere((await avisos()).some((x) => /Falta o arado/.test(x)), `um aviso diz que falta o arado e onde comprar (avisos: ${(await avisos()).join(' | ')})`);
-  confere(!(await A('visivel', 'button[data-modo="arado"]')), 'sem o arado, o modo "Arado" não aparece');
-  await tocarEstabulo();
-  igual(await painel(), 'abrigo', 'tocar no estábulo abre o painel');
-  confere(await J(() => { const b = document.querySelector('.veu [data-k="extra-boi-falta"]'); return !!b && /Comprar o arado/.test(b.textContent); }), 'o painel do estábulo oferece comprar o arado');
-  await tamanhos('estábulo sem o arado');
-  await foto('estabulo-sem-arado');
-  await apertar('extra-boi-falta');
-  igual(await painel(), 'loja', '"Comprar o arado" abre a loja');
-  await comprar('[data-k="c1-arado"]');
-  igual(await A('tem', 'arado'), 1, 'a loja vende o arado');
-  await fecharPainel();
-  await fecharTelas();
-  confere(await A('visivel', 'button[data-modo="arado"]'), 'com boi e arado, o modo "Arado" aparece na barra');
+  let boi = (await A('trab')).boi;
+  confere(!!boi && boi.tratado && boi.casas === 6, `o boi chega tratado (cocho e bebedouro cheios) e ara até 6 casas (${JSON.stringify(boi)})`);
+  confere(await A('visivel', 'button[data-modo="arado"]'), 'com o boi e o arado, o modo "Arado" aparece na barra');
   await tocarEm('button[data-modo="arado"]');
   igual(await A('modo'), 'arado', 'o botão "Arado" escolhe o modo');
-  await esperarFala(/ara 3 casas|ara \d casas/, 'o boi de arado', 'trabalho:boi');
-  igual((await A('trab')).boi.casas, 3, 'sem trato (cocho vazio), o boi ara três casas por passada');
-  // o campo: 5 x 7 casas de grama perto dela
+  await esperarFala(/fileira inteira, até 6 casas/, 'o boi de arado', 'trabalho:boi');
+  // a primeira fileira do campo do começo: segurar o dedo (o mouse) marca a fileira do boi antes de soltar
+  const C = await J(() => window.__jogo.dados.terras.campo); // [x0, z0, x1, z1]
+  const linha = (z) => Array.from({ length: C[2] - C[0] }, (_, k) => [C[0] + k, z]);
+  const doBoi = async () => (await A('eventos', 'arou')).filter((x) => x.com === 'boi').length;
+  const passadas = () => J(() => { const p = window.__jogo.mundo.personagem; return [p.tarefa, ...p.fila].filter((t) => t && t.acao === 'ararComBoi').map((t) => ({ dir: t.args.dir, casas: t.args.casas, janela: !!t.args.janela })); });
+  await segurarCasa(C[0] + 2, C[1], async () => {
+    confere(/Solte para o boi arar 6 casas/.test(await A('dica')), `segurando, a dica diz que o boi ara as 6 casas da fileira ("${await A('dica')}")`);
+    igual((await A('p')).fila.length, 0, 'segurando, nada entra na fila ainda');
+    await foto('fileira-do-boi-marcada', true);
+  });
+  let pas = await passadas();
+  confere(pas.length === 1 && pas[0].casas.length === 6 && pas[0].casas.every(([, z]) => z === C[1]), `soltar põe a fileira inteira do boi na fila, ao longo da fileira (${JSON.stringify(pas)})`);
+  // no meio da passada: o boi puxa o arado, a personagem conduz
+  for (let k = 0; k < 200 && (await doBoi()) < 3; k++) await avancar(0.25);
+  await seguir();
+  await foto('boi-puxando', true);
+  await ateParar();
+  await fecharTelas();
+  igual((await A('chao', linha(C[1]))).join(''), '111111', 'o boi arou a primeira fileira inteira');
+  // a segunda fileira: no celular, um toque curto; no computador, Espaço de frente para ela (dá no mesmo: a fileira toda)
+  if (comDedo) await tocarCasa(C[0], C[1] + 1);
+  else {
+    await J(([x, z]) => { const p = window.__jogo.mundo.personagem; p.x = x; p.z = z; p.rumo = 0; p.rota = null; }, [C[0] + 2.5, C[1] + 0.5]);
+    await quadro();
+    await pg.keyboard.press('Space');
+    await quadro();
+  }
+  pas = await passadas();
+  confere(pas.length === 1 && pas[0].casas.length === 6 && pas[0].casas.every(([, z]) => z === C[1] + 1), `${comDedo ? 'um toque' : 'Espaço'} na segunda fileira põe a fileira inteira na fila (${JSON.stringify(pas)})`);
+  await ateParar();
+  await fecharTelas();
+  igual((await A('chao', linha(C[1] + 1))).join(''), '111111', 'o boi arou a segunda fileira inteira');
+  igual(await doBoi(), 12, 'o boi arou as 12 casas do campo do começo');
+  confere(await A('feita', 'boi-de-arado'), 'doze casas com o boi cumprem a missão "boi-de-arado"');
+  await seguir();
+  await foto('campo-do-comeco-arado-pelo-boi');
+
+  // ================= um campo de 6 x 6: sem trato, três casas; a passada pega o lado com mais casas =================
+  await J(() => { const m = window.__jogo.mundo, a = m.animais.lista.find((x) => x.especie === 'boi'), s = m.animais.abrigos[a.abrigo]; s.cocho = 0; s.bebedouro = 0; a.tratado = false; window.__t.limpar(); });
+  boi = (await A('trab')).boi;
+  confere(!boi.tratado && boi.casas === 3, `com o cocho e o bebedouro vazios, o boi ara só três casas por passada (${JSON.stringify(boi)})`);
+  // o campo de plantação já demarcado na grama perto dela (a fileira do boi para na beira dele)
   const p1 = await A('p');
-  const [x0, z0] = (await A('livres', 5, 7, p1.x + 3, p1.z + 3))[0];
-  const fileira = (z, n = 5) => Array.from({ length: n }, (_, k) => [x0 + k, z]);
+  const [x0, z0] = (await A('livres', 6, 6, p1.x + 3, p1.z + 3))[0];
+  const fileira = (z) => Array.from({ length: 6 }, (_, k) => [x0 + k, z]);
+  const coluna = (x) => Array.from({ length: 6 }, (_, k) => [x, z0 + k]);
   const campo = [];
-  for (let z = z0; z < z0 + 7; z++) campo.push(...fileira(z));
+  for (let z = z0; z < z0 + 6; z++) campo.push(...fileira(z));
+  await J((casas) => { const m = window.__jogo.mundo, loc = m.locais.fazenda; for (const [x, z] of casas) loc.chao[z * loc.l + x] = 6; m.eventos.emitir('chaoMudou', { tudo: true, local: loc.id }); }, campo);
   // antes de confirmar, as casas da passada ficam marcadas (no mouse, ao passar por cima)
   if (!comDedo) {
     const q = await A('pontoDaCasa', x0, z0);
     await pg.mouse.move(q.x, q.y);
     await esperar(450);
-    const marcadas = await J(() => (window.__jogo.cena.destaque.casas || []).length);
-    igual(marcadas, 3, 'passando o mouse na grama, as três casas da passada ficam marcadas');
+    igual(await J(() => (window.__jogo.cena.destaque.casas || []).length), 3, 'passando o mouse no campo, as três casas da passada ficam marcadas');
     confere(/Arar 3 casas com o boi/.test(await A('dica')), `a dica diz o que o toque faz ("${await A('dica')}")`);
-    await pg.screenshot({ path: path.join(capturas, `${f}-${String(++nFoto).padStart(2, '0')}-casas-marcadas.jpg`), type: 'jpeg', quality: 84 });
+    await pg.screenshot({ path: path.join(capturas, `${f}-${String(++nFoto).padStart(2, '0')}-casas-marcadas-sem-trato.jpg`), type: 'jpeg', quality: 84 });
   }
   await tocarCasa(x0, z0);
   await quadro();
-  confere((await A('p')).fila.includes('ararComBoi'), 'o toque na grama põe a passada do boi na fila');
-  // no meio da passada: o boi puxa o arado, a personagem conduz
-  await avancar(3.2);
-  await seguir();
-  await foto('boi-puxando', true);
+  confere((await A('p')).fila.includes('ararComBoi'), 'o toque no campo põe a passada do boi na fila');
   await ateParar();
-  igual((await A('chao', fileira(z0))).join(''), '11100', 'sem trato, a passada ara três casas da fileira');
+  igual((await A('chao', fileira(z0))).join(''), '111666', 'sem trato, a passada ara três casas da fileira');
   // o trato: cocho e bebedouro pelo painel do estábulo
   await tocarEstabulo();
   igual(await painel(), 'abrigo', 'o painel do estábulo abre');
   confere(await J(() => { const b = document.querySelector('.veu [data-k="extra-arar"]'); const d = b && b.closest('.abr-extra'); return !!b && !!d && /sem trato/i.test(d.textContent); }), 'o botão "Arar com o boi" avisa que, sem trato, ele trabalha pela metade');
   await apertar('encher-cocho');
   await apertar('encher-bebedouro');
+  await tamanhos('estábulo com o boi');
+  await foto('estabulo-com-o-boi');
   await fecharPainel();
   await ateParar();
   await fecharTelas();
-  confere((await A('trab')).boi.tratado, 'com cocho e bebedouro, o boi fica tratado');
-  igual((await A('trab')).boi.casas, 5, 'tratado, o boi ara cinco casas por passada');
+  boi = (await A('trab')).boi;
+  confere(boi.tratado && boi.casas === 6, `com cocho e bebedouro, o boi volta a arar até seis casas (${JSON.stringify(boi)})`);
   if ((await A('modo')) !== 'arado') await tocarEm('button[data-modo="arado"]');
-  // seis passadas de cinco: cinco toques, um por fileira, e uma arrastando o dedo (da direita para a esquerda)
-  for (let z = z0 + 1; z < z0 + 6; z++) await tocarCasa(x0, z);
-  await arrastarCasas([[x0 + 4, z0 + 6], [x0 + 3, z0 + 6]]);
-  const filaBoi = await J(() => window.__jogo.mundo.personagem.fila.filter((t) => t.acao === 'ararComBoi').map((t) => t.args.dir));
-  confere(filaBoi.length === 6 && filaBoi[5] === 2, `seis passadas na fila, a do arrasto para a esquerda (direções: ${filaBoi.join(', ')})`);
+  // na ponta da primeira fileira restam 3 casas; na coluna da ponta, 6: o toque ali vai pela coluna
+  await tocarCasa(x0 + 5, z0);
+  // as outras cinco fileiras (5 casas: a da coluna já está prometida): quatro toques e uma arrastando o dedo
+  for (let z = z0 + 1; z < z0 + 5; z++) await tocarCasa(x0, z);
+  await arrastarCasas([[x0, z0 + 5], [x0 + 1, z0 + 5]]);
+  pas = (await passadas()).map((t) => ({ dir: t.dir, n: t.casas.length, janela: t.janela }));
+  confere(pas.length === 6 && pas[0].dir === 1 && pas[0].n === 6 && pas.slice(1, 5).every((t) => t.dir === 0 && t.n === 5 && t.janela) && pas[5].dir === 0 && pas[5].n === 5 && !pas[5].janela,
+    `seis passadas na fila: a coluna da ponta (6), quatro fileiras (5) e a do arrasto, para a direita (${JSON.stringify(pas)})`);
   await ateParar();
   await fecharTelas();
-  const arou = (await A('eventos', 'arou')).filter((x) => x.com === 'boi').length;
-  confere(arou >= 33, `o boi arou 3 + 30 casas (${arou})`);
-  igual((await A('chao', campo)).filter((c) => c === 1).length, 33, 'o campo fica arado (as 30 casas das seis fileiras e as 3 da primeira)');
-  confere(await A('feita', 'boi-de-arado'), 'trinta casas com o boi cumprem a missão "boi-de-arado"');
+  igual((await A('chao', coluna(x0 + 5))).join(''), '111111', 'a coluna da ponta ficou arada inteira (era o lado com mais casas)');
+  igual((await A('chao', fileira(z0))).join(''), '111661', 'na primeira fileira ficam só as duas casas do meio');
+  igual(await doBoi(), 34, 'o boi arou 3 + 6 + 25 casas');
+  igual((await A('chao', campo)).filter((c) => c === 1).length, 34, 'o campo fica arado (fora as duas casas do meio da primeira fileira)');
   await seguir();
   await foto('campo-arado-pelo-boi');
-  // gravar e abrir: a terra arada e a missão ficam
+  // o arado de ferro (nível 12): a fileira do boi vai até 10 casas
+  await tocarEm('.topo-dir [data-painel="loja"]');
+  if ((await painel()) === 'loja') await tocarEm('[data-k="aba-ferramentas"]');
+  await comprar('[data-k="c1-arado-de-ferro"]');
+  igual(await A('tem', 'arado-de-ferro'), 1, 'a loja vende o arado de ferro');
+  await fecharPainel();
+  await fecharTelas();
+  igual((await A('trab')).boi.casas, 10, 'com o arado de ferro, o boi ara até dez casas por passada');
+  // gravar e abrir: a terra arada, a missão e o arado de ferro ficam
   await recarregar();
-  igual((await A('chao', campo)).filter((c) => c === 1).length, 33, 'depois de abrir de novo, a terra continua arada');
+  igual((await A('chao', campo)).filter((c) => c === 1).length, 34, 'depois de abrir de novo, a terra continua arada');
+  igual((await A('trab')).boi.casas, 10, 'e o boi continua com o arado de ferro');
   await J(() => window.__jogo.comando({ tipo: 'escolherModo', modo: 'mao' }));
 
   // ================= o jumento, a carroça e o barril =================
@@ -501,10 +557,10 @@ async function cenario(a, f) {
   confere(!!chipAgua && chipAgua.fonte >= 14 && new RegExp(`${capB}/${capB}`).test(chipAgua.texto), `o HUD mostra a água do barril (${JSON.stringify(chipAgua)})`);
   confere((await A('bichos')).some((b) => b.especie === 'jumento' && b.barril && b.dist < 4), 'o jumento vai junto, com o barril na carroça');
   // plantar o campo (pelo comando: plantar é da frente do campo) e regar tudo pelo toque, sem voltar ao poço
-  const plantadas = campo.filter((c, k) => k !== 3 && k !== 4); // (as duas casas que o boi sem trato não arou)
+  const plantadas = campo.filter((c, k) => k !== 3 && k !== 4); // (as duas casas do meio da primeira fileira, sem arar)
   await J((casas) => { const m = window.__jogo.mundo; m.comando({ tipo: 'escolherModo', modo: 'semear', semente: 'semente-alface' }); for (const [x, z] of casas) m.comando({ tipo: 'tocarCasa', x: x + 0.5, z: z + 0.5 }); }, plantadas);
   await ateParar();
-  igual((await A('plantas', plantadas)).filter((s) => s === 'sede').length, 33, 'as 33 casas aradas ficam plantadas com alface, com sede');
+  igual((await A('plantas', plantadas)).filter((s) => s === 'sede').length, 34, 'as 34 casas aradas ficam plantadas com alface, com sede');
   await J(() => window.__t.limpar());
   await tocarEm('button[data-modo="regar"]');
   for (const [x, z] of plantadas) await tocarCasa(x, z);
@@ -559,7 +615,7 @@ async function cenario(a, f) {
       const q = await A('pontoDaCasa', colhidas[2][0], colhidas[2][1]);
       await pg.mouse.move(q.x, q.y); await pg.mouse.down(); await esperar(900); await pg.mouse.up(); await quadro();
       await ateParar();
-      igual((await A('chao', colhidas)).join(''), '11111', 'segurando o mouse na fileira colhida, o boi ara a fileira toda');
+      igual((await A('chao', colhidas)).join(''), '111111', 'segurando o mouse na fileira colhida, o boi ara a fileira toda (a beira do campo para a fileira, mesmo com o arado de ferro)');
     } else console.log(`  (a casa colhida não voltou a ser campo (chão: ${campoAgora.join('')}): pulei a fileira com o boi)`);
     await J(() => window.__jogo.comando({ tipo: 'escolherModo', modo: 'mao' }));
   }
