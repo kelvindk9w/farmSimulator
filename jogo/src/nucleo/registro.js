@@ -45,8 +45,11 @@ export function registrarTipo(t) {
   return TIPOS[t.tipo];
 }
 
-// { id, ordem, ferramenta, acaoNaCasa(mundo, x, z) → { acao, args, texto, dados, falta } | null, disponivel(mundo) }
+// { id, ordem, ferramenta, acaoNaCasa(mundo, x, z) → { acao, args, texto, dados, falta, casas } | null, disponivel(mundo), pintaEntidade(mundo, e) }
 //   acao = id de uma ação registrada; sem "acao", "texto" é o código do motivo (ui/textos.js faz a frase)
+//   casas = [[x, z], ...] que a ação alcança além da casa tocada (regador de área): a interface marca todas antes
+//   disponivel = o botão do modo só aparece (e a roda de modos só passa por ele) quando devolve true
+//   pintaEntidade = arrastando o dedo neste modo, o toque vale também para estas entidades (o mato, no modo "limpar")
 export function registrarModo(m) {
   unico(MODOS, m.id, m, 'modo');
   MODOS[m.id] = { ordem: 50, acaoNaCasa: () => null, ...m };
@@ -65,4 +68,16 @@ export function registrarAutomatico(fn) { AUTOMATICOS.push(fn); }
 //   objetivo pede? Se sim, a missão se cumpre na hora em que fica valendo (quem se adianta não fica preso).
 export function registrarEvento(nome, def = {}) {
   EVENTOS[nome] = { campos: def.campos || [], aceita: def.aceita || null, jaTem: def.jaTem || null };
+}
+
+// Uma frente nova faz um evento que já existe levar mais campos (o "comprou" da loja passa a levar "lote", por exemplo).
+//   ampliarEvento(nome, { campos: [...], aceita(dados, filtro) → true | false | undefined })
+//   "aceita" responde pelos filtros que são da frente nova; undefined = "não é comigo" (vale a resposta de quem veio antes).
+// O evento tem de estar registrado: importe antes o arquivo que o registra.
+export function ampliarEvento(nome, def = {}) {
+  const ev = EVENTOS[nome];
+  if (!ev) throw new Error(`ampliarEvento: o evento "${nome}" ainda não foi registrado`);
+  for (const c of def.campos || []) if (!ev.campos.includes(c)) ev.campos.push(c);
+  if (def.aceita) { const antes = ev.aceita, nova = def.aceita; ev.aceita = (dados, f) => { const r = nova(dados, f); return r === undefined ? !antes || antes(dados, f) : !!r; }; }
+  return ev;
 }

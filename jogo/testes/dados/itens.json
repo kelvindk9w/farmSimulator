@@ -7,5 +7,9 @@
   "regador": { "nome": "Regador", "tipo": "ferramenta", "capacidade": 3, "nivel": 1 },
   "regador-grande": { "nome": "Regador grande", "tipo": "ferramenta", "degrau": 2, "capacidade": 8, "compra": 30, "nivel": 2 },
   "cesto": { "nome": "Cesto", "tipo": "recipiente", "capacidade": 6 },
-  "cesto-grande": { "nome": "Cesto grande", "tipo": "recipiente", "degrau": 2, "capacidade": 12, "compra": 25, "nivel": 1 }
+  "cesto-grande": { "nome": "Cesto grande", "tipo": "recipiente", "degrau": 2, "capacidade": 12, "compra": 25, "nivel": 1 },
+  "madeira": { "nome": "Madeira", "tipo": "material", "venda": 1 },
+  "tabua": { "nome": "Tábua", "tipo": "material", "venda": 2 },
+  "prego": { "nome": "Prego", "tipo": "material", "venda": 1 },
+  "pedra": { "nome": "Pedra", "tipo": "material", "venda": 1 }
 }

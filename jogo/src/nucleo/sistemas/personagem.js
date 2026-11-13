@@ -7,6 +7,7 @@ import { registrarSistema, registrarModo, ACOES, TIPOS, MODOS, AUTOMATICOS, modo
 import { acharCaminho, comprimento, cabe } from '../caminho.js';
 import { ferramentaNoCinto, ferramentaNoSuporte, usarFerramenta, noCesto } from './posses.js';
 import { darXp } from './niveis.js';
+import { rapidezDe } from './desgaste.js';
 
 const ACEL = 13, FREIO = 15; // unidades/s²
 const GIRO = 14; // rad/s
@@ -92,8 +93,8 @@ function comecarAcao(m, p, t) {
   // a ferramenta da ação e a ajudante (se estiver no cinto) mudam a duração: "rapidez" 0.75 = um quarto mais rápida
   let dur = m.dados.regras.acoes[a.id] || a.dur;
   const fer = a.ferramenta && ferramentaNoCinto(m, a.ferramenta), aju = a.ajudante && ferramentaNoCinto(m, a.ajudante);
-  if (fer) dur *= m.dados.itens[fer].rapidez;
-  if (aju) dur *= m.dados.itens[aju].rapidez;
+  if (fer) dur *= rapidezDe(m, fer); // a ferramenta gasta trabalha mais devagar (sistemas/desgaste.js)
+  if (aju) dur *= rapidezDe(m, aju);
   const efeito = (a.efeitoEm === null ? 0.6 : a.efeitoEm / a.dur) * dur;
   centroDoAlvo(m, p, t, centro);
   if (Math.hypot(centro[0] - p.x, centro[1] - p.z) > 0.05) p.rumo = rumoPara(p.x, p.z, centro[0], centro[1]);
@@ -225,12 +226,17 @@ export function descreverEntidade(m, id) {
   return e ? TIPOS[e.tipo].acaoPossivel(m, e) : null;
 }
 
+// c.arrasto = o dedo está pintando (modo com "pintaEntidade"): enfileira o que der, sem avisos nem painéis
 function tocarEntidade(m, c) {
   const e = m.local.porId[c.id];
   if (!e) return { ok: false, motivo: 'nao-existe' };
   const d = TIPOS[e.tipo].acaoPossivel(m, e);
+  if (d && d.texto === 'na-fila') return { ok: true, repetida: true }; // já prometida: o toque repetido não muda nada
   if (d && d.acao) return enfileirar(m, { tipo: 'agir', acao: d.acao, entidade: e.id, args: d.args || null });
-  if (d && d.texto) m.eventos.emitir('faltou', { motivo: d.texto, dados: d.dados, entidade: e.id });
+  if (c.arrasto) return { ok: false, motivo: d ? d.texto : null };
+  // a entidade abre um painel (bancada, galinheiro, obra...): abre na hora, sem andar; a interface ouve "pediuPainel"
+  if (d && d.painel) { m.eventos.emitir('pediuPainel', { painel: d.painel, arg: d.arg, entidade: e.id }); return { ok: true, dados: { painel: d.painel, arg: d.arg } }; }
+  if (d && d.texto) m.eventos.emitir(d.info ? 'informou' : 'faltou', { motivo: d.texto, dados: d.dados, entidade: e.id }); // "info" = só uma informação (árvore crescendo)
   return { ok: false, motivo: d ? d.texto : null, dados: d ? d.dados : undefined };
 }
 
@@ -326,7 +332,8 @@ registrarSistema({
       const loc = m.local, x = Math.floor(c.x), z = Math.floor(c.z);
       if (!loc.dentro(x, z)) return { ok: false, motivo: 'fora-do-mapa' };
       const e = loc.entidadeEm(x, z);
-      if (e) return c.arrasto ? { ok: false, motivo: null } : tocarEntidade(m, { id: e.id });
+      // pintando com o dedo, as entidades ficam de fora, a não ser as que o modo diz que pinta (o mato, no modo "limpar")
+      if (e) return c.arrasto && !(MODOS[m.modo.id].pintaEntidade && MODOS[m.modo.id].pintaEntidade(m, e)) ? { ok: false, motivo: null } : tocarEntidade(m, { id: e.id, arrasto: c.arrasto });
       if (!loc.ehPropria(x, z)) {
         if (!c.arrasto) m.eventos.emitir('faltou', { motivo: 'terra-a-venda', x, z });
         return { ok: false, motivo: 'terra-a-venda' };
@@ -372,7 +379,7 @@ registrarSistema({
     },
     escolherModo,
     trocarModo(m, c) {
-      const lista = modosEmOrdem(), i = lista.findIndex((x) => x.id === m.modo.id);
+      const lista = modosEmOrdem().filter((x) => !x.disponivel || x.disponivel(m)), i = lista.findIndex((x) => x.id === m.modo.id); // modo que ainda não está disponível fica fora da roda
       const prox = lista[(i + (c.passo < 0 ? -1 : 1) + lista.length) % lista.length];
       return escolherModo(m, { modo: prox.id });
     },

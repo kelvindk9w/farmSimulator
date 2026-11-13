@@ -1,26 +1,42 @@
 // O mapa: monta o local "fazenda" a partir de terras.json. A área inicial é do jogador; o resto é terra à venda,
 // dividida em lotes (cada um com a sua placa) e coberta de mato, pedras, tocos e árvores do mato.
 // As beiradas da área inicial também nascem com mato, pedra e toco (fora do miolo "limpo").
-// Comprar lote e limpar a terra entram com as suas frentes; aqui o mapa já nasce grande e os lotes já existem.
-import { registrarSistema, registrarTipo } from '../registro.js';
+// Aqui ficam o mapa e o que a gravação guarda dele: os lotes já comprados e os obstáculos já tirados.
+// A compra de lote está em lotes.js; limpar a terra (foice, machado, picareta), em limpeza.js.
+import { registrarSistema } from '../registro.js';
 import { Local, CAMINHO } from '../local.js';
 import { acaso } from '../util.js';
 
-const OBSTACULOS = ['mata', 'mato', 'pedra', 'toco'];
-
-// bloqueiam a casa; um dia serão limpos com foice, machado e picareta (rendem fibra, madeira e pedra)
-for (const tipo of OBSTACULOS) {
-  registrarTipo({
-    tipo, casas: [1, 1], bloqueia: true, obstaculo: true,
-    acaoPossivel: (m, e) => (m.local.ehPropria(e.x, e.z) ? { acao: null, texto: 'limpar-depois', dados: { obstaculo: e.tipo } } : { acao: null, texto: 'terra-a-venda' }),
-  });
-}
-registrarTipo({
-  tipo: 'placa', casas: [1, 1], bloqueia: true,
-  acaoPossivel: (m, e) => { const l = loteDe(m, e.lote); return { acao: null, texto: 'lote-a-venda', dados: { preco: l ? l.preco : 0, nivel: l ? l.nivel : 1, nome: l ? l.nome || l.id : '' } }; },
-});
+export const OBSTACULOS = ['mata', 'mato', 'pedra', 'toco']; // os tipos de entidade estão em limpeza.js; a placa, em lotes.js
 
 export const loteDe = (m, id) => m.dados.terras.lotes.find((l) => l.id === id) || null;
+export const idDaPlaca = (lote) => 'placa-' + lote;
+export const loteComprado = (m, id) => m.terras.lotes.includes(id);
+// o lote à venda em que a casa (x, z) fica, ou null (terra própria e terra fora dos lotes não são de lote nenhum)
+export function loteDaCasa(m, x, z) {
+  for (const l of m.dados.terras.lotes) if (dentroDe(l.area, x, z)) return l;
+  return null;
+}
+
+// a terra do lote passa a ser do jogador: some a placa, some o escurecido (o desenho do chão ouve "chaoMudou")
+export function liberarLote(m, id, calado) {
+  const l = loteDe(m, id), loc = m.locais.fazenda;
+  if (!l || loteComprado(m, id)) return false;
+  marcar(loc, l.area, 'propria', 1);
+  loc.tirar(idDaPlaca(id));
+  m.terras.lotes.push(id);
+  if (!calado) m.eventos.emitir('chaoMudou', { tudo: true, local: loc.id });
+  return true;
+}
+
+// tira do mapa um obstáculo nascido com ele e anota a casa (o mapa renasce igual: a gravação guarda o que saiu)
+export function tirarObstaculo(m, e) {
+  const loc = m.locais.fazenda;
+  if (!loc.porId[e.id] || !OBSTACULOS.includes(e.tipo)) return false;
+  loc.tirar(e.id);
+  m.terras.limpos.push(loc.i(e.x, e.z));
+  return true;
+}
 
 function marcar(loc, a, campo, valor) {
   for (let z = Math.max(0, a[1]); z < Math.min(loc.p, a[3]); z++) for (let x = Math.max(0, a[0]); x < Math.min(loc.l, a[2]); x++) loc[campo][z * loc.l + x] = valor;
@@ -65,7 +81,7 @@ registrarSistema({
   iniciar(m) {
     const T = m.dados.terras;
     const loc = m.locais.fazenda = new Local('fazenda', T.largura, T.profundidade);
-    m.terras = { lotes: [] }; // lotes já comprados
+    m.terras = { lotes: [], limpos: [] }; // lotes já comprados; casas (índices) de onde o mato, a pedra ou o toco já saiu
     marcar(loc, T.inicial, 'propria', 1);
     for (const c of T.caminhos) marcar(loc, c, 'chao', CAMINHO);
     const construcoes = [];
@@ -95,6 +111,14 @@ registrarSistema({
       m.terras.aviso = 'o mato da área inicial fechava o caminho: ela nasceu limpa (confira terras.json: inicial.limpo)';
     }
   },
-  salvar(m) { return { lotes: [...m.terras.lotes] }; },
-  carregar(m, d) { m.terras.lotes = Array.isArray(d.lotes) ? d.lotes.filter((id) => loteDe(m, id)) : []; },
+  salvar(m) { return { lotes: [...m.terras.lotes], limpos: [...m.terras.limpos] }; },
+  // roda antes da lavoura e das árvores: quando elas voltam, a terra comprada já é própria e as casas limpas já estão livres
+  carregar(m, d) {
+    const loc = m.locais.fazenda;
+    if (Array.isArray(d.lotes)) for (const id of d.lotes) liberarLote(m, id, true); // lote que saiu dos dados é ignorado
+    if (Array.isArray(d.limpos)) for (const i of d.limpos) {
+      const e = i >= 0 && i < loc.ocupa.length ? loc.porNum[loc.ocupa[i]] : null;
+      if (e && OBSTACULOS.includes(e.tipo)) tirarObstaculo(m, e); // se o mapa mudou e ali não há mais obstáculo, nada a fazer
+    }
+  },
 });

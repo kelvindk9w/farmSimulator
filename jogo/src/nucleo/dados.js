@@ -1,6 +1,8 @@
 // Lê os arquivos de jogo/dados/*.json (já em memória), confere e entrega num formato só para a lógica.
 // Os números são da economia; aqui só se confere o formato e se preenche o que é opcional.
 // prepararDados(bruto) → { dados, problemas: [{ grave, arquivo, texto }] }. Com problema grave o jogo não começa.
+import { prepararConstrucoes } from './dados-construcao.js';
+import { prepararTerras } from './dados-terras.js';
 
 const TIPOS_DE_ITEM = ['colheita', 'produto', 'semente', 'muda', 'material', 'racao', 'embalagem', 'ferramenta', 'recipiente', 'cosmetico'];
 const num = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -195,7 +197,9 @@ export function prepararDados(bruto) {
   if (!abas.length) abas.push({ id: 'tudo', nome: 'Loja', tipos: TIPOS_DE_ITEM, soProximoDegrau: false, itens: ofertas });
   const loja = { ouro: ofertas, abas };
 
-  const dados = { regras, itens, culturas, culturaDaSemente, terras, niveis, missoes, loja, bruto };
+  const construcoes = prepararConstrucoes(bruto, itens, erro, aviso); // frente A: o que se constrói (dados-construcao.js)
+  const dados = { regras, itens, culturas, culturaDaSemente, terras, niveis, missoes, loja, construcoes, bruto };
+  Object.assign(dados, prepararTerras(bruto, itens, erro, aviso)); // frente E: obstaculos, arvores, arvoreDaMuda, desgaste (dados-terras.js)
   return { dados, problemas };
 }
 

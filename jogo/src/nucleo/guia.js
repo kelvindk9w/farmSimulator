@@ -5,8 +5,14 @@
 import { GRAMA, ARADA } from './local.js';
 import { missaoAtual } from './sistemas/missoes.js';
 import { noCesto, espacoNoCesto, noCeleiro, ferramentaNoCinto, ferramentaNoSuporte } from './sistemas/posses.js';
-import { estadoDaPlanta, segundosDeAgua, sementesLivres } from './sistemas/lavoura.js';
+import { estadoDaPlanta, segundosDeAgua, sementesLivres, regaPrometida } from './sistemas/lavoura.js';
 import { filaTem, contarNaFila } from './sistemas/personagem.js';
+
+// As frentes novas ensinam o guia a apontar o passo dos seus eventos, cada uma no seu arquivo:
+//   registrarGuia(evento, (mundo, filtro, out) → out | null)     null = "não é comigo": vale o passo padrão
+// Ex.: o guia de "limpou" aponta o mato mais perto; o de "comprou" com filtro de lote aponta a placa do lote.
+const GUIAS = {};
+export function registrarGuia(evento, fn) { (GUIAS[evento] || (GUIAS[evento] = [])).push(fn); }
 
 const casa = (out, x, z) => { out.tipo = 'casa'; out.x = x; out.z = z; return out; };
 const entidade = (out, id) => { out.tipo = 'entidade'; out.id = id; return out; };
@@ -36,7 +42,7 @@ function plantaPerto(m, estado, cultura, out) {
     const pl = loc.plantas[i];
     if ((cultura && pl.cultura !== cultura) || estadoDaPlanta(m, pl) !== estado) continue;
     const x = i % loc.l, z = (i - x) / loc.l;
-    if (filaTem(m, estado === 'pronta' ? 'colher' : 'regar', x, z)) continue;
+    if (estado === 'pronta' ? filaTem(m, 'colher', x, z) : regaPrometida(m, x, z)) continue; // com regador de área, a rega da vizinha já molha esta
     const d = Math.hypot(x + 0.5 - p.x, z + 0.5 - p.z);
     if (d < melhor) { melhor = d; out.x = x; out.z = z; achou = true; }
   }
@@ -99,6 +105,8 @@ export function guiaDaMissao(m, out = passo) {
   if (!a || a.esperaNivel) return guiaLivre(m, out);
   const o = a.missao.objetivo, f = o.filtro || {};
   const culturaDoItem = (it) => { for (const c of Object.values(m.dados.culturas)) if (c.produto === it) return c.id; return null; };
+  const outros = GUIAS[o.evento];
+  if (outros) for (let k = 0; k < outros.length; k++) { const r = outros[k](m, f, out); if (r) return r; }
   switch (o.evento) {
     case 'arou': return passoArar(m, out);
     case 'plantou': return passoPlantar(m, um(f.item) || sementeDa(m, um(f.cultura)), out);

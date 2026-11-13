@@ -15,16 +15,23 @@
     "personagem/correr-frente": { "arquivo": "personagem/correr-frente.png", "quadros": 8, "casa": [160, 288], "apoio": [80, 266], "qps": 12, "laco": true },
     "personagem/enxadar-costas": { "arquivo": "personagem/enxadar-costas.png", "quadros": 6, "casa": [240, 392], "apoio": [120, 370], "qps": 8, "laco": true },
     "personagem/enxadar-frente": { "arquivo": "personagem/enxadar-frente.png", "quadros": 6, "casa": [288, 408], "apoio": [144, 375], "qps": 8, "laco": true },
+    "personagem/machado-costas": { "arquivo": "personagem/machado-costas.png", "quadros": 6, "casa": [248, 328], "apoio": [124, 306], "qps": 8, "laco": true },
+    "personagem/machado-frente": { "arquivo": "personagem/machado-frente.png", "quadros": 6, "casa": [256, 328], "apoio": [128, 306], "qps": 8, "laco": true },
     "personagem/manivela-costas": { "arquivo": "personagem/manivela-costas.png", "quadros": 6, "casa": [168, 328], "apoio": [84, 306], "qps": 8, "laco": true },
     "personagem/manivela-frente": { "arquivo": "personagem/manivela-frente.png", "quadros": 6, "casa": [168, 328], "apoio": [84, 306], "qps": 8, "laco": true },
+    "personagem/martelar-costas": { "arquivo": "personagem/martelar-costas.png", "quadros": 6, "casa": [192, 320], "apoio": [96, 298], "qps": 8, "laco": true },
     "personagem/martelar-frente": { "arquivo": "personagem/martelar-frente.png", "quadros": 6, "casa": [208, 336], "apoio": [104, 314], "qps": 8, "laco": true },
     "personagem/ordenhar-costas": { "arquivo": "personagem/ordenhar-costas.png", "quadros": 6, "casa": [160, 296], "apoio": [80, 274], "qps": 8, "laco": true },
     "personagem/ordenhar-frente": { "arquivo": "personagem/ordenhar-frente.png", "quadros": 6, "casa": [184, 288], "apoio": [92, 266], "qps": 8, "laco": true },
     "personagem/parada-costas": { "arquivo": "personagem/parada-costas.png", "quadros": 12, "casa": [136, 320], "apoio": [68, 298], "qps": 6, "laco": true },
     "personagem/parada-frente": { "arquivo": "personagem/parada-frente.png", "quadros": 12, "casa": [152, 320], "apoio": [76, 298], "qps": 6, "laco": true },
+    "personagem/picareta-costas": { "arquivo": "personagem/picareta-costas.png", "quadros": 6, "casa": [224, 368], "apoio": [112, 346], "qps": 8, "laco": true },
+    "personagem/picareta-frente": { "arquivo": "personagem/picareta-frente.png", "quadros": 6, "casa": [240, 336], "apoio": [120, 314], "qps": 8, "laco": true },
     "personagem/regar-costas": { "arquivo": "personagem/regar-costas.png", "quadros": 6, "casa": [240, 320], "apoio": [120, 298], "qps": 8, "laco": true },
     "personagem/regar-frente": { "arquivo": "personagem/regar-frente.png", "quadros": 6, "casa": [208, 328], "apoio": [104, 306], "qps": 8, "laco": true },
     "personagem/semear-costas": { "arquivo": "personagem/semear-costas.png", "quadros": 6, "casa": [216, 320], "apoio": [108, 298], "qps": 8, "laco": true },
-    "personagem/semear-frente": { "arquivo": "personagem/semear-frente.png", "quadros": 6, "casa": [184, 320], "apoio": [92, 298], "qps": 8, "laco": true }
+    "personagem/semear-frente": { "arquivo": "personagem/semear-frente.png", "quadros": 6, "casa": [184, 320], "apoio": [92, 298], "qps": 8, "laco": true },
+    "personagem/tosquiar-costas": { "arquivo": "personagem/tosquiar-costas.png", "quadros": 6, "casa": [344, 288], "apoio": [172, 266], "qps": 8, "laco": true },
+    "personagem/tosquiar-frente": { "arquivo": "personagem/tosquiar-frente.png", "quadros": 6, "casa": [280, 288], "apoio": [140, 266], "qps": 8, "laco": true }
   }
 }

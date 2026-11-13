@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { novoMundo, ateParar, ouvirTudo, modo, tocar, tocarEm } from './apoio.mjs';
 import { GRAMA, ARADA, CAMINHO } from '../src/nucleo/local.js';
-import { descreverCasa } from '../src/nucleo/sistemas/personagem.js';
+import { descreverCasa, descreverEntidade } from '../src/nucleo/sistemas/personagem.js';
 import { prepararDados } from '../src/nucleo/dados.js';
 import { brutoDeTeste } from './apoio.mjs';
 
@@ -38,10 +38,12 @@ test('cada lote à venda tem a sua placa, com preço e nível', () => {
   const m = novoMundo(), placa = m.local.porId['placa-lote-leste'];
   assert.ok(placa);
   assert.equal(m.local.ehPropria(placa.x, placa.z), false);
-  const ev = ouvirTudo(m), r = tocarEm(m, 'placa-lote-leste');
-  assert.equal(r.ok, false); assert.equal(r.motivo, 'lote-a-venda');
-  assert.deepEqual(r.dados, { preco: 100, nivel: 2, nome: 'Lote do leste' });
-  assert.equal(ev.de('faltou')[0].motivo, 'lote-a-venda');
+  // o toque na placa pede o painel da compra (a compra em si está em terras.test.mjs)
+  const ev = ouvirTudo(m), r = tocarEm(m, 'placa-lote-leste'), d = descreverEntidade(m, 'placa-lote-leste');
+  assert.equal(r.ok, true);
+  assert.deepEqual(ev.de('pediuPainel')[0], { painel: 'terras', arg: { lote: 'lote-leste' }, entidade: 'placa-lote-leste' });
+  assert.equal(d.texto, 'lote-a-venda');
+  assert.equal(d.dados.preco, 100); assert.equal(d.dados.nivel, 2); assert.equal(d.dados.nome, 'Lote do leste');
 });
 
 test('a natureza da área inicial fica fora do miolo limpo e nunca fecha o caminho', () => {
@@ -51,7 +53,7 @@ test('a natureza da área inicial fica fora do miolo limpo e nunca fecha o camin
   else {
     assert.ok(dentro.length > 20);
     assert.ok(dentro.every((e) => !(e.x >= 8 && e.x < 16 && e.z >= 8 && e.z < 16)), 'o miolo limpo não tem mato');
-    assert.equal(descreverCasa(m, dentro[0].x, dentro[0].z).texto, 'limpar-depois');
+    assert.equal(descreverCasa(m, dentro[0].x, dentro[0].z).texto, 'sem-ferramenta-de-limpar', 'sem foice, machado nem picareta, o toque diz o que falta');
   }
 });
 

@@ -1,0 +1,26 @@
+{
+  "casa": { "nome": "Casa", "tipo": "util", "onde": "fazenda", "casas": [4, 3], "inicial": true, "nivel": 1 },
+  "poco": { "nome": "Poço", "tipo": "util", "onde": "fazenda", "casas": [2, 2], "inicial": true, "nivel": 1 },
+  "banca": { "nome": "Banca", "tipo": "util", "onde": "fazenda", "casas": [3, 2], "inicial": true, "nivel": 1 },
+  "celeiro": {
+    "nome": "Celeiro", "tipo": "armazem", "onde": "fazenda", "casas": [5, 4], "inicial": true, "nivel": 1,
+    "interior": { "piso": [6, 4], "moveis": [{ "id": "suporte-de-ferramentas", "x": 0, "z": 0 }, { "id": "prateleira-simples", "x": 2, "z": 0 }, { "id": "bau", "x": 4, "z": 0 }] },
+    "ampliacoes": [{ "nome": "Celeiro de tábua", "nivel": 2, "custo": { "ouro": 30, "itens": { "tabua": 2 } }, "obraSeg": 100, "piso": [8, 5], "xp": 5 }]
+  },
+  "suporte-de-ferramentas": { "nome": "Suporte de ferramentas", "tipo": "movel", "onde": "celeiro", "casas": [2, 1], "custo": { "ouro": 8, "itens": { "tabua": 1 } }, "obraSeg": 30, "nivel": 1, "exige": ["bancada-de-carpintaria"], "guarda": "ferramentas", "capacidade": 4, "limite": 2, "xp": 2 },
+  "prateleira-simples": { "nome": "Prateleira simples", "tipo": "movel", "onde": "celeiro", "casas": [2, 1], "custo": { "ouro": 6, "itens": { "tabua": 2, "prego": 2 } }, "obraSeg": 30, "nivel": 1, "exige": ["bancada-de-carpintaria"], "guarda": "produtos", "capacidade": 10, "limite": 4, "xp": 3 },
+  "bau": { "nome": "Baú", "tipo": "movel", "onde": "celeiro", "casas": [2, 1], "custo": { "ouro": 8, "itens": { "tabua": 2 } }, "obraSeg": 30, "nivel": 1, "exige": ["bancada-de-carpintaria"], "guarda": "materiais", "capacidade": 40, "limite": 3, "xp": 3 },
+  "bancada-de-carpintaria": {
+    "nome": "Bancada de carpintaria", "tipo": "industria", "onde": "fazenda", "casas": [2, 1], "custo": { "ouro": 12, "itens": { "madeira": 2 } }, "obraSeg": 20, "nivel": 1, "exige": [], "fila": 2, "limite": 1, "xp": 4,
+    "ampliacoes": [{ "nome": "Terceira vaga na fila", "nivel": 1, "custo": { "ouro": 10 }, "cash": 2, "obraSeg": 0, "fila": 3 }]
+  },
+  "galinheiro": {
+    "nome": "Galinheiro", "tipo": "abrigo", "onde": "fazenda", "casas": [3, 3], "custo": { "ouro": 20, "itens": { "tabua": 2, "prego": 4 } }, "obraSeg": 60, "nivel": 3, "exige": ["bancada-de-carpintaria"], "vagas": 4, "limite": 1, "xp": 6,
+    "ampliacoes": [{ "nome": "Galinheiro para 8", "nivel": 3, "custo": { "ouro": 50, "itens": { "tabua": 4 } }, "obraSeg": 200, "vagas": 8, "xp": 9 }]
+  },
+  "cerca-de-madeira": { "nome": "Cerca de madeira", "tipo": "decoracao", "onde": "fazenda", "casas": [1, 1], "custo": { "ouro": 1, "itens": { "madeira": 1 } }, "obraSeg": 0, "nivel": 1, "exige": ["bancada-de-carpintaria"] },
+  "porteira": { "nome": "Porteira", "tipo": "decoracao", "onde": "fazenda", "casas": [1, 1], "bloqueia": false, "chao": "caminho", "custo": { "ouro": 1, "itens": { "madeira": 1 } }, "obraSeg": 0, "nivel": 1, "exige": ["bancada-de-carpintaria"] },
+  "caminho-de-pedra": { "nome": "Caminho de pedra", "tipo": "decoracao", "onde": "fazenda", "casas": [1, 1], "bloqueia": false, "plano": true, "custo": { "ouro": 1, "itens": { "pedra": 1 } }, "obraSeg": 0, "nivel": 1, "exige": ["bancada-de-carpintaria"] },
+  "canteiro-de-flores": { "nome": "Canteiro de flores", "tipo": "decoracao", "onde": "fazenda", "casas": [1, 1], "custo": { "ouro": 5 }, "obraSeg": 0, "nivel": 1 },
+  "fonte-de-pedra": { "nome": "Fonte de pedra", "tipo": "decoracao", "onde": "fazenda", "casas": [2, 2], "custo": { "cash": 3 }, "obraSeg": 0, "nivel": 1 }
+}

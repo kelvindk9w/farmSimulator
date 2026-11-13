@@ -22,7 +22,8 @@ export function ganharCash(m, n, origem) {
 }
 
 // ---------- cesto ----------
-export const capacidadeDoCesto = (m) => m.dados.itens[m.posses.cesto.item].capacidade;
+// (o cesto gasto leva menos até o conserto: sistemas/desgaste.js)
+export const capacidadeDoCesto = (m) => { const it = m.dados.itens[m.posses.cesto.item]; return m.desgaste && m.desgaste.gastas[it.id] ? Math.max(1, Math.floor(it.capacidade * m.dados.desgaste.rendeQuandoGasta)) : it.capacidade; };
 export const noCesto = (m) => total(m.posses.cesto.itens);
 export const espacoNoCesto = (m) => capacidadeDoCesto(m) - noCesto(m);
 // põe até n; devolve quantos couberam
@@ -42,6 +43,25 @@ export function valorDoCesto(m) {
 // ---------- celeiro (estoque) ----------
 export const noCeleiro = (m) => total(m.posses.celeiro.itens);
 export const espacoNoCeleiro = (m) => m.posses.celeiro.capacidade - noCeleiro(m);
+
+// ---------- o que há guardado, esteja onde estiver (obra e receita usam direto, sem a personagem carregar) ----------
+// quanto o jogador tem de um item, somando a bolsa (sementes, materiais), o celeiro e o cesto
+export const quantoTem = (m, item) => (m.posses.bolsa[item] || 0) + (m.posses.celeiro.itens[item] || 0) + (m.posses.cesto.itens[item] || 0);
+// o primeiro item que falta para { item: n }, ou null se há tudo: { item, precisa, tem, falta }
+export function oQueFalta(m, itens) {
+  for (const k in itens) { const tem = quantoTem(m, k); if (tem < itens[k]) return { item: k, precisa: itens[k], tem, falta: itens[k] - tem }; }
+  return null;
+}
+// tira { item: n } do que há guardado: primeiro da bolsa, depois do celeiro, por último do cesto. Devolve false (sem tirar nada) se faltar.
+export function gastarItens(m, itens) {
+  if (oQueFalta(m, itens)) return false;
+  const P = m.posses;
+  for (const k in itens) {
+    let n = itens[k];
+    for (const de of [P.bolsa, P.celeiro.itens, P.cesto.itens]) { const tira = Math.min(n, de[k] || 0); if (tira > 0) { somar(de, k, -tira); n -= tira; } }
+  }
+  return true;
+}
 
 // ---------- ferramentas ----------
 // cada ferramenta é um objeto só: m.posses.ferramentas[id] = { onde: 'cinto' | 'suporte', agua, usos, vez }

@@ -29,6 +29,16 @@
    "arquivo": "ovelha.png",
    "pedido": "modelo-ovelha.md",
    "nota": "Ovelha com lã: frente, costas e perfil. Lã creme em tufos, cara e patas castanho-escuras. Uma rodada."
+  },
+  "ovelha-tosquiada": {
+   "arquivo": "ovelha-tosquiada.png",
+   "pedido": "modelo-ovelha-tosquiada.md",
+   "nota": "A mesma ovelha depois da tosquia: corpo magro creme-rosado, topetinho e tufo no rabo; mesma cabeça e mesmas patas. Feita com a folha da ovelha com lã anexa. Uma rodada."
+  },
+  "tosquia": {
+   "arquivo": "tosquia.png",
+   "pedido": "modelo-tosquia.md",
+   "nota": "Folha de modelo da INTERAÇÃO: a personagem ajoelhada tosquiando a ovelha, vista por trás dela, pela frente dela (a ovelha em primeiro plano) e a pose dela sozinha com a tesoura. Anexada aos pedidos de tosquiar. Uma rodada."
   }
  },
  "folhas": {
@@ -218,6 +228,76 @@
    "pedido": "personagem-colher-fruta-costas.md",
    "rodadas": 1,
    "nota": "Par da de frente. Corpo um pouco mais esguio que o da folha de modelo (aviso de 9%)."
+  },
+  "personagem/martelar-costas": {
+   "pedido": "personagem-martelar-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente."
+  },
+  "personagem/tosquiar-frente": {
+   "pedido": "personagem-tosquiar-frente.md",
+   "rodadas": 1,
+   "nota": "Ajoelhada, a mão esquerda segura (a ovelha é do jogo), a tesoura abre e fecha avançando; o tronco vai e volta. A lã cortada é do jogo."
+  },
+  "personagem/machado-frente": {
+   "pedido": "personagem-machado-frente.md",
+   "rodadas": 1,
+   "nota": "Prepara, torce para trás, arma no alto, desce na diagonal, crava na altura dos joelhos e arranca. O aviso do lenço no quadro 3 é o braço na frente da cabeça."
+  },
+  "personagem/tosquiar-costas": {
+   "pedido": "personagem-tosquiar-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente. A referência em pé veio com a cabeça pequena (aviso de 12%); --ajuste 0.96 iguala a altura ajoelhada à da folha de frente."
+  },
+  "personagem/machado-costas": {
+   "pedido": "personagem-machado-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente."
+  },
+  "personagem/picareta-frente": {
+   "pedido": "personagem-picareta-frente.md",
+   "rodadas": 1,
+   "nota": "Prepara, ergue, arma acima da cabeça, desce, bate no chão à frente dos pés e a picareta quica."
+  },
+  "personagem/picareta-costas": {
+   "pedido": "personagem-picareta-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente."
+  },
+  "animal/ovelha/parada-frente": {
+   "pedido": "ovelha-parada-frente.md",
+   "rodadas": 1,
+   "nota": "Mastiga, respira, vira a cabeça e pisca; patas plantadas. Figura com 190 pontos de altura (fora da tabela de escala: lombo na cintura da personagem). Tamanho pela massa 143."
+  },
+  "animal/ovelha/andar-frente": {
+   "pedido": "ovelha-andar-frente.md",
+   "rodadas": 1,
+   "nota": "Trotezinho de seis quadros, o corpo sobe e desce, a cabeça balança."
+  },
+  "animal/ovelha/parada-costas": {
+   "pedido": "ovelha-parada-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente (204 pontos de altura; tamanho pela massa 137)."
+  },
+  "animal/ovelha/andar-costas": {
+   "pedido": "ovelha-andar-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente."
+  },
+  "animal/ovelha-tosquiada/parada-frente": {
+   "pedido": "ovelha-tosquiada-parada-frente.md",
+   "rodadas": 1,
+   "nota": "A mesma ovelha sem a lã, com a cabeça do mesmo tamanho da lanuda (181 pontos de altura; tamanho pela massa 132). Mesmo movimento da folha com lã, que foi anexada ao pedido."
+  },
+  "animal/ovelha-tosquiada/andar-frente": {
+   "pedido": "ovelha-tosquiada-andar-frente.md",
+   "rodadas": 1,
+   "nota": "Mesmo trotezinho da lanuda. A cabeça veio um pouco maior que na folha parada: tamanho pela massa 126 em vez de 132 iguala a cabeça."
+  },
+  "animal/ovelha-tosquiada/parada-costas": {
+   "pedido": "ovelha-tosquiada-parada-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente (194 pontos de altura; tamanho pela massa 119)."
   }
  },
  "geral": [
