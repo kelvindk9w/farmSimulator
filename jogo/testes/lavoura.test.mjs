@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { novoMundo, ateParar, ouvirTudo, modo, tocar, arar, semear, encher, regar, colher, pular, plantarAtePronta, CAMPO } from './apoio.mjs';
-import { GRAMA, ARADA } from '../src/nucleo/local.js';
+import { GRAMA, ARADA, CAMPO as CHAO_CAMPO } from '../src/nucleo/local.js';
 import { plantaEm, estadoDaPlanta, estagioDaPlanta, progressoDaPlanta, proximoAcontecimento } from '../src/nucleo/sistemas/lavoura.js';
 
 const UMA = [[12, 13]];
@@ -122,10 +122,12 @@ test('colher põe o produto no cesto, dá experiência e libera a casa', () => {
   assert.deepEqual(ev.de('colheu'), [{ cultura: 'rabanete', item: 'rabanete', n: 2, x: 12, z: 13 }]);
 });
 
-test('com a regra de rearar ligada, a casa colhida volta a ser grama', () => {
+test('com a regra de rearar ligada, a casa colhida vira campo (nunca grama) e pede a enxada de novo', () => {
   const m = novoMundo((b) => { b.regras.lavoura = { reararAposColher: true }; });
   plantarAtePronta(m, UMA); colher(m, UMA);
-  assert.equal(m.local.chao[m.local.i(12, 13)], GRAMA);
+  assert.equal(m.local.chao[m.local.i(12, 13)], CHAO_CAMPO);
+  modo(m, 'semear', 'semente-rabanete');
+  assert.equal(tocar(m, 12, 13).motivo, 'arar-antes');
 });
 
 test('modo mão: um toque rega o que tem sede e colhe o que está pronto', () => {

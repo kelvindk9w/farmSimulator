@@ -51,7 +51,7 @@ export function ligarTeclado(entrada) {
 
     if (e.code in DIR) { e.preventDefault(); J.meio = 'teclas'; entrada.usouTeclas(); if (!apertada[DIR[e.code]]) { apertada[DIR[e.code]] = true; rumo(); } return; }
     if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') { if (!correr) { correr = true; J.mundo.comando({ tipo: 'correr', ligado: true }); if (rumando) rumo(); } return; }
-    if (e.code === 'Space' || e.code === 'Enter' || e.code === 'NumpadEnter') { e.preventDefault(); if (!e.repeat) { J.meio = 'teclas'; entrada.usouTeclas(); J.mundo.comando({ tipo: 'agir' }); } return; }
+    if (e.code === 'Space' || e.code === 'Enter' || e.code === 'NumpadEnter') { e.preventDefault(); if (!e.repeat) { J.meio = 'teclas'; entrada.usouTeclas(); J.mundo.comando({ tipo: 'agir' }); entrada.fileira.apertou('tecla'); } return; } // segurar: a fileira do campo
     if (e.repeat) return;
     if (e.code === 'KeyQ' || e.code === 'KeyE') { J.mundo.comando({ tipo: 'trocarModo', passo: e.code === 'KeyQ' ? -1 : 1 }); som.tocar('toque'); return; }
     if (/^Digit[1-9]$/.test(e.code)) { const md = modosEmOrdem().filter((x) => !x.disponivel || x.disponivel(J.mundo))[+e.code.slice(5) - 1]; if (md) { J.mundo.comando({ tipo: 'escolherModo', modo: md.id }); som.tocar('toque'); } return; }
@@ -68,6 +68,7 @@ export function ligarTeclado(entrada) {
     }
   });
   window.addEventListener('keyup', (e) => {
+    if (e.code === 'Space' || e.code === 'Enter' || e.code === 'NumpadEnter') { entrada.fileira.soltou('tecla'); return; }
     if (e.code in DIR) { if (apertada[DIR[e.code]]) { apertada[DIR[e.code]] = false; rumo(); } return; }
     if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') { correr = false; J.mundo.comando({ tipo: 'correr', ligado: false }); if (rumando) rumo(); }
   });

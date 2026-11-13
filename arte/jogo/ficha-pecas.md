@@ -31,9 +31,9 @@ Construções, objetos, plantas, ícones e retratos do jogo, pedidos ao Codex de
 
 <!-- tabela:inicio -->
 
-No catálogo: 271 chaves (271 prontas, 0 pendentes).
+No catálogo: 280 chaves (280 prontas, 0 pendentes).
 
-### objetos (73)
+### objetos (74)
 
 | Chave | Arquivo | Quadro (px) | Apoio | Casas | Tamanho pedido | Pedido | Situação |
 |---|---|---|---|---|---|---|---|
@@ -49,6 +49,7 @@ No catálogo: 271 chaves (271 prontas, 0 pendentes).
 | `objeto/bau` | objetos/bau.png | 221 x 217 | 111, 150 | 2 x 1 | largura 1.6 | 39-moveis-do-celeiro.md | pronto |
 | `objeto/bebedouro` | objetos/bebedouro.png | 111 x 115 | 56, 81 | 1 x 1 | largura 0.74 | 28-pecas-de-trato.md | pronto |
 | `objeto/bebedouro-grande` | objetos/bebedouro-grande.png | 266 x 225 | 133, 145 | 2 x 1 | largura 1.95 | 28-pecas-de-trato.md | pronto |
+| `objeto/caixa-de-correio` | objetos/caixa-de-correio.png | 127 x 212 | 64, 197 | 1 x 1 | altura 1.8 | objeto-caixa-de-correio.md | pronto |
 | `objeto/caixote` | objetos/caixote.png | 161 x 173 | 81, 123 | 1 x 1 | largura 1.13 | 39-moveis-do-celeiro.md | pronto: câmera um pouco mais de cima que o resto (inclinação da base 0,70 em vez de 0,58) |
 | `objeto/caminho-de-pedra` | objetos/caminho-de-pedra.png | 199 x 123 | 100, 62 | 1 x 1 | chão de 1 casa | 44-caminho-de-pedra.md | pronto: esticado na vertical para caber no losango da casa |
 | `objeto/canteiro-de-flores` | objetos/canteiro-de-flores.png | 182 x 151 | 91, 95 | 1 x 1 | largura 1.3 | 41-decoracao-1.md | pronto |
@@ -304,18 +305,25 @@ No catálogo: 271 chaves (271 prontas, 0 pendentes).
 | `retrato/seu-tonho-explicando` | retratos/seu-tonho-explicando.png | 256 x 256 | 128, 248 |  | caixa 256 | 21-retratos-seu-tonho.md | pronto |
 | `retrato/seu-tonho-neutro` | retratos/seu-tonho.png (apelido) | 256 x 256 | 128, 248 |  | caixa 256 | 21-retratos-seu-tonho.md | pronto |
 
-### interface (25)
+### interface (33)
 
 | Chave | Arquivo | Quadro (px) | Apoio | Casas | Tamanho pedido | Pedido | Situação |
 |---|---|---|---|---|---|---|---|
+| `ui/amigos` | interface/amigos.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-modos-e-progresso.md | pronto |
 | `ui/bau-aberto` | interface/bau-aberto.png | 268 x 280 | 134, 272 |  | fator 0.5 | 22-nivel-e-bau.md | pronto |
 | `ui/bau-fechado` | interface/bau-fechado.png | 252 x 226 | 126, 218 |  | fator 0.5 | 22-nivel-e-bau.md | pronto |
 | `ui/cadeado` | interface/cadeado.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
+| `ui/caderno` | interface/caderno.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-modos-e-progresso.md | pronto |
 | `ui/compartilhar` | interface/compartilhar.png | 128 x 128 | 64, 64 |  | caixa 128 | 48-icones-cosmeticos.md | pronto |
 | `ui/concluir` | interface/concluir.png | 128 x 128 | 64, 64 |  | caixa 128 | 48-icones-cosmeticos.md | pronto |
 | `ui/config` | interface/config.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
+| `ui/correio` | interface/correio.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-modos-e-progresso.md | pronto |
 | `ui/enxada` | interface/enxada.png | 128 x 128 | 64, 64 |  | caixa 128 | 18-icones-ferramentas.md | pronto: o mesmo desenho de icone/enxada-velha |
+| `ui/fazenda` | interface/fazenda.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-modos-e-progresso.md | pronto |
 | `ui/fechar` | interface/fechar.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
+| `ui/foto` | interface/foto.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-modos-e-progresso.md | pronto |
+| `ui/guarda-roupa` | interface/guarda-roupa.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-modos-e-progresso.md | pronto |
+| `ui/limpar` | interface/limpar.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-modos-e-progresso.md | pronto |
 | `ui/loja` | interface/loja.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/lote` | interface/lote.png | 128 x 128 | 64, 64 |  | caixa 128 | 54-icones-rega.md | pronto |
 | `ui/mao` | interface/mao.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
@@ -333,6 +341,7 @@ No catálogo: 271 chaves (271 prontas, 0 pendentes).
 | `ui/tela-cheia` | interface/tela-cheia.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/trofeu` | interface/trofeu.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/vaga` | interface/vaga.png | 128 x 128 | 64, 64 |  | caixa 128 | 48-icones-cosmeticos.md | pronto |
+| `ui/voltar` | interface/voltar.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-modos-e-progresso.md | pronto |
 
 <!-- tabela:fim -->
 

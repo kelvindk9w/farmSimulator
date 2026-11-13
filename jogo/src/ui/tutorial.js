@@ -88,6 +88,7 @@ export function criarTutorial(ui, hud) {
       apontarUi(alvo);
       return;
     }
+    cena.seta.casas = g.tipo === 'casa' && g.casas ? g.casas.map((c) => [c[0], c[1]]) : null; // no campo: a fileira toda (render/campo.js)
     if (g.tipo === 'casa') { apontarUi(null); cena.seta.ligada = true; cena.seta.x = g.x + 0.5; cena.seta.z = g.z + 0.5; cena.seta.alto = 0.9; }
     else if (g.tipo === 'entidade') {
       const e = m.local.porId[g.id];

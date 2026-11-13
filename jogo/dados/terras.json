@@ -7,8 +7,9 @@
   "inicial": {
     "area": [24, 44, 40, 60],
     "limpo": [25, 49, 39, 59],
+    "campo": [24, 50, 30, 58],
     "natureza": { "mato": 0.35, "pedra": 0.06, "toco": 0.12 },
-    "descricao": "O sítio do começo: 16 por 16 casas. O miolo vem limpo e compacto (casa, poço, celeiro, banca e o primeiro campo a poucos passos um do outro); as beiradas têm mato, pedras e tocos para aprender a limpar e para a madeira das primeiras obras."
+    "descricao": "O sítio do começo: 16 por 16 casas. O miolo vem limpo e compacto (casa, poço, celeiro, banca e o primeiro campo a poucos passos um do outro); as beiradas têm mato, pedras e tocos para aprender a limpar e para a madeira das primeiras obras. \"campo\" é o campo de plantação demarcado com que a fazenda começa (terra de plantio sem sulco, 6 por 8 casas, fileiras ao longo de X, a oeste do poço): arar grama em volta aumenta o campo."
   },
   "pontos": {
     "casa": [25, 45],
@@ -19,7 +20,7 @@
     "personagem": [32, 55],
     "vizinho": [28, 57],
     "porteira": [32, 59],
-    "lavoura": [26, 50]
+    "lavoura": [24, 50]
   },
   "caminhos": [
     [31, 53, 33, 57],

@@ -130,10 +130,11 @@ registrarCamada('cima', (g, cam, m, S, cena, dt) => {
   }
 });
 
-// o toque no bicho de estimação vale num círculo de pelo menos 48 pontos (o gato é pequeno para o dedo)
+// o toque no bicho de estimação vale num círculo de pelo menos 48 pontos (o gato é pequeno para o dedo); só com a
+// Mão: com enxada, regador ou semente na mão, o toque perto dele é na terra (ele não atrapalha o serviço)
 ALVOS_DE_CIMA.push((m, px, py, cena) => {
   const E = m.estimacao;
-  if (!E || !E.bichos.length || m.personagem.local !== 'fazenda') return null;
+  if (!E || !E.bichos.length || m.personagem.local !== 'fazenda' || m.modo.id !== 'mao') return null;
   const cam = cena.cam, raio = Math.max(0.45 * cam.S, 24 * cam.dpr);
   let melhor = null, d0 = Infinity;
   for (const a of E.bichos) {

@@ -1,14 +1,21 @@
 {
   "escala": 128,
   "pecas": {
+    "ui/amigos": { "arquivo": "interface/amigos.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
     "ui/bau-aberto": { "arquivo": "interface/bau-aberto.png", "quadros": 1, "casa": [268, 280], "apoio": [134, 272], "ancora": "pe" },
     "ui/bau-fechado": { "arquivo": "interface/bau-fechado.png", "quadros": 1, "casa": [252, 226], "apoio": [126, 218], "ancora": "pe" },
     "ui/cadeado": { "arquivo": "interface/cadeado.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/caderno": { "arquivo": "interface/caderno.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
     "ui/compartilhar": { "arquivo": "interface/compartilhar.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
     "ui/concluir": { "arquivo": "interface/concluir.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
     "ui/config": { "arquivo": "interface/config.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/correio": { "arquivo": "interface/correio.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
     "ui/enxada": { "arquivo": "interface/enxada.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/fazenda": { "arquivo": "interface/fazenda.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
     "ui/fechar": { "arquivo": "interface/fechar.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/foto": { "arquivo": "interface/foto.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/guarda-roupa": { "arquivo": "interface/guarda-roupa.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/limpar": { "arquivo": "interface/limpar.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
     "ui/loja": { "arquivo": "interface/loja.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
     "ui/lote": { "arquivo": "interface/lote.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
     "ui/mao": { "arquivo": "interface/mao.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
@@ -25,6 +32,7 @@
     "ui/subida-de-nivel": { "arquivo": "interface/subida-de-nivel.png", "quadros": 1, "casa": [528, 278], "apoio": [264, 270], "ancora": "pe" },
     "ui/tela-cheia": { "arquivo": "interface/tela-cheia.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
     "ui/trofeu": { "arquivo": "interface/trofeu.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
-    "ui/vaga": { "arquivo": "interface/vaga.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] }
+    "ui/vaga": { "arquivo": "interface/vaga.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] },
+    "ui/voltar": { "arquivo": "interface/voltar.png", "quadros": 1, "casa": [128, 128], "apoio": [64, 64] }
   }
 }

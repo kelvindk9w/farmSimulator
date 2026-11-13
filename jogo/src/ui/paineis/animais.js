@@ -50,16 +50,18 @@ registrarPainel({
         if (motivo === 'sem-abrigo') {
           // falta o abrigo: o cartão diz qual e leva ao catálogo de construir
           c.append(el('div', 'info falta', T.animais.precisaDe(D, o.abrigo)));
-          const b = botao({ icone: 'icone/martelo', tamanho: 22, texto: T.animais.construir, aoClicar: () => { som.tocar('toque'); abrirPainel('construir', { id: o.abrigo, categoria: 'abrigo' }); } });
+          const b = botao({ icone: 'icone/martelo', tamanho: 22, texto: T.animais.construirAbrigo(D, o.abrigo), aoClicar: () => { som.tocar('toque'); abrirPainel('construir', { id: o.abrigo, categoria: 'abrigo' }); } });
           b.dataset.k = 'construir-' + o.animal;
-          bs.append(b, preco(o.preco));
+          nome.append(preco(o.preco)); // (o preço fica no nome: o botão é o da obra, não o do bicho)
+          bs.append(b);
         } else if (motivo === 'abrigo-cheio') {
           // sem vaga: leva ao abrigo, onde está a ampliação
           c.append(el('div', 'info falta', T.animais.semVaga(D, o.abrigo)));
           const e = abrigosProntos(m, o.abrigo)[0];
-          const b = botao({ texto: T.animais.verAbrigo, aoClicar: () => { som.tocar('toque'); if (e) abrirPainel('abrigo', { entidade: e.id }); } });
+          const b = botao({ texto: T.animais.verOAbrigo(D, o.abrigo), aoClicar: () => { som.tocar('toque'); if (e) abrirPainel('abrigo', { entidade: e.id }); } });
           b.dataset.k = 'ver-' + o.animal;
-          bs.append(b, preco(o.preco));
+          nome.append(preco(o.preco));
+          bs.append(b);
         } else {
           if (motivo && motivo !== 'sem-ouro') c.append(el('div', 'info falta', T.motivos[motivo] ? T.motivos[motivo](o.pode.dados, D) : motivo));
           const b = botao({ classe: 'verde', aoClicar: () => { const r = m.comando({ tipo: 'comprarAnimal', animal: o.animal }); som.tocar(r.ok ? 'moeda' : 'erro'); } });

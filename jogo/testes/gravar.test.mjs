@@ -66,7 +66,7 @@ test('se os dados mudaram entre versões, a gravação antiga ainda abre (o que 
   const g = copia(jogado().salvar());
   // a cultura plantada deixou de existir, uma missão saiu da lista e a gravação traz uma casa que não cabe no mapa
   const D = dadosDeTeste((b) => { delete b.culturas.milho; b.itens['semente-milho'].tipo = 'miudeza'; b.missoes.vizinho.shift(); });
-  g.sistemas.lavoura.fazenda.push([999999], [13 + 16 * 24, 'milho', 0, 0]);
+  g.sistemas.lavoura.locais.fazenda.arada.push([999999], [13 + 16 * 24, 'milho', 0, 0]); // (formato 2 da lavoura: com o campo de plantação)
   const n = Mundo.carregar(D, g);
   assert.deepEqual(n.missoes.feitas, ['colher-rabanete'].filter((id) => g.sistemas.missoes.feitas.includes(id)));
   assert.equal(n.local.chao[n.local.i(13, 16)], ARADA);

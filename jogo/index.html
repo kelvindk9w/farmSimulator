@@ -525,15 +525,18 @@
   .oferta.animal > canvas.ic { grid-row: span 2; align-self: start; }
   .oferta.animal .botoes { align-items: center; }
   .oferta.animal .botoes > .preco { margin-left: auto; padding-right: 4px; font-weight: 800; }
+  .oferta.animal .nome > .preco { float: right; display: inline-flex; align-items: center; gap: 3px; font-size: 16px; }
   @media (max-width: 560px) { .abr-trato { grid-template-columns: 1fr; } }
   /* frente: trabalho */
   .bt.trab[hidden], .chip.trab-carga[hidden], .chip.trab-agua[hidden] { display: none; }
-  .bt.trab .tecla { display: none; position: absolute; right: -5px; bottom: -6px; min-width: 18px; height: 18px; padding: 0 3px; box-sizing: border-box; border-radius: 6px; background: var(--creme); border: 2px solid var(--marrom); color: var(--marrom); font-size: 12px; font-weight: 800; line-height: 14px; text-align: center; pointer-events: none; }
+  .bt.trab .tecla { display: none; position: absolute; right: -5px; bottom: -6px; min-width: 21px; height: 21px; padding: 0 3px; box-sizing: border-box; border-radius: 7px; background: var(--creme); border: 2px solid var(--marrom); color: var(--marrom); font-size: 14px; font-weight: 800; line-height: 17px; text-align: center; pointer-events: none; }
   @media (hover: hover) and (pointer: fine) { .bt.trab .tecla { display: block; } }
   .bt.trab.ativo .tecla { background: #e9f8d8; }
   .chip.trab-agua span { color: #1f5f8f; }
   .chip.trab-agua.vazio span, .chip.trab-carga.cheio span { color: var(--ruim); }
   #ui.a-cavalo .chip.folego { display: none !important; }
+  .trab-lado { position: absolute; right: max(8px, env(safe-area-inset-right)); top: 60px; display: flex; gap: 6px; }
+  .trab-lado:empty, body.colocando .trab-lado { display: none !important; }
 </style>
 </head>
 <body>

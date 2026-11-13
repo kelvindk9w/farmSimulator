@@ -2,7 +2,12 @@
 // o que ocupa cada casa e a lista de entidades. A personagem está em um local por vez.
 import { TIPOS } from './registro.js';
 
-export const GRAMA = 0, ARADA = 1, CAMINHO = 2;
+// CAMPO: terra de plantio sem sulco (o campo de plantação). Arou uma vez, é campo para sempre: colheu, a casa volta a
+// CAMPO (nunca a grama) e pede a enxada (ou o arado) de novo antes de plantar. (3 é só do desenho: arada e molhada;
+// 4 e 5 são o piso e a soleira das construções, em construcao.js.)
+export const GRAMA = 0, ARADA = 1, CAMINHO = 2, CAMPO = 6;
+// a casa é do campo de plantação (arada ou só campo)?
+export const deLavoura = (c) => c === ARADA || c === CAMPO;
 
 export class Local {
   constructor(id, largura, profundidade) {
@@ -10,7 +15,7 @@ export class Local {
     this.l = largura; // casas em X
     this.p = profundidade; // casas em Z
     const n = largura * profundidade;
-    this.chao = new Uint8Array(n); // GRAMA | ARADA | CAMINHO
+    this.chao = new Uint8Array(n); // GRAMA | ARADA | CAMINHO | CAMPO (e o piso das construções)
     this.propria = new Uint8Array(n); // 1 = terra do jogador (só nela se anda e se trabalha)
     this.ocupa = new Int32Array(n); // 0 = livre; senão, o número da entidade que bloqueia a casa
     this.plantas = new Array(n).fill(null); // o que a lavoura plantou em cada casa

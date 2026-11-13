@@ -99,7 +99,7 @@ T.animais = {
   // o cartão do bicho na loja
   tem: (n) => `Você tem ${n}`, comprar: 'Comprar', nivel: (n) => `Libera no nível ${n}`,
   precisaDe: (D, abrigo) => `Precisa de ${um(nomeC(D, abrigo))}`, construir: 'Construir', construirAbrigo: (D, abrigo) => `Construir ${o(nomeC(D, abrigo))}`,
-  semVaga: (D, abrigo) => `${nomeC(D, abrigo)} sem vaga: amplie`, verAbrigo: 'Ver',
+  semVaga: (D, abrigo) => `${nomeC(D, abrigo)} sem vaga: amplie`, verAbrigo: 'Ver', verOAbrigo: (D, abrigo) => `Ver ${o(nomeC(D, abrigo))}`,
   soCash: 'Na loja de cash',
   resumo: (d, D) => {
     if (!d || d.familia !== 'producao') return (d && d.descricao) || '';

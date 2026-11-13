@@ -108,9 +108,37 @@ export function levar(e, cx, cz, rumo) {
 // o ponto diante da porta de uma construção (a face de +Z, a que olha para a câmera), para o bicho sair e voltar
 export function portaDe(e, out = [0, 0]) { out[0] = e.x + e.l / 2; out[1] = e.z + e.p + 0.6; return out; }
 
-// o chão em que os bichos de estimação andam: o da fazenda, menos as casas plantadas (não pisam na lavoura)
+// o chão em que os bichos andam por conta: o da fazenda, menos as casas plantadas (não pisam na lavoura)
 export function chaoSemPlanta(m) {
   const loc = m.locais.fazenda, c = m._chaoSemPlanta;
   if (c && c.loc === loc) return c; // (a fazenda é trocada por outra quando a terra cresce)
   return (m._chaoSemPlanta = { loc, l: loc.l, p: loc.p, dentro: (x, z) => loc.dentro(x, z), andavel: (x, z) => loc.andavel(x, z) && !loc.plantas[z * loc.l + x] });
+}
+// a casa sem planta mais perto dela (ela está no meio da lavoura): o bicho espera ali, na beira. Preenche e.bx, e.bz
+// (o centro da casa; -1 se não há nenhuma a até 4 casas dela)
+export function beira(m, chao, p, e) {
+  const x0 = Math.floor(p.x), z0 = Math.floor(p.z);
+  let melhor = Infinity;
+  e.bx = -1;
+  for (let r = 1; r <= 4 && e.bx < 0; r++) for (let z = z0 - r; z <= z0 + r; z++) for (let x = x0 - r; x <= x0 + r; x++) {
+    if (Math.max(Math.abs(x - x0), Math.abs(z - z0)) !== r || !chao.andavel(x, z)) continue;
+    const d = Math.hypot(x + 0.5 - p.x, z + 0.5 - p.z) + 0.2 * Math.hypot(x - e.x, z - e.z);
+    if (d < melhor) { melhor = d; e.bx = x + 0.5; e.bz = z + 0.5; }
+  }
+}
+// Vai para perto de (gx, gz) sem pisar em planta: se ela está na lavoura, o alvo vira a beira mais perto dela. O
+// último trecho do caminho é em linha reta: se ele ia entrar numa casa plantada, fica onde estava e refaz o caminho.
+// (O bicho que já está em cima de uma planta, plantada debaixo dele, sai em linha reta.) Devolve true enquanto anda.
+export function irSemPisar(m, e, gx, gz, folga, vmax) {
+  const loc = m.locais.fazenda, chao = chaoSemPlanta(m), P = loc.plantas, l = loc.l;
+  if (P[Math.floor(gz) * l + Math.floor(gx)]) {
+    if (!(e.beiraEm > m.n)) { e.beiraEm = m.n + 40; beira(m, chao, { x: gx, z: gz }, e); }
+    if (!(e.bx >= 0)) { ficar(e); return false; }
+    gx = e.bx; gz = e.bz; folga = 0.15;
+  }
+  const x0 = e.x, z0 = e.z, i0 = Math.floor(z0 + 0.5) * l + Math.floor(x0 + 0.5);
+  const indo = irAte(m, e, gx, gz, folga, vmax, chao, !!P[i0]);
+  const i1 = Math.floor(e.z + 0.5) * l + Math.floor(e.x + 0.5);
+  if (i1 !== i0 && P[i1] && !P[i0]) { e.x = x0; e.z = z0; e.vel = 0; e.rota = null; }
+  return indo;
 }

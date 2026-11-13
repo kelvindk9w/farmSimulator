@@ -12,8 +12,9 @@ import { ENTREGAS } from '../src/nucleo/sistemas/cash.js';
 import { barraDeXp } from '../src/nucleo/sistemas/niveis.js';
 import {
   registrarFamilia, animaisDe, vagasLivres, abrigoDe, estaTratado, nivelDoCocho, nivelDoBebedouro, porAnimal, tirarAnimal,
-  estadoDoAbrigo, podeComprarAnimal, ofertasDeAnimais, cicloDoAnimal, comecarCiclo, animalPorId, faltaNoAbrigo, famintosDe,
+  estadoDoAbrigo, podeComprarAnimal, ofertasDeAnimais, cicloDoAnimal, comecarCiclo, animalPorId, faltaNoAbrigo, famintosDe, jaViuDica,
 } from '../src/nucleo/sistemas/animais.js';
+import { guiaDoEvento } from '../src/nucleo/guia.js';
 import { vidaDoAnimal, prontosNoAbrigo, pedidoDoAbrigo, situacaoDoAnimal, podeRecolher, noRecipiente } from '../src/nucleo/sistemas/producao.js';
 
 // ---------- uma família de mentira, para provar que a base serve a qualquer família ----------
@@ -560,3 +561,68 @@ test('os dados: produção sem produto é erro; ferramenta desconhecida vira avi
   assert.equal(m.posses.cesto.itens.ovo, 1); assert.equal(espacoNoCesto(m), capacidadeDoCesto(m) - 1);
   void porConstrucao; void comecarCiclo; void podeComprarAnimal;
 });
+
+test('a primeira vez de cada coisa: viuDicaDeAnimal marca, jaViuDica pergunta, e a marca vai na gravação', () => {
+  const m = mundoDosAnimais();
+  assert.equal(jaViuDica(m, 'animal'), false);
+  assert.deepEqual(m.comando({ tipo: 'viuDicaDeAnimal', dica: 'animal' }), { ok: true });
+  assert.equal(jaViuDica(m, 'animal'), true);
+  assert.equal(m.comando({ tipo: 'viuDicaDeAnimal', dica: 'animal' }).repetida, true, 'marcar de novo não duplica');
+  assert.equal(m.comando({ tipo: 'viuDicaDeAnimal', dica: 7 }).ok, false);
+  m.comando({ tipo: 'viuDicaDeAnimal', dica: 'recolher:ovo' });
+  const m2 = Mundo.carregar(dadosDeTeste(comAnimais), JSON.parse(JSON.stringify(m.salvar())));
+  assert.deepEqual([jaViuDica(m2, 'animal'), jaViuDica(m2, 'recolher:ovo'), jaViuDica(m2, 'trato')], [true, true, false]);
+  assert.deepEqual(m2.animais.vistos, ['animal', 'recolher:ovo']);
+  // gravação sem a lista (de antes desta marca) abre com a lista vazia
+  const g = JSON.parse(JSON.stringify(m.salvar())); delete g.sistemas.animais.vistos;
+  assert.deepEqual(Mundo.carregar(dadosDeTeste(comAnimais), g).animais.vistos, []);
+});
+
+test('comprarAnimal com "abrigo": vai para aquele abrigo se for do tipo certo, estiver pronto e tiver vaga; senão, para o de vaga', () => {
+  const m = mundoDosAnimais(), c1 = fartura(m, porAbrigo(m, 'curral')), c2 = fartura(m, porAbrigo(m, 'curral', 15, 17));
+  m.posses.ouro = 1000;
+  assert.equal(m.comando({ tipo: 'comprarAnimal', animal: 'vaca', abrigo: c2.id }).dados.entidade, c2.id, 'o painel aberto escolhe o curral');
+  assert.equal(m.comando({ tipo: 'comprarAnimal', animal: 'vaca', abrigo: c2.id }).dados.entidade, c2.id);
+  // o segundo encheu: a próxima vai para o primeiro, mesmo pedindo o segundo
+  assert.equal(m.comando({ tipo: 'comprarAnimal', animal: 'vaca', abrigo: c2.id }).dados.entidade, c1.id);
+  // abrigo de outro tipo não serve: vale o de vaga
+  const g = porAbrigo(m, 'galinheiro');
+  assert.equal(m.comando({ tipo: 'comprarAnimal', animal: 'vaca', abrigo: g.id }).dados.entidade, c1.id);
+  assert.equal(m.comando({ tipo: 'comprarAnimal', animal: 'vaca', abrigo: c1.id }).motivo, 'abrigo-cheio');
+  assert.deepEqual([animaisDe(m, { abrigo: c1.id }).length, animaisDe(m, { abrigo: c2.id }).length], [2, 2]);
+});
+
+test('o guia das missões dos animais: comprar, tratar e recolher apontam o próximo passo (abrigo, loja, colheita ou esperar)', () => {
+  // "casas" (a fileira do campo de plantação) só conta quando vem preenchida
+  const g = (m, ev, f) => { const { casas, ...r } = guiaDoEvento(m, ev, f, {}); return casas ? { casas, ...r } : r; };
+  const m = mundoDosAnimais();
+  // sem galinheiro, comprar galinha começa por construir o galinheiro
+  assert.deepEqual(g(m, 'comprou', { animal: 'galinha' }), g(m, 'construiu', { construcao: 'galinheiro' }));
+  const e = porAbrigo(m, 'galinheiro');
+  assert.deepEqual(g(m, 'comprou', { animal: ['galinha'] }), { tipo: 'entidade', id: e.id });
+  // sem galinha, recolher ovo começa por comprar uma
+  assert.deepEqual(g(m, 'recolheu', { item: 'ovo' }), { tipo: 'entidade', id: e.id });
+  porAnimal(m, 'galinha', { quieto: true });
+  // sem milho, o bebedouro ainda dá para encher: o passo é o galinheiro; com ele cheio, é colher milho
+  delete m.posses.celeiro.itens.milho;
+  assert.deepEqual(g(m, 'tratou', { abrigo: 'galinheiro' }), { tipo: 'entidade', id: e.id });
+  m.animais.abrigos[e.id].bebedouro = m.dados.construcoes.galinheiro.bebedouro;
+  assert.deepEqual(g(m, 'tratou', { abrigo: 'galinheiro' }), g(m, 'colheu', { item: 'milho' }));
+  assert.notEqual(g(m, 'tratou', { abrigo: 'galinheiro' }).tipo, 'entidade');
+  dar(m, { milho: 5 });
+  assert.deepEqual(g(m, 'tratou', { abrigo: 'galinheiro' }), { tipo: 'entidade', id: e.id });
+  // sem trato, recolher ovo pede tratar; tudo cheio, é esperar o ciclo
+  assert.deepEqual(g(m, 'recolheu', { item: 'ovo' }), { tipo: 'entidade', id: e.id });
+  fartura(m, e);
+  pular(m, 1);
+  const espera = g(m, 'recolheu', { item: 'ovo' });
+  assert.equal(espera.tipo, 'esperar'); assert.ok(espera.seg > 0 && espera.seg <= 100, `espera ${espera.seg}`);
+  assert.equal(g(m, 'tratou', { abrigo: 'galinheiro' }).tipo, 'esperar');
+  // ovo pronto sem a caixa: a loja da caixa; com a caixa: o galinheiro (o primeiro ciclo foi sem trato: meio ovo)
+  pular(m, 200);
+  assert.ok(prontosNoAbrigo(m, e.id) > 0);
+  assert.deepEqual(g(m, 'recolheu', { item: 'ovo' }), { tipo: 'painel', painel: 'loja', item: 'caixa-de-ovos' });
+  dar(m, { 'caixa-de-ovos': 1 });
+  assert.deepEqual(g(m, 'recolheu', { item: 'ovo' }), { tipo: 'entidade', id: e.id });
+});
+

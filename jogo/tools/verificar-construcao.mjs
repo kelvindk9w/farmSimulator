@@ -38,14 +38,15 @@ async function pronto(pg) {
       local() { return j.mundo.personagem.local; },
       porta() { const e = j.mundo.construcao.todas.find((o) => o.tipo === 'celeiro'); return [e.x + e.l / 2, e.z + e.p + 0.5]; },
       // o ponto (x, z) do mundo está numa parte da tela onde o dedo alcança o chão (fora da barra e do HUD)?
-      aVista(x, z) { const cam = j.cena.cam, sx = cam.cssX(x, z), sy = cam.cssY(x, 0, z); return sx > 70 && sx < cam.w - 70 && sy > 96 && sy < cam.h - 96; },
+      aVista(x, z) { const cam = j.cena.cam, sx = cam.cssX(x, z), sy = cam.cssY(x, 0, z); return sx > 70 && sx < cam.w - 70 && sy > 96 && sy < cam.h - 112; }, // (fora das bordas que levam a tela junto com o dedo)
       // nenhuma figura (uma construção alta na frente) tapa o toque nas casas deste retângulo?
       descoberto(x, z, l, p) {
         const m = j.mundo, cam = j.cena.cam;
         for (let dz = 0; dz < p; dz++) for (let dx = 0; dx < l; dx++) for (const alto of [0, 0.5]) if (j.cena.entidadeEm(m, cam.cssX(x + dx + 0.5, z + dz + 0.5), cam.cssY(x + dx + 0.5, alto, z + dz + 0.5)) !== null) return false;
         return true;
       },
-      serve(x, z) { const loc = j.mundo.local, i = loc.dentro(x, z) ? loc.i(x, z) : -1; return i >= 0 && loc.propria[i] === 1 && loc.chao[i] === (loc.interior ? 4 : 0) && !loc.ocupa[i] && !loc.plantas[i] && !loc.entidadeEm(x, z); },
+      // (lá fora vale grama e campo de plantio vazio, CAMPO = 6, que vira grama debaixo da construção)
+      serve(x, z) { const loc = j.mundo.local, i = loc.dentro(x, z) ? loc.i(x, z) : -1; return i >= 0 && loc.propria[i] === 1 && (loc.interior ? loc.chao[i] === 4 : loc.chao[i] === 0 || loc.chao[i] === 6) && !loc.ocupa[i] && !loc.plantas[i] && !loc.entidadeEm(x, z); },
       // retângulos l × p de chão livre (com folga em volta), do mais perto de (cx, cz) ao mais longe; soAVista = só os que cabem na tela agora
       livres(l, p, cx, cz, folga = 1, soAVista = false) {
         const loc = j.mundo.local, out = [];

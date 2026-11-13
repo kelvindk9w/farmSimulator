@@ -4,7 +4,7 @@
 // Aqui ficam o mapa e o que a gravação guarda dele: os lotes já comprados e os obstáculos já tirados.
 // A compra de lote está em lotes.js; limpar a terra (foice, machado, picareta), em limpeza.js.
 import { registrarSistema } from '../registro.js';
-import { Local, CAMINHO } from '../local.js';
+import { Local, CAMINHO, CAMPO } from '../local.js';
 import { acaso } from '../util.js';
 
 export const OBSTACULOS = ['mata', 'mato', 'pedra', 'toco']; // os tipos de entidade estão em limpeza.js; a placa, em lotes.js
@@ -42,6 +42,19 @@ function marcar(loc, a, campo, valor) {
   for (let z = Math.max(0, a[1]); z < Math.min(loc.p, a[3]); z++) for (let x = Math.max(0, a[0]); x < Math.min(loc.l, a[2]); x++) loc[campo][z * loc.l + x] = valor;
 }
 const dentroDe = (a, x, z) => !!a && x >= a[0] && z >= a[1] && x < a[2] && z < a[3];
+
+// O campo de plantação com que a fazenda começa (terras.json: inicial.campo): as casas livres dele nascem CAMPO.
+// Casa com construção, caminho ou fora da terra própria fica como está.
+export const campoInicial = (m) => m.dados.terras.campo || null;
+export const noCampoInicial = (m, x, z) => dentroDe(m.dados.terras.campo, x, z);
+export function marcarCampoInicial(m, loc = m.locais.fazenda) {
+  const c = campoInicial(m);
+  if (!c) return;
+  for (let z = Math.max(0, c[1]); z < Math.min(loc.p, c[3]); z++) for (let x = Math.max(0, c[0]); x < Math.min(loc.l, c[2]); x++) {
+    const i = z * loc.l + x;
+    if (loc.propria[i] === 1 && !loc.ocupa[i] && loc.chao[i] !== CAMINHO) loc.chao[i] = CAMPO;
+  }
+}
 
 // sorteio fixo por casa (não entra na gravação: o mapa sempre nasce igual)
 function semear(loc, x, z, chances) {
@@ -89,6 +102,7 @@ registrarSistema({
       const p = T.pontos[tipo], casas = T.casas[tipo];
       if (p) construcoes.push(loc.por({ id: tipo, tipo, x: Math.round(p[0]), z: Math.round(p[1]), l: casas ? casas[0] : 0, p: casas ? casas[1] : 0 }));
     }
+    marcarCampoInicial(m, loc); // depois das construções: casa ocupada não vira campo
     loc.entrada = T.pontos.personagem ? [T.pontos.personagem[0], T.pontos.personagem[1]] : [T.inicial[0] + 0.5, T.inicial[1] + 0.5];
     // uma placa por lote, na casa do lote mais perto do meio da área inicial (ou onde terras.json mandar: "placa").
     // A câmera olha de +X+Z: se ali a placa nasceria atrás da figura de uma construção, ela escorrega pela beirada
@@ -119,7 +133,7 @@ registrarSistema({
     const perto = [Math.floor(loc.entrada[0]), Math.floor(loc.entrada[1])];
     for (let z = 0; z < loc.p; z++) for (let x = 0; x < loc.l; x++) {
       const i = loc.i(x, z);
-      if (loc.ocupa[i] || loc.chao[i] === CAMINHO) continue;
+      if (loc.ocupa[i] || loc.chao[i] === CAMINHO || loc.chao[i] === CAMPO) continue; // (o campo de plantação nasce limpo)
       if (loc.propria[i] && (dentroDe(limpo, x, z) || (Math.abs(x - perto[0]) <= 1 && Math.abs(z - perto[1]) <= 1))) continue;
       semear(loc, x, z, daCasa(x, z));
     }

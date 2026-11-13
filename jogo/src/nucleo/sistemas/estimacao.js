@@ -13,7 +13,7 @@ import { darItem } from './posses.js';
 import { diaDoMundo } from './diaria.js';
 import { registrarFamilia, defDoAnimal, animalPorId } from './animais.js';
 import { registrarGuia } from '../guia.js';
-import { TOQUE, soltar, recolher, bichoSolto, irAte, ficar, esperado, chaoSemPlanta } from './acompanhar.js';
+import { TOQUE, soltar, recolher, bichoSolto, irSemPisar, ficar, esperado, chaoSemPlanta } from './acompanhar.js';
 
 const NAO = (motivo, dados, limpar) => ({ ok: false, motivo, dados, limpar });
 const SIM = { ok: true };
@@ -85,17 +85,6 @@ TOQUE.estimacao = (m, e) => {
 };
 
 // ---------- o passeio ----------
-// a casa sem planta mais perto dela (ela está no meio da lavoura): o bicho espera ali, na beira
-function beira(m, loc, chao, p, e) {
-  const x0 = Math.floor(p.x), z0 = Math.floor(p.z);
-  let melhor = Infinity;
-  e.bx = -1;
-  for (let r = 1; r <= 4 && e.bx < 0; r++) for (let z = z0 - r; z <= z0 + r; z++) for (let x = x0 - r; x <= x0 + r; x++) {
-    if (Math.max(Math.abs(x - x0), Math.abs(z - z0)) !== r || !chao.andavel(x, z)) continue;
-    const d = Math.hypot(x + 0.5 - p.x, z + 0.5 - p.z) + 0.2 * Math.hypot(x - e.x, z - e.z);
-    if (d < melhor) { melhor = d; e.bx = x + 0.5; e.bz = z + 0.5; }
-  }
-}
 function passear(m, loc, chao, p, e, k) {
   if (e.feliz > 0) e.feliz -= 1 / 60;
   const c = CANTO[k % CANTO.length], d = Math.hypot(p.x - e.x - 0.5, p.z - e.z - 0.5);
@@ -105,17 +94,8 @@ function passear(m, loc, chao, p, e, k) {
     return;
   }
   // vai para o cantinho dele perto dela; se ela está no meio da lavoura, para a beira (não pisa em planta de propósito)
-  let gx = p.x + c[0], gz = p.z + c[1], folga = c[2];
-  if (loc.plantas[Math.floor(p.z) * loc.l + Math.floor(p.x)]) {
-    if (!(e.beiraEm > m.n)) { e.beiraEm = m.n + 40; beira(m, loc, chao, p, e); }
-    if (e.bx < 0) { ficar(e); e.indo = false; e.estado = 'parada'; return; }
-    gx = e.bx; gz = e.bz; folga = 0.15;
-  }
-  const x0 = e.x, z0 = e.z, i0 = Math.floor(z0 + 0.5) * loc.l + Math.floor(x0 + 0.5);
-  e.indo = irAte(m, e, gx, gz, folga, d > DISPARA_ACIMA ? V_DISPARA : d > CORRE_ACIMA ? V_CORRE : V_ANDA, chao, false);
-  // o último trecho é em linha reta: se ele ia entrar numa casa plantada, fica onde estava e refaz o caminho
-  const i1 = Math.floor(e.z + 0.5) * loc.l + Math.floor(e.x + 0.5);
-  if (i1 !== i0 && loc.plantas[i1] && !loc.plantas[i0]) { e.x = x0; e.z = z0; e.vel = 0; e.rota = null; }
+  const naLavoura = !!loc.plantas[Math.floor(p.z) * loc.l + Math.floor(p.x)];
+  e.indo = irSemPisar(m, e, naLavoura ? p.x : p.x + c[0], naLavoura ? p.z : p.z + c[1], c[2], d > DISPARA_ACIMA ? V_DISPARA : d > CORRE_ACIMA ? V_CORRE : V_ANDA);
   e.estado = e.vel > 3.6 ? 'correr' : e.vel > 0.25 ? 'andar' : 'parada';
 }
 // um lugar livre ao lado dela para o bicho aparecer

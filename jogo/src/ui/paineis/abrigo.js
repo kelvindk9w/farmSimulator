@@ -68,7 +68,7 @@ registrarPainel({
       const saida = (k, chaveDoIcone, titulo, info, ouro, aoClicar) => {
         const b = botao({ classe: 'abr-saida', aoClicar });
         const t = el('span', 'abr-saida-texto'); t.append(el('b', '', titulo), el('small', '', info));
-        b.append(icone(chaveDoIcone, 40), t);
+        b.append(icone(chaveDoIcone, chaveDoIcone.startsWith('animal/') ? 52 : 40), t);
         if (ouro > 0) { const p = el('span', 'preco'); p.append(el('span', '', '+'), icone('icone/ouro', 18), el('span', '', numero(ouro))); b.append(p); }
         b.dataset.k = 'destino-' + k;
         saidas.append(b);
@@ -178,7 +178,12 @@ registrarPainel({
         try { if (b) b.focus({ preventScroll: true }); } catch { /* sem foco */ }
       });
       corpo.textContent = '';
-      if (cab) cab.textContent = def.nome;
+      if (cab) {
+        cab.textContent = def.nome;
+        // o ícone do cabeçalho é o do próprio abrigo (o registrado é o de uma galinha)
+        const ic = cab.previousElementSibling;
+        if (ic && ic.tagName === 'CANVAS' && ic.dataset.chave !== 'objeto/' + def.id) ic.replaceWith(iconeDaConstrucao(def.id, 28));
+      }
       ctx.saldo.textContent = '';
       ctx.saldo.append(icone('icone/ouro', 20), el('span', '', numero(m.posses.ouro)));
       if (alvo) { corpo.append(telaDoDestino(m, e, alvo)); return; }

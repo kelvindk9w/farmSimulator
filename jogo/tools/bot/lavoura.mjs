@@ -1,7 +1,7 @@
 // Lavoura: colher, regar, vender ou guardar o cesto, arar e semear, escolher a semente pela sessão, melhorar e
 // consertar as ferramentas. A lavoura fica do lado oeste do poço (o lado do ponto "lavoura" de terras.json); se os
 // dados demarcarem um campo de plantação (frente do campo), ele vem primeiro. O resto do terreno é para as obras.
-import { X, precisa } from './jogo.mjs';
+import { X, precisa, registro } from './jogo.mjs';
 import { passo, emModo, nota, evitado, evitar, naFazenda, fazenda, tem, filaTem, contarNaFila, livre, nivel, presenca, comando } from './contexto.mjs';
 
 export const LIGADA = precisa('lavoura', {
@@ -12,14 +12,13 @@ export const LIGADA = precisa('lavoura', {
 });
 const L = X.lavoura, PO = X.posses, LO = X.local;
 const GRAMA = LO.GRAMA, ARADA = LO.ARADA, CAMINHO = LO.CAMINHO, CAMPO = LO.CAMPO; // CAMPO: só depois da frente do campo
-const TIPOS = X.registro ? X.registro.TIPOS : null;
+const TIPOS = registro.TIPOS;
 
 // ---------- a zona da lavoura ----------
 // o retângulo do campo de plantação, se os dados tiverem um (frente do campo): [x0, z0, x1, z1)
-function campoDemarcado(D) {
-  const T = D.terras || {}, B = (D.bruto && D.bruto.terras) || {};
-  for (const c of [T.campo, T.inicial && T.inicial.campo, B.inicial && B.inicial.campo, B.campo]) if (Array.isArray(c) && c.length === 4 && c.every((v) => typeof v === 'number')) return c;
-  return null;
+export function campoDemarcado(D) {
+  const T = D.terras || {};
+  return Array.isArray(T.campo) && T.campo.length === 4 && T.campo.every((v) => typeof v === 'number') ? T.campo : null;
 }
 const dentro = (r, x, z) => x >= r[0] && z >= r[1] && x < r[2] && z < r[3];
 // As casas que a lavoura usa, das mais perto do ponto da lavoura para as mais longe (o campo demarcado primeiro).
@@ -51,7 +50,7 @@ export function zona(J) {
 const podeArarFn = X.lavoura && typeof X.lavoura.podeArar === 'function' ? X.lavoura.podeArar : null;
 function aravel(J, loc, i, x, z) {
   if (loc.ocupa[i] || loc.plantas[i]) return false;
-  if (podeArarFn) { try { return !!podeArarFn(J.m, x, z); } catch { /* reserva: o teste antigo */ } }
+  if (podeArarFn) { try { return !!podeArarFn(J.m, x, z, loc); } catch { /* reserva: o teste antigo */ } }
   return loc.chao[i] === GRAMA || (CAMPO !== undefined && loc.chao[i] === CAMPO);
 }
 
@@ -128,9 +127,21 @@ export function colher(J) {
   if (!LIGADA || !naFazenda(J)) return null;
   const c = plantaPerto(J, 'pronta');
   if (!c) return null;
-  const rende = J.D.culturas[c[2].cultura].rende, naFila = contarNaFila(J, 'colher');
-  if (PO.espacoNoCesto(J.m) - naFila * 2 < rende) return naFila ? null : esvaziar(J, true);
+  const rende = J.D.culturas[c[2].cultura].rende, naFila = colheitaPrometida(J);
+  if (PO.espacoNoCesto(J.m) - naFila < rende) return naFila ? null : esvaziar(J, true);
   return emModo(J, 'mao') || passo(J, 'casa', { x: c[0], z: c[1] });
+}
+// o que as colheitas (da lavoura e do pomar) já na fila vão pôr no cesto
+export function colheitaPrometida(J) {
+  const loc = fazenda(J), p = J.p;
+  let n = 0;
+  const conta = (t) => {
+    if (!t || t.tipo !== 'agir') return;
+    if (t.acao === 'colher') { const pl = loc.plantas[t.z * loc.l + t.x]; n += pl ? J.D.culturas[pl.cultura].rende : 1; }
+    else if (t.acao === 'colherFruta' && X.arvores) { const e = loc.porId[t.entidade]; n += e && J.D.arvores[e.arvore] ? Math.max(1, X.arvores.safrasProntas(J.m, e)) * J.D.arvores[e.arvore].rende : 1; }
+  };
+  conta(p.tarefa); for (const t of p.fila) conta(t);
+  return n;
 }
 function semAgua(J) {
   const r = PO.ferramentaNoCinto(J.m, 'regador') || PO.ferramentaNoSuporte(J.m, 'regador');
@@ -153,6 +164,13 @@ export function cestoTemQuerido(J) {
   for (const k in c) if (c[k] > 0 && (J.quer[k] || 0) > (J.P.celeiro.itens[k] || 0) + (J.P.bolsa[k] || 0)) return true;
   return false;
 }
+// quanto do cesto não serve a nada guardado (pedido, trato, receita, missão)
+function sobraNoCesto(J) {
+  const c = J.P.cesto.itens;
+  let n = 0;
+  for (const k in c) n += Math.max(0, c[k] - Math.max(0, (J.quer[k] || 0) - (J.P.celeiro.itens[k] || 0) - (J.P.bolsa[k] || 0)));
+  return n;
+}
 // forcar = o cesto está cheio (ou a missão pede); senão só esvazia se não estiver colhendo
 export function esvaziar(J, forcar) {
   if (!LIGADA || !naFazenda(J)) return null;
@@ -160,18 +178,26 @@ export function esvaziar(J, forcar) {
   if (n <= 0) { J.vendaDoCeleiro = false; return null; }
   if (!forcar && contarNaFila(J, 'colher') > 0) return null;
   if (filaTem(J, 'vender') || filaTem(J, 'guardar')) return null;
-  let guardar = J.metaCesto === 'guardar' || (J.metaCesto !== 'vender' && !J.vendaDoCeleiro && cestoTemQuerido(J));
+  // o cocho na fila vai comer do cesto (ou do celeiro): vender agora o deixaria sem comida
+  const cocho = contarNaFila(J, 'abastecerCocho') > 0;
+  if (cocho && PO.espacoNoCesto(m) > 0) return null;
+  let guardar = J.metaCesto === 'guardar' || (cocho && PO.espacoNoCeleiro(m) > 0) || (J.metaCesto !== 'vender' && !J.vendaDoCeleiro && cestoTemQuerido(J));
+  // carga misturada (o que se quer e o que sobra): guarda tudo só se o celeiro tem folga; senão vende tudo
+  // (a banca e o celeiro levam o cesto inteiro: não dá para escolher item)
+  if (guardar && J.metaCesto !== 'guardar' && !cocho) { const sobra = sobraNoCesto(J); if (sobra > 0 && PO.espacoNoCeleiro(m) < sobra + 0.25 * J.P.celeiro.capacidade) guardar = false; }
   if (guardar && !(PO.espacoNoCeleiro(m) > 0)) { guardar = false; nota(J, 'celeiro cheio: vendeu o que queria guardar'); J.S && (J.S.celeiroCheio = (J.S.celeiroCheio || 0) + 1); }
   return passo(J, 'entidade', { id: guardar ? 'celeiro' : 'banca' });
 }
 // o celeiro tem coisa a mais (o que não serve a pedido, trato, receita nem missão) e está enchendo: pega para vender
 export function venderDoCeleiro(J, forcar) {
-  if (!LIGADA || !naFazenda(J) || PO.noCesto(J.m) > 0 || J.metaCesto === 'guardar') return null;
+  if (!LIGADA || !naFazenda(J) || PO.noCesto(J.m) > 0 || J.metaCesto === 'guardar' || contarNaFila(J, 'abastecerCocho') > 0) return null;
   const C = J.P.celeiro.itens;
   let sobra = 0;
   for (const k in C) if (J.I[k] && J.I[k].venda > 0) sobra += Math.max(0, C[k] - (J.quer[k] || 0));
   const espaco = PO.espacoNoCeleiro(J.m);
-  if (sobra <= 0 || (!forcar && espaco > 12 && sobra < 30)) return null;
+  const cap = J.P.celeiro.capacidade;
+  if (forcar === 'cheio') { if (espaco > 0.1 * cap || sobra < Math.min(20, 0.1 * cap)) return null; }
+  else if (sobra <= 0 || (!forcar && espaco > 0.25 * cap && sobra < 0.3 * cap)) return null;
   if (evitado(J, 'pegar')) return null;
   evitar(J, 'pegar', 20);
   J.vendaDoCeleiro = true; // o que vier no cesto vai para a banca
@@ -192,6 +218,7 @@ export function plantar(J, opc = {}) {
     } else if (aravel(J, loc, i, x, z)) { araveis++; if (!arar && !filaTem(J, 'arar', x, z)) arar = [x, z]; }
   }
   J.aradas = aradas;
+  if (arar) J.campoSemEspaco = false;
   const so = opc.semente ? (it) => it.id === opc.semente : null;
   if (vazia) {
     const naBolsa = sementesLiberadas(J).filter((it) => livresNaBolsa(J, it.id) > 0 && (!so || so(it)));

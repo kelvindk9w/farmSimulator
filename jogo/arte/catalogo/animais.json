@@ -39,6 +39,7 @@
     "animal/gato-siames/andar-frente": { "arquivo": "animais/gato-siames/andar-frente.png", "quadros": 6, "casa": [120, 144], "apoio": [60, 121], "qps": 9, "laco": true },
     "animal/gato-siames/parada-costas": { "arquivo": "animais/gato-siames/parada-costas.png", "quadros": 8, "casa": [128, 136], "apoio": [64, 114], "qps": 5, "laco": true },
     "animal/gato-siames/parada-frente": { "arquivo": "animais/gato-siames/parada-frente.png", "quadros": 8, "casa": [120, 144], "apoio": [60, 121], "qps": 5, "laco": true },
+    "animal/gato-siames/sentado-costas": { "arquivo": "animais/gato-siames/sentado-costas.png", "quadros": 8, "casa": [96, 136], "apoio": [48, 117], "qps": 5, "laco": true },
     "animal/gato-siames/sentado-frente": { "arquivo": "animais/gato-siames/sentado-frente.png", "quadros": 8, "casa": [96, 136], "apoio": [48, 117], "qps": 5, "laco": true },
     "animal/gato/andar-costas": { "arquivo": "animais/gato/andar-costas.png", "quadros": 6, "casa": [128, 136], "apoio": [64, 114], "qps": 9, "laco": true },
     "animal/gato/andar-frente": { "arquivo": "animais/gato/andar-frente.png", "quadros": 6, "casa": [120, 144], "apoio": [60, 121], "qps": 9, "laco": true },

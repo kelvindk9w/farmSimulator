@@ -45,7 +45,8 @@ export function ligarControle(entrada) {
       rumando = true;
       J.mundo.comando(cmd);
     } else if (rumando) { rumando = false; J.mundo.comando({ tipo: 'frear' }); }
-    if (A) J.mundo.comando({ tipo: 'agir' });
+    if (A) { J.mundo.comando({ tipo: 'agir' }); entrada.fileira.apertou('controle'); } // segurar o A: a fileira do campo
+    else if (!ap(0)) entrada.fileira.soltou('controle');
     if (B) J.mundo.comando({ tipo: 'cancelar' });
     if (L) J.mundo.comando({ tipo: 'trocarModo', passo: -1 });
     if (R) J.mundo.comando({ tipo: 'trocarModo', passo: 1 });

@@ -1,17 +1,22 @@
 // O chão, desenhado por código no estilo de contorno e guardado em blocos (canvas fora da tela, alinhados à tela).
 // Cada bloco só é refeito quando uma casa dele muda (ou quando o zoom muda); a cada quadro o chão é só colar blocos.
-// Grama com detalhe leve, terra arada seca e molhada com sulcos e contorno só na borda da mancha, caminho de terra,
-// terra à venda escurecida. Fora do mapa o chão segue no mesmo verde escuro, sem detalhe.
+// Grama com detalhe leve, caminho de terra, terra à venda escurecida. O campo de plantação é uma mancha só: terra de
+// plantio sem sulco (clara, com grãos e torrões), terra arada com sulcos compridos ao longo de X (sem emenda entre as
+// casas) e terra molhada, mais escura; contorno só na borda da mancha, com um degrau de terra onde ela encontra a grama,
+// e estacas baixas nos quatro cantos do campo inicial (terras.json: inicial.campo). Tudo isto fica nos blocos: não
+// custa nada por quadro. Fora do mapa o chão segue no mesmo verde escuro, sem detalhe.
 import { KX, KY } from './camera.js';
-import { GRAMA, ARADA, CAMINHO } from '../nucleo/local.js';
+import { GRAMA, ARADA, CAMINHO, CAMPO } from '../nucleo/local.js';
 import { acaso } from '../nucleo/util.js';
 
 const T = 256; // lado do bloco, em pontos do canvas
 const COR = {
   ceu: '#619439', // fora do mapa: o mesmo verde da terra à venda, sem detalhe (o mundo não acaba num barranco)
   grama: '#86c63f', gramaClara: '#97d24b', gramaEscura: '#5f9f2c',
-  terra: '#b0703c', terraSulco: '#8a5228', terraLuz: '#c98a52', terraLado: '#7d4a25',
-  molhada: '#70421f', molhadaSulco: '#54301a', molhadaLuz: '#8b5630', molhadaLado: '#4f2c16',
+  campo: '#d98c4a', campoGrao: '#a35d2a', campoLuz: '#eeb070', torrao: '#bb733b', // terra de plantio sem sulco
+  terra: '#b86a30', terraSulco: '#7f3e16', terraLuz: '#d68d4f', terraLado: '#8a4a1f', // arada
+  molhada: '#723b1b', molhadaSulco: '#4a230d', molhadaLuz: '#9a5a2e', molhadaLado: '#4f2a14', brilho: 'rgba(255, 232, 196, 0.32)',
+  estaca: '#a8743f', estacaLuz: '#d29a5e',
   caminho: '#f0b765', caminhoClaro: '#f8d08c', caminhoBorda: '#c98a3a',
   traco: '#3a2412', flor: '#fff6d8', miolo: '#f6c12c',
   venda: 'rgba(24, 52, 46, 0.34)', divisa: 'rgba(58, 36, 18, 0.6)',
@@ -129,7 +134,7 @@ export class Chao {
     const px = (x, z) => (x - z) * ux, py = (x, z) => (x + z) * uy;
 
     // 1. base de cada tipo de chão (um preenchimento por cor)
-    const bases = [[GRAMA, COR.grama], [CAMINHO, COR.caminho], [ARADA, COR.terra], [3, COR.molhada]];
+    const bases = [[GRAMA, COR.grama], [CAMINHO, COR.caminho], [CAMPO, COR.campo], [ARADA, COR.terra], [3, COR.molhada]];
     for (const [qual, cor] of bases) {
       g.beginPath();
       let ha = false;
@@ -174,22 +179,81 @@ export class Chao {
       }
     }
     g.fillStyle = COR.caminhoClaro; g.fill();
-    // terra arada: três sulcos ao longo de X, com um fio de luz ao lado
+    // campo de plantação: terra sem sulco com grãos escuros e claros e uns torrões
+    g.beginPath();
+    const gr = Math.max(0.8, 0.026 * S);
+    for (let z = zi; z <= zf; z++) for (let x = xi; x <= xf; x++) {
+      if (fora(x, z) || tipo(x, z) !== CAMPO) continue;
+      for (let k = 0; k < 7; k++) {
+        const cx = (x - z + (acaso(x, z, 40 + k) - 0.5) * 1.5) * ux, cy = (x + z + 1 + (acaso(x, z, 50 + k) - 0.5) * 1.5) * uy;
+        g.moveTo(cx + gr, cy); g.arc(cx, cy, gr * (0.7 + acaso(x, z, 60 + k) * 0.6), 0, 6.2832);
+      }
+    }
+    g.fillStyle = COR.campoGrao; g.fill();
+    g.beginPath();
+    for (let z = zi; z <= zf; z++) for (let x = xi; x <= xf; x++) {
+      if (fora(x, z) || tipo(x, z) !== CAMPO) continue;
+      for (let k = 0; k < 4; k++) {
+        const cx = (x - z + (acaso(x, z, 70 + k) - 0.5) * 1.5) * ux, cy = (x + z + 1 + (acaso(x, z, 75 + k) - 0.5) * 1.5) * uy;
+        g.moveTo(cx + gr, cy); g.arc(cx, cy, gr * 0.8, 0, 6.2832);
+      }
+    }
+    g.fillStyle = COR.campoLuz; g.fill();
+    // torrões: um ou dois por casa, com contorno e luz em cima
+    const torroes = new Path2D(), luzes = new Path2D();
+    let haTorrao = false;
+    for (let z = zi; z <= zf; z++) for (let x = xi; x <= xf; x++) {
+      if (fora(x, z) || tipo(x, z) !== CAMPO) continue;
+      const n = acaso(x, z, 80) < 0.55 ? 2 : 1;
+      for (let k = 0; k < n; k++) {
+        const cx = (x - z + (acaso(x, z, 81 + k) - 0.5) * 1.1) * ux, cy = (x + z + 1 + (acaso(x, z, 84 + k) - 0.5) * 1.1) * uy, r = (0.055 + acaso(x, z, 87 + k) * 0.035) * S;
+        torroes.moveTo(cx + r * 1.3, cy); torroes.ellipse(cx, cy, r * 1.3, r * 0.85, 0, 0, 6.2832);
+        luzes.moveTo(cx + r * 0.6, cy - r * 0.3); luzes.ellipse(cx - r * 0.15, cy - r * 0.3, r * 0.65, r * 0.32, 0, 0, 6.2832);
+        haTorrao = true;
+      }
+    }
+    if (haTorrao) { g.fillStyle = COR.torrao; g.fill(torroes); g.strokeStyle = 'rgba(58, 36, 18, 0.55)'; g.lineWidth = Math.max(1, 0.018 * S); g.stroke(torroes); g.fillStyle = COR.campoLuz; g.fill(luzes); }
+
+    // terra arada: sulcos compridos ao longo de X, três por casa e espaçados por igual também de uma fileira à
+    // outra; cada sulco corre a fileira inteira de uma vez (sem emenda entre as casas), com um fio de luz na crista
+    const arada = (t) => t === ARADA || t === 3;
     for (const [qual, sulco, luz] of [[ARADA, COR.terraSulco, COR.terraLuz], [3, COR.molhadaSulco, COR.molhadaLuz]]) {
       for (let passe = 0; passe < 2; passe++) {
         g.beginPath();
         let ha = false;
-        for (let z = zi; z <= zf; z++) for (let x = xi; x <= xf; x++) {
-          if (fora(x, z) || tipo(x, z) !== qual) continue;
-          ha = true;
-          for (let k = 1; k <= 3; k++) {
-            const zz = z + k * 0.25 + (passe ? -0.07 : 0);
-            g.moveTo(px(x + 0.1, zz), py(x + 0.1, zz)); g.lineTo(px(x + 0.9, zz), py(x + 0.9, zz));
+        for (let z = zi; z <= zf; z++) {
+          let x = xi;
+          while (x <= xf) {
+            if (tipo(x, z) !== qual) { x++; continue; }
+            let b = x;
+            while (b + 1 <= L - 1 && tipo(b + 1, z) === qual) b++;
+            // a corrida [x, b]: as pontas só recuam onde a terra arada acaba (encostada noutra arada, segue reto)
+            const a0 = arada(tipo(x - 1, z)) ? x : x + 0.1, a1 = arada(tipo(b + 1, z)) ? b + 1 : b + 0.9;
+            ha = true;
+            for (let k = 0; k < 3; k++) {
+              const zz = z + (passe ? k / 3 + 0.04 : (k + 0.5) / 3);
+              if (passe && k === 0) continue; // a crista de cima da fileira é a borda dela
+              g.moveTo(px(a0, zz), py(a0, zz)); g.lineTo(px(a1, zz), py(a1, zz));
+            }
+            x = b + 1;
           }
         }
-        if (ha) { g.strokeStyle = passe ? luz : sulco; g.lineWidth = Math.max(1, (passe ? 0.03 : 0.055) * S); g.lineCap = 'round'; g.stroke(); }
+        if (ha) { g.strokeStyle = passe ? luz : sulco; g.lineWidth = Math.max(1, (passe ? 0.035 : 0.07) * S); g.lineCap = 'butt'; g.stroke(); }
       }
     }
+    // terra molhada: uns reflexos de água nos sulcos
+    g.beginPath();
+    let haBrilho = false;
+    for (let z = zi; z <= zf; z++) for (let x = xi; x <= xf; x++) {
+      if (fora(x, z) || tipo(x, z) !== 3) continue;
+      for (let k = 0; k < 2; k++) {
+        if (acaso(x, z, 90 + k) > 0.7) continue;
+        const zz = z + (Math.floor(acaso(x, z, 92 + k) * 3) + 0.5) / 3, xa = x + 0.1 + acaso(x, z, 94 + k) * 0.5;
+        g.moveTo(px(xa, zz - 0.02), py(xa, zz - 0.02)); g.lineTo(px(xa + 0.28, zz - 0.02), py(xa + 0.28, zz - 0.02));
+        haBrilho = true;
+      }
+    }
+    if (haBrilho) { g.strokeStyle = COR.brilho; g.lineWidth = Math.max(1, 0.03 * S); g.lineCap = 'round'; g.stroke(); }
 
     // 3. terra à venda: escurecida
     g.beginPath();
@@ -198,35 +262,46 @@ export class Chao {
     if (haVenda) { g.fillStyle = COR.venda; g.fill(); }
 
     // 4. bordas: contorno só onde a mancha acaba
-    const lw = Math.max(1.5, 0.034 * S), alto = 0.085 * S; // espessura do canteiro, vista de frente
-    const arada = (t) => t === ARADA || t === 3;
-    // faixas da frente da terra arada (ela é um pouco mais alta que a grama)
+    const lw = Math.max(1.5, 0.034 * S), alto = 0.06 * S; // o degrau do campo, visto de frente
+    const doCampo = (t) => t === ARADA || t === 3 || t === CAMPO; // campo sem sulco, arada e molhada: uma mancha só
+    // degrau na frente do campo (ele fica um pouco acima da grama), na cor da terra da casa da beirada
     for (const molh of [false, true]) {
       g.beginPath();
       let ha = false;
       for (let z = zi; z <= zf; z++) for (let x = xi; x <= xf; x++) {
         if (fora(x, z)) continue;
         const t = tipo(x, z);
-        if (!arada(t) || (t === 3) !== molh) continue;
-        if (!arada(tipo(x + 1, z))) { g.moveTo(px(x + 1, z), py(x + 1, z)); g.lineTo(px(x + 1, z + 1), py(x + 1, z + 1)); g.lineTo(px(x + 1, z + 1), py(x + 1, z + 1) + alto); g.lineTo(px(x + 1, z), py(x + 1, z) + alto); g.closePath(); ha = true; }
-        if (!arada(tipo(x, z + 1))) { g.moveTo(px(x, z + 1), py(x, z + 1)); g.lineTo(px(x + 1, z + 1), py(x + 1, z + 1)); g.lineTo(px(x + 1, z + 1), py(x + 1, z + 1) + alto); g.lineTo(px(x, z + 1), py(x, z + 1) + alto); g.closePath(); ha = true; }
+        if (!doCampo(t) || (t === 3) !== molh) continue;
+        if (!doCampo(tipo(x + 1, z))) { g.moveTo(px(x + 1, z), py(x + 1, z)); g.lineTo(px(x + 1, z + 1), py(x + 1, z + 1)); g.lineTo(px(x + 1, z + 1), py(x + 1, z + 1) + alto); g.lineTo(px(x + 1, z), py(x + 1, z) + alto); g.closePath(); ha = true; }
+        if (!doCampo(tipo(x, z + 1))) { g.moveTo(px(x, z + 1), py(x, z + 1)); g.lineTo(px(x + 1, z + 1), py(x + 1, z + 1)); g.lineTo(px(x + 1, z + 1), py(x + 1, z + 1) + alto); g.lineTo(px(x, z + 1), py(x, z + 1) + alto); g.closePath(); ha = true; }
       }
       if (ha) { g.fillStyle = molh ? COR.molhadaLado : COR.terraLado; g.fill(); g.strokeStyle = COR.traco; g.lineWidth = lw; g.lineJoin = 'round'; g.stroke(); }
     }
-    // contorno da mancha de terra arada e da beira do caminho
+    // contorno da mancha do campo e da beira do caminho
     g.beginPath();
-    const gCam = new Path2D();
-    let haCam = false, haTerra = false;
+    const gCam = new Path2D(), tufos = new Path2D();
+    let haCam = false, haTerra = false, haTufo = false;
+    // tufos de grama que caem por cima da borda de trás do campo (a grama fica mais alta que a terra)
+    const tufo = (xa, za, xb, zb, sx, sz) => {
+      for (let k = 0; k < 2; k++) {
+        const f = 0.25 + k * 0.5 + (acaso(xa * 3 + sx, za * 3 + sz, 96 + k) - 0.5) * 0.2, qx = xa + (xb - xa) * f, qz = za + (zb - za) * f;
+        if (acaso(xa * 5 + sx, za * 5 + sz, 98 + k) > 0.6) continue;
+        const cx = px(qx, qz), cy = py(qx, qz), h = 0.1 * S;
+        tufos.moveTo(cx - h * 0.6, cy - h * 0.5); tufos.lineTo(cx - h * 0.1, cy + h * 0.35); tufos.moveTo(cx, cy - h * 0.8); tufos.lineTo(cx + h * 0.05, cy + h * 0.4); tufos.moveTo(cx + h * 0.6, cy - h * 0.5); tufos.lineTo(cx + h * 0.15, cy + h * 0.35);
+        haTufo = true;
+      }
+    };
     for (let z = zi; z <= zf; z++) for (let x = xi; x <= xf; x++) {
       if (fora(x, z)) continue;
       const t = tipo(x, z);
-      if (arada(t)) {
-        if (!arada(tipo(x, z - 1))) { g.moveTo(px(x, z), py(x, z)); g.lineTo(px(x + 1, z), py(x + 1, z)); haTerra = true; }
-        if (!arada(tipo(x - 1, z))) { g.moveTo(px(x, z), py(x, z)); g.lineTo(px(x, z + 1), py(x, z + 1)); haTerra = true; }
-        if (!arada(tipo(x + 1, z))) { g.moveTo(px(x + 1, z), py(x + 1, z)); g.lineTo(px(x + 1, z + 1), py(x + 1, z + 1)); haTerra = true; }
-        if (!arada(tipo(x, z + 1))) { g.moveTo(px(x, z + 1), py(x, z + 1)); g.lineTo(px(x + 1, z + 1), py(x + 1, z + 1)); haTerra = true; }
+      if (doCampo(t)) {
+        const nz = tipo(x, z - 1), nx = tipo(x - 1, z);
+        if (!doCampo(nz)) { g.moveTo(px(x, z), py(x, z)); g.lineTo(px(x + 1, z), py(x + 1, z)); haTerra = true; if (nz === GRAMA) tufo(x, z, x + 1, z, 1, 0); }
+        if (!doCampo(nx)) { g.moveTo(px(x, z), py(x, z)); g.lineTo(px(x, z + 1), py(x, z + 1)); haTerra = true; if (nx === GRAMA) tufo(x, z, x, z + 1, 0, 1); }
+        if (!doCampo(tipo(x + 1, z))) { g.moveTo(px(x + 1, z), py(x + 1, z)); g.lineTo(px(x + 1, z + 1), py(x + 1, z + 1)); haTerra = true; }
+        if (!doCampo(tipo(x, z + 1))) { g.moveTo(px(x, z + 1), py(x, z + 1)); g.lineTo(px(x + 1, z + 1), py(x + 1, z + 1)); haTerra = true; }
       } else if (t === CAMINHO) {
-        const v = (xx, zz) => { const o = tipo(xx, zz); return o !== CAMINHO && o !== -1 && !arada(o); };
+        const v = (xx, zz) => { const o = tipo(xx, zz); return o !== CAMINHO && o !== -1 && !doCampo(o); };
         if (v(x, z - 1)) { gCam.moveTo(px(x, z), py(x, z)); gCam.lineTo(px(x + 1, z), py(x + 1, z)); haCam = true; }
         if (v(x - 1, z)) { gCam.moveTo(px(x, z), py(x, z)); gCam.lineTo(px(x, z + 1), py(x, z + 1)); haCam = true; }
         if (v(x + 1, z)) { gCam.moveTo(px(x + 1, z), py(x + 1, z)); gCam.lineTo(px(x + 1, z + 1), py(x + 1, z + 1)); haCam = true; }
@@ -236,6 +311,26 @@ export class Chao {
     g.lineCap = 'round'; g.lineJoin = 'round';
     if (haCam) { g.strokeStyle = COR.caminhoBorda; g.lineWidth = Math.max(1.5, 0.045 * S); g.stroke(gCam); }
     if (haTerra) { g.strokeStyle = COR.traco; g.lineWidth = lw; g.stroke(); }
+    if (haTufo) { g.strokeStyle = COR.gramaEscura; g.lineWidth = Math.max(1, 0.03 * S); g.stroke(tufos); }
+    // estacas baixas nos cantos do campo inicial (de enfeite: não ocupam a casa)
+    const C = loc.id === 'fazenda' && mundo.dados.terras.campo;
+    if (C) {
+      const h = 0.36 * S, w = 0.055 * S, corpo = new Path2D(), topos = new Path2D(), sombras = new Path2D();
+      let ha = false;
+      for (const [cx0, cz0, ox, oz] of [[C[0], C[1], -1, -1], [C[2], C[1], 1, -1], [C[0], C[3], -1, 1], [C[2], C[3], 1, 1]]) {
+        const qx = cx0 + ox * 0.14, qz = cz0 + oz * 0.14, sx = px(qx, qz), sy = py(qx, qz);
+        if (sx + 3 * w < x0 || sx - 3 * w > x0 + T || sy + 2 * w < y0 || sy - h > y0 + T) continue;
+        sombras.moveTo(sx + w * 2.4, sy); sombras.ellipse(sx, sy, w * 2.4, w * 1.2, 0, 0, 6.2832);
+        corpo.moveTo(sx - w, sy); corpo.lineTo(sx - w, sy - h + w); corpo.lineTo(sx, sy - h); corpo.lineTo(sx + w, sy - h + w); corpo.lineTo(sx + w, sy); corpo.closePath();
+        topos.moveTo(sx - w, sy - h + w); topos.lineTo(sx, sy - h); topos.lineTo(sx + w, sy - h + w); topos.lineTo(sx, sy - h + 2 * w); topos.closePath();
+        ha = true;
+      }
+      if (ha) {
+        g.fillStyle = 'rgba(34, 52, 20, 0.25)'; g.fill(sombras);
+        g.fillStyle = COR.estaca; g.fill(corpo); g.strokeStyle = COR.traco; g.lineWidth = Math.max(1, 0.025 * S); g.lineJoin = 'round'; g.stroke(corpo);
+        g.fillStyle = COR.estacaLuz; g.fill(topos);
+      }
+    }
     // divisa da terra própria
     g.beginPath();
     let haDiv = false;

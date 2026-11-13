@@ -78,16 +78,15 @@
  },
  "folhas": {
   "personagem/andar-frente": {
-   "pedido": "personagem-andar-frente.md",
-   "rodadas": 1,
-   "estado": "pendente",
-   "nota": "Viva e coerente, mas os quadros 5 a 8 repetem os 1 a 4: as pernas não trocam de verdade (é um ciclo de 4 poses tocado duas vezes)."
+   "pedido": "personagem-andar-frente-r3.md",
+   "rodadas": 3,
+   "nota": "Três rodadas. A 1ª repetia as 4 poses duas vezes (mancava); a 2ª, em duas fileiras, trocou só os braços; a 3ª, pedida pelo quadril de onde sai cada perna, troca a perna da frente na fileira de baixo (a perna de cá cruza na frente da outra). Os quadros 4 e 8 ainda saem parecidos; a troca é sutil no tamanho do jogo."
   },
   "personagem/andar-costas": {
    "pedido": "personagem-andar-costas.md",
-   "rodadas": 1,
-   "estado": "pendente",
-   "nota": "Mesmo caso da de frente: 4 poses tocadas duas vezes."
+   "rodadas": 3,
+   "nota": "Três rodadas, e nenhuma troca as pernas: a 2ª (personagem-andar-costas-r2.md, em duas fileiras, pedida pelo quadril de onde sai cada perna) e a 3ª (personagem-andar-costas-r3.md, só a fileira de baixo, com a perna de trás cruzando em X) repetem na fileira de baixo as poses da de cima; o próprio Codex avisou que a fileira de baixo repetiu as pernas. Fica no catálogo a 1ª rodada (4 poses tocadas duas vezes), que está coerente no tamanho e no balanço, mas manca. Brutas das rodadas 2 e 3 em /root/arte-codex/anim-andar-costas-r2 e -r3.",
+   "estado": "pendente"
   },
   "personagem/parada-frente": {
    "pedido": "personagem-parada-frente.md",
@@ -626,6 +625,11 @@
   },
   "animal/gato-siames/sentado-frente": {
    "pedido": "gato-siames-sentado-frente.md",
+   "rodadas": 1,
+   "nota": "Folha nova no Codex, copiando quadro a quadro a do gato comum (a recoloração por código não faz as pontas escuras do siamês): corpo creme sem listras, máscara, orelhas, patas e rabo castanho-escuros, olhos azuis; mesmo tamanho do gato comum (pela massa). Fora do pedido (a coordenação pediu parada e andar): para ele também sentar quando a personagem para."
+  },
+  "animal/gato-siames/sentado-costas": {
+   "pedido": "gato-siames-sentado-costas.md",
    "rodadas": 1,
    "nota": "Folha nova no Codex, copiando quadro a quadro a do gato comum (a recoloração por código não faz as pontas escuras do siamês): corpo creme sem listras, máscara, orelhas, patas e rabo castanho-escuros, olhos azuis; mesmo tamanho do gato comum (pela massa). Fora do pedido (a coordenação pediu parada e andar): para ele também sentar quando a personagem para."
   }

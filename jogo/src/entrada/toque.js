@@ -92,6 +92,7 @@ export function ligarToque(entrada, hud) {
       gesto = 'pinca';
       pincaDist = Math.hypot(d2.x - d1.x, d2.y - d1.y) || 1; pincaX = (d1.x + d2.x) / 2; pincaY = (d1.y + d2.y) / 2;
       entrada.destacar(-1, -1, null);
+      entrada.fileira.cancelar('dedo');
       return;
     }
     if (d1.id >= 0) return;
@@ -100,7 +101,10 @@ export function ligarToque(entrada, hud) {
     try { cv.setPointerCapture(e.pointerId); } catch { /* sem captura */ }
     if (mouse && botao !== 0) { gesto = 'camera'; e.preventDefault(); return; }
     gesto = 'toque'; ultX = ultZ = -1;
-    if (mouse || J.prefs.esquema !== 'alavanca') { alvoEm(pt.x, pt.y, alvo); entrada.destacar(alvo.x, alvo.z, alvo.entidade); }
+    if (mouse || J.prefs.esquema !== 'alavanca') {
+      alvoEm(pt.x, pt.y, alvo); entrada.destacar(alvo.x, alvo.z, alvo.entidade);
+      if (alvo.entidade === null) entrada.fileira.apertou('dedo', alvo.x, alvo.z); // segurar parado numa casa do campo: a fileira
+    }
   });
 
   cv.addEventListener('pointermove', (e) => {
@@ -120,6 +124,7 @@ export function ligarToque(entrada, hud) {
     const dx = pt.x - d1.x, dy = pt.y - d1.y;
     d1.x = pt.x; d1.y = pt.y;
     if (gesto === 'toque' && Math.hypot(pt.x - d1.x0, pt.y - d1.y0) > (mouse ? 6 : SOLTA)) {
+      entrada.fileira.cancelar('dedo'); // mexeu: não é mais segurar
       const ferramenta = J.mundo.modo.id !== 'mao' && !!MODOS[J.mundo.modo.id], esquema = J.prefs.esquema;
       if (mouse) gesto = ferramenta ? 'pintar' : 'camera';
       else if (esquema === 'alavanca') gesto = 'alavanca';
@@ -143,7 +148,8 @@ export function ligarToque(entrada, hud) {
     const g = gesto;
     gesto = null;
     if (g === 'alavanca') soltarAlavanca();
-    else if (g === 'toque' && !cancelou && (mouse || J.prefs.esquema !== 'alavanca')) tocar(d1.x, d1.y);
+    else if (g === 'toque' && !cancelou && (mouse || J.prefs.esquema !== 'alavanca')) { if (!entrada.fileira.soltou('dedo')) tocar(d1.x, d1.y); }
+    entrada.fileira.cancelar('dedo');
     if (!mouse) entrada.destacar(-1, -1, null, 0.3);
   }
   cv.addEventListener('pointerup', (e) => soltar(e, false));

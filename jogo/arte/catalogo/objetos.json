@@ -13,6 +13,7 @@
     "objeto/bau": { "arquivo": "objetos/bau.png", "quadros": 1, "casa": [221, 217], "apoio": [111, 150] },
     "objeto/bebedouro": { "arquivo": "objetos/bebedouro.png", "quadros": 1, "casa": [111, 115], "apoio": [56, 81] },
     "objeto/bebedouro-grande": { "arquivo": "objetos/bebedouro-grande.png", "quadros": 1, "casa": [266, 225], "apoio": [133, 145] },
+    "objeto/caixa-de-correio": { "arquivo": "objetos/caixa-de-correio.png", "quadros": 1, "casa": [127, 212], "apoio": [64, 197] },
     "objeto/caixote": { "arquivo": "objetos/caixote.png", "quadros": 1, "casa": [161, 173], "apoio": [81, 123] },
     "objeto/caminho-de-pedra": { "arquivo": "objetos/caminho-de-pedra.png", "quadros": 1, "casa": [199, 123], "apoio": [100, 62] },
     "objeto/canteiro-de-flores": { "arquivo": "objetos/canteiro-de-flores.png", "quadros": 1, "casa": [182, 151], "apoio": [91, 95] },

@@ -1733,6 +1733,71 @@
    "altura-livre": true
   }
  },
+ "animal/gato-siames/sentado-costas": {
+  "chave": "animal/gato-siames/sentado-costas",
+  "crua": "sentado-costas.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 4,
+  "referencia": false,
+  "modo": "molde",
+  "emPe": 118,
+  "emPeReal": 118,
+  "emPeFonte": 575,
+  "escala": 0.2045,
+  "casa": [
+   96,
+   136
+  ],
+  "apoio": [
+   48,
+   117
+  ],
+  "quadros": 8,
+  "desenhos": 4,
+  "qps": 5,
+  "laco": true,
+  "alturas": [
+   118,
+   117,
+   117,
+   118
+  ],
+  "tamanhoPelaMassa": [
+   69.8,
+   69.9,
+   70.2,
+   70
+  ],
+  "variacaoAltura": 0.2,
+  "custosDoMolde": [
+   0,
+   22,
+   51,
+   15
+  ],
+  "bytes": 19610,
+  "avisos": [],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/gato-siames/sentado-costas",
+   "altura": "118",
+   "quadros": "4",
+   "qps": "5",
+   "alinhar": "molde",
+   "molde": "0.35-0.9",
+   "em-pe-quadro": "1",
+   "faixa-pes": "0.2",
+   "chao": "0.06",
+   "sequencia": "1,2,3,2,3,1,4,1",
+   "tamanho-massa": "70",
+   "altura-livre": true
+  }
+ },
  "animal/gato-siames/sentado-frente": {
   "chave": "animal/gato-siames/sentado-frente",
   "crua": "sentado-frente.png",
@@ -3771,23 +3836,23 @@
   "chave": "personagem/andar-frente",
   "crua": "andar-frente.png",
   "cruaTamanho": [
-   2172,
-   724
+   1536,
+   1024
   ],
-  "linhasNaCrua": 1,
+  "linhasNaCrua": 2,
   "figurasNaCrua": 8,
   "referencia": false,
   "modo": "ciclo",
   "emPe": 294,
-  "emPeReal": 291,
-  "emPeFonte": 517,
-  "escala": 0.5636,
+  "emPeReal": 288,
+  "emPeFonte": 466,
+  "escala": 0.6191,
   "casa": [
-   152,
+   184,
    312
   ],
   "apoio": [
-   76,
+   92,
    290
   ],
   "quadros": 8,
@@ -3795,36 +3860,46 @@
   "qps": 10,
   "laco": true,
   "alturas": [
-   291,
-   274,
-   287,
-   278,
-   287,
+   282,
+   275,
    277,
-   287,
-   271
+   275,
+   281,
+   278,
+   281,
+   288
   ],
-  "variacaoAltura": 7.2,
+  "tamanhoPelaMassa": [
+   147.3,
+   141.7,
+   137.7,
+   144.2,
+   144.1,
+   139.8,
+   134.1,
+   146
+  ],
+  "variacaoAltura": 4.7,
   "tamanhoPelaCor": [
+   48.4,
+   48.1,
+   47.7,
+   48.5,
+   48.5,
    48.2,
-   48.7,
-   47.7,
-   47.4,
-   47.9,
-   49.9,
-   47.7,
-   47.8
+   48,
+   48.6
   ],
-  "bytes": 113429,
+  "bytes": 120994,
   "avisos": [
-   "altura varia 7.2% entre quadros (291 274 287 278 287 277 287 271), esperado nesta ação"
+   "altura varia 4.7% entre quadros (282 275 277 275 281 278 281 288), esperado nesta ação"
   ],
   "falhas": [],
   "ok": true,
   "opcoes": {
    "chave": "personagem/andar-frente",
-   "quadros": "8",
    "altura": "294",
+   "quadros": "8",
    "qps": "10",
    "base": "0.5",
    "tamanho-cor": "47.5",

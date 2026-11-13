@@ -4,6 +4,7 @@ import { J } from '../contexto.js';
 import { ligarToque } from './toque.js';
 import { ligarTeclado } from './teclado.js';
 import { ligarControle } from './controle.js';
+import { ligarFileira } from './fileira.js';
 import { foco } from './foco.js';
 import { alvoDaFrente, descreverCasa, descreverEntidade } from '../nucleo/sistemas/personagem.js';
 import { frase, fraseDaAcao } from '../ui/textos.js';
@@ -30,6 +31,7 @@ export function ligarEntrada(hud) {
     atualizar(dt) {
       const m = J.mundo, d = cena.destaque;
       if (entrada.lerControle) entrada.lerControle(dt);
+      entrada.fileira.atualizar(dt); // segurar numa casa do campo: a fileira toda
       if (guardar > 0) { guardar -= dt; if (guardar <= 0) { J.prefs.zoom = +(cam.alvoE / cam.base).toFixed(3); J.gravarPrefs(); } }
       if (some > 0) { some -= dt; if (some <= 0) { cursor.x = -1; cursor.entidade = null; } }
       // o destaque: nas teclas, a casa à frente dela; no ponteiro, a casa apontada
@@ -50,9 +52,11 @@ export function ligarEntrada(hud) {
         if (q) texto = q.acao ? fraseDaAcao(q.acao, q.dados, m.dados) : frase(q.texto, q.dados, m.dados);
         if (q && q.acao && q.casas) d.casas = q.casas; // ferramenta com área: todas as casas que a ação alcança ficam marcadas
       }
+      texto = entrada.fileira.dica(texto, m, x, z, ent);
       hud.dica(texto);
     },
   };
+  entrada.fileira = ligarFileira(entrada, hud);
   ligarToque(entrada, hud);
   ligarTeclado(entrada);
   entrada.lerControle = ligarControle(entrada);

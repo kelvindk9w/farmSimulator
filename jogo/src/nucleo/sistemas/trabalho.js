@@ -13,7 +13,7 @@
 // botões não aparecem, e a interface diz o que falta e onde comprar (evento "faltaApetrecho").
 import { registrarSistema, registrarAcao, registrarModo, registrarEvento, ampliarEvento, ACOES, TIPOS } from '../registro.js';
 import { PASSO, total, somar } from '../util.js';
-import { GRAMA, ARADA } from '../local.js';
+import { GRAMA, ARADA, CAMPO, deLavoura } from '../local.js';
 import { comprimento, cabe } from '../caminho.js';
 import { DESLOCAMENTO, PREPAROS, filaTem } from './personagem.js';
 import * as LAVOURA from './lavoura.js'; // AGUA_A_MAO e podeArar (este, da frente do campo de plantação: enquanto não existir, vale a grama)
@@ -23,7 +23,7 @@ import { VENDAVEL, jaTem } from './loja.js';
 import { darXp } from './niveis.js';
 import { registrarFamilia, estaTratado, defDoAnimal, abrigoDe } from './animais.js';
 import { registrarGuia, guiaDoEvento } from '../guia.js';
-import { soltar, recolher, bichoSolto, irAte, ficar, levar, portaDe, esperado } from './acompanhar.js';
+import { soltar, recolher, bichoSolto, irSemPisar, ficar, levar, portaDe, esperado } from './acompanhar.js';
 
 const NAO = (motivo, dados, limpar) => ({ ok: false, motivo, dados, limpar });
 const SIM = { ok: true };
@@ -131,24 +131,32 @@ export function casasDaPassada(m, x, z, dir, n = casasPorPassada(m)) {
   for (let k = 1; k < n; k++) { const cx = x + d[0] * k, cz = z + d[1] * k; if (aravel(m, loc, cx, cz) && !prometida(m, cx, cz)) out.push([cx, cz]); }
   return out;
 }
-// Para onde vai a fileira num toque simples: das quatro que saem da casa tocada, a que tem mais casas para arar;
-// no empate vale a ordem fixa (+X, +Z, -X, -Z), para o toque dar sempre no mesmo.
-export function direcaoDaPassada(m, x, z, n = casasPorPassada(m)) {
-  let melhor = 0, conta = -1;
-  for (let dir = 0; dir < 4; dir++) { const c = casasDaPassada(m, x, z, dir, n).length; if (c > conta) { conta = c; melhor = dir; } }
+// Para onde vai a fileira num toque simples: das quatro que saem da casa tocada, a que tem mais casas para arar (no
+// empate, a que tem mais campo: o boi refaz a lavoura antes de abrir grama nova; depois, a ordem fixa +X, +Z, -X, -Z,
+// para o toque dar sempre no mesmo). soX: só ao longo de X (a fileira do campo, ao segurar o dedo nela).
+export function direcaoDaPassada(m, x, z, n = casasPorPassada(m), soX = false) {
+  const loc = m.local;
+  let melhor = 0, nota = -1;
+  for (let dir = 0; dir < 4; dir += soX ? 2 : 1) {
+    const c = casasDaPassada(m, x, z, dir, n);
+    let v = c.length * 100;
+    for (const [cx, cz] of c) if (loc.chao[cz * loc.l + cx] === CAMPO) v++;
+    if (v > nota) { nota = v; melhor = dir; }
+  }
   return melhor;
 }
-// O dedo pintando: a direção é a do arrasto. A passada posta pela casa anterior do dedo, se ainda não começou,
-// vira para o lado em que ele foi. Devolve a direção (ou -1 se o dedo acabou de pousar).
+// O dedo pintando (ou a fileira inteira, de "segurar o dedo"): a direção é a do arrasto, desde que a casa anterior do
+// dedo seja de uma passada da fila e esta esteja na mesma linha, a até uma passada de distância. A passada que começa
+// na casa anterior, se ainda não começou, vira para o lado em que o dedo foi. Devolve a direção (ou -1: sem direção).
 function arrastar(m, x, z) {
   const A = m.trabalho.arrasto, dx = x - A.x, dz = z - A.z;
   let dir = -1;
-  if (m.n - A.n < 150) { if (dx === 0 && dz === 0) dir = A.dir; else if (Math.abs(dx) + Math.abs(dz) === 1) dir = DIRS.findIndex((d) => d[0] === dx && d[1] === dz); }
-  if (dir >= 0 && (dx || dz)) {
+  if (m.n - A.n < 150 && (dx === 0) !== (dz === 0) && Math.abs(dx + dz) <= casasPorPassada(m) && prometida(m, A.x, A.z)) {
+    dir = DIRS.findIndex((d) => d[0] === Math.sign(dx) && d[1] === Math.sign(dz));
     const t = m.personagem.fila.find((q) => q.tipo === 'agir' && q.acao === 'ararComBoi' && q.x === A.x && q.z === A.z);
-    if (t && t.args.dir !== dir) { t.args = { casas: [[A.x, A.z]], dir }; t.args.casas = casasDaPassada(m, A.x, A.z, dir); }
+    if (t && t.args.dir !== dir && !t.args.passada) { t.args = { casas: [[A.x, A.z]], dir }; t.args.casas = casasDaPassada(m, A.x, A.z, dir); }
   }
-  A.x = x; A.z = z; A.n = m.n; A.dir = dir;
+  A.x = x; A.z = z; A.n = m.n;
   return dir;
 }
 
@@ -194,7 +202,8 @@ registrarModo({
     const a = pronto(m, 'arar');
     if (!a) return { acao: null, texto: 'sem-boi', falta: true };
     const n = casasPorPassada(m, a);
-    if (dir < 0) dir = direcaoDaPassada(m, x, z, n);
+    // o dedo pousou na lavoura pintando (ou segurou na fileira): a passada vai ao longo dela
+    if (dir < 0) dir = direcaoDaPassada(m, x, z, n, !!(c && c.arrasto) && deLavoura(loc.chao[i]));
     const casas = casasDaPassada(m, x, z, dir, n);
     return { acao: 'ararComBoi', args: { casas, dir }, casas, dados: { n: casas.length, animal: a.especie } };
   },
@@ -389,19 +398,20 @@ function sair(m, a, p) {
   if (abrigo && abrigo.local === 'fazenda') portaDe(abrigo, pt); else { pt[0] = p.x; pt[1] = p.z; }
   return soltar(m, a, pt[0], pt[1], { figura: figuraDe(m, a) });
 }
-// vai com ela: parado, só sai do lugar quando ela se afasta mais que "larga"; andando, para a "folga" dela
+// vai com ela: parado, só sai do lugar quando ela se afasta mais que "larga"; andando, para a "folga" dela. Não pisa na
+// lavoura: com ela no meio do campo, espera na beira (é ali que ela enche o regador no barril)
 function seguir(m, e, p, folga, larga, vAnda, vCorre) {
   if (esperado(m, e)) { ficar(e); e.indo = false; return; }
   const d = Math.hypot(p.x - e.x - 0.5, p.z - e.z - 0.5);
   if (!e.indo && d < larga) { ficar(e); return; }
-  e.indo = irAte(m, e, p.x, p.z, folga, d > 4.5 ? vCorre : vAnda, null, true);
+  e.indo = irSemPisar(m, e, p.x, p.z, folga, d > 4.5 ? vCorre : vAnda);
 }
 // volta sozinho para o estábulo e some lá dentro
 function voltar(m, e, a) {
   const abrigo = abrigoDe(m, a);
   if (!abrigo || abrigo.local !== 'fazenda') { recolher(m, a.id); return; }
   portaDe(abrigo, pt);
-  if (!irAte(m, e, pt[0], pt[1], 0.3, 3, null, true)) recolher(m, a.id);
+  if (!irSemPisar(m, e, pt[0], pt[1], 0.3, 3)) recolher(m, a.id);
   else e.estado = papel(defDoAnimal(m, a)) === 'arar' ? 'puxar' : 'andar';
 }
 

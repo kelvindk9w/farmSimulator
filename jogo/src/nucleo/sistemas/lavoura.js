@@ -1,4 +1,8 @@
-// A lavoura: enxada (grama vira terra arada), semear, regar, crescer e colher.
+// A lavoura: enxada (grama ou campo vira terra arada), semear, regar, crescer e colher.
+// O campo de plantação: a fazenda já nasce com um (terras.json: inicial.campo). Arou uma vez, é campo para sempre:
+// colheu, a casa vira CAMPO (terra de plantio sem sulco, nunca grama) e pede a enxada de novo antes de plantar.
+// Arar grama livre aumenta o campo. podeArar() diz onde a enxada (ou o arado do boi) pode passar.
+// Fileira: as casas de campo seguidas ao longo de X; o comando "fileira" enfileira a ação do modo em toda ela.
 // Regra da água: a cultura pede "regas" regas até ficar pronta. Cada rega molha a terra e faz a planta crescer
 // um trecho (tempoSeg / regas); acabou o trecho, a terra seca e a planta espera a próxima rega. Nunca morre.
 // O crescimento guarda instantes absolutos (secaEm), então o tempo fora do jogo se resolve por conta, sem simular.
@@ -6,12 +10,21 @@
 // Dois ganchos para as outras frentes, sem editar este arquivo:
 //   PLANTIOS      o que o modo "semear" planta além de semente de cultura (as mudas de árvore entram por aqui)
 //   REGA_SOZINHA  quem rega uma casa sem a personagem (o aspersor): a planta emenda um trecho no outro
-import { registrarSistema, registrarAcao, registrarModo, registrarAutomatico, registrarEvento } from '../registro.js';
-import { GRAMA, ARADA } from '../local.js';
+import { registrarSistema, registrarAcao, registrarModo, registrarAutomatico, registrarEvento, MODOS } from '../registro.js';
+import { GRAMA, ARADA, CAMPO, deLavoura } from '../local.js';
 import { somar } from '../util.js';
 import { espacoNoCesto, porNoCesto, ferramentaNoCinto, ferramentaNoSuporte } from './posses.js';
 import { darXp } from './niveis.js';
 import { filaTem, contarNaFila } from './personagem.js';
+import { campoInicial } from './terras.js';
+
+// dá para arar a casa (x, z)? Grama livre ou campo livre, em terra própria (sem entidade nem planta em cima).
+// Não olha a fila de tarefas. Quem ara (a enxada, o arado do boi) usa esta mesma conta.
+export function podeArar(m, x, z, loc = m.local) {
+  if (!loc.dentro(x, z)) return false;
+  const i = z * loc.l + x, c = loc.chao[i];
+  return (c === GRAMA || c === CAMPO) && loc.propria[i] === 1 && !loc.ocupa[i] && !loc.plantas[i];
+}
 
 // planta = { cultura, feitas, secaEm }
 //   feitas: regas cujo trecho de crescimento já terminou (0..regas); feitas = regas → pronta
@@ -154,7 +167,7 @@ registrarAcao({
   pode(m, alvo) {
     const loc = m.local, i = idx(m, alvo);
     if (!loc.ehPropria(alvo.x, alvo.z)) return NAO('terra-a-venda');
-    if (loc.chao[i] !== GRAMA || loc.ocupa[i]) return NAO(loc.chao[i] === ARADA ? 'ja-arado' : 'nao-da-para-arar');
+    if (!podeArar(m, alvo.x, alvo.z, loc)) return NAO(loc.chao[i] === ARADA ? 'ja-arado' : 'nao-da-para-arar');
     return SIM;
   },
   aoEfeito(m, alvo) {
@@ -232,7 +245,7 @@ registrarAcao({
     porNoCesto(m, c.produto, c.rende);
     loc.plantas[i] = null;
     loc.plantadas.splice(loc.plantadas.indexOf(i), 1);
-    if (m.dados.regras.reararAposColher) loc.chao[i] = GRAMA; // a casa volta a pedir enxada antes de plantar de novo
+    if (m.dados.regras.reararAposColher) loc.chao[i] = CAMPO; // segue campo (nunca grama), mas pede a enxada antes de plantar de novo
     m.eventos.emitir('chaoMudou', { local: loc.id, x: alvo.x, z: alvo.z });
     m.eventos.emitir('colheu', { cultura: c.id, item: c.produto, n: c.rende, x: alvo.x, z: alvo.z });
     darXp(m, c.xp, 'colher');
@@ -244,9 +257,9 @@ registrarModo({
   id: 'enxada', ordem: 10, ferramenta: 'enxada',
   acaoNaCasa(m, x, z) {
     const loc = m.local, i = z * loc.l + x;
-    if (loc.chao[i] === GRAMA) return loc.ocupa[i] ? null : filaTem(m, 'arar', x, z) ? { acao: null, texto: 'na-fila' } : { acao: 'arar' };
+    if (podeArar(m, x, z)) return filaTem(m, 'arar', x, z) ? { acao: null, texto: 'na-fila' } : { acao: 'arar' };
     if (loc.chao[i] === ARADA) return { acao: null, texto: 'ja-arado' };
-    return null; // caminho: só anda
+    return null; // caminho, casa ocupada: só anda
   },
 });
 
@@ -267,7 +280,7 @@ registrarModo({
     if (outro) return outro.acaoNaCasa(m, x, z, s); // muda de árvore: quem responde é o plantio dela
     if (loc.plantas[i]) return { acao: null, texto: 'ja-plantado' };
     if (filaTem(m, 'semear', x, z)) return { acao: null, texto: 'na-fila' };
-    if (loc.chao[i] !== ARADA && !filaTem(m, 'arar', x, z)) return loc.chao[i] === GRAMA && !loc.ocupa[i] ? { acao: null, texto: 'arar-antes' } : null;
+    if (loc.chao[i] !== ARADA && !filaTem(m, 'arar', x, z)) return podeArar(m, x, z) ? { acao: null, texto: 'arar-antes' } : null;
     if (!s || !m.dados.culturaDaSemente[s]) return { acao: null, texto: 'sem-semente-escolhida', falta: true };
     if (sementesLivres(m, s) <= 0) return { acao: null, texto: 'sem-sementes', dados: { item: s }, falta: true };
     return { acao: 'semear', args: { semente: s }, dados: { item: s } };
@@ -287,7 +300,7 @@ registrarModo({
     const loc = m.local, i = z * loc.l + x;
     resolver(m, loc, i);
     const pl = loc.plantas[i];
-    if (!pl) return filaTem(m, 'semear', x, z) ? { acao: 'regar' } : loc.chao[i] === ARADA ? { acao: null, texto: 'nada-para-regar' } : null;
+    if (!pl) return filaTem(m, 'semear', x, z) ? { acao: 'regar' } : deLavoura(loc.chao[i]) ? { acao: null, texto: 'nada-para-regar' } : null;
     const e = estadoDaPlanta(m, pl);
     if (e === 'sede') return regaPrometida(m, x, z) ? { acao: null, texto: 'na-fila' } : semAgua(m) ? { acao: null, texto: 'regador-vazio', falta: true } : rega(m, x, z, { cultura: pl.cultura });
     return { acao: null, texto: e === 'pronta' ? 'ja-pronta' : 'ja-regada', dados: { cultura: pl.cultura, seg: segundosDeAgua(m, pl) } };
@@ -309,7 +322,7 @@ registrarAutomatico((m, x, z) => {
   const loc = m.local, i = z * loc.l + x;
   resolver(m, loc, i);
   const pl = loc.plantas[i];
-  if (!pl) return loc.chao[i] === ARADA ? { acao: null, texto: 'terra-arada-vazia' } : null;
+  if (!pl) return loc.chao[i] === ARADA ? { acao: null, texto: 'terra-arada-vazia' } : loc.chao[i] === CAMPO ? { acao: null, texto: 'campo-sem-sulco' } : null;
   const e = estadoDaPlanta(m, pl);
   if (e === 'pronta') return { acao: 'colher', dados: { cultura: pl.cultura } };
   if (e === 'sede') return regaPrometida(m, x, z) ? { acao: null, texto: 'na-fila' } : semAgua(m) ? { acao: null, texto: 'regador-vazio', falta: true } : rega(m, x, z, { cultura: pl.cultura });
@@ -317,6 +330,49 @@ registrarAutomatico((m, x, z) => {
   return { acao: null, texto: 'crescendo', info: true, dados: { cultura: pl.cultura, seg: segundosDeAgua(m, pl) } };
 });
 
+// ---------- a fileira ----------
+// As casas de campo (arada ou sem sulco) seguidas na linha z, ao longo de X, que passam pela casa (x, z), em ordem a
+// partir da ponta mais perto da personagem. Casa que não é de campo: lista vazia.
+export function casasDaFileira(m, x, z, loc = m.local) {
+  const serve = (cx) => loc.dentro(cx, z) && loc.propria[z * loc.l + cx] === 1 && !loc.ocupa[z * loc.l + cx] && deLavoura(loc.chao[z * loc.l + cx]);
+  if (!serve(x)) return [];
+  let a = x, b = x;
+  while (serve(a - 1)) a--;
+  while (serve(b + 1)) b++;
+  const out = [], p = m.personagem, daPontaA = p.local !== loc.id || Math.abs(p.x - (a + 0.5)) <= Math.abs(p.x - (b + 0.5));
+  for (let k = 0; k <= b - a; k++) out.push([daPontaA ? a + k : b - k, z]);
+  return out;
+}
+// O que segurar o dedo na casa (x, z) faria na fileira dela, no modo ativo, sem mexer em nada:
+//   { casas: [[x, z]...] toda a fileira, alvo: [[x, z, acao]...] as que entram na fila, n, acao (a mais comum),
+//     molha: [[x, z]...] casas que as regas de área molham junto, motivo (por que parou antes do fim, ou por que nada) }
+// A conta é a mesma do toque arrastando casa por casa: cada ação escolhida entra numa fila de mentira, para que a
+// próxima casa já desconte a semente, a água e a vaga da fila; no fim a fila volta a ser a de antes.
+export function fileiraDe(m, x, z) {
+  const casas = casasDaFileira(m, x, z);
+  if (!casas.length) return null;
+  const p = m.personagem, modo = MODOS[m.modo.id], fila = p.fila, n0 = fila.length, max = m.dados.regras.filaMax;
+  const alvo = [], molha = [], conta = {};
+  let motivo = null, acao = null;
+  if (!modo) return { casas, alvo, molha, n: 0, acao, motivo: 'nada-aqui' };
+  try {
+    for (const [cx, cz] of casas) {
+      const d = modo.acaoNaCasa(m, cx, cz, { x: cx + 0.5, z: cz + 0.5, arrasto: true });
+      if (!d || d.texto === 'na-fila') continue;
+      if (d.acao) {
+        if (fila.length >= max) { motivo = 'fila-cheia'; break; }
+        fila.push({ tipo: 'agir', acao: d.acao, x: cx, z: cz, args: d.args || null });
+        alvo.push([cx, cz, d.acao]);
+        if (d.casas) for (let k = 1; k < d.casas.length; k++) molha.push(d.casas[k]);
+        conta[d.acao] = (conta[d.acao] || 0) + 1;
+        if (!acao || conta[d.acao] > conta[acao]) acao = d.acao;
+      } else if (d.falta && !motivo) motivo = d.texto;
+    }
+  } finally { fila.length = n0; }
+  return { casas, alvo, molha, n: alvo.length, acao, motivo: alvo.length ? motivo : motivo || 'fileira-em-dia' };
+}
+
+registrarEvento('fileira', { campos: ['acao', 'n', 'z'] });
 registrarEvento('arou', { campos: ['x', 'z'] });
 // "plantou" e "colheu" valem também para o que os plantios registrados plantam e dão (muda e fruta de árvore levam "arvore")
 registrarEvento('plantou', { campos: ['cultura', 'item', 'x', 'z', 'arvore'], aceita: (dados, f) => naLista(f.item, (s) => plantavel(dados, s)) && naLista(f.cultura, (c) => !!dados.culturas[c]) });
@@ -325,30 +381,75 @@ registrarEvento('colheu', { campos: ['cultura', 'item', 'n', 'x', 'z', 'arvore']
 // o valor pedido pelo filtro (um só ou uma lista de "qualquer um destes") existe para este jogo?
 function naLista(v, existe) { return v === undefined || (Array.isArray(v) ? v.some(existe) : existe(v)); }
 
+// Gravação, formato 2: { formato: 2, locais: { fazenda: { campo: [índice...], arada: [[índice, cultura, feitas, secaEm] | [índice]...] } } }
+// (o formato 1, das gravações de antes do campo de plantação, era { fazenda: [[índice, ...]...] }: só a terra arada).
+export const FORMATO_DA_LAVOURA = 2;
+// a casa gravada ainda serve para campo? (o mapa pode ter mudado: construção, árvore ou caminho em cima)
+const servePara = (loc, i) => i >= 0 && i < loc.chao.length && (loc.chao[i] === GRAMA || loc.chao[i] === CAMPO) && !loc.ocupa[i];
+function arada(m, loc, [i, cultura, feitas, secaEm]) {
+  if (!servePara(loc, i)) return;
+  loc.chao[i] = ARADA;
+  if (cultura && m.dados.culturas[cultura]) { loc.plantas[i] = { cultura, feitas: Math.min(feitas || 0, m.dados.culturas[cultura].regas), secaEm: secaEm || 0 }; loc.plantadas.push(i); }
+}
+
 registrarSistema({
   id: 'lavoura',
   segundo: resolverTudo,
   ausencia: resolverTudo,
-  // grava só o que não é grama: [índice, cultura | 0, feitas, secaEm]
+  // grava só o que é campo: as casas sem sulco e as aradas, com a planta [índice, cultura, feitas, secaEm]
   salvar(m) {
-    const out = {};
+    const locais = {};
     for (const id in m.locais) {
-      const loc = m.locais[id], casas = [];
-      for (let i = 0; i < loc.chao.length; i++) if (loc.chao[i] === ARADA) { const pl = loc.plantas[i]; casas.push(pl ? [i, pl.cultura, pl.feitas, Math.round(pl.secaEm)] : [i]); }
-      out[id] = casas;
+      const loc = m.locais[id], campo = [], arada = [];
+      for (let i = 0; i < loc.chao.length; i++) {
+        if (loc.chao[i] === CAMPO) campo.push(i);
+        else if (loc.chao[i] === ARADA) { const pl = loc.plantas[i]; arada.push(pl ? [i, pl.cultura, pl.feitas, Math.round(pl.secaEm)] : [i]); }
+      }
+      if (campo.length || arada.length || id === 'fazenda') locais[id] = { campo, arada };
     }
-    return out;
+    return { formato: FORMATO_DA_LAVOURA, locais };
   },
+  // roda depois das terras (o campo inicial já está marcado) e das construções (debaixo delas o campo já virou grama)
   carregar(m, d) {
-    for (const id in d) {
-      const loc = m.locais[id];
-      if (!loc) continue;
-      for (const [i, cultura, feitas, secaEm] of d[id]) {
-        if (!(i >= 0 && i < loc.chao.length) || loc.chao[i] !== GRAMA || loc.ocupa[i]) continue; // o mapa mudou: a casa não serve mais
-        loc.chao[i] = ARADA;
-        if (cultura && m.dados.culturas[cultura]) { loc.plantas[i] = { cultura, feitas: Math.min(feitas || 0, m.dados.culturas[cultura].regas), secaEm: secaEm || 0 }; loc.plantadas.push(i); }
+    if (d && d.formato >= 2 && d.locais && typeof d.locais === 'object') {
+      for (const id in d.locais) {
+        const loc = m.locais[id], g = d.locais[id];
+        if (!loc || !g) continue;
+        // o campo gravado manda: casa do campo inicial que não está na gravação deixou de ser campo (vira grama)
+        if (id === 'fazenda' && campoInicial(m)) {
+          const fica = new Set(Array.isArray(g.campo) ? g.campo : []);
+          if (Array.isArray(g.arada)) for (const c of g.arada) if (Array.isArray(c)) fica.add(c[0]);
+          for (let i = 0; i < loc.chao.length; i++) if (loc.chao[i] === CAMPO && !fica.has(i)) loc.chao[i] = GRAMA;
+        }
+        if (Array.isArray(g.campo)) for (const i of g.campo) if (servePara(loc, i)) loc.chao[i] = CAMPO;
+        if (Array.isArray(g.arada)) for (const c of g.arada) if (Array.isArray(c)) arada(m, loc, c);
+      }
+    } else if (d && typeof d === 'object') {
+      // formato 1 (antes do campo de plantação): a fazenda fica com o campo inicial que as terras marcaram nas casas
+      // livres (debaixo das construções ele já virou grama); a terra arada gravada volta por cima
+      for (const id in d) {
+        const loc = m.locais[id];
+        if (!loc || !Array.isArray(d[id])) continue;
+        for (const c of d[id]) if (Array.isArray(c)) arada(m, loc, c);
       }
     }
     m.eventos.emitir('chaoMudou', { tudo: true });
+  },
+  comandos: {
+    // segurou o dedo (ou a tecla) numa casa do campo: a ação do modo vai para a fileira toda, como se o dedo
+    // tivesse arrastado casa por casa (o que não cabe na fila, ou falta semente ou água, fica de fora)
+    fileira(m, c) {
+      const x = Math.floor(c.x), z = Math.floor(c.z), f = fileiraDe(m, x, z);
+      if (!f) return { ok: false, motivo: 'fora-do-campo' };
+      let n = 0, motivo = f.motivo;
+      for (const [cx, cz] of f.alvo) {
+        const r = m.comando({ tipo: 'tocarCasa', x: cx + 0.5, z: cz + 0.5, arrasto: true });
+        if (r.ok && !r.repetida) n++;
+        else if (r.motivo === 'fila-cheia') { motivo = 'fila-cheia'; break; }
+      }
+      if (!n) { m.eventos.emitir('faltou', { motivo: motivo || 'fileira-em-dia', x, z }); return { ok: false, motivo: motivo || 'fileira-em-dia' }; }
+      m.eventos.emitir('fileira', { acao: f.acao, n, x, z });
+      return { ok: true, dados: { n, acao: f.acao, motivo } };
+    },
   },
 });

@@ -105,6 +105,29 @@ test('casa que não se ara fica de fora sem erro; a direção é a da fileira co
   assert.equal(descreverCasa(m, 12, 14).texto, 'ja-arado');
 });
 
+test('segurar o dedo na fileira do campo: o boi ara a fileira toda, ao longo dela, a partir da ponta mais perto', () => {
+  const m = mundoDoTrabalho(), loc = m.locais.fazenda;
+  comBicho(m, 'boi', 'arado');
+  modo(m, 'arado');
+  // campo sem sulco (o que fica depois da colheita): uma fileira de 12 (z = 12) e uma de 4 (z = 16), grama em volta
+  const CAMPO = 6;
+  for (let x = 6; x <= 17; x++) loc.chao[12 * loc.l + x] = CAMPO;
+  for (let x = 8; x <= 11; x++) loc.chao[16 * loc.l + x] = CAMPO;
+  m.comando({ tipo: 'irPara', x: 18.5, z: 14.5 }); ateParar(m);
+  const r = m.comando({ tipo: 'fileira', x: 10.5, z: 12.5 });
+  if (!r.ok && r.motivo === 'fora-do-campo') return; // (sem o campo de plantação ainda, não há "fileira")
+  assert.equal(r.ok, true);
+  ateParar(m, 200);
+  for (let x = 6; x <= 17; x++) assert.equal(chao(m, x, 12), ARADA, `(${x}, 12) arada`);
+  for (let x = 4; x <= 20; x++) { assert.notEqual(chao(m, x, 11), ARADA); assert.notEqual(chao(m, x, 13), ARADA); }
+  // a fileira curta, com ela do lado direito: o boi vai para a esquerda, pelo campo, e não abre a grama da direita
+  m.comando({ tipo: 'irPara', x: 15.5, z: 17.5 }); ateParar(m);
+  assert.equal(m.comando({ tipo: 'fileira', x: 9.5, z: 16.5 }).ok, true);
+  ateParar(m);
+  for (let x = 8; x <= 11; x++) assert.equal(chao(m, x, 16), ARADA, `(${x}, 16) arada`);
+  for (let x = 12; x <= 16; x++) assert.equal(chao(m, x, 16), GRAMA, `(${x}, 16) ficou grama`);
+});
+
 test('sem trato o boi ara três casas; trinta casas em passadas de cinco', () => {
   const m = mundoDoTrabalho(), ev = ouvirTudo(m);
   const boi = comBicho(m, 'boi', 'arado');

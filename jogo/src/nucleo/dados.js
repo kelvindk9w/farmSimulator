@@ -89,7 +89,7 @@ export function prepararDados(bruto) {
     },
     celeiro: { capacidade: obj(R.celeiro) && R.celeiro.capacidade > 0 ? R.celeiro.capacidade : 50 },
     filaMax: R.filaMax > 0 ? R.filaMax : 40,
-    reararAposColher: !!(obj(R.lavoura) && R.lavoura.reararAposColher), // colheu, a casa volta a ser grama
+    reararAposColher: !!(obj(R.lavoura) && R.lavoura.reararAposColher), // colheu, a casa volta a ser campo sem sulco (pede a enxada de novo)
     antiTrava: obj(R.antiTrava) && R.antiTrava.semente ? { semente: R.antiTrava.semente, quantidade: R.antiTrava.quantidade > 0 ? R.antiTrava.quantidade : 1 } : null,
   };
   if (regras.antiTrava && !itens[regras.antiTrava.semente]) { aviso('regras.json', `antiTrava.semente: "${regras.antiTrava.semente}" não existe em itens.json`); regras.antiTrava = null; }
@@ -114,6 +114,7 @@ export function prepararDados(bruto) {
     inicial: Array.isArray(T.inicial) ? T.inicial : obj(T.inicial) && Array.isArray(T.inicial.area) ? T.inicial.area : null,
     limpo: obj(T.inicial) && Array.isArray(T.inicial.limpo) ? T.inicial.limpo : null, // miolo da área inicial que nasce sem mato (sem isto, ela toda)
     naturezaInicial: obj(T.inicial) && obj(T.inicial.natureza) ? T.inicial.natureza : {}, // mato, pedra e toco nas beiradas da área inicial
+    campo: obj(T.inicial) && Array.isArray(T.inicial.campo) ? T.inicial.campo : null, // o campo de plantação demarcado com que a fazenda começa: [x0, z0, x1, z1]
     lotes: Array.isArray(T.lotes) ? T.lotes.filter(obj) : [],
     pontos: obj(T.pontos) ? T.pontos : {}, // onde nascem poço, banca, celeiro, casa e a personagem: [x, z]
     caminhos: Array.isArray(T.caminhos) ? T.caminhos : [], // faixas de caminho de terra: [x0, z0, x1, z1]
@@ -140,6 +141,12 @@ export function prepararDados(bruto) {
       else if (area(terras.inicial) && (v[0] < terras.inicial[0] || v[1] < terras.inicial[1] || v[0] >= terras.inicial[2] || v[1] >= terras.inicial[3])) erro('terras.json', `"pontos.${p}" fica fora da área inicial`);
     }
     terras.caminhos = terras.caminhos.filter((c) => { if (area(c)) return true; aviso('terras.json', 'caminho ignorado: esperava [x0, z0, x1, z1]'); return false; });
+    if (terras.campo) {
+      const c = terras.campo, ini = terras.inicial;
+      if (!area(c)) { aviso('terras.json', '"inicial.campo" ignorado: esperava [x0, z0, x1, z1]'); terras.campo = null; }
+      else if (area(ini) && (c[0] < ini[0] || c[1] < ini[1] || c[2] > ini[2] || c[3] > ini[3])) { aviso('terras.json', '"inicial.campo" ignorado: o campo tem de caber na área inicial'); terras.campo = null; }
+      else terras.campo = c.map(Math.round);
+    }
   }
 
   // ---------- níveis ----------

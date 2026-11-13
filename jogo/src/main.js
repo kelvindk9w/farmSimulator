@@ -13,7 +13,7 @@ import { estadoDaPlanta } from './nucleo/sistemas/lavoura.js';
 import { missaoAtual } from './nucleo/sistemas/missoes.js';
 import { guiaDaMissao } from './nucleo/guia.js';
 import { noCesto } from './nucleo/sistemas/posses.js';
-import { ARADA } from './nucleo/local.js';
+import { ARADA, CAMPO } from './nucleo/local.js';
 import { Atlas } from './render/atlas.js';
 import { qualidadeDaImagem } from './plataforma/qualidade.js';
 import { Cena } from './render/cena.js';
@@ -229,15 +229,15 @@ function comecar() {
     estado() {
       const m = J.mundo, P = m.posses, p = m.personagem, loc = m.local, a = missaoAtual(m);
       const plantas = loc.plantadas.map((i) => ({ x: i % loc.l, z: Math.floor(i / loc.l), cultura: loc.plantas[i].cultura, estado: estadoDaPlanta(m, loc.plantas[i]) }));
-      let aradas = 0;
-      for (let i = 0; i < loc.chao.length; i++) if (loc.chao[i] === ARADA) aradas++;
+      let aradas = 0, campo = 0; // campo: casas do campo de plantação sem sulco
+      for (let i = 0; i < loc.chao.length; i++) if (loc.chao[i] === ARADA) aradas++; else if (loc.chao[i] === CAMPO) campo++;
       return {
         agora: m.agora, nivel: m.progresso.nivel, xp: m.progresso.xp, ouro: P.ouro, cash: P.cash,
         cesto: { ...P.cesto.itens }, noCesto: noCesto(m), bolsa: { ...P.bolsa }, celeiro: { ...P.celeiro.itens },
         ferramentas: JSON.parse(JSON.stringify(P.ferramentas)), modo: { ...m.modo },
         personagem: { x: p.x, z: p.z, rumo: p.rumo, folego: p.folego, fila: p.fila.length, ocupada: ocupada(m) },
         missao: a ? { id: a.missao.id, conta: a.conta, n: a.n, esperaNivel: a.esperaNivel } : null, feitas: [...m.missoes.feitas],
-        plantas, aradas,
+        plantas, aradas, campo,
       };
     },
   };

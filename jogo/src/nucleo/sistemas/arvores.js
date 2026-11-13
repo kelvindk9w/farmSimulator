@@ -7,7 +7,7 @@
 import { registrarSistema, registrarAcao, registrarTipo, registrarEvento } from '../registro.js';
 import { registrarConcluivel } from '../concluir.js';
 import { somar } from '../util.js';
-import { CAMINHO, ARADA, GRAMA } from '../local.js';
+import { CAMINHO, ARADA, GRAMA, CAMPO } from '../local.js';
 import { cabe } from '../caminho.js';
 import { espacoNoCesto, porNoCesto } from './posses.js';
 import { darXp } from './niveis.js';
@@ -60,7 +60,7 @@ export function podePlantarArvore(m, x, z, id, semFila) {
   if (loc.ocupa[i]) return NAO('casa-ocupada');
   if (loc.chao[i] === CAMINHO) return NAO('no-caminho');
   if (loc.plantas[i]) return NAO('ja-plantado');
-  if (loc.chao[i] !== GRAMA && loc.chao[i] !== ARADA) return NAO('casa-ocupada'); // piso de construção, por exemplo
+  if (loc.chao[i] !== GRAMA && loc.chao[i] !== ARADA && loc.chao[i] !== CAMPO) return NAO('casa-ocupada'); // piso de construção, por exemplo
   for (const e of m.arvores.todas) {
     if (e.local !== loc.id) continue;
     const d = Math.max(Math.abs(e.x - x), Math.abs(e.z - z)), pede = Math.max(a.espacamento, def(m, e).espacamento);
@@ -109,7 +109,7 @@ registrarAcao({
   aoEfeito(m, alvo, args) {
     const loc = m.local, i = loc.i(alvo.x, alvo.z), id = m.dados.arvoreDaMuda[args.muda];
     somar(m.posses.bolsa, args.muda, -1);
-    if (loc.chao[i] === ARADA) loc.chao[i] = GRAMA; // a árvore fica na grama
+    if (loc.chao[i] === ARADA || loc.chao[i] === CAMPO) loc.chao[i] = GRAMA; // a árvore fica na grama (até no campo de plantação)
     const e = porArvore(m, loc, id, alvo.x, alvo.z, m.agora, 0);
     afastar(m, alvo.x, alvo.z);
     m.eventos.emitir('chaoMudou', { local: loc.id, x: alvo.x, z: alvo.z });
@@ -227,6 +227,7 @@ registrarSistema({
       // a árvore saiu dos dados, ou o mapa mudou e a casa não serve mais: fica de fora
       if (!m.dados.arvores[id] || !loc.dentro(x, z) || loc.ocupa[loc.i(x, z)] || !loc.propria[loc.i(x, z)]) continue;
       porArvore(m, loc, id, x, z, plantada || 0, colhida || 0);
+      if (loc.chao[loc.i(x, z)] === CAMPO) loc.chao[loc.i(x, z)] = GRAMA; // gravação de antes do campo de plantação: a árvore fica na grama
     }
     for (const e of m.arvores.todas) e.deu = safrasProntas(m, e) > 0; // o que já estava pronto ao gravar não avisa de novo
   },
