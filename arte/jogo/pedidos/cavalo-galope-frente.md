@@ -9,7 +9,7 @@ Preciso da folha de animação do MESMO cavalo selado GALOPANDO, visto de FRENTE
 
 Gere uma imagem e salve na pasta atual como `galope-frente.png`:
 
-- Uma única fileira horizontal com 8 quadros, da esquerda para a direita, nesta ordem:
+- DUAS fileiras horizontais, uma em cima da outra, com 4 quadros cada: a fileira de CIMA tem os quadros 1 a 4, a de BAIXO tem os quadros 5 a 8, sempre da esquerda para a direita. As duas fileiras bem separadas por uma faixa vazia (nada de uma fileira encosta na outra), nesta ordem:
   1. RECOLHIDO: as quatro patas no ar, dobradas e juntas embaixo da barriga. É o ponto mais ALTO do corpo.
   2. As duas patas de TRÁS descem e tocam o chão, bem embaixo do corpo; as da frente ainda no ar, dobradas.
   3. APOIO ATRÁS: o peso sobre as patas de trás, que dobram; as patas da frente se esticam para a frente.
@@ -24,7 +24,7 @@ Gere uma imagem e salve na pasta atual como `galope-frente.png`:
 - É o MESMO cavalo selado da folha de modelo em todos os quadros: pelo castanho, crina e rabo castanho-escuros, listra branca na testa, quatro meias brancas, sela de couro marrom sobre manta vermelha, estribos, cabeçada e rédeas. Mesmas cores chapadas, mesmo traço escuro grosso.
 - NINGUÉM montado: a sela vazia.
 - Fundo transparente de verdade (canal alfa). Sem chão, sem sombra, sem cenário, sem poeira, sem riscos de movimento, sem gotas, sem brilhos, sem números, sem texto, sem linhas de grade, sem moldura.
-- Nada cortado nas bordas. Imagem bem larga (proporção perto de 3 por 1).
+- Nada cortado nas bordas. Imagem na proporção 3 por 2 (largura uma vez e meia a altura), com as duas fileiras ocupando bem o espaço.
 - Arte original; não imite nenhum jogo existente.
 
 No fim, liste os arquivos que salvou.

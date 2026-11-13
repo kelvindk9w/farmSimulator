@@ -15,6 +15,7 @@ import { guiaDaMissao } from './nucleo/guia.js';
 import { noCesto } from './nucleo/sistemas/posses.js';
 import { ARADA } from './nucleo/local.js';
 import { Atlas } from './render/atlas.js';
+import { qualidadeDaImagem } from './plataforma/qualidade.js';
 import { Cena } from './render/cena.js';
 import { prepararReserva } from './render/reserva.js';
 import { limitar } from './nucleo/util.js';
@@ -55,7 +56,7 @@ function comecar() {
   window.addEventListener('pointerdown', () => som.destravar(), true); // o áudio só começa dentro de um gesto
 
   // ---------- arte e desenho ----------
-  const atlas = J.atlas = new Atlas(defAtlas, './');
+  const atlas = J.atlas = new Atlas(defAtlas, './', { leve: qualidadeDaImagem(J.prefs.imagem) === 'leve' });
   prepararReserva(dados);
   prepararIcones(atlas, dados);
   atlas.aoCarregar = () => repintarIcones();
@@ -220,7 +221,7 @@ function comecar() {
     avisos: () => [...avisosNaTela(), ...avisosEmEspera()], // os que estão na tela e os que esperam a vez
     avisosNaTela,
     guia: () => ({ ...guiaDaMissao(J.mundo) }),
-    medidas: () => ({ w: tela.w, h: tela.h, emPe: tela.emPe, dpr: cam.dpr, E: cam.E, fps: Math.round(fps), quadros, blocosDoChao: cena.chao.pintados, figuras: cena.n, menu: foco.menu }),
+    medidas: () => ({ w: tela.w, h: tela.h, emPe: tela.emPe, dpr: cam.dpr, E: cam.E, imagemLeve: atlas.leve, fps: Math.round(fps), quadros, blocosDoChao: cena.chao.pintados, figuras: cena.n, menu: foco.menu }),
     arteBaixada: () => atlas.tudoPronto(),
     baixarArte: () => atlas.baixarTudo(),
     estado() {

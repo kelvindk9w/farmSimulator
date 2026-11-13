@@ -34,6 +34,7 @@ registrarPainel({
       corpo.append(opcao(C.som, C.somInfo, ...escolha('som', [[true, C.ligado], [false, C.desligado]], !!J.prefs.som, (v) => { som.ligar(v); mudar('som', v); if (v) som.tocar('toque'); })));
       corpo.append(opcao(C.esquema, C.esquemaInfo, ...escolha('esquema', [['toque', C.soToque], ['alavanca', C.alavanca], ['os-dois', C.osDois]], J.prefs.esquema, (v) => mudar('esquema', v))));
       corpo.append(opcao(C.botoes, C.botoesInfo, ...escolha('botoes', [['normal', C.normal], ['grande', C.grande]], J.prefs.botoes, (v) => mudar('botoes', v))));
+      corpo.append(opcao(C.imagem, C.imagemInfo(!!(J.atlas && J.atlas.leve)), ...escolha('imagem', [['auto', C.imagemAuto], ['nitida', C.imagemNitida], ['leve', C.imagemLeve]], J.prefs.imagem || 'auto', (v) => mudar('imagem', v))));
       if (tela.podeTelaCheia()) {
         const b = botao({ texto: tela.emTelaCheia() ? C.sair : C.entrar, aoClicar: () => { tela.alternarTelaCheia(); setTimeout(() => desenhar('tela-cheia'), 350); } });
         b.dataset.k = 'tela-cheia';

@@ -7,6 +7,7 @@ import { registrarAcao, registrarTipo, registrarModo, registrarEvento, TIPOS } f
 import { ferramentaNoCinto, ferramentaNoSuporte, darItem } from './posses.js';
 import { darXp } from './niveis.js';
 import { OBSTACULOS, tirarObstaculo } from './terras.js';
+import { registrarGuia } from '../guia.js';
 
 const ACAO_DA = { foice: 'rocar', machado: 'cortar', picareta: 'quebrar' };
 const VIZINHAS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]];
@@ -120,3 +121,26 @@ registrarModo({
 
 registrarEvento('limpou', { campos: ['obstaculo', 'x', 'z', 'itens', 'n'], aceita: (dados, f) => f.obstaculo === undefined || (Array.isArray(f.obstaculo) ? f.obstaculo : [f.obstaculo]).some((o) => !!dados.obstaculos[o]) });
 registrarEvento('golpeou', { campos: ['obstaculo', 'x', 'z', 'entidade', 'falta'] });
+
+// o obstáculo mais perto da personagem que dá para limpar agora (em terra própria, com a ferramenta que ela tem,
+// ainda fora da fila e com algum lado livre para chegar); tipos = lista de tipos que servem (null = qualquer um)
+export function obstaculoPerto(m, tipos) {
+  const loc = m.local, p = m.personagem;
+  let melhor = Infinity, achou = null;
+  for (const e of loc.entidades) {
+    if (!TIPOS[e.tipo].obstaculo || (tipos && !tipos.includes(e.tipo)) || !loc.ehPropria(e.x, e.z)) continue;
+    const d = Math.hypot(e.x + 0.5 - p.x, e.z + 0.5 - p.z);
+    if (d >= melhor) continue;
+    if (!(loc.andavel(e.x + 1, e.z) || loc.andavel(e.x - 1, e.z) || loc.andavel(e.x, e.z + 1) || loc.andavel(e.x, e.z - 1))) continue;
+    if (!acaoNoObstaculo(m, e).acao) continue;
+    melhor = d; achou = e;
+  }
+  return achou;
+}
+// missão de limpar: o guia aponta o obstáculo mais perto do tipo pedido
+registrarGuia('limpou', (m, f, out) => {
+  const e = obstaculoPerto(m, f.obstaculo === undefined ? null : Array.isArray(f.obstaculo) ? f.obstaculo : [f.obstaculo]);
+  if (!e) return null;
+  out.tipo = 'entidade'; out.id = e.id;
+  return out;
+});

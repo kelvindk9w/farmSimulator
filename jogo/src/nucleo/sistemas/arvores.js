@@ -14,6 +14,7 @@ import { darXp } from './niveis.js';
 import { VENDAVEL } from './loja.js';
 import { PLANTIOS } from './lavoura.js';
 import { filaTem, contarNaFila } from './personagem.js';
+import { registrarGuia } from '../guia.js';
 
 const NAO = (motivo, dados, limpar) => ({ ok: false, motivo, dados, limpar });
 const SIM = { ok: true };
@@ -225,4 +226,46 @@ registrarSistema({
     }
     for (const e of m.arvores.todas) e.deu = safrasProntas(m, e) > 0; // o que já estava pronto ao gravar não avisa de novo
   },
+});
+
+// ---------- o guia das missões de pomar ----------
+const um = (v) => (Array.isArray(v) ? v[0] : v);
+// a casa livre mais perto da personagem onde a árvore cabe (dentro de "raio" casas), ou null
+export function casaParaArvore(m, id, raio = 8) {
+  const p = m.personagem, x0 = Math.floor(p.x), z0 = Math.floor(p.z);
+  let melhor = Infinity, achou = null;
+  for (let z = z0 - raio; z <= z0 + raio; z++) for (let x = x0 - raio; x <= x0 + raio; x++) {
+    const d = Math.hypot(x + 0.5 - p.x, z + 0.5 - p.z);
+    if (d >= melhor || d < 1 || m.local.chaoEm(x, z) !== GRAMA || filaTem(m, 'plantarMuda', x, z) || !podePlantarArvore(m, x, z, id).ok) continue;
+    melhor = d; achou = [x, z];
+  }
+  return achou;
+}
+function passoPlantarMuda(m, muda, out) {
+  const id = m.dados.arvoreDaMuda[muda];
+  if (!(m.posses.bolsa[muda] > 0)) { out.tipo = 'painel'; out.painel = 'loja'; out.item = muda; return out; }
+  if (mudasLivres(m, muda) <= 0) { out.tipo = null; return out; } // as que há já estão prometidas na fila
+  if (m.modo.id !== 'semear') { out.tipo = 'modo'; out.modo = 'semear'; return out; }
+  if (m.modo.semente !== muda) { out.tipo = 'semente'; out.item = muda; return out; }
+  const c = casaParaArvore(m, id);
+  if (!c) { out.tipo = null; return out; }
+  out.tipo = 'casa'; out.x = c[0]; out.z = c[1];
+  return out;
+}
+registrarGuia('plantou', (m, f, out) => { const muda = um(f.item); return m.dados.arvoreDaMuda[muda] ? passoPlantarMuda(m, muda, out) : null; });
+registrarGuia('colheu', (m, f, out) => {
+  const fruto = um(f.item), a = Object.values(m.dados.arvores).find((x) => x.fruto === fruto);
+  if (!a) return null;
+  const p = m.personagem;
+  let perto = null, melhor = Infinity, espera = Infinity;
+  for (const e of m.arvores.todas) {
+    if (e.arvore !== a.id) continue;
+    if (safrasProntas(m, e) > 0) { const d = Math.hypot(e.x - p.x, e.z - p.z); if (d < melhor && !colheitaNaFila(m, e.id)) { melhor = d; perto = e; } } else espera = Math.min(espera, esperaDaArvore(m, e));
+  }
+  if (perto) {
+    if (espacoNoCesto(m) - frutaPrometida(m) < a.rende) { out.tipo = 'entidade'; out.id = 'banca'; return out; }
+    out.tipo = 'entidade'; out.id = perto.id; return out;
+  }
+  if (espera < Infinity) { out.tipo = 'esperar'; out.seg = espera; return out; }
+  return passoPlantarMuda(m, a.muda, out);
 });

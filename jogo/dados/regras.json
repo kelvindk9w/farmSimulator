@@ -101,7 +101,8 @@
     "expoente": 0.7,
     "gratisAteSeg": 30,
     "vale": ["obra", "fila", "muda"],
-    "nota": "cash = teto(coef × minutos^expoente); de graça se faltar até 30 s. Não vale para cultura, animal nem espera de pedido."
+    "limitePorDia": 20,
+    "nota": "cash = teto(coef × minutos^expoente); de graça se faltar até 30 s. Não vale para cultura, animal nem espera de pedido. \"limitePorDia\": quantas conclusões PAGAS por dia (0 ou ausente = sem limite); as de graça não contam. O 20 é provisório (posto pela frente de progresso): a economia decide o número."
   },
   "antiTrava": {
     "semente": "semente-alface",

@@ -316,7 +316,7 @@ const B_VISTA = {
   costas: 'de COSTAS três quartos, exatamente como a segunda figura da folha de modelo: o corpo virado para o fundo e para a direita de quem olha; a traseira fica em primeiro plano e a cabeça lá na frente, vista de trás',
 };
 // Folha de um bicho. plantado: as patas não saem do lugar (parada, ciscar, pastar); senão é um ciclo de andar.
-function bicho({ nome, artigo = 'a', modelo, igual, arquivo, titulo, n, quadros, vivo, vista, plantado, refs = [], semObjeto = '' }) {
+function bicho({ nome, artigo = 'a', modelo, igual, arquivo, titulo, n, quadros, vivo, vista, plantado, refs = [], semObjeto = '', grade = false }) {
   return `${CABECA}
 - \`referencias/${modelo}.png\`: a FOLHA DE MODELO d${artigo} ${nome} (parad${artigo} de frente três quartos, de costas três quartos e de perfil). Ela manda nas proporções, nas cores e nos detalhes.
 ${refs.join('\n')}${refs.length ? '\n' : ''}
@@ -324,14 +324,14 @@ Preciso da folha de animação d${artigo} MESM${artigo.toUpperCase()} ${nome} ${
 
 Gere uma imagem e salve na pasta atual como \`${arquivo}\`:
 
-- Uma única fileira horizontal com ${n} quadros, da esquerda para a direita, nesta ordem:
+- ${grade ? `DUAS fileiras horizontais, uma em cima da outra, com ${n / 2} quadros cada: a fileira de CIMA tem os quadros 1 a ${n / 2}, a de BAIXO tem os quadros ${n / 2 + 1} a ${n}, sempre da esquerda para a direita. As duas fileiras bem separadas por uma faixa vazia (nada de uma fileira encosta na outra)` : `Uma única fileira horizontal com ${n} quadros, da esquerda para a direita`}, nesta ordem:
 ${quadros.map((q, i) => `  ${i + 1}. ${q}`).join('\n')}
 - ${vivo}
 - Em todos os quadros el${artigo} é vist${artigo} pela mesma câmera da cena (isométrica, de cima), ${B_VISTA[vista]}. ${plantado ? `El${artigo} NÃO sai do lugar: as patas ficam plantadas no mesmo ponto em todos os quadros.` : `El${artigo} anda nessa direção (${P_RUMO[vista]}) sem sair do lugar.`}
 - Os ${n} quadros têm ${artigo} ${nome} do MESMO tamanho (o corpo tem o mesmo tamanho em todos), sobre a mesma linha de base, igualmente espaçados, cada um centrado numa casa de mesma largura, com um vão vazio entre um quadro e o outro (nenhum quadro encosta no vizinho).
 - É ${artigo} MESM${artigo.toUpperCase()} ${nome} da folha de modelo em todos os quadros: ${igual} Mesmas cores chapadas, mesmo traço escuro grosso.
 ${semObjeto ? `- ${semObjeto}\n` : ''}- ${LIMPO}
-${FIM}
+${grade ? FIM.replace('Imagem bem larga (proporção perto de 3 por 1)', 'Imagem na proporção 3 por 2 (largura uma vez e meia a altura), com as duas fileiras ocupando bem o espaço') : FIM}
 `;
 }
 
@@ -542,7 +542,7 @@ for (const vista of ['frente', 'costas']) {
     semObjeto: 'NÃO desenhe terra, sulco, torrões nem ninguém segurando o arado.',
   });
   pedidos[`boi-puxar-${vista}`] = bicho({
-    ...BOI, arquivo: `puxar-${vista}.png`, titulo: 'PUXANDO O ARADO', vista, n: 8, quadros: PASSO8, refs: [...parada(BOI, 'parado'), ...par('puxar')],
+    ...BOI, grade: true, arquivo: `puxar-${vista}.png`, titulo: 'PUXANDO O ARADO', vista, n: 8, quadros: PASSO8, refs: [...parada(BOI, 'parado'), ...par('puxar')],
     vivo: PASSO8_VIVO('Ele faz FORÇA para puxar: o pescoço esticado e a cabeça baixa, empurrando a coalheira; os tirantes de corrente sempre esticados; os ombros trabalham, o rabo balança. O arado vem atrás, sempre na mesma distância do boi e na mesma posição, com um leve tranco para cima e para baixo.'),
     semObjeto: 'NÃO desenhe terra, sulco, torrões, poeira nem ninguém segurando o arado: o jogo faz a terra.',
   });
@@ -560,12 +560,12 @@ for (const vista of ['frente', 'costas']) {
     semObjeto: 'NINGUÉM montado: a sela vazia.',
   });
   pedidos[`cavalo-andar-${vista}`] = bicho({
-    ...CAVALO, arquivo: `andar-${vista}.png`, titulo: 'ANDANDO A PASSO', vista, n: 8, quadros: PASSO8, refs: [...parada(CAVALO, 'parado'), ...par('andar')],
+    ...CAVALO, grade: true, arquivo: `andar-${vista}.png`, titulo: 'ANDANDO A PASSO', vista, n: 8, quadros: PASSO8, refs: [...parada(CAVALO, 'parado'), ...par('andar')],
     vivo: PASSO8_VIVO('A cabeça balança para cima e para baixo a cada passo, a crina e o rabo balançam, os estribos balançam de leve.'),
     semObjeto: 'NINGUÉM montado: a sela vazia.',
   });
   pedidos[`cavalo-galope-${vista}`] = bicho({
-    ...CAVALO, arquivo: `galope-${vista}.png`, titulo: 'GALOPANDO', vista, n: 8, quadros: GALOPE8, refs: [...parada(CAVALO, 'parado'), ...par('galope')],
+    ...CAVALO, grade: true, arquivo: `galope-${vista}.png`, titulo: 'GALOPANDO', vista, n: 8, quadros: GALOPE8, refs: [...parada(CAVALO, 'parado'), ...par('galope')],
     vivo: 'É um GALOPE de verdade, bem diferente do passo: o corpo se encolhe e se estica, as patas da frente e as de trás trabalham em pares, o pescoço esticado para a frente, a crina e o rabo voando para trás, os estribos sacudindo. O cavalo tem o MESMO tamanho de corpo e de cabeça da folha parada anexa.',
     semObjeto: 'NINGUÉM montado: a sela vazia.',
   });
@@ -583,7 +583,7 @@ for (const vista of ['frente', 'costas']) {
     semObjeto: 'NÃO desenhe carga nem condutor: a carroça vazia.',
   });
   pedidos[`jumento-andar-${vista}`] = bicho({
-    ...JUMENTO, arquivo: `andar-${vista}.png`, titulo: 'ANDANDO E PUXANDO A CARROÇA', vista, n: 8, quadros: PASSO8, refs: [...parada(JUMENTO, 'parado'), ...par('andar')],
+    ...JUMENTO, grade: true, arquivo: `andar-${vista}.png`, titulo: 'ANDANDO E PUXANDO A CARROÇA', vista, n: 8, quadros: PASSO8, refs: [...parada(JUMENTO, 'parado'), ...par('andar')],
     vivo: PASSO8_VIVO('A cabeça balança para cima e para baixo, as orelhas compridas balançam, o rabo balança. A carroça vem atrás, sempre na mesma distância e do mesmo tamanho; as RODAS GIRAM: os raios mudam de posição um pouco a cada quadro; a caixa da carroça dá um leve tranco para cima e para baixo.'),
     semObjeto: 'NÃO desenhe carga, condutor, poeira nem marcas de roda: a carroça vazia.',
   });
@@ -670,6 +670,61 @@ Gere uma imagem e salve na pasta atual como \`tosquiar-${vista}.png\`:
 - ${LIMPO}
 ${FIM}
 `;
+}
+
+// ---------- montaria: folha de modelo da interação e a personagem montada (cavalo e personagem num desenho só) ----------
+
+pedidos['modelo-montaria'] = `${CABECA}
+${P_MODELO}
+- \`referencias/cavalo.png\`: a FOLHA DE MODELO do cavalo com sela (de frente três quartos, de costas três quartos e de perfil), sem ninguém montado.
+
+Preciso da FOLHA DE MODELO DA MONTARIA: a personagem MONTADA no cavalo selado. Essa folha vai ser anexada aos pedidos de animação dela a cavalo, para a pose, o tamanho de uma figura em relação à outra e o jeito de sentar saírem sempre iguais.
+
+Gere uma imagem e salve na pasta atual como \`modelo-montaria.png\`:
+
+- Uma única fileira horizontal com 3 desenhos da MESMA personagem montada no MESMO cavalo, parados, da esquerda para a direita, na mesma ordem e nas mesmas vistas da folha de modelo do cavalo:
+  1. de FRENTE três quartos: o cavalo com o corpo virado para a esquerda de quem olha e para a câmera; vê-se o rosto dela e a cara do cavalo;
+  2. de COSTAS três quartos: o cavalo com o corpo virado para o fundo e para a direita de quem olha; vê-se a garupa e o rabo do cavalo em primeiro plano e as costas dela (o coque, o nó do lenço, as costas do macacão);
+  3. de PERFIL: o cavalo todo de lado, com a cabeça para a esquerda de quem olha.
+- Ela está SENTADA NA SELA, de pernas abertas, uma perna de cada lado do cavalo, os pés nos estribos, o tronco reto, as duas mãos à frente segurando as rédeas na altura da cintura, olhando para a frente, contente.
+- Tamanhos certos: é a personagem do tamanho da folha de modelo dela sobre o cavalo do tamanho da folha de modelo dele (em pé no chão, a cabeça dela ficaria na altura das orelhas do cavalo). Montada, a cintura dela fica na altura do lombo do cavalo e a cabeça dela é o ponto mais alto do desenho, bem acima das orelhas do cavalo.
+- É a MESMA personagem da folha de modelo (lenço vermelho com nó, coque castanho, camisa amarela de mangas dobradas, macacão azul com dois botões amarelos, botas marrons) e o MESMO cavalo da folha de modelo (castanho, crina e rabo castanho-escuros, listra branca na testa, quatro meias brancas, sela de couro marrom sobre manta vermelha, estribos, cabeçada e rédeas).
+- Os três desenhos do mesmo tamanho, os cascos na mesma linha de base, bem separados um do outro por um vão vazio largo.
+- Pose de descanso nos três: o cavalo com as quatro patas no chão, retas, cabeça erguida, rabo caído.
+- Tudo visto pela mesma câmera da cena (isométrica, de cima, a cerca de 35 graus), no mesmo estilo: traço escuro grosso, cores chapadas com poucos tons.
+- Fundo transparente de verdade (canal alfa). Sem chão, sem sombra, sem cenário, sem números, sem nomes, sem texto, sem setas, sem linhas de grade, sem moldura.
+- Nada cortado nas bordas. Imagem bem larga (proporção perto de 3 por 1).
+- Arte original; não imite nenhum jogo existente.
+
+No fim, liste os arquivos que salvou.
+`;
+
+for (const vista of ['frente', 'costas']) {
+  for (const [acao, titulo, quadros, vivo] of [
+    ['andar', 'ANDANDO A PASSO', PASSO8, PASSO8_VIVO('A cabeça do cavalo balança para cima e para baixo a cada passo, a crina e o rabo balançam. A personagem acompanha o passo: o quadril dela balança de leve com o lombo do cavalo, o tronco sobe e desce um pouquinho, as mãos com as rédeas vão e vêm de leve, as pontas do lenço balançam.')],
+    ['galope', 'GALOPANDO', GALOPE8, 'É um GALOPE de verdade: o cavalo se encolhe e se estica, o pescoço esticado para a frente, a crina e o rabo voando para trás. A personagem galopa junto: inclinada para a frente, levanta um pouco da sela quando o cavalo se estica e senta quando ele se recolhe, os cotovelos dobrados, as rédeas curtas, as pontas do lenço voando para trás. O cavalo e a personagem têm o MESMO tamanho da folha de modelo da montaria.'],
+  ]) {
+    pedidos[`personagem-montada-${acao}-${vista}`] = `${CABECA}
+${P_MODELO}
+- \`referencias/cavalo.png\`: a FOLHA DE MODELO do cavalo com sela.
+- \`referencias/montaria.png\`: a FOLHA DE MODELO DA MONTARIA (a personagem montada no cavalo, de frente três quartos, de costas três quartos e de perfil). Ela manda na pose dela na sela e no tamanho de uma figura em relação à outra.
+- \`referencias/cavalo-${acao}-${vista}.png\`: a folha de animação já pronta do MESMO cavalo, SEM ninguém montado, na mesma ação e na mesma vista. O cavalo desta folha nova faz EXATAMENTE o mesmo movimento, quadro a quadro, na mesma ordem e no mesmo formato de folha; a diferença é que agora a personagem vai montada.
+${vista === 'costas' ? `- \`referencias/montada-${acao}-frente.png\`: a folha já pronta da mesma ação com a personagem montada, vista de frente (dá o jeito dela na sela; aqui tudo é visto de costas).\n` : ''}
+Preciso da folha de animação da personagem MONTADA NO CAVALO, ${titulo}, vista ${vista === 'frente' ? 'de FRENTE' : 'de COSTAS'} três quartos, para usar como figura 2D animada dentro do jogo. O cavalo e a personagem são um desenho só em cada quadro.
+
+Gere uma imagem e salve na pasta atual como \`montada-${acao}-${vista}.png\`:
+
+- DUAS fileiras horizontais, uma em cima da outra, com 4 quadros cada: a fileira de CIMA tem os quadros 1 a 4, a de BAIXO tem os quadros 5 a 8, sempre da esquerda para a direita. As duas fileiras bem separadas por uma faixa vazia (nada de uma fileira encosta na outra). Os quadros, pelo movimento do cavalo:
+${quadros.map((q, i) => `  ${i + 1}. ${q}`).join('\n')}
+- ${vivo}
+- Ela vai SENTADA NA SELA em todos os quadros, uma perna de cada lado, os pés nos estribos, as duas mãos segurando as rédeas, como na folha de modelo da montaria.
+- Em todos os quadros o conjunto é visto pela mesma câmera da cena (isométrica, de cima), ${B_VISTA[vista].replace('a cara aparece', 'aparecem a cara do cavalo e o rosto dela').replace('a traseira fica em primeiro plano e a cabeça lá na frente, vista de trás', 'a garupa do cavalo fica em primeiro plano e vemos as costas dela')}. O cavalo anda nessa direção (${P_RUMO[vista]}) sem sair do lugar.
+- Os 8 quadros têm o cavalo e a personagem do MESMO tamanho (a cabeça dela e o corpo do cavalo têm o mesmo tamanho em todos), cada fileira sobre a sua linha de base, igualmente espaçados, cada um centrado numa casa de mesma largura, com um vão vazio entre um quadro e o outro (nenhum quadro encosta no vizinho).
+- ${P_MESMA} E o MESMO cavalo da folha de modelo: ${CAVALO.igual}
+- ${LIMPO}
+${FIM.replace('Imagem bem larga (proporção perto de 3 por 1)', 'Imagem na proporção 3 por 2 (largura uma vez e meia a altura), com as duas fileiras ocupando bem o espaço')}
+`;
+  }
 }
 
 const quais = process.argv.slice(2);

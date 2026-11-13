@@ -1,6 +1,6 @@
 // O que as partes do jogo no navegador compartilham: o mundo em uso, os dados, o desenho e as preferências.
 // main.js preenche; interface e entrada só leem (e chamam J.mundo.comando).
-export const PREFS_PADRAO = { som: true, esquema: 'os-dois', botoes: 'normal', zoom: 0 };
+export const PREFS_PADRAO = { som: true, esquema: 'os-dois', botoes: 'normal', zoom: 0, imagem: 'auto' }; // imagem: 'auto' | 'nitida' | 'leve'
 
 export const J = {
   dados: null, // o que prepararDados() devolveu

@@ -1,13 +1,20 @@
 // O catálogo de arte em uso: o build junta as peças em páginas (dist/arte/<grupo>-<n>-<resumo>.png) e descreve
 // cada quadro em atlas.json. Cada grupo só é baixado quando uma peça dele é pedida pela primeira vez.
 // Peça que não existe (ou cuja página ainda não chegou) é desenhada pela figura de reserva (reserva.js).
+//
+// Duas qualidades de imagem (escolhida ao abrir o jogo; plataforma/qualidade.js):
+//   nítida  baixa a página inteira e faz na hora uma cópia pela metade, usada quando o zoom é pequeno
+//   leve    baixa só a página "-m" (metade do tamanho, um quarto da memória e do peso): celular fraco e TV
+// As coordenadas dos quadros valem para as duas: cada página guarda o fator "d" (1 ou 0,5) da sua imagem.
 
 export class Atlas {
   // def = { paginas: [{ arquivo, grupo, l, a }], pecas: { chave: { g, e, casa, apoio, qps, laco, q: [[pagina, x, y, w, h, dx, dy], ...] } } }
-  constructor(def, base = './') {
+  constructor(def, base = './', opc = {}) {
     this.def = def || { paginas: [], pecas: {} };
     this.base = base;
-    this.paginas = this.def.paginas.map((p) => ({ ...p, estado: 'nao', img: null, meia: null }));
+    this.leve = !!opc.leve;
+    // img = a imagem baixada; d = tamanho dela em relação às coordenadas (1 ou 0,5); pequena = cópia pela metade (só na nítida)
+    this.paginas = this.def.paginas.map((p) => ({ ...p, estado: 'nao', img: null, d: 1, pequena: null }));
     this.pecas = this.def.pecas;
     this.aoCarregar = null; // chamado quando uma página chega (a interface redesenha os ícones)
     this.falhas = [];
@@ -34,21 +41,24 @@ export class Atlas {
       if (pg.grupo !== grupo || pg.estado !== 'nao') continue;
       pg.estado = 'carregando';
       const img = new Image();
+      const leve = this.leve && !!pg.meia, arquivo = leve ? pg.meia : pg.arquivo;
       img.onload = () => {
-        pg.img = img; pg.estado = 'pronta';
-        // metade do tamanho, para a figura não serrilhar quando o zoom é pequeno
-        try {
-          const c = document.createElement('canvas');
-          c.width = Math.max(1, img.width >> 1); c.height = Math.max(1, img.height >> 1);
-          const g = c.getContext('2d');
-          g.imageSmoothingQuality = 'high';
-          g.drawImage(img, 0, 0, c.width, c.height);
-          pg.meia = c;
-        } catch (e) { pg.meia = null; }
+        pg.img = img; pg.d = leve ? 0.5 : 1; pg.estado = 'pronta';
+        // na imagem nítida: uma cópia pela metade, para a figura não serrilhar quando o zoom é pequeno
+        if (!leve) {
+          try {
+            const c = document.createElement('canvas');
+            c.width = Math.max(1, img.width >> 1); c.height = Math.max(1, img.height >> 1);
+            const g = c.getContext('2d');
+            g.imageSmoothingQuality = 'high';
+            g.drawImage(img, 0, 0, c.width, c.height);
+            pg.pequena = c;
+          } catch (e) { pg.pequena = null; }
+        }
         if (this.aoCarregar) this.aoCarregar(grupo);
       };
-      img.onerror = () => { pg.estado = 'falhou'; this.falhas.push(pg.arquivo); console.warn('arte: a página ' + pg.arquivo + ' não carregou; as peças dela usam a figura de reserva'); };
-      img.src = this.base + pg.arquivo;
+      img.onerror = () => { pg.estado = 'falhou'; this.falhas.push(arquivo); console.warn('arte: a página ' + arquivo + ' não carregou; as peças dela usam a figura de reserva'); };
+      img.src = this.base + arquivo;
     }
   }
   // baixa já todos os grupos (as ferramentas de captura esperam por isso)
@@ -63,8 +73,8 @@ export class Atlas {
     const n = p.q.length, f = p.q[quadro < 0 ? 0 : quadro >= n ? n - 1 : quadro | 0], pg = this.paginas[f[0]];
     if (pg.estado !== 'pronta') { if (pg.estado === 'nao') this._baixarGrupo(pg.grupo); return false; }
     const k = S / p.e; // pontos do canvas por ponto da peça
-    const meia = k <= 0.55 && pg.meia;
-    const src = meia ? pg.meia : pg.img, d = meia ? 0.5 : 1;
+    const pequena = k <= 0.55 && pg.pequena;
+    const src = pequena || pg.img, d = pequena ? 0.5 : pg.d;
     const dx = (f[5] - p.apoio[0]) * k, dy = (f[6] - p.apoio[1]) * k * escalaY, w = f[3] * k, h = f[4] * k * escalaY;
     if (espelhar) {
       g.save(); g.translate(sx, sy); g.scale(-1, 1);

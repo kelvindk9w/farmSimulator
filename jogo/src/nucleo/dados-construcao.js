@@ -1,6 +1,6 @@
 // Lê construcoes.json (já em memória) e entrega no formato que a lógica usa: dados.construcoes[id].
 // Os números são da economia; aqui só se confere o formato e se preenche o que é opcional.
-//   { id, nome, tipo, onde, casas: [l, p], nivel, descricao, inicial, bloqueia, plano,
+//   { id, nome, tipo, onde, casas: [l, p], nivel, descricao, inicial, bloqueia, plano, chao,
 //     custo: { ouro, cash, itens } | null, obraSeg, exige: [id], limite (0 = sem limite), xp,
 //     ampliacoes: [{ nome, nivel, custo: { ouro, cash, itens }, cash, obraSeg, xp, ...o que muda }],
 //     ...e o que mais vier no arquivo (vagas, cocho, bebedouro, fila, guarda, capacidade, interior, efeito) }
@@ -32,6 +32,7 @@ export function prepararConstrucoes(bruto, itens, erro, aviso) {
       ...c, id, nome: c.nome || id, tipo: c.tipo || 'util', onde: c.onde === 'celeiro' ? 'celeiro' : 'fazenda', casas,
       nivel: num(c.nivel) ? c.nivel : 1, descricao: c.descricao || '', inicial: !!c.inicial,
       bloqueia: c.bloqueia !== false, plano: !!c.plano, // plano = calçamento: fica rente ao chão e não tapa nada
+      chao: c.chao === 'caminho' || c.plano ? 'caminho' : null, // deixa o chão batido debaixo dela (calçamento, porteira): ali a enxada não ara
       custo: custoDe(c.custo, itens, erro, onde), obraSeg: c.obraSeg > 0 ? c.obraSeg : 0,
       exige: Array.isArray(c.exige) ? c.exige.filter((x) => typeof x === 'string') : [],
       limite: c.limite >= 1 ? Math.round(c.limite) : 0, xp: num(c.xp) ? c.xp : 0,

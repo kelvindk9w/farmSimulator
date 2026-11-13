@@ -39,6 +39,16 @@
    "arquivo": "tosquia.png",
    "pedido": "modelo-tosquia.md",
    "nota": "Folha de modelo da INTERAÇÃO: a personagem ajoelhada tosquiando a ovelha, vista por trás dela, pela frente dela (a ovelha em primeiro plano) e a pose dela sozinha com a tesoura. Anexada aos pedidos de tosquiar. Uma rodada."
+  },
+  "boi": {
+   "arquivo": "boi.png",
+   "pedido": "modelo-boi.md",
+   "nota": "Boi de trabalho caramelo com coalheira, tirantes de corrente e o arado de madeira atrás: frente, costas e perfil. O arado faz parte da figura. Uma rodada."
+  },
+  "cavalo": {
+   "arquivo": "cavalo.png",
+   "pedido": "modelo-cavalo.md",
+   "nota": "Cavalo castanho com sela de couro sobre manta vermelha, estribos, cabeçada e rédeas; ninguém montado: frente, costas e perfil. Uma rodada."
   }
  },
  "folhas": {
@@ -298,6 +308,11 @@
    "pedido": "ovelha-tosquiada-parada-costas.md",
    "rodadas": 1,
    "nota": "Par da de frente (194 pontos de altura; tamanho pela massa 119)."
+  },
+  "animal/ovelha-tosquiada/andar-costas": {
+   "pedido": "ovelha-tosquiada-andar-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente; saiu mais saltitante (as patas encolhem nos quadros 3 e 6). Tamanho pela massa 116."
   }
  },
  "geral": [

@@ -6,6 +6,7 @@ import { gastarOuro } from './posses.js';
 import { darXp } from './niveis.js';
 import { JA_COMPROU } from './loja.js';
 import { loteDe, loteComprado, liberarLote, idDaPlaca } from './terras.js';
+import { registrarGuia } from '../guia.js';
 
 const nomeDoLote = (l) => l.nome || l.id;
 
@@ -76,4 +77,12 @@ registrarSistema({
       return { ok: true, dados };
     },
   },
+});
+
+// missão de comprar um lote: o guia aponta a placa dele (o toque nela abre a compra)
+registrarGuia('comprou', (m, f, out) => {
+  const id = Array.isArray(f.lote) ? f.lote[0] : f.lote;
+  if (!id || !m.local.porId[idDaPlaca(id)]) return null;
+  out.tipo = 'entidade'; out.id = idDaPlaca(id);
+  return out;
 });

@@ -108,6 +108,7 @@ export const T = {
     esquema: 'Controle no toque', esquemaInfo: 'Tocar no chão, alavanca com botão de ação, ou os dois', soToque: 'Só toque', alavanca: 'Alavanca', osDois: 'Os dois',
     botoes: 'Tamanho dos botões', botoesInfo: 'Botões maiores para dedos e para a TV', normal: 'Normal', grande: 'Grande',
     telaCheia: 'Tela cheia', telaCheiaInfo: 'Esconde as barras do navegador', entrar: 'Entrar', sair: 'Sair',
+    imagem: 'Imagem', imagemInfo: (leve) => `Leve gasta menos memória e internet. Agora: ${leve ? 'leve' : 'nítida'}. A troca vale ao abrir o jogo de novo.`, imagemAuto: 'Automática', imagemNitida: 'Nítida', imagemLeve: 'Leve',
     gravacao: 'Gravação', gravacaoInfo: 'O jogo grava sozinho, o tempo todo. A fazenda fica guardada neste aparelho; use Exportar para ter uma cópia.',
     semGravacao: 'Este navegador não deixa gravar neste aparelho. Use Exportar e guarde o texto para não perder a fazenda.',
     exportar: 'Exportar', exportarInfo: 'Copie este texto e guarde. Ele é a sua fazenda inteira.', copiar: 'Copiar', copiado: 'Copiado!', naoCopiou: 'Não deu para copiar sozinho: o texto está selecionado, copie por ele.',

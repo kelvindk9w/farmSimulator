@@ -1,12 +1,13 @@
 // Junta as peças do catálogo de arte (arte/catalogo/<grupo>.json) em páginas de atlas, uma ou mais por grupo.
 // Cada peça é uma tira de quadros lado a lado, todos do tamanho da "casa"; aqui cada quadro perde a borda vazia
-// e vai para a página com 2 pontos de folga. O jogo recebe a descrição em atlas.json (formato em src/render/atlas.js).
+// e vai para a página com 4 pontos de folga. Cada página sai em dois tamanhos: inteira (imagem nítida) e pela metade
+// ("-m", imagem leve, um quarto da memória: celular fraco e TV). O jogo recebe a descrição em atlas.json (formato em src/render/atlas.js).
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import sharp from 'sharp';
 
-const LADO = 2048, FOLGA = 2;
+const LADO = 2048, FOLGA = 4; // folga de 4 para a página de metade do tamanho ainda ter 2 pontos entre as peças
 
 function resumoDe(partes) { const h = crypto.createHash('sha1'); for (const p of partes) h.update(p); return h.digest('hex').slice(0, 10); }
 
@@ -48,12 +49,12 @@ function caixaDoQuadro(dados, larg, x0, cw, ch) {
 // monta as páginas em pastaSaida (dist/arte) e devolve a descrição; reaproveita o que já está lá se nada mudou
 export async function montarAtlas(pastaArte, pastaSaida) {
   const { grupos, entradas, avisos } = lerCatalogos(pastaArte);
-  const resumo = resumoDe(['v3', ...entradas]);
+  const resumo = resumoDe(['v4', ...entradas]);
   const arqDef = path.join(pastaSaida, 'atlas.json');
   if (fs.existsSync(arqDef)) {
     try {
       const velho = JSON.parse(fs.readFileSync(arqDef, 'utf8'));
-      if (velho.resumo === resumo && velho.paginas.every((p) => fs.existsSync(path.join(pastaSaida, '..', p.arquivo)))) return { def: velho, avisos, reaproveitado: true };
+      if (velho.resumo === resumo && velho.paginas.every((p) => fs.existsSync(path.join(pastaSaida, '..', p.arquivo)) && p.meia && fs.existsSync(path.join(pastaSaida, '..', p.meia)))) return { def: velho, avisos, reaproveitado: true };
     } catch { /* refaz */ }
   }
   fs.rmSync(pastaSaida, { recursive: true, force: true });
@@ -91,6 +92,7 @@ export async function montarAtlas(pastaArte, pastaSaida) {
       x += f.w + FOLGA; alto = Math.max(alto, f.h);
       pg.l = Math.max(pg.l, f.px + f.w + FOLGA); pg.a = Math.max(pg.a, f.py + f.h + FOLGA);
     }
+    for (const p of paginas) { p.l += p.l & 1; p.a += p.a & 1; } // lados pares: a página de metade casa ponto a ponto
     // 3. pinta e grava cada página
     for (const p of paginas) {
       if (!p.itens.length) continue;
@@ -103,10 +105,13 @@ export async function montarAtlas(pastaArte, pastaSaida) {
         }
       }
       const png = await sharp(buf, { raw: { width: p.l, height: p.a, channels: 4 } }).png({ compressionLevel: 9, effort: 7 }).toBuffer();
-      const nome = `${grupo}-${paginas.indexOf(p) + 1}-${resumoDe([png])}.png`;
+      const base = `${grupo}-${paginas.indexOf(p) + 1}-${resumoDe([png])}`, nome = base + '.png', nomeMeia = base + '-m.png';
       fs.writeFileSync(path.join(pastaSaida, nome), png);
+      // a mesma página pela metade (as coordenadas do jogo valem para as duas: ele multiplica por 0,5)
+      const meia = await sharp(buf, { raw: { width: p.l, height: p.a, channels: 4 } }).resize(p.l / 2, p.a / 2, { kernel: 'lanczos3' }).png({ compressionLevel: 9, effort: 7 }).toBuffer();
+      fs.writeFileSync(path.join(pastaSaida, nomeMeia), meia);
       const indice = def.paginas.length;
-      def.paginas.push({ arquivo: 'arte/' + nome, grupo, l: p.l, a: p.a });
+      def.paginas.push({ arquivo: 'arte/' + nome, meia: 'arte/' + nomeMeia, grupo, l: p.l, a: p.a });
       for (const f of p.itens) { f.q[0] = indice; f.q[1] = f.px; f.q[2] = f.py; }
     }
   }

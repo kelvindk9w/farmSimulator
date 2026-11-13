@@ -9,7 +9,7 @@ Preciso da folha de animação do MESMO cavalo selado ANDANDO A PASSO, visto de 
 
 Gere uma imagem e salve na pasta atual como `andar-frente.png`:
 
-- Uma única fileira horizontal com 8 quadros, da esquerda para a direita, nesta ordem:
+- DUAS fileiras horizontais, uma em cima da outra, com 4 quadros cada: a fileira de CIMA tem os quadros 1 a 4, a de BAIXO tem os quadros 5 a 8, sempre da esquerda para a direita. As duas fileiras bem separadas por uma faixa vazia (nada de uma fileira encosta na outra), nesta ordem:
   1. A pata de TRÁS do lado da câmera (a mais perto de quem olha) sai do chão, dobrada, o casco um pouco levantado. As outras três apoiadas.
   2. Essa pata de trás pousa um pouco à frente. O quadril desse lado desce de leve.
   3. A pata da FRENTE do mesmo lado sai do chão, dobrada no joelho.
@@ -24,7 +24,7 @@ Gere uma imagem e salve na pasta atual como `andar-frente.png`:
 - É o MESMO cavalo selado da folha de modelo em todos os quadros: pelo castanho, crina e rabo castanho-escuros, listra branca na testa, quatro meias brancas, sela de couro marrom sobre manta vermelha, estribos, cabeçada e rédeas. Mesmas cores chapadas, mesmo traço escuro grosso.
 - NINGUÉM montado: a sela vazia.
 - Fundo transparente de verdade (canal alfa). Sem chão, sem sombra, sem cenário, sem poeira, sem riscos de movimento, sem gotas, sem brilhos, sem números, sem texto, sem linhas de grade, sem moldura.
-- Nada cortado nas bordas. Imagem bem larga (proporção perto de 3 por 1).
+- Nada cortado nas bordas. Imagem na proporção 3 por 2 (largura uma vez e meia a altura), com as duas fileiras ocupando bem o espaço.
 - Arte original; não imite nenhum jogo existente.
 
 No fim, liste os arquivos que salvou.

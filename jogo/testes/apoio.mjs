@@ -7,6 +7,7 @@ import { Mundo } from '../src/nucleo/mundo.js';
 import { prepararDados } from '../src/nucleo/dados.js';
 import { ocupada } from '../src/nucleo/sistemas/personagem.js';
 import { plantaEm, estadoDaPlanta } from '../src/nucleo/sistemas/lavoura.js';
+import { colocar } from '../src/nucleo/sistemas/construcao.js';
 
 const aqui = path.dirname(fileURLToPath(import.meta.url));
 
@@ -69,3 +70,10 @@ export function plantarAtePronta(m, casas, semente = 'semente-rabanete') {
 // pula o relógio como quem fecha o jogo e volta depois
 export const pular = (m, seg) => m.acertarRelogio(m.agora + seg * 1000);
 export const CAMPO = [[12, 13], [13, 13], [12, 14], [13, 14]];
+
+// ---------- construções (frente A) ----------
+// põe uma construção já pronta em (x, z), sem cobrar, sem obra e sem evento: porConstrucao(m, 'galinheiro', 11, 12).
+// opc = { local, nivel, obraSeg } (obraSeg > 0 = nasce em obra). Devolve a entidade.
+export const porConstrucao = (m, id, x, z, opc = {}) => colocar(m, id, x, z, { quieto: true, ...opc });
+// dá ouro e materiais para construir à vontade: rico(m, { madeira: 10, tabua: 10 })
+export function rico(m, itens = {}, ouro = 1000) { m.posses.ouro += ouro; for (const k in itens) m.posses.bolsa[k] = (m.posses.bolsa[k] || 0) + itens[k]; return m; }

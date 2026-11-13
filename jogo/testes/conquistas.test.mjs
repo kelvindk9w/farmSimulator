@@ -1,7 +1,7 @@
 // Conquistas: contam qualquer evento, ficam prontas para receber e entregam o prêmio quando o jogador recebe.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { dadosDeTeste, ouvirTudo, arar, tocarEm, colher, plantarAtePronta, CAMPO } from './apoio.mjs';
+import { dadosDeTeste, ouvirTudo, ateParar, arar, tocarEm, colher, plantarAtePronta, CAMPO } from './apoio.mjs';
 import { comProgresso, mundoComProgresso } from './apoio-progresso.mjs';
 import { Mundo } from '../src/nucleo/mundo.js';
 import { darXp } from '../src/nucleo/sistemas/niveis.js';
@@ -42,15 +42,20 @@ test('a conquista conta o evento, fica pronta no marco e só paga quando o jogad
 });
 
 test('o filtro escolhe os eventos, "soma" soma um campo e "conta: nivel" vale o nível', () => {
-  const m = mundoComProgresso();
+  const m = mundoComProgresso(), ev = ouvirTudo(m);
   m.posses.bolsa['semente-rabanete'] = 8;
-  plantarAtePronta(m, CAMPO);
-  colher(m, CAMPO);
-  assert.equal(de(m, 'so-rabanete').valor, 4, 'colheu { item: rabanete, n }: soma as unidades');
+  plantarAtePronta(m, CAMPO.slice(0, 2));
+  colher(m, CAMPO.slice(0, 2));
+  const colhidos = ev.de('colheu').reduce((s, d) => s + d.n, 0);
+  assert.ok(colhidos >= 3);
+  assert.equal(de(m, 'so-rabanete').valor, colhidos, 'colheu { item: rabanete, n }: soma as unidades');
   assert.equal(de(m, 'so-rabanete').prontas, 1);
-  tocarEm(m, 'banca');
-  let n = 0; while (m.personagem.fila.length + (m.personagem.acao ? 1 : 0) + (m.personagem.tarefa ? 1 : 0) > 0 && n++ < 3000) m.passo();
-  assert.equal(de(m, 'bom-de-venda').valor, 16, 'vendeu { ouro }: 4 rabanetes a 4');
+  m.eventos.emitir('colheu', { item: 'milho', n: 50 });
+  assert.equal(de(m, 'so-rabanete').valor, colhidos, 'milho não está no filtro');
+  tocarEm(m, 'banca'); ateParar(m);
+  const vendido = ev.de('vendeu').reduce((s, d) => s + d.ouro, 0);
+  assert.ok(vendido >= 10);
+  assert.equal(de(m, 'bom-de-venda').valor, vendido, 'vendeu { ouro }: soma o ouro, não as unidades');
   assert.equal(de(m, 'bom-de-venda').prontas, 1);
 
   assert.equal(de(m, 'fazendeiro').valor, m.progresso.nivel);

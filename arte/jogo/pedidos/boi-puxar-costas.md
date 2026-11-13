@@ -10,7 +10,7 @@ Preciso da folha de animação do MESMO boi com o arado PUXANDO O ARADO, visto d
 
 Gere uma imagem e salve na pasta atual como `puxar-costas.png`:
 
-- Uma única fileira horizontal com 8 quadros, da esquerda para a direita, nesta ordem:
+- DUAS fileiras horizontais, uma em cima da outra, com 4 quadros cada: a fileira de CIMA tem os quadros 1 a 4, a de BAIXO tem os quadros 5 a 8, sempre da esquerda para a direita. As duas fileiras bem separadas por uma faixa vazia (nada de uma fileira encosta na outra), nesta ordem:
   1. A pata de TRÁS do lado da câmera (a mais perto de quem olha) sai do chão, dobrada, o casco um pouco levantado. As outras três apoiadas.
   2. Essa pata de trás pousa um pouco à frente. O quadril desse lado desce de leve.
   3. A pata da FRENTE do mesmo lado sai do chão, dobrada no joelho.
@@ -25,7 +25,7 @@ Gere uma imagem e salve na pasta atual como `puxar-costas.png`:
 - É o MESMO boi com o arado da folha de modelo em todos os quadros: pelo caramelo, focinho claro, chifres claros, cupim pequeno, coalheira no pescoço, tirantes de corrente e o ARADO de madeira com ferro cinza e duas rabiças logo atrás dele, sempre inteiro e do mesmo tamanho. Mesmas cores chapadas, mesmo traço escuro grosso.
 - NÃO desenhe terra, sulco, torrões, poeira nem ninguém segurando o arado: o jogo faz a terra.
 - Fundo transparente de verdade (canal alfa). Sem chão, sem sombra, sem cenário, sem poeira, sem riscos de movimento, sem gotas, sem brilhos, sem números, sem texto, sem linhas de grade, sem moldura.
-- Nada cortado nas bordas. Imagem bem larga (proporção perto de 3 por 1).
+- Nada cortado nas bordas. Imagem na proporção 3 por 2 (largura uma vez e meia a altura), com as duas fileiras ocupando bem o espaço.
 - Arte original; não imite nenhum jogo existente.
 
 No fim, liste os arquivos que salvou.
