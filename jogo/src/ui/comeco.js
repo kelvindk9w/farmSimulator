@@ -1,7 +1,8 @@
 // A interface do começo humilde (a lógica está em nucleo/sistemas/comeco.js; o desenho, em render/comeco.js):
 //   - a chegada, no jogo novo: a cena começa sozinha (menos no modo #teste das ferramentas), com o botão "Pular" no
-//     canto; o balão fica escondido enquanto ela anda. No fim do caminho ela fala primeiro (o balão com o nome e o
-//     retrato dela, e "+6 sementes de alface" saindo da trouxa); depois o Seu Tonho acena e dá as boas-vindas.
+//     canto; o balão fica escondido enquanto ela anda. No fim do caminho ela fala primeiro, em dois balões com o nome
+//     e o retrato dela (retrato/personagem, depois retrato/personagem-alegre, quando "+6 sementes de alface" sai da
+//     trouxa); depois o Seu Tonho acena e dá as boas-vindas (com o retrato alegre dele).
 //     Qualquer toque na tela também termina a cena (a lógica cuida disso: o jogo nunca fica preso).
 //   - só na versão de teste (regras.json versaoDeTeste): ao abrir uma gravação de um começo mais antigo que o desta
 //     versão, pergunta uma vez se quer começar de novo (a fazenda deste aparelho é apagada).
@@ -55,12 +56,24 @@ aoInstalarMundo((m, ctx) => {
   esconderBalao(ctx, false);
 
   // a chegada: ela fala primeiro (as sementes saem da trouxa); o Seu Tonho responde com as boas-vindas (uma vez só)
-  ev.ouvir('elaFalou', (d) => {
+  const daTrouxa = (itens) => {
     const p = m.personagem;
-    esconderBalao(ctx, false);
-    if (ctx && ctx.tutorial) ctx.tutorial.dizer(D.elaNome, T.comeco.fala, d.seg || 4.5, { nome: D.elaNome, retrato: 'retrato/' + D.elaId });
-    for (const id in d.itens) part.texto(T.comeco.daTrouxa(d.itens[id], nomeDoItem(m.dados, id)), p.x, 1.9, p.z, VERDE);
+    for (const id in itens) part.texto(T.comeco.daTrouxa(itens[id], nomeDoItem(m.dados, id)), p.x, 1.9, p.z, VERDE);
     part.brilho(p.x, 1.0, p.z, 4);
+  };
+  ev.ouvir('elaFalou', (d) => {
+    esconderBalao(ctx, false);
+    const partes = T.comeco.fala, seg = d.seg || 5.5, letras = partes.reduce((s, f) => s + f.texto.length, 0);
+    let trouxe = false, usado = 0;
+    const abrir = () => { if (!trouxe) { trouxe = true; daTrouxa(d.itens); } };
+    partes.forEach((f, i) => {
+      // (cada balão fica o tempo do tamanho dele, no mínimo 2 s; o último fecha a conta da fala, quando ele responde)
+      const t = i < partes.length - 1 ? Math.max(2, (seg * f.texto.length) / letras) : Math.max(2, seg - usado);
+      usado += t;
+      const quem = { nome: D.elaNome, retrato: 'retrato/' + D.elaId + (f.cara ? '-' + f.cara : '') };
+      if (ctx && ctx.tutorial) ctx.tutorial.dizer(D.elaNome, f.texto, t, quem, f.trouxa ? abrir : null);
+    });
+    if (!ctx || !ctx.tutorial) abrir();
   });
   let deuBoasVindas = false;
   const boasVindas = () => {
@@ -110,9 +123,9 @@ aoInstalarMundo((m, ctx) => {
   abriu = true;
   if (primeira && !J.teste && querComecoNovo(m)) depoisDoCarregando(() => {
     if (J.mundo !== m || !querComecoNovo(m)) return;
+    const P = T.comeco.comecoNovo;
+    if (!perguntar({ titulo: P.titulo, texto: P.texto, nota: P.nota, sim: P.sim, nao: P.nao, classeSim: 'ruim', aoSim: () => J.trocarMundo(null) })) return;
     m.comando({ tipo: 'perguntouComecoNovo' });
     J.gravarLogo();
-    const P = T.comeco.comecoNovo;
-    perguntar({ titulo: P.titulo, texto: P.texto, nota: P.nota, sim: P.sim, nao: P.nao, classeSim: 'ruim', aoSim: () => J.trocarMundo(null) });
   });
 });

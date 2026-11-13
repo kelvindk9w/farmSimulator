@@ -31,8 +31,12 @@ const PRONTA = {
 
 T.comeco = {
   pular: 'Pular',
-  // na chegada ela fala primeiro (o nome e o retrato vêm de missoes.json "ela"); depois o Seu Tonho responde
-  fala: 'Vim tentar a vida aqui. Trouxe minha enxada e umas sementes para começar.',
+  // na chegada ela fala primeiro, em dois balões (o nome e o retrato vêm de missoes.json "ela"; "cara": o retrato
+  // retrato/<id> ou retrato/<id>-<cara>); no segundo, as sementes saem da trouxa. Depois o Seu Tonho responde.
+  fala: [
+    { texto: 'Vim tentar a vida aqui.', cara: '' },
+    { texto: 'Trouxe minha enxada e umas sementes para começar.', cara: 'alegre', trouxa: true },
+  ],
   daTrouxa: (n, nome) => `+${numero(n)} ${n === 1 ? minus(nome) : plural(minus(nome))}`,
   boasVindas: { titulo: 'Seu Tonho', fala: 'Seja bem-vinda! A fazenda é sua: está velhinha, mas a terra é boa. Vou te ajudando.' },
   // só na versão de teste: a gravação é de um começo mais antigo que o desta versão (pergunta uma vez)

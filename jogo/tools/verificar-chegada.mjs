@@ -1,11 +1,14 @@
 // Confere a chegada do jogo novo (o começo humilde) no jogo montado, num Chromium sem janela, com cliques e toques de
-// verdade: ela entra pela porteira de costas para a câmera, com a trouxa, até perto do Seu Tonho; ele acena quando ela
-// passa da cerca e dá as boas-vindas; o botão "Pular" fica no canto e o balão do vizinho só aparece depois do aceno;
-// pular (botão ou toque no chão) termina a cena na hora, e nada fica preso; no jogo de verdade (sem #teste) a cena
-// começa sozinha (parada na porteira enquanto a tela de carregando estiver à vista) e não volta depois de gravar.
-// Também a fazenda do começo: casa e poço velhos, caixote, baú, cerca de arame, sem celeiro, banca nem quadro; e a
-// gravação de antes (testes/gravacoes) abrindo com a fazenda de antes. Em 1280x720 (mouse) e 844x390 (celular
-// deitado, dedo). Fotos h-*.jpg (a chegada quadro a quadro). Termina com "Tudo certo." ou com a lista das falhas.
+// verdade: ela entra pela porteira de costas para a câmera, com a trouxa, até perto do Seu Tonho; no fim do caminho
+// ela fala primeiro, em dois balões com o nome e o retrato dela (neutro, depois alegre, quando "+6 sementes de
+// alface" sai da trouxa); depois ele acena e dá as boas-vindas; o botão "Pular" fica no canto e o balão fica
+// escondido enquanto ela anda; pular (botão ou toque no chão) termina a cena na hora, e nada fica preso; no jogo de
+// verdade (sem #teste) a cena começa sozinha (parada na porteira enquanto a tela de carregando estiver à vista) e
+// não volta depois de gravar. Também a fazenda do começo: casa e poço velhos, caixote, baú, cerca de arame, sem
+// celeiro, banca nem quadro; e a gravação de antes (testes/gravacoes) abrindo com a fazenda de antes, com a pergunta
+// da versão de teste (uma vez só: "Agora não" deixa a fazenda de antes; "Sim" começa o jogo novo). Em 1280x720
+// (mouse) e 844x390 (celular deitado, dedo). Fotos h-*.jpg (a chegada quadro a quadro). Termina com "Tudo certo." ou
+// com a lista das falhas.
 //   JOGO_DIST=dist-x JOGO_CAPTURAS=capturas-x node tools/verificar-chegada.mjs     (monte antes: npm run build)
 import fs from 'node:fs';
 import path from 'node:path';
@@ -45,14 +48,36 @@ const J = (pg, f, arg) => pg.evaluate(f, arg);
 const foto = async (pg, nome) => { await J(pg, () => window.__jogo.desenhar()); await esperar(150); await pg.screenshot({ path: path.join(capturas, nome), type: 'jpeg', quality: 84 }); };
 const cena = (pg) => J(pg, () => {
   const j = window.__jogo, m = j.mundo, C = m.comeco, p = m.personagem, loc = m.locais.fazenda, b = document.querySelector('.pular-chegada');
-  const balao = document.querySelector('.balao');
+  const balao = document.querySelector('.balao'), quem = balao && balao.querySelector('.quem'), rosto = quem && quem.querySelector('canvas');
   return {
     chegada: !!C.chegada, chegou: C.chegou, x: p.x, z: p.z, rumo: p.rumo, fila: p.fila.length,
-    dentro: loc.ehPropria(Math.floor(p.x), Math.floor(p.z)), acenou: !!C.acenouEm,
+    dentro: loc.ehPropria(Math.floor(p.x), Math.floor(p.z)), acenou: !!C.acenouEm, falou: !!(C.chegada && C.chegada.falou),
     pular: !!b && !!b.offsetParent, balao: !!balao && !balao.hidden && getComputedStyle(balao).visibility !== 'hidden',
-    fala: balao ? balao.textContent : '',
+    fala: balao ? balao.querySelector('.fala').textContent : '', quem: quem ? quem.textContent : '', rosto: rosto ? rosto.dataset.chave : '',
+    sementes: j.cena.part.textos.some((t) => t.t >= 0 && /^\+6 sementes de alface$/.test(t.texto)),
   };
 });
+const NOME = 'Rosa', FALA1 = /^Vim tentar a vida aqui\.$/, FALA2 = /^Trouxe minha enxada e umas sementes para começar\.$/, BOAS = /bem-vinda/i;
+// desenha (no modo #teste, cada desenho anda 1 s das falas) até a fala casar com "re"; devolve as falas vistas, em ordem
+async function falasAte(pg, re, max = 12) {
+  const vistas = [];
+  for (let k = 0; k < max; k++) {
+    const c = await cena(pg);
+    if (c.balao && (!vistas.length || vistas[vistas.length - 1].fala !== c.fala)) vistas.push({ fala: c.fala, quem: c.quem, rosto: c.rosto, sementes: c.sementes });
+    if (re.test(c.fala)) break;
+    await J(pg, () => window.__jogo.desenhar());
+  }
+  return vistas;
+}
+// a ordem certa: as duas falas dela (nome e retrato dela; as sementes saem da trouxa com a segunda), depois as boas-vindas dele
+function conferirFalas(vistas, onde) {
+  const i1 = vistas.findIndex((v) => FALA1.test(v.fala)), i2 = vistas.findIndex((v) => FALA2.test(v.fala)), i3 = vistas.findIndex((v) => BOAS.test(v.fala));
+  const resumo = vistas.map((v) => `${v.quem}/${v.rosto}: ${v.fala.slice(0, 30)}`).join(' | ');
+  if (!confere(i1 >= 0 && i2 > i1 && i3 > i2, `${onde}: ela fala primeiro (dois balões) e o Seu Tonho responde (veio ${resumo})`)) return;
+  confere(vistas[i1].quem === NOME && vistas[i1].rosto === 'retrato/personagem', `${onde}: o primeiro balão é dela, com o nome e o retrato neutro (${vistas[i1].quem}, ${vistas[i1].rosto})`);
+  confere(vistas[i2].quem === NOME && vistas[i2].rosto === 'retrato/personagem-alegre' && vistas[i2].sementes, `${onde}: no segundo, o retrato alegre e "+6 sementes de alface" saindo da trouxa (${vistas[i2].rosto}, sementes ${vistas[i2].sementes})`);
+  confere(vistas[i3].quem === 'Seu Tonho' && vistas[i3].rosto === 'retrato/seu-tonho-alegre', `${onde}: as boas-vindas com o nome e o retrato alegre dele (${vistas[i3].quem}, ${vistas[i3].rosto})`);
+}
 async function centroDe(pg, seletor) {
   const r = await pg.evaluate((s) => { const e = document.querySelector(s); if (!e || !e.offsetParent) return null; const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, seletor);
   if (!r) confere(false, `não achei "${seletor}" na tela`);
@@ -69,28 +94,43 @@ try {
   igual(f, { casa: 'casa-velha', poco: 'poco-velho', banca: 'caixote-de-venda', bau: 'bau-da-casa', celeiro: null, quadro: null, vizinho: 'vizinho', cerca: 'cerca-de-arame' }, 'a fazenda do começo: casa e poço velhos, caixote, baú, cerca de arame e o Seu Tonho; sem celeiro nem quadro');
   igual(await J(pg, () => window.__jogo.mundo.comeco.chegada), null, 'no modo #teste a cena não começa sozinha');
   const r = await J(pg, () => window.__jogo.comando({ tipo: 'comecarChegada' }));
-  confere(r.ok && r.dados.seg > 3 && r.dados.seg < 9, `a cena começa e dura alguns segundos (veio ${JSON.stringify(r)})`);
+  confere(r.ok && r.dados.seg > 7 && r.dados.seg < 14, `a cena começa e dura alguns segundos (veio ${JSON.stringify(r)})`);
   await J(pg, () => window.__jogo.seguir());
   let c = await cena(pg);
   confere(c.chegada && !c.dentro, 'ela começa do lado de fora da cerca');
   confere(c.pular, 'o botão "Pular" aparece no canto');
-  confere(!c.balao, 'o balão do vizinho fica escondido até ele acenar');
+  confere(!c.balao, 'o balão fica escondido enquanto ela anda');
   confere(Math.abs(Math.cos(c.rumo) + 1) < 0.2, `ela entra de costas para a câmera, andando para o fundo (rumo ${c.rumo.toFixed(2)})`);
   igual(await J(pg, () => window.__jogo.guia().tipo), null, 'durante a cena, nenhuma seta');
   // quadro a quadro (0,5 s cada)
-  let viuAceno = false, k = 0;
-  for (; k < 24 && (await cena(pg)).chegada; k++) {
+  let viuFala = false, viuAceno = false, k = 0;
+  for (; k < 32 && (await cena(pg)).chegada; k++) {
     await foto(pg, `h-1280-chegada-${String(k).padStart(2, '0')}.jpg`);
     await J(pg, () => window.__jogo.avancar(0.5));
     c = await cena(pg);
-    if (c.acenou && !viuAceno) {
-      viuAceno = true;
+    if (!c.falou && !viuFala) confere(!c.acenou, `andando, o Seu Tonho ainda não acena (quadro ${k})`);
+    if (c.falou && !viuFala) {
+      viuFala = true;
+      confere(c.dentro && !c.acenou, 'no fim do caminho, dentro da cerca, ela fala primeiro (ele ainda não acenou)');
       await J(pg, () => window.__jogo.desenhar());
       c = await cena(pg);
-      confere(c.dentro, 'o Seu Tonho acena quando ela passa da cerca');
-      confere(c.balao && /bem-vinda/i.test(c.fala), `com o aceno vêm as boas-vindas no balão (veio "${c.fala.slice(0, 80)}")`);
+      confere(c.balao && c.quem === NOME && c.rosto === 'retrato/personagem' && FALA1.test(c.fala), `o balão dela: nome, retrato e a primeira fala (veio ${c.quem}, ${c.rosto}: "${c.fala}")`);
+      await foto(pg, 'h-1280-fala-dela-1.jpg');
+      await J(pg, () => window.__jogo.desenhar());
+      c = await cena(pg);
+      confere(c.balao && c.quem === NOME && c.rosto === 'retrato/personagem-alegre' && FALA2.test(c.fala) && c.sementes, `o segundo balão dela, alegre, com "+6 sementes de alface" saindo da trouxa (veio ${c.rosto}: "${c.fala}", sementes ${c.sementes})`);
+      await foto(pg, 'h-1280-fala-dela-2.jpg');
+    }
+    if (c.acenou && !viuAceno) {
+      viuAceno = true;
+      confere(viuFala, 'o Seu Tonho acena depois da fala dela');
+      await J(pg, () => window.__jogo.desenhar());
+      c = await cena(pg);
+      confere(c.balao && BOAS.test(c.fala) && c.quem === 'Seu Tonho' && c.rosto === 'retrato/seu-tonho-alegre', `com o aceno vêm as boas-vindas dele, com o retrato alegre (veio ${c.quem}, ${c.rosto}: "${c.fala.slice(0, 80)}")`);
+      await foto(pg, 'h-1280-boas-vindas.jpg');
     }
   }
+  confere(viuFala, 'ela falou');
   confere(viuAceno, 'o Seu Tonho acenou');
   c = await cena(pg);
   confere(!c.chegada && c.chegou, `a cena acabou sozinha (${k} quadros)`);
@@ -118,8 +158,7 @@ try {
   c = await cena(pg);
   confere(!c.chegada && c.chegou && !c.pular, 'o botão "Pular" termina a cena na hora');
   await J(pg, () => window.__jogo.desenhar());
-  c = await cena(pg);
-  confere(c.balao && /bem-vinda/i.test(c.fala), 'pulando, as boas-vindas aparecem do mesmo jeito');
+  conferirFalas(await falasAte(pg, BOAS), 'pulando');
   igual(await J(pg, () => window.__jogo.mundo.comando({ tipo: 'comecarChegada' }).ok), false, 'a cena não volta');
   await a.ctx.close();
   a = await abrir(1280, 720); pg = a.pg;

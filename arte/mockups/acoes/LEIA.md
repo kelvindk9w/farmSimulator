@@ -19,14 +19,18 @@ Hoje há uma barra embaixo com um botão para cada ferramenta: Mão, Enxada, Sem
 
 ## As telas
 
-- **`acoes-campo.png`** — O campo de 2 fileiras de 6. A casa arada à frente da personagem tem o contorno dourado e o balãozinho com a semente: tocar ali planta alface. Embaixo, a vaga "Na mão" mostra Alface ×6, e o botão redondo de agir também mostra a semente.
+- **`acoes-campo.png`** — O campo de 2 fileiras de 6: na da frente, 3 casas com alface brotando e 3 aradas; a de trás ainda sem arar. A casa arada perto da personagem tem o contorno dourado e o balãozinho com a semente: tocar ali planta alface. Embaixo, a vaga "Na mão" mostra Alface ×6, e o botão redondo de agir também mostra a semente.
 - **`acoes-vaga-aberta.png`** — Tocou na vaga: abre uma fileira curta com as sementes que ela tem (Alface, Milho, Feijão) e um "+" (Comprar), que leva à aba Sementes da loja. A escolhida fica verde.
 - **`acoes-roda-vaca.png`** — Tocou numa vaca, perto do estábulo: abrem Ordenhar (a maior), Dar ração e Afagar. Aqui a vaga está com Ração ×8, e o botão de agir mostra o balde (a ação principal).
 - **`acoes-arvore.png`** — Tocou numa laranjeira com frutas: abrem Colher (a maior) e Podar. Aqui a vaga mostra o jeito de quando acabam as sementes: "Comprar sementes", que leva à loja.
 - **`acoes-antes-e-depois.png`** — A mesma cena duas vezes: em cima, a barra de hoje (quatro botões, é preciso escolher Semear antes); embaixo, a proposta (só a vaga; toca na casa e pronto).
 
+O arrastar (parte 4) não aparece desenhado: numa imagem parada ele não se vê bem.
+
 ## O que não muda
 
 O alto da tela (nível, ouro, cash, cesto, água, Mochila, Loja, Construir, Menu), o balão do Seu Tonho, a alavanca e o botão redondo de agir continuam como na interface aprovada.
 
-Os pedidos usados no Codex estão em `pedidos/`.
+## Como as imagens foram feitas
+
+Todas no Codex, com os pedidos que estão em `pedidos/` (`01b` é a correção do campo da `01`). A `acoes-antes-e-depois.png` junta duas telas do Codex, uma em cima da outra (a de cima saiu do pedido `03`); só as faixas "HOJE" e "PROPOSTA" foram postas depois, por programa.

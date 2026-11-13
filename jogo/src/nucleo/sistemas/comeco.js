@@ -99,7 +99,7 @@ function arrumarVizinho(m) {
 
 // ---------- a chegada ----------
 const VELOCIDADE = 2.3; // unidades/s (um pouco mais devagar que o passo normal: ela chega olhando tudo)
-const FALA_DELA = 4.5; // segundos: no fim do caminho ela fala primeiro (o balão dela); depois o Seu Tonho responde
+const FALA_DELA = 5.5; // segundos: no fim do caminho ela fala primeiro (o balão dela); depois o Seu Tonho responde
 const PARADA = 1.6; // segundos depois do aceno dele, antes de a cena acabar
 const PASSADA = 1.5; // unidades de chão por ciclo do desenho (a mesma da personagem)
 function caminhoDaChegada(m) {

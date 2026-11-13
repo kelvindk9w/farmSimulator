@@ -17,6 +17,7 @@ import { reformas, trechosDaCerca, tipoDoTrecho, ehHumilde, querComecoNovo, vers
 import { construcoesDe, estaPronta } from '../src/nucleo/sistemas/construcao.js';
 import { guiaDaMissao } from '../src/nucleo/guia.js';
 import { TIPOS } from '../src/nucleo/registro.js';
+import { rumoPara } from '../src/nucleo/util.js';
 
 const aqui = path.dirname(fileURLToPath(import.meta.url));
 const BRUTO = lerPasta(path.join(aqui, '..', 'dados'));
@@ -37,6 +38,7 @@ function naMissao(m, id) {
   return missaoAtual(m);
 }
 const visualDe = (m, e) => TIPOS[e.tipo].visual(m, e, {});
+const m0 = (m) => ({ P: m.dados.terras.pontos.personagem });
 const rico = (m, ouro = 5000, itens = {}) => { m.posses.ouro += ouro; for (const k in itens) m.posses.bolsa[k] = (m.posses.bolsa[k] || 0) + itens[k]; };
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -75,12 +77,12 @@ test('a chegada: ela entra pela porteira até perto do Seu Tonho, fala primeiro 
   while (m.comeco.chegada && !ev.de('elaFalou').length && passos < 60 * 20) { m.passo(); passos++; }
   assert.equal(ev.de('tonhoAcenou').length, 0, 'ela fala primeiro');
   // no fim do caminho ela fala: a trouxa dá as sementes do início (já na bolsa desde o começo), virada para o Seu Tonho
-  assert.deepEqual(ev.de('elaFalou'), [{ itens: { 'semente-alface': 6 }, seg: 4.5 }]);
+  assert.deepEqual(ev.de('elaFalou'), [{ itens: { 'semente-alface': 6 }, seg: 5.5 }]);
   assert.deepEqual(m.dados.regras.inicio.itens, { 'semente-alface': 6 });
   assert.equal(m.posses.bolsa['semente-alface'], 6);
   assert.ok(loc.ehPropria(Math.floor(p.x), Math.floor(p.z)), 'já dentro da cerca');
-  const v0 = naFazenda(m, 'vizinho');
-  assert.ok(Math.abs(Math.atan2(Math.sin(p.rumo - Math.atan2(v0.z + 0.5 - p.z, v0.x + 0.5 - p.x)), Math.cos(p.rumo - Math.atan2(v0.z + 0.5 - p.z, v0.x + 0.5 - p.x)))) < 0.01 || true);
+  const v0 = naFazenda(m, 'vizinho'), quer = rumoPara(p.x, p.z, v0.x + 0.5, v0.z + 0.5);
+  assert.ok(Math.abs(Math.atan2(Math.sin(p.rumo - quer), Math.cos(p.rumo - quer))) < 0.01, 'virada para o Seu Tonho');
   assert.equal(m.comeco.acenouEm, 0, 'ele ainda não acenou');
   while (m.comeco.chegada && passos < 60 * 20) { m.passo(); passos++; }
   assert.ok(!m.comeco.chegada && m.comeco.chegou);
@@ -107,6 +109,8 @@ test('a chegada nunca prende: pular, ou qualquer toque, termina a cena na hora; 
   const r = b.comando({ tipo: 'tocarCasa', x: 28.5, z: 53.5 });
   assert.equal(r.ok, true); assert.equal(r.dados.pulouChegada, true);
   assert.deepEqual(ev.de('chegou'), [{ pulou: true }]);
+  assert.deepEqual(ev.tipos().filter((x) => ['elaFalou', 'tonhoAcenou', 'chegou'].includes(x)), ['elaFalou', 'chegou'], 'pulando, a fala dela vem do mesmo jeito (as boas-vindas são da interface)');
+  assert.ok(Math.hypot(b.personagem.x - m0(b).P[0], b.personagem.z - m0(b).P[1]) < 0.01, 'e ela já está no fim do caminho');
   assert.equal(b.personagem.fila.length, 0);
   b.comando({ tipo: 'tocarCasa', x: 28.5, z: 53.5 }); ateParar(b);
   assert.ok(Math.hypot(b.personagem.x - 28.5, b.personagem.z - 53.5) < 1.2, 'o segundo toque anda');
@@ -387,6 +391,41 @@ test('gravação de antes, mais adiante (nível 5): o celeiro com os móveis, o 
   assert.equal(m.posses.cesto.itens.alface, 3);
   assert.ok(capacidadeDe(m, 'produtos') >= 60 + 40, 'a prateleira e a despensa da casa');
   assert.equal(m.comeco.esperaDosPedidos, 1);
+});
+
+test('a versão do começo fica na gravação; na versão de teste, a gravação de um começo mais antigo pede a pergunta uma vez só', () => {
+  const D = dadosDeVerdade();
+  assert.equal(D.regras.versaoDeTeste, true, 'esta é a versão de teste');
+  // a fazenda nova é do começo de agora: nada a perguntar, nem depois de gravar
+  const m = new Mundo(D, { agora: 1_700_000_000_000 });
+  assert.equal(m.comeco.versao, versaoDoComeco(m)); assert.equal(versaoDoComeco(m), 2);
+  assert.equal(querComecoNovo(m), false);
+  assert.equal(m.comando({ tipo: 'perguntouComecoNovo' }).ok, false);
+  const g = copia(m.salvar());
+  assert.equal(g.sistemas.comeco.versao, 2);
+  assert.equal(querComecoNovo(Mundo.carregar(D, copia(g))), false);
+  // a fazenda de antes do começo humilde é a 0: pergunta (uma vez)
+  const v = Mundo.carregar(D, velha('antes-nivel-1'));
+  assert.deepEqual([v.comeco.versao, v.comeco.perguntou, querComecoNovo(v)], [0, 0, true]);
+  assert.equal(v.comando({ tipo: 'perguntouComecoNovo' }).ok, true);
+  assert.equal(querComecoNovo(v), false);
+  assert.equal(v.comando({ tipo: 'perguntouComecoNovo' }).ok, false, 'só uma vez');
+  const v2 = Mundo.carregar(D, copia(v.salvar()));
+  assert.deepEqual([v2.comeco.versao, v2.comeco.perguntou, querComecoNovo(v2), ehHumilde(v2)], [0, 2, false, false], 'gravada de novo: continua a de antes, já perguntada');
+  // a do primeiro começo humilde (gravada sem o número) é a 1: pergunta também
+  const h = copia(g); delete h.sistemas.comeco.versao; delete h.sistemas.comeco.perguntou;
+  const v1 = Mundo.carregar(D, h);
+  assert.deepEqual([v1.comeco.versao, ehHumilde(v1)], [1, true]);
+  assert.equal(querComecoNovo(v1), true);
+  // um começo mais novo ainda (o número subiu nos dados): pergunta de novo a quem já respondeu sobre o anterior
+  const B = copia(BRUTO); B.terras.comeco.versao = 3;
+  const D3 = prepararDados(B).dados;
+  assert.equal(querComecoNovo(Mundo.carregar(D3, copia(v.salvar()))), true);
+  // fora da versão de teste, nunca pergunta: a gravação velha continua como está
+  const L = copia(BRUTO); L.regras.versaoDeTeste.ligada = false;
+  const DL = prepararDados(L).dados, l = Mundo.carregar(DL, velha('antes-nivel-1'));
+  assert.equal(DL.regras.versaoDeTeste, false);
+  assert.deepEqual([querComecoNovo(l), l.comando({ tipo: 'perguntouComecoNovo' }).ok, ehHumilde(l)], [false, false, false]);
 });
 
 // ---------------------------------------------------------------------------------------------------------------

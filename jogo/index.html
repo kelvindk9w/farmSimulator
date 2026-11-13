@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-carregando="1">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -7,6 +7,65 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#a5def5">
 <title>Fazenda</title>
+<script>
+// Tela de carregando (1 de 3): aparece antes de o main.js chegar. Aqui: a imagem leve ou nítida (a mesma regra de
+// src/plataforma/qualidade.js) e já começa a baixar o fundo e as molduras que a tela usa. A tela está logo no começo
+// do <body>; o que ela faz, no fim do <body>; o resto, em src/ui/carregando.js.
+(function () {
+  var n = navigator, leve, pref, m, l, i, baixar;
+  try { pref = JSON.parse(localStorage.getItem('fazenda.jogo.prefs') || '{}').imagem; } catch (e) { /* sem gravação */ }
+  if (pref === 'leve' || pref === 'nitida') leve = pref === 'leve';
+  else {
+    try {
+      var lado = Math.max(screen.width || 0, screen.height || 0);
+      leve = /\b(TV|AFT[A-Z0-9]+|SmartTV|SMART-TV|Tizen|Web0S|webOS|BRAVIA|CrKey|GoogleTV|HbbTV|Roku)\b/i.test(n.userAgent || '') ||
+        !!(n.deviceMemory && n.deviceMemory <= 4) || ((n.maxTouchPoints || 0) > 0 && lado > 0 && lado <= 950);
+    } catch (e) { leve = true; }
+  }
+  if (leve) document.documentElement.className += ' carga-leve';
+  m = leve ? 'molduras/m/' : 'molduras/';
+  baixar = [leve ? 'carregando/fundo-m.js' : 'carregando/fundo.js', m + 'cabecalho.png', m + 'barra-moldura.png', m + 'barra-enchimento-verde.png', m + 'aviso.png', m + 'pilula.png'];
+  for (i = 0; i < baixar.length; i++) {
+    l = document.createElement('link');
+    l.rel = 'preload'; l.href = baixar[i]; l.as = i ? 'image' : 'script';
+    if (!i) l.setAttribute('fetchpriority', 'high');
+    document.head.appendChild(l);
+  }
+  window.__cargaFundo = baixar[0];
+})();
+</script>
+<style>
+  /* tela de carregando: as molduras são as da interface aprovada (as fatias de src/ui/estilo/pecas.js; na leve, pela metade) */
+  #carga { position: fixed; inset: 0; z-index: 1000; overflow: hidden; background: #93d4f2 linear-gradient(180deg, #8fd0f3 0%, #cbe9ec 36%, #a9d873 47%, #86c845 70%, #74b93c 100%); color: #4a2a12; font: 900 16px/1.2 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif; -webkit-user-select: none; user-select: none; transition: opacity .3s ease-out;
+    --c-cab: url(molduras/cabecalho.png); --f-cab: 66 84 66 84 fill; --c-pil: url(molduras/pilula.png); --f-pil: 54 54 54 54 fill; --c-avi: url(molduras/aviso.png); --f-avi: 43 45 42 45 fill;
+    --c-bar: url(molduras/barra-moldura.png); --f-bar: 24 27 24 27 fill; --c-enc: url(molduras/barra-enchimento-verde.png); --f-enc: 18 21 18 21 fill; }
+  html.carga-leve #carga { --c-cab: url(molduras/m/cabecalho.png); --f-cab: 33 42 33 42 fill; --c-pil: url(molduras/m/pilula.png); --f-pil: 27 27 27 27 fill; --c-avi: url(molduras/m/aviso.png); --f-avi: 21 22 21 22 fill;
+    --c-bar: url(molduras/m/barra-moldura.png); --f-bar: 12 13 12 13 fill; --c-enc: url(molduras/m/barra-enchimento-verde.png); --f-enc: 8 10 9 10 fill; }
+  #carga.saindo { opacity: 0; pointer-events: none; }
+  #carga .carga-fundo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .4s; }
+  #carga.com-fundo .carga-fundo { opacity: 1; }
+  #carga .carga-alto, #carga .carga-baixo { position: absolute; left: 0; right: 0; display: flex; justify-content: center; }
+  #carga .carga-alto { top: 0; height: 78%; align-items: center; }
+  #carga .carga-baixo { bottom: max(6%, env(safe-area-inset-bottom)); }
+  #carga .carga-z { zoom: var(--esc, 1); display: flex; flex-direction: column; align-items: center; }
+  #carga .carga-placa, #carga .carga-versao, #carga .carga-barra, #carga .carga-barra > i, #carga .carga-dica, #carga .carga-erro { box-sizing: border-box; border-style: solid; border-color: transparent; border-image-repeat: stretch; border-image-outset: 0; }
+  #carga .carga-placa { margin: 0; min-width: 300px; height: 68px; border-width: 6px 10px; padding: 0 46px 3px; display: flex; align-items: center; justify-content: center; border-image-source: var(--c-cab); border-image-slice: var(--f-cab); border-image-width: 33px 42px;
+    font-size: 42px; font-weight: 900; letter-spacing: .5px; color: #fff; -webkit-text-stroke: 7px #4a2a12; paint-order: stroke fill; white-space: nowrap; }
+  #carga .carga-versao { position: relative; margin-top: -9px; height: 30px; border-width: 4px; padding: 0 12px; display: flex; align-items: center; border-image-source: var(--c-pil); border-image-slice: var(--f-pil); border-image-width: 15px; font-size: 15px; font-weight: 800; white-space: nowrap; }
+  #carga .carga-barra { position: relative; width: 440px; max-width: calc(88vw / var(--esc, 1)); height: 28px; border-width: 5px; border-image-source: var(--c-bar); border-image-slice: var(--f-bar); border-image-width: 12px 13.5px; }
+  #carga .carga-barra > i { position: absolute; left: -1px; top: -1px; height: 20px; width: 0; min-width: 22px; border-width: 2px; border-image-source: var(--c-enc); border-image-slice: var(--f-enc); border-image-width: 9.5px 11px; opacity: 0; overflow: hidden; border-radius: 10px; transition: width .35s linear, opacity .2s; }
+  #carga.cheia .carga-barra > i { opacity: 1; }
+  #carga .carga-barra > i::after { content: ""; position: absolute; top: 0; bottom: 0; left: -40px; width: 40px; background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .5), rgba(255, 255, 255, 0)); animation: carga-brilho 1.8s linear infinite; }
+  @keyframes carga-brilho { from { transform: translateX(0); } to { transform: translateX(500px); } }
+  #carga .carga-dica { margin: 10px 0 0; min-height: 34px; max-width: min(560px, calc(92vw / var(--esc, 1))); border-width: 4px 6px; padding: 3px 12px; display: flex; align-items: center; justify-content: center; text-align: center; border-image-source: var(--c-avi); border-image-slice: var(--f-avi); border-image-width: 14.3px 15px 14px 15px;
+    font-size: 16px; font-weight: 800; transition: opacity .25s; }
+  #carga .carga-dica.trocando { opacity: 0; }
+  #carga .carga-erro { min-height: 56px; max-width: min(520px, calc(92vw / var(--esc, 1))); border-width: 5px 7px; padding: 6px 20px; border-image-source: var(--c-avi); border-image-slice: var(--f-avi); border-image-width: 18px 19px 18px 19px; background: none; font: inherit; font-size: 19px; font-weight: 900; color: #8c1d12; cursor: pointer; }
+  #carga .carga-erro:focus-visible { outline: 4px solid #ff9d2e; outline-offset: 2px; }
+  #carga.falhou { cursor: pointer; }
+  #carga.falhou .carga-barra, #carga.falhou .carga-dica { display: none; }
+  @media (prefers-reduced-motion: reduce) { #carga .carga-barra > i::after { animation: none; display: none; } #carga .carga-dica { transition: none; } }
+</style>
 <style>
   :root { --creme: #fff9ec; --creme2: #f6e9cd; --marrom: #4a2f1b; --marrom2: #8a6a4c; --verde: #41a85c; --verde2: #2f8a47; --ouro: #f6c12c; --azul: #4aa9e6; --ruim: #c0392b; --sombra: 0 3px 0 rgba(74, 47, 27, .35); }
   html, body { margin: 0; height: 100%; overflow: hidden; background: #a5def5; overscroll-behavior: none; }
@@ -544,11 +603,119 @@
 </style>
 </head>
 <body>
+<!-- Tela de carregando (2 de 3): o que aparece na hora. As dicas trocam a cada poucos segundos (uma por linha). -->
+<div id="carga">
+  <img class="carga-fundo" alt="">
+  <div class="carga-alto"><div class="carga-z">
+    <h1 class="carga-placa">Fazenda</h1>
+    <div class="carga-versao">Versão de teste</div>
+  </div></div>
+  <div class="carga-baixo"><div class="carga-z">
+    <div class="carga-barra" role="progressbar" aria-label="Carregando" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div>
+    <p class="carga-dica"></p>
+    <button class="carga-erro" type="button" hidden>Não deu para carregar. Toque para tentar de novo.</button>
+  </div></div>
+</div>
+<ul id="carga-dicas" hidden>
+  <li>Segure o dedo na terra para o boi arar a fileira toda.</li>
+  <li>Segure numa casa do campo: arar, semear ou regar vai na fileira toda.</li>
+  <li>Planta com sede não cresce: encha o regador no poço.</li>
+  <li>Fale com o Seu Tonho: as tarefas dele dão ouro e experiência.</li>
+  <li>Ponha a colheita no caixote da porteira: os fregueses compram.</li>
+  <li>O jogo grava sozinho, o tempo todo.</li>
+  <li>Dois dedos, ou a roda do mouse, aproximam e afastam a câmera.</li>
+  <li>O tempo da fazenda corre mesmo com o jogo fechado.</li>
+  <li>Limpe o mato, os tocos e as pedras para abrir espaço.</li>
+  <li>No computador, as teclas 1, 2, 3... escolhem a ferramenta.</li>
+</ul>
 <div id="palco">
   <canvas id="tela" tabindex="0" aria-label="A fazenda"></canvas>
   <div id="ui"></div>
 </div>
-<noscript><p style="padding:16px">Este jogo precisa de JavaScript.</p></noscript>
-<script src="./main.js" defer></script>
+<noscript><p style="padding:16px">Este jogo precisa de JavaScript.</p><style>#carga { display: none; }</style></noscript>
+<script src="./main.js" defer id="carga-principal"></script>
+<script>
+// Tela de carregando (3 de 3): a barra, as dicas e o erro. Enquanto o main.js baixa, a barra anda sozinha, devagar,
+// até uns 30%; depois quem diz quanto falta é o main.js (src/ui/carregando.js: a arte e as molduras da primeira cena),
+// por window.__carga. A tela fica pelo menos MINIMO ms e some com um fade curto; ao sumir, tira o data-carregando do
+// <html> e avisa com o evento "jogo-carregou" (a cena de chegada espera por ele).
+(function () {
+  var MINIMO = 800, TROCA = 4000, t0 = performance.now();
+  var raiz = document.documentElement, c = document.getElementById('carga');
+  var barra = c.querySelector('.carga-barra'), enche = barra.querySelector('i'), dica = c.querySelector('.carga-dica');
+  var botao = c.querySelector('.carga-erro'), img = c.querySelector('.carga-fundo');
+  var real = 0, mostrado = -1, chegou = false, acabou = false, falhou = false, k, dicas, relogio, relogioDica;
+
+  function escala() { // a mesma conta de src/ui/estilo/index.js: o celular deitado é a medida; maior, cresce
+    var w = window.innerWidth, h = window.innerHeight, x;
+    if (h > w) { x = w; w = h; h = x; }
+    c.style.setProperty('--esc', String(Math.round(Math.max(1, Math.min(w / 1100, h / 560, 2.4)) * 100) / 100));
+  }
+  escala();
+  window.addEventListener('resize', escala);
+
+  function mostrar(p) {
+    p = Math.max(0, Math.min(1, p));
+    if (p <= mostrado) return; // a barra nunca volta
+    mostrado = p;
+    enche.style.width = (p * 100).toFixed(1) + '%';
+    barra.setAttribute('aria-valuenow', String(Math.round(p * 100)));
+    if (p > 0.03) c.classList.add('cheia');
+  }
+  function andar() { if (!acabou && !falhou) mostrar(Math.max(real, chegou ? 0 : 0.3 * (1 - Math.exp((t0 - performance.now()) / 2500)))); }
+  relogio = setInterval(andar, 200);
+  andar();
+
+  dicas = [].map.call(document.querySelectorAll('#carga-dicas li'), function (li) { return li.textContent; });
+  k = Math.floor(Math.random() * dicas.length);
+  dica.textContent = dicas[k] || '';
+  relogioDica = setInterval(function () {
+    dica.classList.add('trocando');
+    setTimeout(function () { k = (k + 1) % dicas.length; dica.textContent = dicas[k]; dica.classList.remove('trocando'); }, 250);
+  }, TROCA);
+
+  function parar() { clearInterval(relogio); clearInterval(relogioDica); window.removeEventListener('resize', escala); }
+  function tirar() { // a tela sai de vez: nada fica por cima do jogo
+    parar();
+    if (c.parentNode) c.parentNode.removeChild(c);
+    delete raiz.dataset.carregando;
+    try { window.dispatchEvent(new Event('jogo-carregou')); } catch (e) { /* navegador velho */ }
+  }
+  function erro(detalhe) {
+    if (acabou || falhou) return;
+    falhou = true; parar();
+    if (detalhe) console.warn('tela de carregando: ' + detalhe);
+    c.classList.add('falhou');
+    botao.hidden = false;
+    try { botao.focus(); } catch (e) { /* sem foco */ }
+  }
+  c.addEventListener('click', function () { if (falhou) location.reload(); });
+
+  window.__carga = {
+    // o fundo (carregando/fundo.js chama com a imagem); sem ele, fica a cor
+    fundo: function (url) { img.onload = function () { c.classList.add('com-fundo'); }; img.src = url; },
+    // quanto já carregou, de 0 a 1 (o main.js chama: chegar já vale uns 35%)
+    andar: function (f) { chegou = true; if (f > real) real = f; andar(); },
+    // a primeira cena está desenhada: enche, espera completar o MINIMO e some
+    pronto: function () {
+      if (acabou || falhou) return;
+      acabou = true; mostrar(1); parar();
+      setTimeout(function () { c.classList.add('saindo'); setTimeout(tirar, 320); }, Math.max(MINIMO - (performance.now() - t0), 380));
+    },
+    erro: erro,
+    // some na hora, sem fade (modo #teste das ferramentas, e a lista de erros dos dados)
+    sumir: function () { if (!falhou) { acabou = true; tirar(); } },
+    get falhou() { return falhou; },
+  };
+
+  var s = document.createElement('script');
+  s.src = window.__cargaFundo; s.async = true;
+  document.head.appendChild(s);
+
+  var principal = document.getElementById('carga-principal');
+  principal.addEventListener('error', function () { erro('o main.js não chegou'); });
+  principal.addEventListener('load', function () { if (!window.__jogo) erro('o main.js chegou, mas o jogo não começou'); });
+})();
+</script>
 </body>
 </html>

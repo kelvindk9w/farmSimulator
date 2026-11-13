@@ -35,6 +35,7 @@ import { foco } from './entrada/foco.js';
 import { gravacao } from './plataforma/gravacao.js';
 import { tela } from './plataforma/tela.js';
 import { som } from './plataforma/som.js';
+import { acompanharCarga, sumirCarga, falhouCarga } from './ui/carregando.js';
 
 const ui = document.getElementById('ui'), canvas = document.getElementById('tela');
 const erros = [];
@@ -47,7 +48,7 @@ function comecar() {
   const { dados, problemas } = prepararDados(bruto);
   const graves = problemas.filter((p) => p.grave);
   if (problemas.length) console.info('dados do jogo:\n' + listarProblemas(problemas));
-  if (graves.length) { telaDeErro(T.erroDeDados + '\n\n' + listarProblemas(graves)); window.__jogo = { pronto: false, erros, problemas }; return; }
+  if (graves.length) { sumirCarga(); telaDeErro(T.erroDeDados + '\n\n' + listarProblemas(graves)); window.__jogo = { pronto: false, erros, problemas }; return; }
   J.dados = dados;
   J.teste = location.hash === '#teste';
   J.toque = (navigator.maxTouchPoints || 0) > 0 || !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
@@ -194,9 +195,11 @@ function comecar() {
       erros.push(String(e && e.stack ? e.stack : e));
       console.error(e);
       telaDeErro(T.erroDoJogo + '\n\n' + String(e && e.message ? e.message : e));
+      falhouCarga(e);
     }
   }
   requestAnimationFrame(quadro);
+  acompanharCarga({ atlas, ui, teste: J.teste }); // a tela de carregando (index.html) some quando a primeira cena estiver desenhada
 
   // ---------- ganchos para as ferramentas (verificar, capturas) ----------
   const pt = { x: 0, y: 0 };
@@ -249,5 +252,6 @@ try { comecar(); } catch (e) {
   erros.push(String(e && e.stack ? e.stack : e));
   console.error(e);
   telaDeErro(T.erroDoJogo + '\n\n' + String(e && e.message ? e.message : e));
+  falhouCarga(e);
   window.__jogo = { pronto: false, erros };
 }

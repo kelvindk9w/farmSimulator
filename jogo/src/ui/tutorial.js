@@ -28,6 +28,7 @@ export function criarTutorial(ui, hud) {
   // falas avulsas do vizinho (a primeira vez de uma mecânica): tomam o balão por uns segundos, uma de cada vez
   let dito = null;
   const falas = [];
+  const proxima = () => { dito = falas.shift(); if (dito.aoMostrar) dito.aoMostrar(); };
   const baixa = () => J.cena.cam.h < 500; // celular deitado: o balão já nasce compacto
   const passo = { tipo: null };
 
@@ -59,8 +60,9 @@ export function criarTutorial(ui, hud) {
   function atualizar(dt) {
     const m = J.mundo, a = missaoAtual(m), cena = J.cena;
     relogio -= dt; aberto += dt;
-    if (!dito && falas.length) dito = falas.shift();
-    if (dito && !painelAberto() && !subidaAberta() && (dito.resta -= dt) <= 0) dito = null; // com um painel na frente, a fala espera
+    if (!dito && falas.length) proxima();
+    // com um painel na frente, a fala espera; acabada, a seguinte entra no mesmo quadro (sem piscar a missão no meio)
+    if (dito && !painelAberto() && !subidaAberta() && (dito.resta -= dt) <= 0) { dito = null; if (falas.length) proxima(); }
     classe(balao, 'avulsa', !!dito);
     if (!a && !dito) { if (!balao.hidden) balao.hidden = true; apontarUi(null); cena.seta.ligada = false; return; }
     if (balao.hidden) balao.hidden = false;
@@ -119,8 +121,9 @@ export function criarTutorial(ui, hud) {
     concluiu() { feitaAte = 1.6; pequeno = false; fixo = false; aberto = 0; relogio = 0; },
     abrirMissoes() { abrirPainel('missoes'); },
     // o vizinho diz uma coisa fora da missão (título curto e uma ou duas frases); fica "seg" segundos ou até o toque.
-    // quem = { nome, retrato (a chave da peça) }: a fala é de outra pessoa (ou dele com outra cara)
-    dizer(tituloDaFala, textoDaFala, seg = 11, quem = null) { if (textoDaFala && falas.length < 3 && !(dito && dito.fala === textoDaFala) && !falas.some((f) => f.fala === textoDaFala)) falas.push({ titulo: tituloDaFala || '', fala: textoDaFala, resta: seg, quem }); },
+    // quem = { nome, retrato (a chave da peça) }: a fala é de outra pessoa (ou dele com outra cara); aoMostrar: chamada
+    // quando a fala aparece no balão (depois das que estavam na frente)
+    dizer(tituloDaFala, textoDaFala, seg = 11, quem = null, aoMostrar = null) { if (textoDaFala && falas.length < 3 && !(dito && dito.fala === textoDaFala) && !falas.some((f) => f.fala === textoDaFala)) falas.push({ titulo: tituloDaFala || '', fala: textoDaFala, resta: seg, quem, aoMostrar }); },
     falando: () => (dito ? dito.fala : falas.length ? falas[0].fala : null),
     balao, seta,
   };
