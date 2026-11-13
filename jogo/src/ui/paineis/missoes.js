@@ -5,7 +5,7 @@ import { J } from '../../contexto.js';
 import { registrarPainel } from './registro.js';
 import { missaoAtual } from '../../nucleo/sistemas/missoes.js';
 
-// a recompensa em fichas: ouro, cash, xp e itens
+// a recompensa em fichas: ouro, cash, xp, o bicho de presente e os itens
 export function fichasDaRecompensa(D, r) {
   const caixa = el('div', 'itens');
   const ficha = (ic, texto) => { const e = el('div', 'item'); e.append(icone(ic, 26), el('span', '', texto)); caixa.append(e); };
@@ -13,6 +13,7 @@ export function fichasDaRecompensa(D, r) {
   if (r.ouro > 0) ficha('icone/ouro', numero(r.ouro));
   if (r.cash > 0) ficha('icone/cash', numero(r.cash));
   if (r.xp > 0) ficha('icone/xp', `${numero(r.xp)} ${T.subida.xp}`);
+  for (const k in r.animais || {}) if (D.animais && D.animais[k]) ficha('animal/' + k + '/parada-frente', `${r.animais[k] > 1 ? r.animais[k] + ' × ' : ''}${D.animais[k].nome}`);
   for (const k in r.itens || {}) ficha('icone/' + k, `${r.itens[k] > 1 ? r.itens[k] + ' × ' : ''}${D.itens[k] ? D.itens[k].nome : k}`);
   return caixa;
 }

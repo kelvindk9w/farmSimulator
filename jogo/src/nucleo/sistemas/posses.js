@@ -143,12 +143,16 @@ export function darItem(m, id, n = 1, origem = '') {
   return true;
 }
 
-// aplica uma recompensa { ouro, cash, xp, itens: { id: n } }; o xp fica com quem chamou (niveis.js)
+// o que outras frentes sabem dar além de ouro, cash e itens: RECOMPENSAS.push((m, r, origem) => ...) lê a parte dela
+// da recompensa (os animais: { animais: { especie: n } }, em animais.js)
+export const RECOMPENSAS = [];
+// aplica uma recompensa { ouro, cash, xp, itens: { id: n }, ...o que RECOMPENSAS souber }; o xp fica com quem chamou (niveis.js)
 export function darRecompensa(m, r, origem) {
   if (!r) return;
   if (r.ouro > 0) ganharOuro(m, r.ouro, origem);
   if (r.cash > 0) ganharCash(m, r.cash, origem);
   if (r.itens) for (const k in r.itens) darItem(m, k, r.itens[k], origem);
+  for (let i = 0; i < RECOMPENSAS.length; i++) RECOMPENSAS[i](m, r, origem);
 }
 
 registrarSistema({

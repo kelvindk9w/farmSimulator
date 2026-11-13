@@ -330,13 +330,16 @@ function mundoDeVerdade(nivel) {
   m.posses.celeiro.capacidade = 500;
   return m;
 }
-test('dados de verdade: a subida para o nível 7 mostra o fubá como receita nova e a ração uma vez só (é item da loja)', () => {
+test('dados de verdade: a ração do boi entra na loja no nível 4; no 7, o fubá e a ração aparecem como receitas novas do moinho (uma vez cada)', () => {
   const m = mundoDeVerdade(6), ev = ouvirTudo(m);
   darXp(m, m.dados.niveis.limiar[7] - m.progresso.xp);
   assert.equal(m.progresso.nivel, 7);
   const lib = ev.de('subiuDeNivel')[0].liberou;
-  assert.deepEqual(lib.filter((x) => x.tipo === 'receitas').map((x) => [x.id, x.icone]), [['fuba', 'icone/fuba']]);
-  assert.equal(lib.filter((x) => x.id === 'racao' || x.item === 'racao').length, 1, 'a ração aparece uma vez');
+  assert.deepEqual(lib.filter((x) => x.tipo === 'receitas').map((x) => [x.id, x.icone]).sort(), [['fuba', 'icone/fuba'], ['racao', 'icone/racao']]);
+  assert.equal(lib.filter((x) => x.id === 'racao' || x.item === 'racao').length, 1, 'a ração aparece uma vez (a receita: o item já estava na loja desde o nível 4)');
+  const n = mundoDeVerdade(3), en = ouvirTudo(n);
+  darXp(n, n.dados.niveis.limiar[4] - n.progresso.xp);
+  assert.equal(en.de('subiuDeNivel')[0].liberou.filter((x) => x.id === 'racao' || x.item === 'racao').length, 1, 'no nível 4 a ração aparece uma vez');
 });
 
 // põe a construção pronta no primeiro lugar livre do terreiro

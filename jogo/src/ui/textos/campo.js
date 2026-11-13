@@ -14,7 +14,7 @@ Object.assign(T.motivos, {
 });
 
 // o verbo de cada ação na fileira (as ações das outras frentes caem no "fazer")
-const VERBO = { arar: 'arar', semear: 'semear', regar: 'regar', colher: 'colher' };
+const VERBO = { arar: 'arar', semear: 'semear', regar: 'regar', colher: 'colher', ararComBoi: 'o boi arar' };
 const casas = (n) => (n === 1 ? '1 casa' : `${numero(n)} casas`);
 
 T.campo = {

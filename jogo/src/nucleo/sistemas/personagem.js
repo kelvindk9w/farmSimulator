@@ -99,6 +99,7 @@ function comecarAcao(m, p, t) {
   if (!r.ok) { falhar(m, p, t, r); p.tarefa = null; return; }
   // a ferramenta da ação e a ajudante (se estiver no cinto) mudam a duração: "rapidez" 0.75 = um quarto mais rápida
   let dur = m.dados.regras.acoes[a.id] || a.dur;
+  if (a.duracao) dur = a.duracao(m, t, t.args, dur); // a ação que muda com o tamanho (a passada do boi: por casa)
   const fer = a.ferramenta && ferramentaNoCinto(m, a.ferramenta), aju = a.ajudante && ferramentaNoCinto(m, a.ajudante);
   if (fer) dur *= rapidezDe(m, fer); // a ferramenta gasta trabalha mais devagar (sistemas/desgaste.js)
   if (aju) dur *= rapidezDe(m, aju);

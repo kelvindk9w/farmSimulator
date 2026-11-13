@@ -333,6 +333,12 @@ registrarAutomatico((m, x, z) => {
 // ---------- a fileira ----------
 // As casas de campo (arada ou sem sulco) seguidas na linha z, ao longo de X, que passam pela casa (x, z), em ordem a
 // partir da ponta mais perto da personagem. Casa que não é de campo: lista vazia.
+// segurar o dedo na casa (x, z) faz alguma fileira no modo ativo? (na lavoura, sempre; o modo com a fileira dele decide)
+export function podeSegurar(m, x, z) {
+  const modo = MODOS[m.modo.id];
+  if (!m.local.dentro(x, z)) return false;
+  return modo && modo.fileira ? !!modo.fileira(m, x, z) : deLavoura(m.local.chao[z * m.local.l + x]);
+}
 export function casasDaFileira(m, x, z, loc = m.local) {
   const serve = (cx) => loc.dentro(cx, z) && loc.propria[z * loc.l + cx] === 1 && !loc.ocupa[z * loc.l + cx] && deLavoura(loc.chao[z * loc.l + cx]);
   if (!serve(x)) return [];
@@ -348,10 +354,14 @@ export function casasDaFileira(m, x, z, loc = m.local) {
 //     molha: [[x, z]...] casas que as regas de área molham junto, motivo (por que parou antes do fim, ou por que nada) }
 // A conta é a mesma do toque arrastando casa por casa: cada ação escolhida entra numa fila de mentira, para que a
 // próxima casa já desconte a semente, a água e a vaga da fila; no fim a fila volta a ser a de antes.
+// O modo que tem a fileira dele (registrarModo({ fileira(m, x, z) })) responde por ela: o Arado mostra a fileira do boi
+// (até o limite do arado, no eixo com mais casas para arar, também na grama) e a faz numa tarefa só ("umaTarefa").
 export function fileiraDe(m, x, z) {
+  const modo = MODOS[m.modo.id];
+  if (modo && modo.fileira) return modo.fileira(m, x, z);
   const casas = casasDaFileira(m, x, z);
   if (!casas.length) return null;
-  const p = m.personagem, modo = MODOS[m.modo.id], fila = p.fila, n0 = fila.length, max = m.dados.regras.filaMax;
+  const p = m.personagem, fila = p.fila, n0 = fila.length, max = m.dados.regras.filaMax;
   const alvo = [], molha = [], conta = {};
   let motivo = null, acao = null;
   if (!modo) return { casas, alvo, molha, n: 0, acao, motivo: 'nada-aqui' };
@@ -442,7 +452,11 @@ registrarSistema({
       const x = Math.floor(c.x), z = Math.floor(c.z), f = fileiraDe(m, x, z);
       if (!f) return { ok: false, motivo: 'fora-do-campo' };
       let n = 0, motivo = f.motivo;
-      for (const [cx, cz] of f.alvo) {
+      if (f.umaTarefa) { // a fileira toda numa tarefa só (a passada do boi): o toque na casa segurada, como fileira
+        const r = f.n ? m.comando({ tipo: 'tocarCasa', x: x + 0.5, z: z + 0.5, fileira: true }) : null;
+        if (r && r.ok && !r.repetida) n = f.n;
+        else if (r && r.motivo) motivo = r.motivo;
+      } else for (const [cx, cz] of f.alvo) {
         const r = m.comando({ tipo: 'tocarCasa', x: cx + 0.5, z: cz + 0.5, arrasto: true });
         if (r.ok && !r.repetida) n++;
         else if (r.motivo === 'fila-cheia') { motivo = 'fila-cheia'; break; }

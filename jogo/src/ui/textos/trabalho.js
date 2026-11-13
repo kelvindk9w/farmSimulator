@@ -16,7 +16,7 @@ const curto = (D, id) => o(String(nomeA(D, id)).replace(/ de arado$| caramelo$/i
 const Curto = (D, id) => O(String(nomeA(D, id)).replace(/ de arado$| caramelo$/i, ''));
 
 T.modos.arado = 'Arado';
-T.dicaDoModo.arado = 'Toque na grama: o boi ara uma fileira inteira. Arraste o dedo para escolher a direção.';
+T.dicaDoModo.arado = 'Toque ou segure numa casa: o boi ara a fileira inteira, para o lado com mais terra (até 6 casas com o arado simples). Arraste o dedo para escolher a direção.';
 
 Object.assign(T.acoes, {
   ararComBoi: (d) => (d && d.n > 1 ? `Arar ${d.n} casas com o boi` : 'Arar com o boi'),

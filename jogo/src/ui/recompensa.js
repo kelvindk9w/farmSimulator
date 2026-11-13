@@ -8,7 +8,7 @@
 //   compra     o cash de uma compra simulada
 // Só aparece quando algo foi ganho (recompensa vazia não abre nada, a não ser o nível). Várias ao mesmo tempo
 // entram na fila e saem uma depois da outra. Fecha no botão, com Enter, Espaço ou Esc.
-//   mostrarRecompensa({ tipo, faixa, titulo, sub, numero, icone, recompensa: { ouro, cash, xp, itens }, liberou: [...], rodape })
+//   mostrarRecompensa({ tipo, faixa, titulo, sub, numero, icone, recompensa: { ouro, cash, xp, itens, animais }, liberou: [...], rodape })
 import { el, icone, botao } from './dom.js';
 import './textos/progresso.js';
 import { T, numero } from './textos.js';
@@ -26,7 +26,7 @@ export function prepararRecompensa(ui) { raiz = ui; prepararDialogo(ui); }
 export const recompensaAberta = () => !!aberta;
 export const recompensasNaFila = () => fila.length + (aberta ? 1 : 0);
 
-const temAlgo = (r) => !!r && (r.ouro > 0 || r.cash > 0 || r.xp > 0 || (!!r.itens && Object.keys(r.itens).length > 0));
+const temAlgo = (r) => !!r && (r.ouro > 0 || r.cash > 0 || r.xp > 0 || (!!r.itens && Object.keys(r.itens).length > 0) || (!!r.animais && Object.keys(r.animais).length > 0));
 
 export function mostrarRecompensa(d) {
   if (!d || (d.tipo !== 'nivel' && !temAlgo(d.recompensa))) return false; // nunca cobre o jogo sem ter ganhado nada
@@ -44,6 +44,7 @@ function fichas(r, atraso) {
   if (r.ouro > 0) ficha('icone/ouro', numero(r.ouro));
   if (r.cash > 0) ficha('icone/cash', numero(r.cash));
   if (r.xp > 0) ficha('icone/xp', `${numero(r.xp)} ${T.subida.xp}`);
+  for (const k in r.animais || {}) if (D.animais && D.animais[k]) ficha('animal/' + k + '/parada-frente', `${r.animais[k] > 1 ? r.animais[k] + ' × ' : ''}${D.animais[k].nome}`);
   for (const k in r.itens || {}) ficha('icone/' + k, `${r.itens[k] > 1 ? r.itens[k] + ' × ' : ''}${D.itens[k] ? D.itens[k].nome : k}`);
   return caixa;
 }

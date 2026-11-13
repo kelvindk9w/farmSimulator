@@ -72,7 +72,12 @@ function recompensa(arq, onde, r) {
   if (!obj(r)) { erro(arq, `${onde}: "recompensa" devia ser um objeto`); return; }
   for (const k of ['ouro', 'cash', 'xp', 'ouroPorNivel']) if (r[k] !== undefined && !positivo(r[k])) erro(arq, `${onde}: recompensa.${k} devia ser número maior que zero`);
   mapaDeItens(arq, onde, r.itens, 'recompensa.itens');
-  for (const k of Object.keys(r)) if (!['ouro', 'cash', 'xp', 'ouroPorNivel', 'itens'].includes(k)) aviso(arq, `${onde}: recompensa com campo desconhecido "${k}"`);
+  // bicho de presente (o boi do Seu Tonho): { animais: { especie: n } }
+  if (r.animais !== undefined) {
+    if (!obj(r.animais)) erro(arq, `${onde}: recompensa.animais devia ser { animal: n }`);
+    else for (const [k, n] of Object.entries(r.animais)) { if (!animais[k]) erro(arq, `${onde}: recompensa.animais cita "${k}", que não existe`); if (!inteiroPos(n)) erro(arq, `${onde}: recompensa.animais.${k} devia ser um inteiro maior que zero`); }
+  }
+  for (const k of Object.keys(r)) if (!['ouro', 'cash', 'xp', 'ouroPorNivel', 'itens', 'animais'].includes(k)) aviso(arq, `${onde}: recompensa com campo desconhecido "${k}"`);
 }
 const funcoes = () => new Set(entradas(itens).filter(([, i]) => i.tipo === 'ferramenta' || i.tipo === 'recipiente').map(([id, i]) => i.funcao || id.split('-')[0]));
 const nivelDe = (o) => (num(o && o.nivel) ? o.nivel : 1);
@@ -302,7 +307,9 @@ for (const [id, r] of entradas(receitas)) {
   campo('receitas', onde, r, 'tempoSeg', positivo, 'um número maior que zero');
   campo('receitas', onde, r, 'xp', naoNegativo, 'um número');
   campo('receitas', onde, r, 'nivel', inteiroPos, 'um inteiro de 1 para cima');
-  for (const k of Object.keys(r.sai || {})) { (saiDeReceita[k] = saiDeReceita[k] || []).push(id); if (itens[k] && itens[k].nivel !== r.nivel) aviso('receitas', `${onde}: a receita é do nível ${r.nivel} e o item "${k}" do nível ${itens[k].nivel}`); }
+  // (o item que a loja vende antes da receita pode ser de nível menor: a ração do boi se compra desde o nível 4 e o
+  // moinho, no 7, só a faz mais barata)
+  for (const k of Object.keys(r.sai || {})) { (saiDeReceita[k] = saiDeReceita[k] || []).push(id); if (itens[k] && itens[k].nivel !== r.nivel && !(itens[k].nivel < r.nivel && itens[k].compra > 0)) aviso('receitas', `${onde}: a receita é do nível ${r.nivel} e o item "${k}" do nível ${itens[k].nivel}`); }
   for (const k of Object.keys(r.entra || {})) (entraEmReceita[k] = entraEmReceita[k] || []).push(id);
 }
 
@@ -514,6 +521,7 @@ const encosta = (a, b) => (a[0] <= b[2] && b[0] <= a[2] && a[1] < b[3] && b[1] <
   const eventos = (missoes.eventos || {}).lista || {};
   if (!Object.keys(eventos).length) erro('missoes', 'falta "eventos.lista" (os eventos que missões e conquistas escutam)');
   const classes = new Set([...TIPOS_ITEM, 'animal', 'lote', 'construcao', 'diaria', 'conquista', 'convite']);
+  const presente = {}; // bicho que uma missão anterior deu de presente: { especie: nível da missão }
   // devolve o menor nível em que o filtro pode ser cumprido. Uma lista no filtro vale por "qualquer um destes".
   function filtro(onde, f) {
     let n = 1;
@@ -533,7 +541,7 @@ const encosta = (a, b) => (a[0] <= b[2] && b[0] <= a[2] && a[1] < b[3] && b[1] <
         else if (k === 'familia') { if (!FAMILIAS.includes(v)) erro('missoes', `${onde}: família "${v}" não existe`); else niveisK.push(Math.min(...entradas(animais).filter(([, a]) => a.familia === v && a.preco.ouro).map(([, a]) => a.nivel))); }
         else if (k === 'classe') { if (!classes.has(v)) erro('missoes', `${onde}: filtro classe "${v}" desconhecido`); }
         else if (k === 'obstaculo') { if (!(terras.obstaculos || {})[v]) erro('missoes', `${onde}: filtro cita o obstáculo "${v}", que não está em terras.obstaculos`); }
-        else if (k === 'com') { if (v !== 'boi') erro('missoes', `${onde}: filtro com "${v}" desconhecido (só "boi")`); else if (animais.boi) niveisK.push(animais.boi.nivel); }
+        else if (k === 'com') { if (v !== 'boi') erro('missoes', `${onde}: filtro com "${v}" desconhecido (só "boi")`); else if (animais.boi) niveisK.push(Math.min(animais.boi.nivel, presente.boi || Infinity)); }
         else if (k === 'parte') { if (!['cocho', 'bebedouro'].includes(v)) erro('missoes', `${onde}: filtro parte "${v}" desconhecido`); }
         else erro('missoes', `${onde}: campo de filtro desconhecido "${k}"`);
       }
@@ -575,6 +583,8 @@ const encosta = (a, b) => (a[0] <= b[2] && b[0] <= a[2] && a[1] < b[3] && b[1] <
     if (func && !jaTem.has(func) && !(porFuncao[func] || []).some((x) => x.compra > 0 && x.nivel <= mi.nivel)) erro('missoes', `${onde}: pede "${func}", que o jogador ainda não ganhou nem pode comprar no nível ${mi.nivel}`);
     // a ferramenta dada nesta recompensa vale para as missões seguintes
     for (const f of Object.keys((mi.recompensa || {}).itens || {})) if (itens[f] && ['ferramenta', 'recipiente'].includes(itens[f].tipo)) jaTem.add(itens[f].funcao);
+    // o bicho dado nesta recompensa também (o boi do nível 4, antes de se poder comprar outro)
+    for (const a of Object.keys((mi.recompensa || {}).animais || {})) if (animais[a] && !(presente[a] <= mi.nivel)) presente[a] = mi.nivel;
   });
   if (viz.length < 25 || viz.length > 40) aviso('missoes', `são ${viz.length} missões do vizinho; o plano fala em cerca de 30`);
   // conquistas

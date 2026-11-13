@@ -16,7 +16,7 @@
 // valer como tratado. Os ciclos se resolvem em ordem de relógio (instantes exatos, não o momento em que a conta é
 // feita), então dá o mesmo resultado com o jogo aberto ou depois de horas fechado. Nenhum bicho morre nem foge.
 import { registrarSistema, registrarAcao, registrarEvento, ampliarEvento } from '../registro.js';
-import { gastarOuro, quantoTem, gastarItens, ferramentaNoCinto, ferramentaNoSuporte } from './posses.js';
+import { gastarOuro, quantoTem, gastarItens, ferramentaNoCinto, ferramentaNoSuporte, RECOMPENSAS } from './posses.js';
 import { MOSTRA_LIBERADO } from './niveis.js';
 import { JA_COMPROU, VENDAVEL } from './loja.js';
 import { comportamento, COMPORTAMENTOS, construcaoPorId, estaPronta, valorDe } from './construcao.js';
@@ -241,6 +241,31 @@ ENTREGAS.animal = {
   },
   entregar(m, id) { const d = m.dados.animais[id]; if (d && FAMILIAS[d.familia] && !m.animais.entregues.includes(id)) porAnimal(m, id); },
 };
+// ---------- bicho de presente (recompensa de missão: { animais: { especie: n } }) ----------
+// O vizinho dá o bicho: sem preço e sem olhar o nível, no primeiro abrigo pronto com vaga, que ele deixa com o cocho
+// e o bebedouro cheios. A recompensa GARANTE n bichos da espécie: quem já tem (comprou antes, gravação de antes) não
+// ganha outro; sem abrigo com vaga, não vem (a missão que dá o bicho pede o abrigo antes).
+export function darAnimalDePresente(m, especie, origem) {
+  const d = m.dados.animais[especie];
+  if (!d || !FAMILIAS[d.familia]) return null;
+  const e = d.abrigo ? abrigoComVaga(m, d.abrigo) : null;
+  if (d.abrigo && !e) return null;
+  if (e) {
+    const s = criarEstado(m, e), item = comidaDoAbrigo(m, e);
+    if (item) s.cocho = Math.max(s.cocho, capacidadeDoCocho(m, e));
+    s.bebedouro = Math.max(s.bebedouro, capacidadeDoBebedouro(m, e));
+  }
+  const a = porAnimal(m, especie, e ? { abrigo: e.id } : {});
+  m.eventos.emitir('ganhouAnimal', { id: a.id, animal: especie, familia: a.familia, origem: origem || '' });
+  return a;
+}
+RECOMPENSAS.push((m, r, origem) => {
+  if (!r || !r.animais || typeof r.animais !== 'object') return;
+  for (const especie in r.animais) {
+    const quer = Math.max(0, Math.round(r.animais[especie]) || 0);
+    for (let k = animaisDe(m, { especie }).length; k < quer; k++) if (!darAnimalDePresente(m, especie, origem)) break;
+  }
+});
 // o que foi pago com cash e ainda não está na fazenda (a família não existia, ou a gravação é de antes dela)
 function entregarPendentes(m) {
   const esp = animaisEspeciais(m), A = m.animais;

@@ -49,10 +49,27 @@ export function bichoDe(m, tipo) {
   }
   return achou;
 }
-// o apetrecho que falta para este bicho trabalhar (id do item), ou null
+// os dois itens fazem o mesmo papel? (o arado de ferro vale pelo arado simples que o boi "exige")
+const mesmoPapel = (I, a, b) => !!I[a] && !!I[b] && I[a].tipo === I[b].tipo && I[a].funcao === I[b].funcao;
+const doJogador = (m) => [...Object.keys(m.posses.ferramentas), ...m.posses.recipientes];
+// o melhor item do jogador que faz o papel de "id" (maior degrau), ou null
+function melhorDoPapel(m, id) {
+  const I = m.dados.itens;
+  let achou = null;
+  for (const k of doJogador(m)) if ((k === id || mesmoPapel(I, k, id)) && (!achou || I[k].degrau > I[achou].degrau)) achou = k;
+  return achou;
+}
+// o apetrecho que falta para este bicho trabalhar (id do item), ou null; um melhor do mesmo papel vale
 export function faltaDe(m, a) {
   const d = defDoAnimal(m, a);
-  if (d && Array.isArray(d.exige)) for (const id of d.exige) if (m.dados.itens[id] && !jaTem(m, id)) return id;
+  if (d && Array.isArray(d.exige)) for (const id of d.exige) if (m.dados.itens[id] && !jaTem(m, id) && !melhorDoPapel(m, id)) return id;
+  return null;
+}
+// o apetrecho com que o bicho trabalha agora (o melhor arado que o jogador tem), como está em itens.json, ou null
+export function apetrechoDe(m, a) {
+  const d = defDoAnimal(m, a);
+  if (!d || !Array.isArray(d.exige)) return null;
+  for (const id of d.exige) { const k = m.dados.itens[id] && melhorDoPapel(m, id); if (k) return m.dados.itens[k]; }
   return null;
 }
 // o bicho deste papel com tudo o que precisa para trabalhar, ou null
@@ -69,9 +86,11 @@ export const temBarril = (m) => temRecipiente(m, 'barril');
 export const capacidadeDaCarroca = (m) => Math.floor(capacidadeDe(m, 'carroca') * fatorDoJumento(m));
 export const capacidadeDoBarril = (m) => Math.floor(capacidadeDe(m, 'barril') * fatorDoJumento(m));
 export const naCarroca = (m) => total(m.trabalho.carroca);
-// quantas casas o boi ara por passada agora (5; sem trato, 3)
+// O limite da fileira do boi agora: o "fileira" do melhor arado do jogador (6 no simples, 10 no de ferro; o trator, mais
+// adiante, fará várias fileiras); sem arado nos dados, o efeito.casas do boi. Sem trato, no máximo 3.
 export function casasPorPassada(m, a = bichoDe(m, 'arar')) {
-  const d = a && defDoAnimal(m, a), n = d && d.efeito && d.efeito.casas >= 1 ? Math.round(d.efeito.casas) : 5;
+  const d = a && defDoAnimal(m, a), ap = a ? apetrechoDe(m, a) : null;
+  const n = ap && ap.fileira >= 1 ? Math.round(ap.fileira) : d && d.efeito && d.efeito.casas >= 1 ? Math.round(d.efeito.casas) : 6;
   return a && !estaTratado(m, a) ? Math.min(n, SEM_TRATO_ARA) : n;
 }
 // a velocidade montada: a do cavalo; sem trato, a dela correndo (e continua sem gastar fôlego)
@@ -91,7 +110,8 @@ export function estadoDoTrabalho(m) {
 
 // ---------- a loja vende os apetrechos ----------
 // arado e sela são "ferramenta" que nenhuma ação leva no cinto: vendem-se porque um bicho deste jogo os exige
-const exigido = (dados, id) => !!dados.animais && Object.values(dados.animais).some((d) => d.familia === 'trabalho' && Array.isArray(d.exige) && d.exige.includes(id));
+// (um melhor do mesmo papel também: o arado de ferro)
+const exigido = (dados, id) => !!dados.animais && Object.values(dados.animais).some((d) => d.familia === 'trabalho' && Array.isArray(d.exige) && d.exige.some((e) => e === id || mesmoPapel(dados.itens, e, id)));
 const eraVendavel = VENDAVEL.ferramenta;
 VENDAVEL.ferramenta = (m, it) => exigido(m.dados, it.id) || eraVendavel(m, it);
 // carroça e barril: recipientes que não mudam o cesto (a carga e a água deles moram em mundo.trabalho)
@@ -145,16 +165,67 @@ export function direcaoDaPassada(m, x, z, n = casasPorPassada(m), soX = false) {
   }
   return melhor;
 }
-// O dedo pintando (ou a fileira inteira, de "segurar o dedo"): a direção é a do arrasto, desde que a casa anterior do
-// dedo seja de uma passada da fila e esta esteja na mesma linha, a até uma passada de distância. A passada que começa
-// na casa anterior, se ainda não começou, vira para o lado em que o dedo foi. Devolve a direção (ou -1: sem direção).
+// A fileira do boi a partir da casa (x, z) (o toque e o "segurar o dedo" no modo Arado). Nos dois eixos, a faixa de
+// casas seguidas da mesma linha que passa por ela (na lavoura, as casas de campo, aradas ou plantadas; na grama, a grama
+// que dá para arar) e, nela, a janela de até n casas que contém a casa tocada e pega mais casas para arar; no empate,
+// a que cresce para o lado mais comprido da faixa. Fica o eixo com mais casas para arar; no empate, o que tem mais
+// campo (o boi refaz a lavoura antes de abrir grama nova); depois, X.
+//   { casas: [[x, z]...] a janela toda, em ordem, aArar: [[x, z]...] as que o boi vira (fora a planta, a já arada e a
+//     já prometida), dir: 0 (+X) ou 1 (+Z) } ou null (a casa não é de lavoura nem grama para arar)
+export function fileiraDoBoi(m, x, z, n = casasPorPassada(m)) {
+  const loc = m.local;
+  if (!loc.dentro(x, z) || !loc.ehPropria(x, z) || loc.ocupa[z * loc.l + x]) return null;
+  const lavoura = deLavoura(loc.chao[z * loc.l + x]);
+  if (!lavoura && !aravel(m, loc, x, z)) return null;
+  const daLinha = (cx, cz) => loc.dentro(cx, cz) && loc.ehPropria(cx, cz) && !loc.ocupa[cz * loc.l + cx] && (lavoura ? deLavoura(loc.chao[cz * loc.l + cx]) : aravel(m, loc, cx, cz));
+  let melhor = null, nota = -1;
+  for (const dir of [0, 1]) {
+    const d = DIRS[dir];
+    let mais = 0, menos = 0;
+    while (mais < n - 1 && daLinha(x + d[0] * (mais + 1), z + d[1] * (mais + 1))) mais++;
+    while (menos < n - 1 && daLinha(x - d[0] * (menos + 1), z - d[1] * (menos + 1))) menos++;
+    // de -menos a +mais: 1 = casa para arar (2 se for campo), 0 = não
+    const vale = [];
+    for (let k = -menos; k <= mais; k++) {
+      const cx = x + d[0] * k, cz = z + d[1] * k;
+      vale.push(aravel(m, loc, cx, cz) && !prometida(m, cx, cz) ? (loc.chao[cz * loc.l + cx] === CAMPO ? 2 : 1) : 0);
+    }
+    let ini = 0, fim = 0, nArar = -1, nCampo = 0;
+    for (let s = -menos; s <= 0; s++) {
+      const e = Math.min(s + n - 1, mais);
+      let a = 0, c = 0;
+      for (let k = s; k <= e; k++) { const v = vale[k + menos]; if (v) a++; if (v === 2) c++; }
+      // empate: para o lado mais comprido (o de "mais", a janela mais à frente; o de "menos", a mais atrás)
+      if (a > nArar || (a === nArar && (mais >= menos ? s > ini : false))) { nArar = a; nCampo = c; ini = s; fim = e; }
+    }
+    const casas = [], aArar = [];
+    for (let k = ini; k <= fim; k++) { const c = [x + d[0] * k, z + d[1] * k]; casas.push(c); if (vale[k + menos]) aArar.push(c); }
+    const v = nArar * 100 + nCampo;
+    if (v > nota) { nota = v; melhor = { casas, aArar, dir }; }
+  }
+  return melhor;
+}
+// O que segurar o dedo faria no modo Arado (lavoura.js: fileiraDe pergunta ao modo): a fileira do boi, numa passada só
+function fileiraDoArado(m, x, z) {
+  const f = fileiraDoBoi(m, x, z);
+  if (!f) return null;
+  const a = pronto(m, 'arar');
+  const motivo = !a ? 'sem-boi' : !f.aArar.length ? 'fileira-em-dia' : null;
+  const alvo = a ? f.aArar.map(([cx, cz]) => [cx, cz, 'ararComBoi']) : [];
+  return { casas: f.casas, alvo, molha: [], n: alvo.length, acao: alvo.length ? 'ararComBoi' : null, motivo, umaTarefa: true };
+}
+
+// O dedo pintando: a direção é a do arrasto, desde que a casa anterior do dedo seja de uma passada da fila e esta
+// esteja na mesma linha, a até uma passada de distância. A passada que começa na casa anterior, se ainda não começou,
+// vira para o lado em que o dedo foi (a do primeiro toque era a fileira do boi, "janela": vira passada daquela casa).
+// Devolve a direção (ou -1: sem direção).
 function arrastar(m, x, z) {
   const A = m.trabalho.arrasto, dx = x - A.x, dz = z - A.z;
   let dir = -1;
   if (m.n - A.n < 150 && (dx === 0) !== (dz === 0) && Math.abs(dx + dz) <= casasPorPassada(m) && prometida(m, A.x, A.z)) {
     dir = DIRS.findIndex((d) => d[0] === Math.sign(dx) && d[1] === Math.sign(dz));
     const t = m.personagem.fila.find((q) => q.tipo === 'agir' && q.acao === 'ararComBoi' && q.x === A.x && q.z === A.z);
-    if (t && t.args.dir !== dir && !t.args.passada) { t.args = { casas: [[A.x, A.z]], dir }; t.args.casas = casasDaPassada(m, A.x, A.z, dir); }
+    if (t && (t.args.dir !== dir || t.args.janela) && !t.args.passada) { t.args = { casas: [[A.x, A.z]], dir }; t.args.casas = casasDaPassada(m, A.x, A.z, dir); }
   }
   A.x = x; A.z = z; A.n = m.n;
   return dir;
@@ -170,8 +241,16 @@ function ararCasa(m, loc, x, z) {
   return true;
 }
 
+// A passada dura o mesmo por casa andada: regras.acoes.ararComBoi (ou o "seg" do boi) é a de 5 casas, da ponta à ponta.
+const PASSADA_PADRAO = 5;
 registrarAcao({
   id: 'ararComBoi', dur: 2.5, efeitoEm: 2.4, estadoVisual: 'conduzir',
+  duracao(m, t, args, dur) {
+    const c = args && args.casas;
+    if (!c || !c.length) return dur;
+    const L = Math.abs(c[c.length - 1][0] - c[0][0]) + Math.abs(c[c.length - 1][1] - c[0][1]);
+    return dur * (L + 2) / (PASSADA_PADRAO + 1);
+  },
   pode(m, alvo, args) {
     if (m.personagem.local !== 'fazenda') return NAO('so-no-terreiro', null, true);
     const a = bichoDe(m, 'arar');
@@ -192,20 +271,28 @@ registrarModo({
   id: 'arado', ordem: 12, icone: 'icone/arado',
   disponivel: (m) => !!pronto(m, 'arar'),
   aoEscolher(m) { m.trabalho.boiOcioso = 0; },
-  // c = o comando do toque (c.arrasto: o dedo está pintando); a dica e o destaque chamam sem ele
+  // segurar o dedo numa casa (do campo ou da grama para arar): a fileira do boi, marcada no chão antes de soltar
+  fileira: fileiraDoArado,
+  // c = o comando do toque (c.arrasto: o dedo está pintando; c.fileira: soltou a fileira segurada); a dica e o
+  // destaque chamam sem ele. O toque e a fileira segurada dão no mesmo: a fileira do boi a partir da casa
   acaoNaCasa(m, x, z, c) {
-    const loc = m.local, i = z * loc.l + x;
+    const loc = m.local, i = z * loc.l + x, inteira = !!(c && c.fileira);
     let dir = c && c.arrasto ? arrastar(m, x, z) : -1;
-    if (loc.chao[i] === ARADA) return { acao: null, texto: 'ja-arado' };
-    if (!aravel(m, loc, x, z)) return null; // caminho, terra plantada: só anda
-    if (prometida(m, x, z)) return NA_FILA;
+    if (!inteira) {
+      if (loc.chao[i] === ARADA) return { acao: null, texto: 'ja-arado' };
+      if (!aravel(m, loc, x, z)) return null; // caminho, terra plantada: só anda
+      if (prometida(m, x, z)) return NA_FILA;
+    }
     const a = pronto(m, 'arar');
     if (!a) return { acao: null, texto: 'sem-boi', falta: true };
     const n = casasPorPassada(m, a);
-    // o dedo pousou na lavoura pintando (ou segurou na fileira): a passada vai ao longo dela
-    if (dir < 0) dir = direcaoDaPassada(m, x, z, n, !!(c && c.arrasto) && deLavoura(loc.chao[i]));
-    const casas = casasDaPassada(m, x, z, dir, n);
-    return { acao: 'ararComBoi', args: { casas, dir }, casas, dados: { n: casas.length, animal: a.especie } };
+    if (dir >= 0) { // o dedo pintando numa direção: a passada vai para lá, a partir desta casa
+      const casas = casasDaPassada(m, x, z, dir, n);
+      return { acao: 'ararComBoi', args: { casas, dir }, casas, dados: { n: casas.length, animal: a.especie } };
+    }
+    const f = fileiraDoBoi(m, x, z, n);
+    if (!f || !f.aArar.length) return inteira ? { acao: null, texto: 'fileira-em-dia' } : NA_FILA;
+    return { acao: 'ararComBoi', args: { casas: f.aArar, dir: f.dir, janela: true }, casas: f.aArar, dados: { n: f.aArar.length, animal: a.especie } };
   },
 });
 
@@ -461,14 +548,17 @@ registrarGuia('arou', (m, f, out) => {
   const p = m.personagem, loc = m.local;
   if (p.local !== 'fazenda') { out.tipo = null; return out; }
   if (m.modo.id !== 'arado') { out.tipo = 'modo'; out.modo = 'arado'; return out; }
+  // a casa para arar mais perto dela (a do campo vale três casas de distância a menos: o boi refaz a lavoura antes de
+  // abrir grama nova), com a fileira que o boi faria dali marcada no chão
   const x0 = Math.floor(p.x), z0 = Math.floor(p.z);
   let melhor = Infinity;
   out.tipo = null;
   for (let z = z0 - 9; z <= z0 + 9; z++) for (let x = x0 - 9; x <= x0 + 9; x++) {
     if (!aravel(m, loc, x, z) || prometida(m, x, z)) continue;
-    const d = Math.hypot(x + 0.5 - p.x, z + 0.5 - p.z);
+    const d = Math.hypot(x + 0.5 - p.x, z + 0.5 - p.z) - (loc.chao[z * loc.l + x] === CAMPO ? 3 : 0);
     if (d < melhor) { melhor = d; out.tipo = 'casa'; out.x = x; out.z = z; }
   }
+  if (out.tipo === 'casa') { const f = fileiraDoBoi(m, out.x, out.z); if (f && f.aArar.length > 1) out.casas = f.aArar; }
   return out;
 });
 // montar: comprar o que falta, ligar "ir a cavalo" (o botão do HUD se registra como painel "ir-a-cavalo") e ir longe

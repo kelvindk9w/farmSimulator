@@ -9,7 +9,7 @@ import { EVENTOS, MODOS } from '../src/nucleo/registro.js';
 import { GRAMA, ARADA } from '../src/nucleo/local.js';
 import { guiaDoEvento } from '../src/nucleo/guia.js';
 import { descreverCasa, visualDaPersonagem } from '../src/nucleo/sistemas/personagem.js';
-import { plantaEm, estadoDaPlanta } from '../src/nucleo/sistemas/lavoura.js';
+import { plantaEm, estadoDaPlanta, fileiraDe } from '../src/nucleo/sistemas/lavoura.js';
 import { ofertasDaLoja } from '../src/nucleo/sistemas/loja.js';
 import { podeComprarAnimal, porAnimal } from '../src/nucleo/sistemas/animais.js';
 import { bichoSolto } from '../src/nucleo/sistemas/acompanhar.js';
@@ -20,6 +20,7 @@ const copia = (o) => JSON.parse(JSON.stringify(o));
 const recarregar = (m) => Mundo.carregar(m.dados, copia(m.salvar()));
 const chao = (m, x, z) => m.locais.fazenda.chao[z * m.locais.fazenda.l + x];
 const semTrato = (a) => { a.tratado = false; return a; };
+const bichoDo = (m) => m.animais.lista.find((a) => a.especie === 'boi');
 
 // ---------------------------------------------------------------------------------------------------------------
 test('o apetrecho não trava a compra do bicho: trava o uso, e a loja vende arado, sela, carroça e barril', () => {
@@ -80,15 +81,22 @@ test('o boi ara cinco casas em linha numa passada, com o mesmo chão da enxada e
   assert.equal(ev.de('arou').pop().com, undefined);
 });
 
-test('casa que não se ara fica de fora sem erro; a direção é a da fileira com mais casas; o dedo escolhe a dele', () => {
+test('o toque na grama: o eixo com mais casas para arar, a janela cresce para o lado mais comprido; o que não se ara fica de fora; o dedo escolhe a direção dele', () => {
   const m = mundoDoTrabalho(), ev = ouvirTudo(m);
   comBicho(m, 'boi', 'arado');
-  // uma planta no caminho da fileira +X: ela segue para o lado, sem erro
+  // uma planta em (14, 14)
   arar(m, [[14, 14]]); semear(m, [[14, 14]]);
   modo(m, 'arado');
-  // para +X: 12,13,(14 plantada),15,16 = 4 casas; para +Z, 5: o toque simples escolhe +Z
-  const d = descreverCasa(m, 12, 14);
-  assert.deepEqual(d.casas, [[12, 14], [12, 15], [12, 16], [12, 17], [12, 18]]);
+  // em (14, 12): para +Z a grama acaba na planta (z = 13 só), para -Z o caminho (z = 9) corta: 3 casas em Z; em X, 5
+  let d = descreverCasa(m, 14, 12);
+  assert.deepEqual(d.casas, [[14, 12], [15, 12], [16, 12], [17, 12], [18, 12]]);
+  // em (14, 13), colada na planta: em X são 5; em Z, para -Z até o caminho (z = 10..13): 4 → X, para o lado mais comprido
+  d = descreverCasa(m, 14, 13);
+  assert.equal(d.casas.length, 5);
+  assert.ok(d.casas.every(([, z]) => z === 13));
+  // perto da cerca da terra própria (x = 19 é a última casa): para +X só 1, para -X 4: a janela vai para -X
+  d = descreverCasa(m, 18, 16);
+  assert.deepEqual(d.casas.map(([x]) => x).sort((a, b) => a - b), [14, 15, 16, 17, 18]);
   // a fileira pelo caminho (z = 9 é caminho): as casas do caminho ficam de fora
   const c = descreverCasa(m, 15, 7);
   assert.ok(c.casas.every(([x, z]) => z !== 9), 'nada do caminho');
@@ -105,27 +113,58 @@ test('casa que não se ara fica de fora sem erro; a direção é a da fileira co
   assert.equal(descreverCasa(m, 12, 14).texto, 'ja-arado');
 });
 
-test('segurar o dedo na fileira do campo: o boi ara a fileira toda, ao longo dela, a partir da ponta mais perto', () => {
-  const m = mundoDoTrabalho(), loc = m.locais.fazenda;
+test('segurar o dedo numa casa do campo: o boi ara a fileira no eixo com mais casas, até o limite do arado (6 no simples, 10 no de ferro)', () => {
+  const m = novo((b) => {
+    b.itens.arado.fileira = 6;
+    b.itens['arado-de-ferro'] = { nome: 'Arado de ferro', tipo: 'ferramenta', funcao: 'arado', degrau: 2, nivel: 1, compra: 40, fileira: 10 };
+    b.loja.ouro.itens.push('arado-de-ferro');
+  }), loc = m.locais.fazenda, ev = ouvirTudo(m);
   comBicho(m, 'boi', 'arado');
   modo(m, 'arado');
-  // campo sem sulco (o que fica depois da colheita): uma fileira de 12 (z = 12) e uma de 4 (z = 16), grama em volta
+  assert.equal(casasPorPassada(m), 6);
+  // o campo: uma fileira de 12 ao longo de X (z = 12, x 6..17) e uma coluna de 4 ao longo de Z (x = 11, z 14..17)
   const CAMPO = 6;
   for (let x = 6; x <= 17; x++) loc.chao[12 * loc.l + x] = CAMPO;
-  for (let x = 8; x <= 11; x++) loc.chao[16 * loc.l + x] = CAMPO;
-  m.comando({ tipo: 'irPara', x: 18.5, z: 14.5 }); ateParar(m);
-  const r = m.comando({ tipo: 'fileira', x: 10.5, z: 12.5 });
-  if (!r.ok && r.motivo === 'fora-do-campo') return; // (sem o campo de plantação ainda, não há "fileira")
-  assert.equal(r.ok, true);
+  for (let z = 14; z <= 17; z++) loc.chao[z * loc.l + 11] = CAMPO;
+  // segurando em (8, 12): em X a fileira tem 12 casas; em Z, 1 (a coluna não encosta): X, 6 casas, para o lado mais comprido
+  let f = fileiraDe(m, 8, 12);
+  assert.equal(f.acao, 'ararComBoi'); assert.equal(f.n, 6);
+  assert.deepEqual(f.casas, [[8, 12], [9, 12], [10, 12], [11, 12], [12, 12], [13, 12]]);
+  assert.deepEqual(f.alvo.map(([x, z]) => [x, z]), f.casas, 'as seis entram na passada');
+  // mostrar não mexe em nada
+  assert.equal(m.personagem.fila.length, 0);
+  // segurando em (11, 15), na coluna: em Z são 4 (o campo), em X 1: o boi vai ao longo de Z, só no campo
+  f = fileiraDe(m, 11, 15);
+  assert.deepEqual(f.casas, [[11, 14], [11, 15], [11, 16], [11, 17]]);
+  // soltou: uma passada só, com as seis casas
+  const r = m.comando({ tipo: 'fileira', x: 8.5, z: 12.5 });
+  assert.equal(r.ok, true); assert.equal(r.dados.n, 6); assert.equal(r.dados.acao, 'ararComBoi');
+  assert.equal(m.personagem.fila.filter((t) => t.acao === 'ararComBoi').length + (m.personagem.tarefa && m.personagem.tarefa.acao === 'ararComBoi' ? 1 : 0), 1);
   ateParar(m, 200);
-  for (let x = 6; x <= 17; x++) assert.equal(chao(m, x, 12), ARADA, `(${x}, 12) arada`);
-  for (let x = 4; x <= 20; x++) { assert.notEqual(chao(m, x, 11), ARADA); assert.notEqual(chao(m, x, 13), ARADA); }
-  // a fileira curta, com ela do lado direito: o boi vai para a esquerda, pelo campo, e não abre a grama da direita
-  m.comando({ tipo: 'irPara', x: 15.5, z: 17.5 }); ateParar(m);
-  assert.equal(m.comando({ tipo: 'fileira', x: 9.5, z: 16.5 }).ok, true);
-  ateParar(m);
-  for (let x = 8; x <= 11; x++) assert.equal(chao(m, x, 16), ARADA, `(${x}, 16) arada`);
-  for (let x = 12; x <= 16; x++) assert.equal(chao(m, x, 16), GRAMA, `(${x}, 16) ficou grama`);
+  for (let x = 8; x <= 13; x++) assert.equal(chao(m, x, 12), ARADA, `(${x}, 12) arada`);
+  for (const x of [6, 7, 14, 15, 16, 17]) assert.equal(chao(m, x, 12), CAMPO, `(${x}, 12) ficou para a próxima`);
+  // a passada de 6 casas leva o mesmo por casa que a de 5 (2,5 s): 2,5 × 7 / 6
+  const dur = ev.de('comecouAcao').find((d) => d.acao === 'ararComBoi').dur;
+  assert.ok(Math.abs(dur - 2.5 * 7 / 6) < 0.01, `durou ${dur}`);
+  // de novo na mesma casa: o resto da fileira (x 14..17 de um lado, 6..7 do outro): 6 casas, as que faltam
+  f = fileiraDe(m, 13, 12);
+  assert.deepEqual(f.alvo.map(([x]) => x).sort((a, b) => a - b), [14, 15, 16, 17]);
+  // o arado de ferro: 10 casas; vale pelo simples (o boi não pede o simples de volta)
+  m.posses.ouro += 100;
+  assert.equal(m.comando({ tipo: 'comprar', item: 'arado-de-ferro' }).ok, true);
+  assert.equal(casasPorPassada(m), 10);
+  delete m.posses.ferramentas.arado;
+  assert.equal(estadoDoTrabalho(m).boi.falta, null);
+  assert.equal(MODOS.arado.disponivel(m), true);
+  f = fileiraDe(m, 17, 12);
+  assert.deepEqual(f.casas.map(([x]) => x), [8, 9, 10, 11, 12, 13, 14, 15, 16, 17]);
+  assert.deepEqual(f.alvo.map(([x]) => x), [14, 15, 16, 17]);
+  // sem trato, no máximo 3
+  bichoDo(m).tratado = false;
+  assert.equal(casasPorPassada(m), 3);
+  // segurar na grama também vale no Arado (o campo cresce); fora da terra própria, não
+  assert.equal(fileiraDe(m, 12, 17).n, 3);
+  assert.equal(fileiraDe(m, 21, 12), null);
 });
 
 test('sem trato o boi ara três casas; trinta casas em passadas de cinco', () => {

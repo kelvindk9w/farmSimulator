@@ -1,6 +1,6 @@
 // O que o campo de plantação marca no chão, numa camada da cena (render/cena.js: registrarCamada):
 //   a fileira que o dedo (ou o botão) está segurando: a fileira toda de leve e, na cor da ação, as casas que entram
-//   na fila quando soltar;
+//   na fila quando soltar (no Arado, a janela do boi e as casas que ele vira);
 //   a fileira que o tutorial aponta (cena.seta.casas, do guia): as casas que pedem o mesmo, piscando devagar.
 import { registrarCamada, COR_DA_ACAO } from './cena.js';
 
@@ -23,7 +23,7 @@ registrarCamada('chao', (g, cam, m, S, cena) => {
     g.lineWidth = Math.max(2, 0.05 * S); g.strokeStyle = 'rgba(255,255,255,.6)'; g.stroke();
     // as que entram na fila: claras, com o contorno branco (e a cor da ação por dentro, menos na enxada, que some na terra)
     if (F.alvo && F.alvo.length) {
-      const acao = F.alvo[0][2], cor = acao === 'arar' ? '#fff3d6' : COR_DA_ACAO[acao] || '#ffffff', pulso = 0.5 + 0.5 * Math.sin(cena.tempo * 7);
+      const acao = F.alvo[0][2], cor = acao === 'arar' || acao === 'ararComBoi' ? '#fff3d6' : COR_DA_ACAO[acao] || '#ffffff', pulso = 0.5 + 0.5 * Math.sin(cena.tempo * 7);
       g.beginPath();
       for (const [x, z] of F.alvo) losango(g, cam, x, z, S, 0.1 - 0.04 * pulso);
       g.globalAlpha = 0.42 + 0.12 * pulso; g.fillStyle = cor; g.fill(); g.globalAlpha = 1;

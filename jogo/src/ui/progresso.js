@@ -161,7 +161,7 @@ aoInstalarMundo((m, ctx) => {
   // missão com prêmio grande (ferramenta, recipiente, roupa ou cash): a tela inteira; as outras ficam no aviso de sempre
   ev.ouvir('missaoConcluida', (d) => {
     const r = d.recompensa || {};
-    let grande = r.cash > 0;
+    let grande = r.cash > 0 || (!!r.animais && Object.keys(r.animais).length > 0); // bicho de presente também
     for (const k in r.itens || {}) if (D.itens[k] && PREMIO_GRANDE[D.itens[k].tipo]) grande = true;
     if (grande) mostrarRecompensa({ tipo: 'missao', icone: 'ui/missoes', titulo: d.titulo, recompensa: resolver(m, r) });
   });

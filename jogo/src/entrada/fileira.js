@@ -1,10 +1,10 @@
-// Segurar para a fileira: o dedo (ou o mouse) parado numa casa do campo de plantação, ou o botão de agir seguro
+// Segurar para a fileira: o dedo (ou o mouse) parado numa casa do campo de plantação (no modo Arado, também na grama:
+// a fileira do boi, até o limite do arado, no eixo com mais casas para arar), ou o botão de agir seguro
 // (Espaço ou Enter, o A do controle, o botão de agir da tela; vale a casa à frente dela), mostra a fileira toda
 // marcada no chão com o que vai para a fila; soltar confirma (comando "fileira"), mexer o dedo cancela.
 // A linha de dica avisa, numa casa do campo, que segurar faz a fileira.
 import { J } from '../contexto.js';
-import { deLavoura } from '../nucleo/local.js';
-import { fileiraDe } from '../nucleo/sistemas/lavoura.js';
+import { fileiraDe, podeSegurar } from '../nucleo/sistemas/lavoura.js';
 import { alvoDaFrente } from '../nucleo/sistemas/personagem.js';
 import { FILEIRA } from '../render/campo.js';
 import { T } from '../ui/textos.js';
@@ -37,7 +37,7 @@ export function ligarFileira(entrada, hud) {
         if (frente.entidade !== undefined) return;
         x = frente.x; z = frente.z;
       }
-      if (!J.mundo.local.dentro(x, z) || !deLavoura(J.mundo.local.chaoEm(x, z))) return; // fora do campo: segurar não faz nada
+      if (!podeSegurar(J.mundo, x, z)) return; // fora do campo (no Arado, também fora da grama para arar): segurar não faz nada
       st.origem = origem; st.x = x; st.z = z; st.t = 0; st.recalc = 0;
     },
     cancelar(origem) { if (!origem || st.origem === origem) limpar(); },
@@ -71,7 +71,7 @@ export function ligarFileira(entrada, hud) {
     // a linha de dica: segurando, o que acontece ao soltar; numa casa do campo, que segurar faz a fileira toda
     dica(texto, m, x, z, ent) {
       if (FILEIRA.ligada && st.prev) return T.campo.solte(st.prev.acao, st.prev.n);
-      if (ent !== null || x < 0 || !deLavoura(m.local.chaoEm(x, z))) return texto;
+      if (ent !== null || x < 0 || !podeSegurar(m, x, z)) return texto;
       const f = fileiraDe(m, x, z);
       if (!f || f.n < 2) return texto;
       const extra = J.meio === 'teclas' ? T.campo.segureTecla(f.n) : T.campo.segure(f.n);

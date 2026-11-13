@@ -1,6 +1,6 @@
 // O que as recompensas têm em comum (conquistas, presente do dia, convite, compartilhar, cash):
 // ler a parte delas nos dados (missoes.json, loja.json, regras.json) e transformar uma recompensa dos dados
-// ({ ouro, ouroPorNivel, cash, xp, itens }) nos números que o jogador recebe agora.
+// ({ ouro, ouroPorNivel, cash, xp, itens, animais }) nos números que o jogador recebe agora.
 // Tudo é opcional: com os dados pequenos dos testes (sem conquistas, sem diária, sem cash) as listas vêm vazias.
 import { darRecompensa } from './sistemas/posses.js';
 import { darXp } from './sistemas/niveis.js';
@@ -68,6 +68,7 @@ export function resolver(m, r, extra) {
   const out = { ouro: 0, cash: 0, xp: 0, itens: {} };
   for (const p of [r, extra]) {
     if (!obj(p)) continue;
+    if (obj(p.animais)) for (const k in p.animais) if (m.dados.animais && m.dados.animais[k] && p.animais[k] > 0) (out.animais || (out.animais = {}))[k] = (out.animais[k] || 0) + p.animais[k];
     if (p.ouro > 0) out.ouro += p.ouro;
     if (p.ouroPorNivel > 0) out.ouro += p.ouroPorNivel * m.progresso.nivel;
     if (p.cash > 0) out.cash += p.cash;
@@ -76,7 +77,7 @@ export function resolver(m, r, extra) {
   }
   return out;
 }
-export const temPremio = (r) => !!r && (r.ouro > 0 || r.cash > 0 || r.xp > 0 || (!!r.itens && Object.keys(r.itens).length > 0));
+export const temPremio = (r) => !!r && (r.ouro > 0 || r.cash > 0 || r.xp > 0 || (!!r.itens && Object.keys(r.itens).length > 0) || (!!r.animais && Object.keys(r.animais).length > 0));
 
 // põe a recompensa (já resolvida) nas posses do jogador
 export function entregar(m, r, origem) {

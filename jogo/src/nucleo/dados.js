@@ -178,6 +178,7 @@ export function prepararDados(bruto) {
       if (!obj(m.objetivo) || !m.objetivo.evento) { aviso('missoes.json', `missão "${m.id}": falta "objetivo.evento" (ignorada)`); continue; }
       missoes.vizinho.push({ ...m, titulo: m.titulo || m.id, fala: m.fala || '', objetivo: { evento: m.objetivo.evento, filtro: obj(m.objetivo.filtro) ? m.objetivo.filtro : null, n: m.objetivo.n >= 1 ? m.objetivo.n : 1 }, recompensa: obj(m.recompensa) ? m.recompensa : {} });
       for (const k of Object.keys((obj(m.recompensa) && m.recompensa.itens) || {})) if (!itens[k]) aviso('missoes.json', `missão "${m.id}": o item "${k}" da recompensa não existe`);
+      for (const k of Object.keys((obj(m.recompensa) && m.recompensa.animais) || {})) if (!obj(bruto.animais) || !obj(bruto.animais[k])) aviso('missoes.json', `missão "${m.id}": o animal "${k}" da recompensa não existe`);
       const pedido = obj(m.objetivo.filtro) ? m.objetivo.filtro.item : undefined;
       if (m.objetivo.evento === 'comprou' && typeof pedido === 'string' && itens[pedido] && (itens[pedido].tipo === 'ferramenta' || itens[pedido].tipo === 'recipiente') && !m.valeJaTer) aviso('missoes.json', `missão "${m.id}": pede comprar "${pedido}", que só se compra uma vez; sem "valeJaTer": true, quem já tem fica preso`);
     }
