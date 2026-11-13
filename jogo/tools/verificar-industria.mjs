@@ -450,6 +450,29 @@ try {
     await o.fecharPainel();
   }
 
+  // ---- o laticínio: queijo minas (pede o curral; o leite vem das vacas, aqui pelo gancho de teste)
+  await J(() => { const m = window.__jogo.mundo; m.posses.ouro += 12000; window.__i.dar({ tabua: 40, madeira: 10, prego: 60, pedra: 24, leite: 2 }); window.__i.missoes(null, 'queijo'); });
+  const curral = await J((p) => window.__i.erguer('curral', p), [banc.x, banc.z]);
+  const lat = curral && (await J((p) => window.__i.erguer('laticinio', p), [banc.x, banc.z]));
+  if (confere(!!lat && !lat.obra, 'o curral e o laticínio foram erguidos')) {
+    await o.fecharTelas();
+    await o.tocarConstrucao('laticinio', 0.6);
+    igual(await o.painel(), 'industria', 'o toque no laticínio abre o painel dele');
+    confere(await J(() => { const c = document.querySelector('.ind-receita[data-receita="queijo-minas"]'); return !!c && /2\/2/.test(c.textContent) && /30 min/.test(c.textContent) && c.querySelector('[data-k="fazer-queijo-minas"]').classList.contains('alvo-tutorial'); }), 'o queijo minas mostra leite 2/2, 30 min e o botão marcado pela missão');
+    await o.tamanhos('painel do laticínio');
+    await o.tocarEm('[data-k="fazer-queijo-minas"]');
+    igual(await o.tem('leite'), 0, 'o queijo gasta os 2 leites');
+    confere(await J(() => { const b = document.querySelector('[data-k="concluir"]'); return !!b && /Terminar agora/.test(b.textContent) && /\d/.test(b.textContent) && /falta 30 min/.test(document.querySelector('.ind-falta').textContent); }), 'a receita de 30 minutos mostra o tempo e o preço em cash de terminar agora');
+    await o.foto('17b-laticinio');
+    await J(() => { window.__jogo.pular(1801); window.__jogo.avancar(0.2); });
+    await o.quadro(200);
+    await o.tocarEm('[data-k="retirar"]');
+    igual(await o.tem('queijo-minas'), 1, 'meia hora depois, o queijo minas vai para o estoque');
+    confere(await J(() => window.__jogo.estado().feitas.includes('queijo')), 'a missão "queijo" foi cumprida');
+    await o.fecharTelas();
+    await o.fecharPainel();
+  }
+
   // ---- o quadro de pedidos: bilhetes, entregar, trocar, a espera
   await J(() => { window.__i.missoes(null, 'primeiro-pedido'); window.__jogo.avancar(0.6); });
   igual(await J(() => { const g = window.__jogo.guia(); return g && g.tipo + ':' + g.id; }), 'entidade:quadro-de-pedidos', 'na missão do primeiro pedido, o guia aponta o quadro');
@@ -566,7 +589,7 @@ try {
   await o.ateParar();
   // (a subida para o nível 7 também dá tábuas de prêmio: por isso "pelo menos uma a mais")
   confere((await o.tem('tabua')) >= tabCel + 1 && (await o.ind('bancada-de-carpintaria')).saida.length === 0, 'celular: o dedo na bancada retira a tábua pronta');
-  await esperar(900);
+  await esperar(2600); // (os itens da lista entram um a um)
   confere(await J(() => { const s = document.querySelector('.subida:not(.dialogo)'); return !!s && /Fubá/.test(s.textContent) && /Ração/.test(s.textContent); }), 'a tela de subida para o nível 7 mostra as receitas novas (fubá e ração)');
   await pg.screenshot({ path: path.join(capturas, 'c-cel-07-subida-com-receitas.jpg'), type: 'jpeg', quality: 84 });
   confere(await J(() => { const s = document.querySelector('.subida:not(.dialogo)'); return (s.textContent.match(/Ração/g) || []).length === 1; }), 'a ração aparece uma vez só na lista do que o nível liberou');

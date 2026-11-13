@@ -548,6 +548,16 @@
    "pedido": "gato-parada-frente.md",
    "rodadas": 1,
    "nota": "Gato rajado laranja: descanso, balança o rabo erguido, olha em volta e pisca; 4 desenhos em 8 quadros. Altura de 118 px contando o rabo erguido (cerca de 100 px até a ponta das orelhas)."
+  },
+  "animal/gato/parada-costas": {
+   "pedido": "gato-parada-costas.md",
+   "rodadas": 1,
+   "nota": "O mesmo gato visto por trás: balança o rabo, vira a cabeça e pisca; 4 desenhos em 8 quadros; mesmo tamanho da vista de frente (pela massa)."
+  },
+  "animal/gato/andar-frente": {
+   "pedido": "gato-andar-frente.md",
+   "rodadas": 1,
+   "nota": "Trote leve de 6 quadros, rabo erguido; mesmo tamanho da espera (pela massa)."
   }
  },
  "geral": [

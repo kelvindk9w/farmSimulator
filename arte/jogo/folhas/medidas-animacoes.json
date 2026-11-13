@@ -1475,6 +1475,134 @@
    "sequencia": "1,2,2,1,3,3,1,4"
   }
  },
+ "animal/gato/andar-frente": {
+  "chave": "animal/gato/andar-frente",
+  "crua": "andar-frente.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 6,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 118,
+  "emPeReal": 122,
+  "emPeFonte": 391,
+  "escala": 0.3127,
+  "casa": [
+   120,
+   144
+  ],
+  "apoio": [
+   60,
+   121
+  ],
+  "quadros": 6,
+  "desenhos": 6,
+  "qps": 9,
+  "laco": true,
+  "alturas": [
+   122,
+   116,
+   114,
+   118,
+   114,
+   113
+  ],
+  "tamanhoPelaMassa": [
+   75.1,
+   73,
+   72.7,
+   75.5,
+   75,
+   73.7
+  ],
+  "variacaoAltura": 7.7,
+  "bytes": 34303,
+  "avisos": [
+   "altura varia 7.7% entre quadros (122 116 114 118 114 113), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/gato/andar-frente",
+   "altura": "118",
+   "quadros": "6",
+   "qps": "9",
+   "eixo": "massa",
+   "base": "linha",
+   "chao": "0.09",
+   "tamanho-massa": "75",
+   "altura-livre": true
+  }
+ },
+ "animal/gato/parada-costas": {
+  "chave": "animal/gato/parada-costas",
+  "crua": "parada-costas.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 4,
+  "referencia": false,
+  "modo": "molde",
+  "emPe": 107,
+  "emPeReal": 107,
+  "emPeFonte": 484,
+  "escala": 0.2211,
+  "casa": [
+   128,
+   136
+  ],
+  "apoio": [
+   64,
+   114
+  ],
+  "quadros": 8,
+  "desenhos": 4,
+  "qps": 5,
+  "laco": true,
+  "alturas": [
+   107,
+   106,
+   117,
+   109
+  ],
+  "tamanhoPelaMassa": [
+   73.5,
+   73.4,
+   75.4,
+   74.5
+  ],
+  "variacaoAltura": 9.6,
+  "custosDoMolde": [
+   0,
+   11,
+   80,
+   23
+  ],
+  "bytes": 25610,
+  "avisos": [
+   "altura varia 9.6% entre quadros (107 106 117 109), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/gato/parada-costas",
+   "altura": "107",
+   "quadros": "4",
+   "qps": "5",
+   "alinhar": "molde",
+   "molde": "0.55-1",
+   "em-pe-quadro": "1",
+   "faixa-pes": "0.25",
+   "chao": "0.09",
+   "sequencia": "1,2,3,2,3,1,4,1",
+   "altura-livre": true
+  }
+ },
  "animal/gato/parada-frente": {
   "chave": "animal/gato/parada-frente",
   "crua": "parada-frente.png",

@@ -779,6 +779,30 @@ ${FIM.replace('Imagem bem larga (proporção perto de 3 por 1)', 'Imagem na prop
 `;
 }
 
+// ---------- gato siamês (bicho especial): a mesma folha do gato, com a pelagem de siamês ----------
+// A recoloração por código não dá as "pontas" escuras do siamês (rosto, orelhas, patas, rabo); por isso é folha nova,
+// pedida como cópia quadro a quadro da folha do gato comum.
+const SIAMES = 'corpo CREME bem claro, liso, SEM listras; as "pontas" CASTANHO-ESCURAS: a máscara do rosto (o focinho e em volta dos olhos), as duas orelhas, as quatro patas (da metade da perna para baixo) e o rabo inteiro; olhos AZUIS; nariz escuro; bigodes claros';
+for (const vista of ['frente', 'costas']) {
+  for (const [acao, n] of [['parada', 4], ['andar', 6], ['sentado', 4]]) {
+    pedidos[`gato-siames-${acao}-${vista}`] = `${CABECA}
+- \`referencias/gato.png\`: a FOLHA DE MODELO do gato comum (de frente três quartos, de costas três quartos e de perfil). Ela manda nas proporções e no desenho; aqui só a pelagem muda.
+- \`referencias/${acao}-${vista}.png\`: a folha de animação já pronta do gato comum do jogo (rajado laranja), nesta mesma ação e nesta mesma vista: ${n} quadros numa fileira.
+${acao === 'parada' && vista === 'frente' ? '' : '- `referencias/siames-parada-frente.png`: a folha já pronta do gato SIAMÊS parado, visto de frente (dá as cores e as marcas do siamês: use exatamente as mesmas).\n'}
+Preciso de uma folha IGUAL à folha \`referencias/${acao}-${vista}.png\`, quadro a quadro, com uma única diferença: o gato agora é um GATO SIAMÊS.
+
+Gere uma imagem e salve na pasta atual como \`${acao}-${vista}.png\`:
+
+- O MESMO formato da folha anexa: uma única fileira horizontal com os mesmos ${n} quadros, na mesma ordem, com o gato nas MESMAS poses, do mesmo tamanho e no mesmo lugar de cada quadro. O mesmo desenho, o mesmo traço, as mesmas proporções.
+- A diferença é só a pelagem: ${SIAMES}. É o mesmo siamês, com as mesmas marcas, nos ${n} quadros.
+- Tudo visto pela mesma câmera da cena (isométrica, de cima), ${B_VISTA[vista]}.
+- Os ${n} quadros com o gato do MESMO tamanho, sobre a mesma linha de base, com um vão vazio entre um quadro e o outro (nenhum quadro encosta no vizinho).
+- ${LIMPO}
+${FIM}
+`;
+  }
+}
+
 const quais = process.argv.slice(2);
 for (const [nome, texto] of Object.entries(pedidos)) {
   if (quais.length && !quais.includes(nome)) continue;
