@@ -543,6 +543,11 @@
    "pedido": "recolorida de animal/cachorro/sentado-costas",
    "rodadas": 1,
    "nota": "Fora do pedido (a coordenação pediu parada e andar): o sentado do cachorro com o pelo do boiadeiro, para ele também sentar quando a personagem para."
+  },
+  "animal/gato/parada-frente": {
+   "pedido": "gato-parada-frente.md",
+   "rodadas": 1,
+   "nota": "Gato rajado laranja: descanso, balança o rabo erguido, olha em volta e pisca; 4 desenhos em 8 quadros. Altura de 118 px contando o rabo erguido (cerca de 100 px até a ponta das orelhas)."
   }
  },
  "geral": [
