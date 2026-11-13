@@ -18,6 +18,7 @@ import { Atlas } from './render/atlas.js';
 import { qualidadeDaImagem } from './plataforma/qualidade.js';
 import { Cena } from './render/cena.js';
 import { prepararReserva } from './render/reserva.js';
+import { ligarLugares } from './render/lugares.js';
 import { limitar } from './nucleo/util.js';
 import { J, PREFS_PADRAO } from './contexto.js';
 import { el, prepararIcones, repintarIcones } from './ui/dom.js';
@@ -62,6 +63,7 @@ function comecar() {
   prepararIcones(atlas, dados);
   atlas.aoCarregar = () => repintarIcones();
   const cena = J.cena = new Cena(canvas, atlas);
+  ligarLugares(atlas); // o regador ao lado do poço e a enxada na estaca: a peça própria, se o catálogo já tiver
   const cam = cena.cam;
 
   // ---------- o mundo: a gravação deste aparelho, ou uma fazenda nova ----------

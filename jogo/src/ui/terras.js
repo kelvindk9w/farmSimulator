@@ -99,8 +99,8 @@ aoInstalarMundo((m, ctx) => {
     const F = m.posses.ferramentas, f = F[d.item];
     if (!f || f.onde !== 'cinto') return;
     let velha = null;
-    for (const id in F) if (id !== d.item && D.itens[id].funcao === it.funcao && F[id].onde === 'suporte' && (!velha || D.itens[id].degrau > D.itens[velha].degrau)) velha = id;
-    if (velha) avisar(T.ganhos.trocou(d.item, velha, D), 'bom', 4200);
+    for (const id in F) if (id !== d.item && D.itens[id].funcao === it.funcao && F[id].onde !== 'cinto' && (!velha || D.itens[id].degrau > D.itens[velha].degrau)) velha = id;
+    if (velha) avisar(T.ganhos.trocou(d.item, velha, D, F[velha].onde), 'bom', 4200);
   });
   ev.ouvir('ferramentaGastando', (d) => { avisar(T.ganhos.gastando(d, D), '', 4200); atualizarChip(); });
   ev.ouvir('ferramentaGasta', (d) => { avisar(T.ganhos.gasta(d, D), '', 4800); atualizarChip(); });

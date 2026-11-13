@@ -1,4 +1,4 @@
-// Painel das ferramentas: o que está no cinto e no suporte do celeiro, o quanto cada uma ainda aguenta e o conserto
+// Painel das ferramentas: o que está no cinto, no suporte do celeiro e pelo sítio (no lugar delas), o quanto cada uma ainda aguenta e o conserto
 // com um toque (de qualquer lugar). Abre pelo aviso de ferramenta gasta do HUD e pelo botão da mochila.
 import { el, icone, botao } from '../dom.js';
 import '../terras.js';
@@ -61,9 +61,10 @@ registrarPainel({
         if (P.ouro < total) b.classList.add('sem');
         linha.append(b); corpo.append(linha);
       }
-      const cinto = listaDeFerramentas(m, 'cinto'), suporte = listaDeFerramentas(m, 'suporte');
+      const cinto = listaDeFerramentas(m, 'cinto'), suporte = listaDeFerramentas(m, 'suporte'), noSitio = listaDeFerramentas(m, 'lugar');
       corpo.append(secao(T.ferramentas.cinto, T.ferramentas.vagas(cinto.length, P.vagasNoCinto)), grade(m, cinto));
       if (suporte.length) corpo.append(secao(T.ferramentas.suporte), grade(m, suporte));
+      if (noSitio.length) corpo.append(secao(T.ferramentas.lugar), grade(m, noSitio));
       corpo.append(secao(T.ferramentas.recipientes), grade(m, P.recipientes));
       corpo.append(el('div', 'nota', aConsertar.length ? T.ferramentas.nota : T.ferramentas.emDia + ' ' + T.ferramentas.nota));
     }

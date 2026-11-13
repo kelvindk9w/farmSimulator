@@ -1,5 +1,5 @@
 // O que o jogador tem: ouro, cash, a bolsa (sementes e miudezas), o cesto (colheita, com limite), as ferramentas
-// (no cinto ou no suporte do celeiro) e o estoque do celeiro.
+// (no cinto, no suporte do celeiro ou no lugar delas no sítio) e o estoque do celeiro.
 import { registrarSistema } from '../registro.js';
 import { somar, total } from '../util.js';
 
@@ -79,45 +79,62 @@ export function gastarItens(m, itens) {
 }
 
 // ---------- ferramentas ----------
-// cada ferramenta é um objeto só: m.posses.ferramentas[id] = { onde: 'cinto' | 'suporte', agua, usos, vez }
+// cada ferramenta é um objeto só: m.posses.ferramentas[id] = { onde, agua, usos, vez }
+//   onde = 'cinto'    com ela
+//          'suporte'  pendurada no suporte de ferramentas do celeiro
+//          'lugar'    no lugar dela no sítio (a enxada velha escorada na estaca do campo, o regador velho no chão ao lado
+//                     do poço: dados/terras.json "lugares"; a entidade e o desenho em sistemas/lugares.js)
+// Fora do cinto, ela fica "guardada": quem precisa dela vai buscar sozinha (personagem.js: ondeBuscar).
+const maisForte = (I, a, b) => I[a].degrau > I[b].degrau || (I[a].degrau === I[b].degrau && I[a].capacidade > I[b].capacidade);
+// a melhor ferramenta da função em "onde" (null = em qualquer lugar fora do cinto)
 function melhor(m, funcao, onde) {
   let achou = null;
   const F = m.posses.ferramentas, I = m.dados.itens;
   for (const id in F) {
-    if (F[id].onde !== onde || I[id].funcao !== funcao) continue;
-    if (!achou || I[id].degrau > I[achou].degrau || (I[id].degrau === I[achou].degrau && I[id].capacidade > I[achou].capacidade)) achou = id;
+    if (I[id].funcao !== funcao || (onde ? F[id].onde !== onde : F[id].onde === 'cinto')) continue;
+    if (!achou || maisForte(I, id, achou)) achou = id;
   }
   return achou;
 }
 export const ferramentaNoCinto = (m, funcao) => melhor(m, funcao, 'cinto');
 export const ferramentaNoSuporte = (m, funcao) => melhor(m, funcao, 'suporte');
+// a melhor fora do cinto (no suporte ou no lugar dela): é a que ela vai buscar
+export const ferramentaGuardada = (m, funcao) => melhor(m, funcao, null);
+export { maisForte };
+// o lugar da ferramenta no sítio ([x, z] dos dados) ou null (sem lugar: fica no suporte do celeiro)
+export const lugarDaFerramenta = (m, id) => (m.dados.terras.lugares && m.dados.terras.lugares[id]) || null;
+// para onde ela vai quando sai do cinto: o lugar dela no sítio, se tiver; senão, o suporte do celeiro
+export const casaDaFerramenta = (m, id) => (lugarDaFerramenta(m, id) ? 'lugar' : 'suporte');
+// a entidade do lugar da ferramenta "id" (sistemas/lugares.js)
+export const idDoLugar = (id) => 'lugar:' + id;
 export function listaDeFerramentas(m, onde) { const out = []; for (const id in m.posses.ferramentas) if (m.posses.ferramentas[id].onde === onde) out.push(id); return out; }
 export function usarFerramenta(m, id) { const f = m.posses.ferramentas[id]; if (f) { f.usos++; f.vez = ++m.posses.vez; } }
 
-// tira do suporte e põe no cinto; com o cinto cheio, a ferramenta usada há mais tempo volta para o suporte
-export function pegarDoSuporte(m, id) {
+// tira do suporte (ou do lugar dela) e põe no cinto; com o cinto cheio, a usada há mais tempo volta para a casa dela
+export function pegarGuardada(m, id) {
   const P = m.posses, f = P.ferramentas[id];
-  if (!f || f.onde !== 'suporte') return null;
+  if (!f || f.onde === 'cinto') return null;
   let guardou = null;
   const noCinto = listaDeFerramentas(m, 'cinto');
   if (noCinto.length >= P.vagasNoCinto) {
     guardou = noCinto.reduce((a, b) => (P.ferramentas[a].vez <= P.ferramentas[b].vez ? a : b));
-    P.ferramentas[guardou].onde = 'suporte';
+    P.ferramentas[guardou].onde = casaDaFerramenta(m, guardou);
   }
+  const de = f.onde;
   f.onde = 'cinto'; f.vez = ++P.vez;
-  return { item: id, guardou };
+  return { item: id, guardou, de };
 }
 
-// ferramenta nova: vai para o cinto se houver vaga ou se trocar uma pior do mesmo papel; senão, para o suporte
+// ferramenta nova: vai para o cinto se houver vaga ou se trocar uma pior do mesmo papel; senão, para a casa dela
 export function adquirirFerramenta(m, id) {
   const P = m.posses, it = m.dados.itens[id];
   if (P.ferramentas[id]) return false;
-  const f = P.ferramentas[id] = { onde: 'suporte', agua: 0, usos: 0, vez: 0 };
+  const f = P.ferramentas[id] = { onde: casaDaFerramenta(m, id), agua: 0, usos: 0, vez: 0 };
   const velha = ferramentaNoCinto(m, it.funcao);
   if (velha && m.dados.itens[velha].degrau <= it.degrau) {
     f.agua = Math.min(it.capacidade, P.ferramentas[velha].agua); // a água do regador velho passa para o novo
     P.ferramentas[velha].agua = 0;
-    P.ferramentas[velha].onde = 'suporte'; f.onde = 'cinto'; f.vez = ++P.vez;
+    P.ferramentas[velha].onde = casaDaFerramenta(m, velha); f.onde = 'cinto'; f.vez = ++P.vez;
   } else if (!velha && listaDeFerramentas(m, 'cinto').length < P.vagasNoCinto) { f.onde = 'cinto'; f.vez = ++P.vez; }
   return true;
 }
@@ -171,6 +188,7 @@ registrarSistema({
     const P = m.posses;
     for (const id of I.cinto) P.ferramentas[id] = { onde: 'cinto', agua: 0, usos: 0, vez: ++P.vez };
     for (const id of I.suporte) P.ferramentas[id] = { onde: 'suporte', agua: 0, usos: 0, vez: 0 };
+    for (const id of I.noLugar) P.ferramentas[id] = { onde: casaDaFerramenta(m, id), agua: 0, usos: 0, vez: 0 }; // o regador velho, no chão ao lado do poço
     for (const k in I.itens) {
       const it = m.dados.itens[k];
       if (it.tipo === 'colheita' || it.tipo === 'produto') somar(P.celeiro.itens, k, I.itens[k]); else somar(P.bolsa, k, I.itens[k]);
@@ -187,13 +205,13 @@ registrarSistema({
     if (!P.recipientes.includes(P.cesto.item)) P.recipientes.push(P.cesto.item);
     if (d.ferramentas) {
       P.ferramentas = {};
-      for (const k in d.ferramentas) if (I[k] && I[k].tipo === 'ferramenta') { const f = d.ferramentas[k]; P.ferramentas[k] = { onde: f.onde === 'cinto' ? 'cinto' : 'suporte', agua: Math.min(f.agua || 0, I[k].capacidade), usos: f.usos || 0, vez: f.vez || 0 }; }
+      for (const k in d.ferramentas) if (I[k] && I[k].tipo === 'ferramenta') { const f = d.ferramentas[k]; P.ferramentas[k] = { onde: f.onde === 'cinto' ? 'cinto' : casaDaFerramenta(m, k), agua: Math.min(f.agua || 0, I[k].capacidade), usos: f.usos || 0, vez: f.vez || 0 }; }
     }
     P.vez = d.vez || 0;
     P.vagasNoCinto = m.dados.regras.inicio.vagasNoCinto;
     for (const k of P.recipientes) if (I[k].funcao === 'cinto') P.vagasNoCinto = Math.max(P.vagasNoCinto, I[k].capacidade);
-    // se sobrou ferramenta demais no cinto (os dados mudaram), as usadas há mais tempo voltam para o suporte
-    for (let c = listaDeFerramentas(m, 'cinto'); c.length > P.vagasNoCinto; c = listaDeFerramentas(m, 'cinto')) P.ferramentas[c.reduce((a, b) => (P.ferramentas[a].vez <= P.ferramentas[b].vez ? a : b))].onde = 'suporte';
+    // se sobrou ferramenta demais no cinto (os dados mudaram), as usadas há mais tempo voltam para a casa delas
+    for (let c = listaDeFerramentas(m, 'cinto'); c.length > P.vagasNoCinto; c = listaDeFerramentas(m, 'cinto')) { const k = c.reduce((a, b) => (P.ferramentas[a].vez <= P.ferramentas[b].vez ? a : b)); P.ferramentas[k].onde = casaDaFerramenta(m, k); }
     if (d.celeiro) P.celeiro.itens = soExistentes(d.celeiro.itens);
     if (d.conta) P.conta = { ganho: d.conta.ganho || 0, gasto: d.conta.gasto || 0 };
   },

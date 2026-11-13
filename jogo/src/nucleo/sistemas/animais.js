@@ -16,7 +16,7 @@
 // valer como tratado. Os ciclos se resolvem em ordem de relógio (instantes exatos, não o momento em que a conta é
 // feita), então dá o mesmo resultado com o jogo aberto ou depois de horas fechado. Nenhum bicho morre nem foge.
 import { registrarSistema, registrarAcao, registrarEvento, ampliarEvento } from '../registro.js';
-import { gastarOuro, quantoTem, gastarItens, ferramentaNoCinto, ferramentaNoSuporte, RECOMPENSAS } from './posses.js';
+import { gastarOuro, quantoTem, gastarItens, ferramentaNoCinto, ferramentaGuardada, RECOMPENSAS } from './posses.js';
 import { MOSTRA_LIBERADO } from './niveis.js';
 import { JA_COMPROU, VENDAVEL } from './loja.js';
 import { comportamento, COMPORTAMENTOS, construcaoPorId, estaPronta, valorDe } from './construcao.js';
@@ -339,7 +339,7 @@ export function podeEncherBebedouro(m, e) {
   const cap = capacidadeDoBebedouro(m, e);
   if (!(cap > 0)) return NAO('sem-bebedouro', { construcao: e.tipo });
   if (nivelDoBebedouro(m, e) >= cap) return NAO('bebedouro-cheio', { construcao: e.tipo });
-  if (!ferramentaNoCinto(m, 'regador') && !ferramentaNoSuporte(m, 'regador')) return NAO('sem-ferramenta', { funcao: 'regador' }, true);
+  if (!ferramentaNoCinto(m, 'regador') && !ferramentaGuardada(m, 'regador')) return NAO('sem-ferramenta', { funcao: 'regador' }, true);
   return SIM;
 }
 // quantas regas faltam para encher o bebedouro
@@ -490,7 +490,7 @@ registrarSistema({
       if (!r.ok) return falha(m, r, c.quieto);
       if (naFila(m, 'abastecerBebedouro', e.id)) return { ok: true, repetida: true };
       if (p.fila.length + 2 > m.dados.regras.filaMax) return falha(m, NAO('fila-cheia'), c.quieto);
-      const reg = ferramentaNoCinto(m, 'regador') || ferramentaNoSuporte(m, 'regador'), poco = pocoDe(m, m.local);
+      const reg = ferramentaNoCinto(m, 'regador') || ferramentaGuardada(m, 'regador'), poco = pocoDe(m, m.local);
       if (!(m.posses.ferramentas[reg].agua > 0)) {
         if (!poco) return falha(m, NAO('regador-vazio'), c.quieto);
         if (!naFila(m, 'encher', poco.id)) p.fila.push({ tipo: 'agir', acao: 'encher', entidade: poco.id, args: null });

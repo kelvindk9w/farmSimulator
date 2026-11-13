@@ -22,6 +22,11 @@
     "porteira": [32, 59],
     "lavoura": [24, 51]
   },
+  "lugares": {
+    "nota": "O lugar de cada ferramenta no sítio: [x, z] da casa. Fora do cinto, ela fica ali, desenhada no chão, e a personagem vai buscar sozinha. A enxada velha fica escorada na estaca do canto da frente do campo (o canto mais perto do poço); o regador velho, no chão ao lado do poço. Construção, caminho ou terra arada em cima: o lugar muda para a casa de grama livre mais perto. Ferramenta sem lugar fica no suporte do celeiro.",
+    "enxada-velha": [30, 53],
+    "regador-velho": [33, 51]
+  },
   "caminhos": [
     [31, 53, 33, 57],
     [29, 49, 36, 50],

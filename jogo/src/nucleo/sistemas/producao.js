@@ -11,7 +11,7 @@
 //   campos da família no bicho: resto (fração de produto), fim ('' | 'espera' | 'estimacao'), avisou
 import { registrarSistema, registrarAcao, registrarEvento } from '../registro.js';
 import { somar } from '../util.js';
-import { RECIPIENTES, espacoNoCesto, porNoCesto, ferramentaNoCinto, ferramentaNoSuporte, ganharOuro, darItem } from './posses.js';
+import { RECIPIENTES, espacoNoCesto, porNoCesto, ferramentaNoCinto, ferramentaGuardada, ganharOuro, darItem } from './posses.js';
 import { darXp } from './niveis.js';
 import { gastar, rendeDe } from './desgaste.js';
 import { construcaoPorId, estaPronta } from './construcao.js';
@@ -60,7 +60,7 @@ export function podeRecolher(m, d) {
     const cabe = capacidadeDoRecipiente(m, rec) - noRecipiente(m, d.ferramenta);
     return cabe > 0 ? { ok: true, cabe, recipiente: rec } : NAO('recipiente-cheio', { item: rec, produto: d.produto }, true);
   }
-  if (jeito === 'ferramenta' && !ferramentaNoCinto(m, d.ferramenta) && !ferramentaNoSuporte(m, d.ferramenta)) return NAO('falta-de-recolher', { item: itemDaFuncao(m, d.ferramenta), funcao: d.ferramenta, animal: d.id }, true);
+  if (jeito === 'ferramenta' && !ferramentaNoCinto(m, d.ferramenta) && !ferramentaGuardada(m, d.ferramenta)) return NAO('falta-de-recolher', { item: itemDaFuncao(m, d.ferramenta), funcao: d.ferramenta, animal: d.id }, true);
   const cabe = espacoNoCesto(m);
   return cabe > 0 ? { ok: true, cabe, recipiente: null } : NAO('cesto-cheio', null, true);
 }

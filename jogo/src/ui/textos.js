@@ -34,7 +34,7 @@ export const T = {
     vender: (d) => (d && d.n ? `Vender o que está no cesto por ${numero(d.ouro)} de ouro` : 'Vender a colheita na banca'),
     guardar: () => 'Guardar no celeiro o que está no cesto',
     pegar: () => 'Pegar do celeiro para vender',
-    pegarFerramenta: () => 'Buscar a ferramenta no celeiro',
+    pegarFerramenta: (d, D) => (d && d.item ? `Pegar ${minus(nomeDe(D, d.item))}` : 'Buscar a ferramenta'),
   },
   // por que não deu, ou o que há ali
   motivos: {
@@ -73,7 +73,7 @@ export const T = {
     'fora-do-mapa': () => '',
     'nao-da': () => 'Não deu',
   },
-  hud: { nivel: 'Nível', ouro: 'Ouro', cash: 'Cash', folego: 'Fôlego', cesto: 'Cesto', regador: 'Regador', cancelarFila: 'Tarefas na fila: toque para cancelar', cansada: 'Sem fôlego: ela segue andando até recuperar', semRegador: 'no celeiro' },
+  hud: { nivel: 'Nível', ouro: 'Ouro', cash: 'Cash', folego: 'Fôlego', cesto: 'Cesto', regador: 'Regador', cancelarFila: 'Tarefas na fila: toque para cancelar', cansada: 'Sem fôlego: ela segue andando até recuperar', semRegador: 'no celeiro', regadorNoLugar: 'no poço' },
   botoes: { loja: 'Loja', mochila: 'Mochila e celeiro', missoes: 'Missões', config: 'Configurações', telaCheia: 'Tela cheia', fechar: 'Fechar', agir: 'Agir' },
   ganhos: {
     colheu: (d, D) => `+${d.n} ${nomeDe(D, d.item)}`,
@@ -96,7 +96,7 @@ export const T = {
   },
   mochila: {
     titulo: 'Mochila e celeiro', comVoce: 'Com você', cesto: 'Cesto', sementes: 'Sementes', outros: 'Outras coisas', cinto: 'Cinto de ferramentas', vagas: (n, t) => `${n}/${t} vagas`,
-    celeiro: 'No celeiro', estoque: 'Estoque', suporte: 'Suporte de ferramentas', vazio: 'Vazio', agua: (a, c) => `água ${a}/${c}`,
+    celeiro: 'No celeiro', estoque: 'Estoque', suporte: 'Suporte de ferramentas', lugar: 'Pelo sítio (ela busca sozinha)', vazio: 'Vazio', agua: (a, c) => `água ${a}/${c}`,
     dica: 'Toque no celeiro para guardar o cesto. Com o cesto vazio, o toque pega de volta o que dá para vender.',
   },
   missoes: {

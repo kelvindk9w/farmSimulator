@@ -70,7 +70,7 @@ T.ganhos.arvoreCresceu = (d, D) => `${nomeA(D, d.arvore)} ficou adulta`;
 T.ganhos.consertou = (d, D) => `${nomeI(D, d.item)}: como nova`;
 T.ganhos.gastando = (d, D) => `${nomeI(D, d.item)} está quase gasta: o conserto custa pouco`;
 T.ganhos.gasta = (d, D) => `${nomeI(D, d.item)} ficou gasta e rende menos: conserte com um toque`;
-T.ganhos.trocou = (nova, velha, D) => `${nomeI(D, nova)} no cinto. ${nomeI(D, velha)} foi para o suporte do celeiro`;
+T.ganhos.trocou = (nova, velha, D, onde) => `${nomeI(D, nova)} no cinto. ${nomeI(D, velha)} ${onde === 'lugar' ? 'voltou para o lugar dela no sítio' : 'foi para o suporte do celeiro'}`;
 T.ganhos.aspersor = (n) => `O aspersor rega ${n} casas em volta, sozinho`;
 // a compra de um lote não é a de um item: o aviso é outro (o resto continua com a frase da loja)
 const comprouAntes = T.ganhos.comprou;
@@ -91,7 +91,7 @@ T.terras = {
 };
 
 T.ferramentas = {
-  titulo: 'Ferramentas', cinto: 'No cinto', suporte: 'No suporte do celeiro', recipientes: 'Cestos e cintos', vagas: (n, t) => `${n}/${t} vagas`,
+  titulo: 'Ferramentas', cinto: 'No cinto', suporte: 'No suporte do celeiro', lugar: 'Pelo sítio (ela busca sozinha)', recipientes: 'Cestos e cintos', vagas: (n, t) => `${n}/${t} vagas`,
   nova: 'Não gasta', boa: (u) => `Aguenta mais ${numero(u)} usos`, gasta: 'Gasta: rende menos',
   consertar: 'Consertar', tudo: (n) => `Consertar tudo por ${numero(n)}`, emDia: 'Tudo em ordem: nada a consertar.',
   nota: 'Ferramenta gasta não quebra: só trabalha mais devagar até o conserto. As velhas, do Seu Tonho, e as de aço não gastam nunca.',

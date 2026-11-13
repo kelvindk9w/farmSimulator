@@ -632,6 +632,26 @@
    "pedido": "gato-siames-sentado-costas.md",
    "rodadas": 1,
    "nota": "Folha nova no Codex, copiando quadro a quadro a do gato comum (a recoloração por código não faz as pontas escuras do siamês): corpo creme sem listras, máscara, orelhas, patas e rabo castanho-escuros, olhos azuis; mesmo tamanho do gato comum (pela massa). Fora do pedido (a coordenação pediu parada e andar): para ele também sentar quando a personagem para."
+  },
+  "personagem/parada-trouxa-frente": {
+   "pedido": "personagem-parada-trouxa-frente.md",
+   "rodadas": 1,
+   "nota": "Parada na chegada, com a trouxa no ombro (pau na mão de lá, trouxa do lado direito de quem olha) e a enxada com a lâmina no chão ao lado da bota, como na imagem aprovada comeco-personagem-trouxa.png. 4 desenhos (descanso, inspira, peito cheio, piscada) em 12 quadros, na mesma sequência da parada-frente. Escala pela altura e pelo lenço (282 px em pé, cabeça do tamanho da do andar). O apoio foi puxado 22 px para a esquerda (--apoio-dx -22) para ficar entre as botas, e não no meio entre botas e enxada."
+  },
+  "personagem/parada-trouxa-costas": {
+   "pedido": "personagem-parada-trouxa-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente, vista de costas: trouxa à esquerda de quem olha, enxada apoiada no chão à esquerda. 3 desenhos em 12 quadros, como a parada-costas. O lenço de costas aparece grande: escala pelo alvo do lenço medido na parada-costas (--tamanho-cor 58.3), 278 px em pé, cabeça uns 6% maior que a da parada-costas. Apoio puxado 26 px para a direita (--apoio-dx 26), entre as botas."
+  },
+  "personagem/andar-trouxa-frente": {
+   "pedido": "personagem-andar-trouxa-frente.md",
+   "rodadas": 1,
+   "nota": "Andar de frente com a trouxa no ombro e a enxada pendurada na outra mão (sem tocar o chão). Em duas fileiras de 4; as pernas seguem quadro a quadro as da andar-frente (rodada 3), com a mesma troca sutil na fileira de baixo. Mesmas opções da andar-frente."
+  },
+  "animal/seu-tonho/acenar-frente": {
+   "pedido": "seu-tonho-acenar-frente.md",
+   "rodadas": 1,
+   "nota": "Seu Tonho dando as boas-vindas: 5 desenhos (descanso, ergue a mão, aceno para fora, aceno para dentro, abaixa) montados em 12 quadros a 8 por segundo (1,2,3,4,3,4,3,4,5,1,1,1): acena três vezes e descansa. Pés plantados (molde pelas pernas), mesma altura e mesmo pé da parado-frente (apoio 30 px acima do pé da casa nas duas); a casa é mais larga e mais alta por causa da mão erguida."
   }
  },
  "geral": [

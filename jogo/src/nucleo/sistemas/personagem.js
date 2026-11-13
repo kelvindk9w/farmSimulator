@@ -1,11 +1,12 @@
 // A personagem: anda por caminho (A*) com aceleração e freio, corre enquanto há fôlego, e cumpre uma fila de tarefas
 // (andar até, agir numa casa ou numa entidade). Se a ação pede uma ferramenta que não está no cinto, ela mesma
-// enfileira a ida ao suporte do celeiro: um toque faz a cadeia toda.
+// enfileira a ida até onde a ferramenta está (o lugar dela no sítio ou o suporte do celeiro): um toque faz a cadeia
+// toda. Escolher na barra o modo de uma ferramenta que ela não leva também a manda buscar.
 // Aqui ficam também o modo escolhido na barra (mão, enxada...) e os comandos de toque e de teclado.
 import { PASSO, limitar, girarPara, rumoPara } from '../util.js';
 import { registrarSistema, registrarModo, ACOES, TIPOS, MODOS, AUTOMATICOS, modosEmOrdem } from '../registro.js';
 import { acharCaminho, comprimento, cabe } from '../caminho.js';
-import { ferramentaNoCinto, ferramentaNoSuporte, usarFerramenta, noCesto } from './posses.js';
+import { ferramentaNoCinto, usarFerramenta, noCesto, maisForte, idDoLugar } from './posses.js';
 import { darXp } from './niveis.js';
 import { rapidezDe } from './desgaste.js';
 
@@ -110,6 +111,24 @@ function comecarAcao(m, p, t) {
   m.eventos.emitir('comecouAcao', { acao: a.id, x: t.x, z: t.z, entidade: t.entidade, dur });
 }
 
+// Onde ela busca a ferramenta "funcao" que não está no cinto: { item, entidade } da melhor que dá para pegar no local
+// dela (a do lugar no sítio: a entidade do lugar, sistemas/lugares.js; a do suporte: o celeiro, ou o móvel lá dentro).
+// null se não há nenhuma ao alcance.
+export function ondeBuscar(m, funcao) {
+  const loc = m.locais[m.personagem.local], F = m.posses.ferramentas, I = m.dados.itens;
+  let achou = null, suporte;
+  for (const id in F) {
+    const f = F[id];
+    if (f.onde === 'cinto' || I[id].funcao !== funcao || (achou && !maisForte(I, id, achou.item))) continue;
+    let e = null;
+    if (f.onde === 'lugar') e = loc.porId[idDoLugar(id)] || null;
+    else { if (suporte === undefined) suporte = loc.entidades.find((x) => TIPOS[x.tipo].suporte) || null; e = suporte; }
+    if (e) achou = { item: id, entidade: e.id };
+  }
+  return achou;
+}
+const buscar = (b, funcao, extra) => ({ tipo: 'agir', acao: 'pegarFerramenta', entidade: b.entidade, args: { funcao, item: b.item, ...extra }, auto: true });
+
 function iniciarTarefa(m, p, t) {
   const loc = m.locais[p.local];
   if (t.tipo === 'andar') {
@@ -122,6 +141,7 @@ function iniciarTarefa(m, p, t) {
   const a = ACOES[t.acao];
   if (!a) { falhar(m, p, t, { motivo: 'acao-desconhecida', dados: { acao: t.acao } }); return; }
   if (t.entidade !== undefined && !loc.porId[t.entidade]) return; // a entidade sumiu
+  if (t.acao === 'pegarFerramenta' && t.args && ferramentaNoCinto(m, t.args.funcao)) return; // já pegou (outra busca chegou antes)
   if (!t.preparada) for (let i = 0; i < PREPAROS.length; i++) {
     const antes = PREPAROS[i](m, p, t);
     if (antes) { t.preparada = true; p.fila.unshift({ tipo: 'agir', args: null, auto: true, ...antes }, t); return; }
@@ -129,10 +149,10 @@ function iniciarTarefa(m, p, t) {
   const r = a.pode(m, t, t.args);
   if (!r.ok) { falhar(m, p, t, r); return; }
   if (a.ferramenta && !ferramentaNoCinto(m, a.ferramenta)) {
-    // a ferramenta está no suporte: vai buscar antes (custa tempo, não toques)
-    const suporte = ferramentaNoSuporte(m, a.ferramenta) && loc.entidades.find((e) => TIPOS[e.tipo].suporte);
-    if (!suporte) { falhar(m, p, t, { motivo: 'sem-ferramenta', dados: { funcao: a.ferramenta }, limpar: true }); return; }
-    p.fila.unshift({ tipo: 'agir', acao: 'pegarFerramenta', entidade: suporte.id, args: { funcao: a.ferramenta }, auto: true }, t);
+    // a ferramenta está guardada (no lugar dela ou no suporte): vai buscar antes (custa tempo, não toques)
+    const b = ondeBuscar(m, a.ferramenta);
+    if (!b) { falhar(m, p, t, { motivo: 'sem-ferramenta', dados: { funcao: a.ferramenta }, limpar: true }); return; }
+    p.fila.unshift(buscar(b, a.ferramenta), t);
     return;
   }
   const onde = pontoDeParada(m, p, t);
@@ -276,12 +296,26 @@ function irPara(m, c) {
   return { ok: true };
 }
 
+// A busca pedida pela barra: escolheu o modo de uma ferramenta que ela não leva (Enxada, Regar), ela vai buscar sozinha.
+// Trocou de modo antes de pegar: a busca que ainda não começou a ação sai da fila.
+function buscarDoModo(m, modo) {
+  const p = m.personagem, quer = modo.ferramenta || null;
+  const outra = (t) => t && t.acao === 'pegarFerramenta' && t.args && t.args.doModo && t.args.funcao !== quer;
+  for (let i = p.fila.length - 1; i >= 0; i--) if (outra(p.fila[i])) p.fila.splice(i, 1);
+  if (outra(p.tarefa) && !p.acao) { p.tarefa = null; p.rota = null; }
+  const mesmaBusca = (t) => t && t.acao === 'pegarFerramenta' && t.args && t.args.funcao === quer;
+  if (!quer || ferramentaNoCinto(m, quer) || mesmaBusca(p.tarefa) || p.fila.some(mesmaBusca)) return;
+  const b = ondeBuscar(m, quer);
+  if (b) enfileirar(m, buscar(b, quer, { doModo: true }));
+}
+
 function escolherModo(m, c) {
   const modo = MODOS[c.modo];
   if (!modo) return { ok: false, motivo: 'modo-desconhecido' };
   m.modo.id = c.modo;
   if (c.semente !== undefined) m.modo.semente = c.semente;
   if (modo.aoEscolher) modo.aoEscolher(m);
+  buscarDoModo(m, modo);
   m.eventos.emitir('modoMudou', { modo: m.modo.id, semente: m.modo.semente });
   return { ok: true };
 }

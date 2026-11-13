@@ -46,6 +46,8 @@ registrarPainel({
         b.append(secao(T.mochila.estoque, `${noCeleiro(m)}/${P.celeiro.capacidade}`), itens(m, P.celeiro.itens));
         b.append(secao(T.mochila.suporte), ferramentas(m, listaDeFerramentas(m, 'suporte')));
       }
+      const noSitio = listaDeFerramentas(m, 'lugar'); // a enxada na estaca do campo, o regador ao lado do poço
+      if (noSitio.length) b.append(secao(T.mochila.lugar), ferramentas(m, noSitio));
       col.append(a, b);
       corpo.append(col, el('div', 'nota', T.mochila.dica));
       // o desgaste e o conserto das ferramentas têm painel próprio

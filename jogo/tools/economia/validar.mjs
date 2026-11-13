@@ -331,7 +331,7 @@ for (let volta = 0; volta < 6; volta++) for (const [, r] of entradas(receitas)) 
 }
 const dado = new Set(); // itens que só chegam de presente (missão, início, diária)
 for (const k of Object.keys((regras.inicio || {}).itens || {})) dado.add(k);
-for (const k of [(regras.inicio || {}).cesto, ...((regras.inicio || {}).cinto || []), ...((regras.inicio || {}).suporte || [])]) if (k) dado.add(k);
+for (const k of [(regras.inicio || {}).cesto, ...((regras.inicio || {}).cinto || []), ...((regras.inicio || {}).suporte || []), ...((regras.inicio || {}).noLugar || [])]) if (k) dado.add(k);
 for (const mi of missoes.vizinho || []) { for (const k of Object.keys((mi.recompensa || {}).itens || {})) dado.add(k); }
 for (const r of Object.values(niveis.recompensas || {})) for (const k of Object.keys((r && r.itens) || {})) dado.add(k);
 for (const d of (missoes.diaria || {}).dias || []) for (const r of [d.recompensa, d.primeiraVolta]) for (const k of Object.keys((r && r.itens) || {})) dado.add(k);
@@ -559,7 +559,7 @@ const encosta = (a, b) => (a[0] <= b[2] && b[0] <= a[2] && a[1] < b[3] && b[1] <
   const viz = Array.isArray(missoes.vizinho) ? missoes.vizinho : [];
   if (!viz.length) erro('missoes', 'falta a lista "vizinho"');
   let nivelAnt = 1;
-  const jaTem = new Set([...(regras.inicio || {}).cinto || [], ...(regras.inicio || {}).suporte || []].map((id) => (itens[id] || {}).funcao));
+  const jaTem = new Set([...(regras.inicio || {}).cinto || [], ...(regras.inicio || {}).suporte || [], ...(regras.inicio || {}).noLugar || []].map((id) => (itens[id] || {}).funcao));
   viz.forEach((mi, k) => {
     const onde = `missão "${mi.id}"`;
     if (!txt(mi.id)) { erro('missoes', `a missão ${k + 1} não tem "id"`); return; }
@@ -681,7 +681,7 @@ const encosta = (a, b) => (a[0] <= b[2] && b[0] <= a[2] && a[1] < b[3] && b[1] <
   const ini = regras.inicio || {};
   if (!naoNegativo(ini.ouro) || !naoNegativo(ini.cash)) erro('regras', 'inicio: faltam "ouro" e "cash"');
   if (!itens[ini.cesto] || itens[ini.cesto].tipo !== 'recipiente') erro('regras', `inicio.cesto "${ini.cesto}" não é um recipiente`);
-  for (const l of ['cinto', 'suporte']) for (const f of ini[l] || []) if (!itens[f] || itens[f].tipo !== 'ferramenta') erro('regras', `inicio.${l}: "${f}" não é uma ferramenta`);
+  for (const l of ['cinto', 'suporte', 'noLugar']) for (const f of ini[l] || []) if (!itens[f] || itens[f].tipo !== 'ferramenta') erro('regras', `inicio.${l}: "${f}" não é uma ferramenta`);
   if ((ini.cinto || []).length > (ini.vagasNoCinto || 0)) erro('regras', 'inicio.cinto tem mais ferramentas que vagas');
   mapaDeItens('regras', 'inicio', ini.itens, 'itens');
   const pe = regras.personagem || {}, fo = regras.folego || {};

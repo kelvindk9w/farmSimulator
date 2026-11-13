@@ -57,7 +57,7 @@ T.trabalho = {
     montarDica: 'Viagem longa vai a cavalo, sem gastar fôlego. Tecla H.',
     levar: 'Levar o jumento', deixar: 'Deixar o jumento aqui',
     levarDica: (cap) => `Ele vai atrás com a carroça: leva ${cap} coisas. Tecla J.`,
-    arar: 'Arar com o boi', ararDica: (n) => `O boi ara ${n} casas por passada.`,
+    arar: 'Arar com o boi', ararDica: (n) => `O boi ara a fileira inteira: até ${n} casas por passada.`,
     falta: (D, item) => `Comprar ${o(nomeI(D, item))}`,
     faltaDica: (D, animal, item) => `${Curto(D, animal)} só trabalha com ${o(nomeI(D, item))}. Está na loja, em Ferramentas.`,
     semTrato: (D, animal) => `${Curto(D, animal)} está sem trato: trabalha pela metade. Encha o cocho e o bebedouro.`,
@@ -72,7 +72,7 @@ T.trabalho = {
   // o que o Seu Tonho explica na primeira vez de cada coisa
   tonho: {
     titulo: { boi: 'O boi de arado', cavalo: 'A cavalo', jumento: 'O jumento', barril: 'O barril de água', barrilCheio: 'Água no campo', afago: 'Um companheiro', falta: 'Falta um apetrecho' },
-    boi: (n) => `Toque na grama e o boi ara ${n} casas de uma vez, em fila. Arraste o dedo para escolher a direção.`,
+    boi: (n) => `Toque ou segure o dedo numa casa do campo ou da grama: o boi ara a fileira inteira, até ${n} casas, para o lado com mais terra. Arraste o dedo para escolher a direção.`,
     cavalo: 'Com o cavalo ligado, toda viagem longa é montada, sem gastar fôlego. Chegou, ela apeia sozinha e o cavalo espera do lado.',
     jumento: 'O jumento vai atrás de você com a carroça. Cesto cheio, a colheita passa para ela; a banca e o celeiro levam tudo junto.',
     barril: 'Leve o jumento até o poço e toque nele: o barril enche junto com o regador.',

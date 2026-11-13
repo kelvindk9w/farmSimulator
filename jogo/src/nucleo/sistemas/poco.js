@@ -1,10 +1,11 @@
-// O poço: enche o regador que está no cinto (ou busca o regador no suporte antes, como toda ação com ferramenta).
+// O poço: enche o regador que está no cinto (ou busca antes o regador guardado, no lugar dele ao lado do poço ou no
+// suporte do celeiro, como toda ação com ferramenta).
 import { registrarAcao, registrarTipo, registrarEvento } from '../registro.js';
-import { ferramentaNoCinto, ferramentaNoSuporte } from './posses.js';
+import { ferramentaNoCinto, ferramentaGuardada } from './posses.js';
 import { filaTem } from './personagem.js';
 
-// o regador que a ação usaria: o do cinto; sem ele, o do suporte (a personagem vai buscar)
-const regador = (m) => ferramentaNoCinto(m, 'regador') || ferramentaNoSuporte(m, 'regador');
+// o regador que a ação usaria: o do cinto; sem ele, o guardado (a personagem vai buscar)
+const regador = (m) => ferramentaNoCinto(m, 'regador') || ferramentaGuardada(m, 'regador');
 
 registrarAcao({
   id: 'encher', ferramenta: 'regador', dur: 1.5, efeitoEm: 1.1, estadoVisual: 'manivela',

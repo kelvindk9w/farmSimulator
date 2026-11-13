@@ -13,7 +13,7 @@
 import { registrarSistema, registrarAcao, registrarModo, registrarAutomatico, registrarEvento, MODOS } from '../registro.js';
 import { GRAMA, ARADA, CAMPO, deLavoura } from '../local.js';
 import { somar } from '../util.js';
-import { espacoNoCesto, porNoCesto, ferramentaNoCinto, ferramentaNoSuporte } from './posses.js';
+import { espacoNoCesto, porNoCesto, ferramentaNoCinto, ferramentaGuardada } from './posses.js';
 import { darXp } from './niveis.js';
 import { filaTem, contarNaFila } from './personagem.js';
 import { campoInicial } from './terras.js';
@@ -115,7 +115,7 @@ export const plantavel = (D, item) => !!item && (!!D.culturaDaSemente[item] || !
 // ---------- rega com área ----------
 // quantas casas em linha o regador da personagem molha numa rega (1 = só a casa tocada)
 export function areaDaRega(m) {
-  const reg = ferramentaNoCinto(m, 'regador') || ferramentaNoSuporte(m, 'regador'), a = reg ? m.dados.itens[reg].area : 1;
+  const reg = ferramentaNoCinto(m, 'regador') || ferramentaGuardada(m, 'regador'), a = reg ? m.dados.itens[reg].area : 1;
   return a >= 1 ? Math.round(a) : 1;
 }
 // a casa (x, z) já vai ser molhada por uma rega da fila (a dela mesma ou a de uma vizinha, com regador de área)?

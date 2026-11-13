@@ -49,7 +49,7 @@ function fazBeco(loc, x, z) {
   return false;
 }
 const alcanca = (J, loc, e) => VIZ.some(([dx, dz]) => loc.dentro(e.x + dx, e.z + dz) && J.alcance[(e.z + dz) * loc.l + e.x + dx] === 1);
-const ferramentaDe = (J, funcao) => X.posses.ferramentaNoCinto(J.m, funcao) || X.posses.ferramentaNoSuporte(J.m, funcao);
+const ferramentaDe = (J, funcao) => X.posses.ferramentaNoCinto(J.m, funcao) || X.posses.ferramentaGuardada(J.m, funcao);
 // dá para limpar este tipo de obstáculo com o que ela tem?
 export function limpavel(J, tipo) {
   const O = J.D.obstaculos[tipo];

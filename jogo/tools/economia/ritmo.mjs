@@ -64,7 +64,7 @@ function novoEstado(perfil) {
     c: { ouroDe: {}, ouroPara: {}, xpDe: {}, cashDe: {}, tempo: {}, toques: 0, poco: 0, colhidas: 0 },
   };
   for (const [k, f] of Object.entries(T.inicial.natureza || {})) S.obst[k] = Math.round(borda * f);
-  for (const id of [...I.cinto, ...I.suporte, I.cesto]) S.ferr[D.itens[id].funcao] = id;
+  for (const id of [...I.cinto, ...I.suporte, ...(I.noLugar || []), I.cesto]) S.ferr[D.itens[id].funcao] = id;
   for (const [id, c] of Object.entries(D.construcoes)) if (c.inicial) { S.constr[id] = { n: 1, degrau: 0 }; for (const mv of (c.interior || {}).moveis || []) S.constr[mv.id] = { n: 1, degrau: 0 }; }
   return S;
 }

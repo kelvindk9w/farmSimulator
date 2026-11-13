@@ -84,6 +84,7 @@ export function prepararDados(bruto) {
     inicio: {
       ouro: num(ini.ouro) ? ini.ouro : 0, cash: num(ini.cash) ? ini.cash : 0,
       cesto: ini.cesto || null, cinto: Array.isArray(ini.cinto) ? [...ini.cinto] : [], suporte: Array.isArray(ini.suporte) ? [...ini.suporte] : [],
+      noLugar: Array.isArray(ini.noLugar) ? [...ini.noLugar] : [], // as que começam no lugar delas no sítio (terras.json "lugares")
       vagasNoCinto: ini.vagasNoCinto >= 1 ? Math.round(ini.vagasNoCinto) : 2,
       itens: obj(ini.itens) ? { ...ini.itens } : {},
     },
@@ -100,9 +101,9 @@ export function prepararDados(bruto) {
   const I = regras.inicio;
   if (!I.cesto) erro('regras.json', 'falta "inicio.cesto" (o recipiente com que a personagem começa)');
   else if (!itens[I.cesto] || itens[I.cesto].tipo !== 'recipiente') erro('regras.json', `inicio.cesto: "${I.cesto}" não é um recipiente de itens.json`);
-  for (const lista of ['cinto', 'suporte']) for (const f of I[lista]) if (!itens[f] || itens[f].tipo !== 'ferramenta') erro('regras.json', `inicio.${lista}: "${f}" não é uma ferramenta de itens.json`);
+  for (const lista of ['cinto', 'suporte', 'noLugar']) for (const f of I[lista]) if (!itens[f] || itens[f].tipo !== 'ferramenta') erro('regras.json', `inicio.${lista}: "${f}" não é uma ferramenta de itens.json`);
   if (I.cinto.length > I.vagasNoCinto) erro('regras.json', `inicio.cinto tem ${I.cinto.length} ferramentas, mas o cinto só tem ${I.vagasNoCinto} vagas`);
-  for (const f of ['enxada', 'regador']) if (![...I.cinto, ...I.suporte].some((id) => itens[id] && itens[id].funcao === f)) aviso('regras.json', `a personagem começa sem ${f} (nem no cinto, nem no suporte)`);
+  for (const f of ['enxada', 'regador']) if (![...I.cinto, ...I.suporte, ...I.noLugar].some((id) => itens[id] && itens[id].funcao === f)) aviso('regras.json', `a personagem começa sem ${f} (nem no cinto, nem no suporte, nem no lugar dela)`);
   for (const k of Object.keys(I.itens)) if (!itens[k]) erro('regras.json', `inicio.itens: "${k}" não existe em itens.json`);
 
   // ---------- terras ----------
@@ -119,6 +120,7 @@ export function prepararDados(bruto) {
     pontos: obj(T.pontos) ? T.pontos : {}, // onde nascem poço, banca, celeiro, casa e a personagem: [x, z]
     caminhos: Array.isArray(T.caminhos) ? T.caminhos : [], // faixas de caminho de terra: [x0, z0, x1, z1]
     natureza: obj(T.natureza) ? T.natureza : {}, // o que cobre a terra fora dos lotes: { mata: 0.03, mato: 0.05, pedra: 0.02, toco: 0.01 } (chance por casa); cada lote pode ter a sua
+    lugares: {}, // o lugar de cada ferramenta no sítio: { item: [x, z] } (a enxada velha na estaca do campo, o regador velho ao lado do poço)
     casas: {}, // tamanho da base de cada construção inicial, de construcoes.json: { celeiro: [5, 4], ... }
   };
   if (obj(bruto.construcoes)) for (const [id, c] of Object.entries(bruto.construcoes)) {
@@ -147,7 +149,16 @@ export function prepararDados(bruto) {
       else if (area(ini) && (c[0] < ini[0] || c[1] < ini[1] || c[2] > ini[2] || c[3] > ini[3])) { aviso('terras.json', '"inicial.campo" ignorado: o campo tem de caber na área inicial'); terras.campo = null; }
       else terras.campo = c.map(Math.round);
     }
+    if (obj(T.lugares)) for (const [id, v] of Object.entries(T.lugares)) {
+      if (id === 'nota') continue;
+      const ini = terras.inicial;
+      if (!itens[id] || itens[id].tipo !== 'ferramenta') aviso('terras.json', `lugares.${id}: não é uma ferramenta de itens.json`);
+      else if (!(Array.isArray(v) && v.length >= 2 && num(v[0]) && num(v[1]))) aviso('terras.json', `lugares.${id}: esperava [x, z]`);
+      else if (area(ini) && (v[0] < ini[0] || v[1] < ini[1] || v[0] >= ini[2] || v[1] >= ini[3])) aviso('terras.json', `lugares.${id} fica fora da área inicial`);
+      else terras.lugares[id] = [Math.round(v[0]), Math.round(v[1])];
+    }
   }
+  for (const f of regras.inicio.noLugar) if (itens[f] && !terras.lugares[f]) aviso('regras.json', `inicio.noLugar: "${f}" não tem lugar em terras.json "lugares" (fica no suporte do celeiro)`);
 
   // ---------- níveis ----------
   // limiar[n] = experiência total para chegar ao nível n (limiar[1] = 0)

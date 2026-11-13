@@ -8,6 +8,7 @@ import './lavoura.js';
 import './poco.js';
 import './banca.js';
 import './celeiro.js';
+import './lugares.js'; // o lugar das ferramentas no sítio (a enxada na estaca do campo, o regador ao lado do poço)
 import './loja.js';
 import './missoes.js';
 import './celeiro-dentro.js'; // frente de construir: entrar e sair do celeiro, e o espaço que vem dos móveis (depois da personagem e das missões)

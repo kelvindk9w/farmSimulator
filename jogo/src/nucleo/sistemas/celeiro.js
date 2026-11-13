@@ -1,9 +1,10 @@
 // O celeiro visto de fora (M1): um toque guarda o que está no cesto; com o cesto vazio, um toque pega de volta
-// (para vender). É nele que fica o suporte de ferramentas: a personagem vai até ele buscar a que não está no cinto.
+// (para vender). É nele que fica o suporte de ferramentas: a personagem vai até ele buscar a que não está no cinto
+// (a que tem lugar no sítio, como o regador velho ao lado do poço, ela busca lá: sistemas/lugares.js).
 // A casa também mora aqui, por enquanto só como construção.
 import { registrarAcao, registrarTipo, registrarEvento } from '../registro.js';
 import { somar } from '../util.js';
-import { noCesto, espacoNoCesto, noCeleiro, espacoNoCeleiro, ferramentaNoCinto, ferramentaNoSuporte, pegarDoSuporte, cestoECargas, naCarga } from './posses.js';
+import { noCesto, espacoNoCesto, noCeleiro, espacoNoCeleiro, ferramentaNoCinto, ferramentaNoSuporte, pegarGuardada, cestoECargas, naCarga } from './posses.js';
 import { filaTem } from './personagem.js';
 
 registrarAcao({
@@ -48,17 +49,20 @@ registrarAcao({
   },
 });
 
+// pegar a ferramenta guardada: no suporte do celeiro (ou no móvel, lá dentro) ou no lugar dela no sítio (sistemas/lugares.js).
+// args = { funcao, item }: "item" é a que ela foi buscar (sem ele, a melhor do suporte)
+const qualPegar = (m, args) => (args.item && m.posses.ferramentas[args.item] && m.posses.ferramentas[args.item].onde !== 'cinto' ? args.item : ferramentaNoSuporte(m, args.funcao));
 registrarAcao({
   id: 'pegarFerramenta', dur: 0.8, efeitoEm: 0.5, estadoVisual: 'entregar',
   pode(m, alvo, args) {
-    if (ferramentaNoCinto(m, args.funcao)) return { ok: true }; // já está com ela: a ação vira só uma passada no celeiro
-    return ferramentaNoSuporte(m, args.funcao) ? { ok: true } : { ok: false, motivo: 'sem-ferramenta', dados: { funcao: args.funcao } };
+    if (ferramentaNoCinto(m, args.funcao)) return { ok: true }; // já está com ela: a ação vira só uma passada
+    return qualPegar(m, args) ? { ok: true } : { ok: false, motivo: 'sem-ferramenta', dados: { funcao: args.funcao } };
   },
   aoEfeito(m, alvo, args) {
-    const id = ferramentaNoSuporte(m, args.funcao);
-    if (!id || ferramentaNoCinto(m, args.funcao)) return;
-    const r = pegarDoSuporte(m, id);
-    if (r) m.eventos.emitir('pegouFerramenta', { item: r.item, guardou: r.guardou, entidade: alvo.entidade });
+    if (ferramentaNoCinto(m, args.funcao)) return;
+    const id = qualPegar(m, args);
+    const r = id && pegarGuardada(m, id);
+    if (r) m.eventos.emitir('pegouFerramenta', { item: r.item, guardou: r.guardou, entidade: alvo.entidade, lugar: r.de === 'lugar' });
   },
 });
 
@@ -80,4 +84,4 @@ registrarTipo({
 
 registrarEvento('guardou', { campos: ['itens', 'n', 'entidade'] });
 registrarEvento('pegou', { campos: ['itens', 'n', 'entidade'] });
-registrarEvento('pegouFerramenta', { campos: ['item', 'guardou', 'entidade'] });
+registrarEvento('pegouFerramenta', { campos: ['item', 'guardou', 'entidade', 'lugar'] });

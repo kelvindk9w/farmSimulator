@@ -138,7 +138,11 @@ export class Cena {
       const it = itens[o[k]];
       const sx = cam.telaX(it.x, it.z), sy = cam.telaY(it.x, 0, it.z);
       let r;
-      if (it.tipo === ENT) r = Math.min(it.ref.l, it.ref.p) * 0.52 * S * (it.ref.l + it.ref.p > 2 ? 1.05 : 0.6);
+      if (it.tipo === ENT) {
+        const so = TIPOS[it.ref.tipo].sombra; // o tipo que diz o tamanho da própria sombra (o regador no chão; 0 = nenhuma)
+        r = so ? so(m, it.ref) * S : Math.min(it.ref.l, it.ref.p) * 0.52 * S * (it.ref.l + it.ref.p > 2 ? 1.05 : 0.6);
+        if (!(r > 0)) continue;
+      }
       else if (it.tipo === PERS) r = 0.34 * S;
       else if (it.tipo === SOLTA) r = it.ref.raio * S;
       else continue;

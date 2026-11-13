@@ -6,7 +6,7 @@
 // (a interface marca a fileira toda; null quando é uma casa só).
 import { GRAMA, ARADA, CAMPO, deLavoura } from './local.js';
 import { missaoAtual } from './sistemas/missoes.js';
-import { noCesto, espacoNoCesto, noCeleiro, ferramentaNoCinto, ferramentaNoSuporte } from './sistemas/posses.js';
+import { noCesto, espacoNoCesto, noCeleiro, ferramentaNoCinto, ferramentaGuardada } from './sistemas/posses.js';
 import { estadoDaPlanta, segundosDeAgua, sementesLivres, regaPrometida, podeArar, casasDaFileira } from './sistemas/lavoura.js';
 import { filaTem, contarNaFila } from './sistemas/personagem.js';
 
@@ -114,7 +114,7 @@ function passoPlantar(m, semente, out) {
 }
 function passoRegar(m, cultura, out) {
   if (!plantaPerto(m, 'sede', cultura, out)) return null;
-  const x = out.x, z = out.z, reg = ferramentaNoCinto(m, 'regador') || ferramentaNoSuporte(m, 'regador');
+  const x = out.x, z = out.z, reg = ferramentaNoCinto(m, 'regador') || ferramentaGuardada(m, 'regador');
   if (reg && m.posses.ferramentas[reg].agua - contarNaFila(m, 'regar') <= 0 && !filaTem(m, 'encher')) return entidade(out, 'poco'); // a água que há já está prometida
   if (m.modo.id !== 'mao' && m.modo.id !== 'regar') return modo(out, 'mao');
   naFileira(m, x, z, (l, i, cx, cz) => !!l.plantas[i] && estadoDaPlanta(m, l.plantas[i]) === 'sede' && (!cultura || l.plantas[i].cultura === cultura) && !regaPrometida(m, cx, cz), out);

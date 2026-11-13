@@ -8,7 +8,7 @@ import { obstaculos } from './terras.mjs';
 export const LIGADA = precisa('lavoura', {
   lavoura: ['estadoDaPlanta', 'proximoAcontecimento', 'regaPrometida'],
   personagem: ['filaTem', 'contarNaFila', 'ocupada'],
-  posses: ['noCesto', 'espacoNoCesto', 'noCeleiro', 'espacoNoCeleiro', 'ferramentaNoCinto', 'ferramentaNoSuporte', 'quantoTem'],
+  posses: ['noCesto', 'espacoNoCesto', 'noCeleiro', 'espacoNoCeleiro', 'ferramentaNoCinto', 'ferramentaGuardada', 'quantoTem'],
   local: ['GRAMA', 'ARADA', 'CAMINHO'],
 });
 const L = X.lavoura, PO = X.posses, LO = X.local;
@@ -156,7 +156,7 @@ export function colheitaPrometida(J) {
   return n;
 }
 function semAgua(J) {
-  const r = PO.ferramentaNoCinto(J.m, 'regador') || PO.ferramentaNoSuporte(J.m, 'regador');
+  const r = PO.ferramentaNoCinto(J.m, 'regador') || PO.ferramentaGuardada(J.m, 'regador');
   return !!r && J.P.ferramentas[r].agua - contarNaFila(J, 'regar') <= 0;
 }
 export function regar(J) {

@@ -4,8 +4,9 @@
     "ouro": 20,
     "cash": 10,
     "cesto": "cesto-de-palha",
-    "cinto": ["enxada-velha", "regador-velho"],
+    "cinto": ["enxada-velha"],
     "suporte": [],
+    "noLugar": ["regador-velho"],
     "vagasNoCinto": 2,
     "itens": { "semente-alface": 6 }
   },

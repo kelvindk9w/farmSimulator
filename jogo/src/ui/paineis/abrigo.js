@@ -20,7 +20,7 @@ import { perguntar } from '../dialogo.js';
 import { botaoConcluir } from '../concluir.js';
 import { som } from '../../plataforma/som.js';
 import { construcaoPorId, defDe, proximaAmpliacao, faltaDaObra, andamentoDaObra } from '../../nucleo/sistemas/construcao.js';
-import { quantoTem, ferramentaNoCinto, ferramentaNoSuporte } from '../../nucleo/sistemas/posses.js';
+import { quantoTem, ferramentaNoCinto, ferramentaGuardada } from '../../nucleo/sistemas/posses.js';
 import { animaisDe, animalPorId, defDoAnimal, estadoDoAbrigo, faltaNoAbrigo, ofertasDeAnimais, podeEncherCocho, podeEncherBebedouro, estaTratado } from '../../nucleo/sistemas/animais.js';
 import { situacaoDoAnimal, vidaDoAnimal, prontosNoAbrigo, podeRecolher } from '../../nucleo/sistemas/producao.js';
 import { missaoAtual } from '../../nucleo/sistemas/missoes.js';
@@ -101,7 +101,7 @@ registrarPainel({
       let nota = '', ruim = false;
       if (eCocho) { if (s.tem > 0) nota = T.animais.temComida(D, s.item, s.tem); else if (!cheio) { nota = T.animais.semComida(D, s.item); ruim = true; } }
       else {
-        const reg = ferramentaNoCinto(m, 'regador') || ferramentaNoSuporte(m, 'regador');
+        const reg = ferramentaNoCinto(m, 'regador') || ferramentaGuardada(m, 'regador');
         if (reg) nota = T.animais.comRegador(m.posses.ferramentas[reg].agua, D.itens[reg].capacidade); else { nota = T.animais.semRegador; ruim = true; }
       }
       textos.append(titulo, barra);
@@ -161,7 +161,7 @@ registrarPainel({
       const prontos = prontosNoAbrigo(m, e.id), comProduto = bichos.find((a) => a.familia === 'producao' && a.pronto > 0);
       const rec = comProduto ? podeRecolher(m, defDoAnimal(m, comProduto)) : null;
       const ofertas = ofertasDeAnimais(m).filter((o) => o.abrigo === e.tipo), amp = proximaAmpliacao(m, e), extras = extrasDoAbrigo(m, e);
-      const reg = ferramentaNoCinto(m, 'regador') || ferramentaNoSuporte(m, 'regador');
+      const reg = ferramentaNoCinto(m, 'regador') || ferramentaGuardada(m, 'regador');
       // só refaz quando muda o que o painel mostra (os relógios andam sem refazer)
       const sinal = [destinoDe, e.nivel, e.ampliaAte > 0, st.vagas, st.cocho.nivel, st.cocho.capacidade, st.cocho.tem, st.bebedouro.nivel, st.bebedouro.capacidade, reg ? m.posses.ferramentas[reg].agua : -1,
         m.posses.ouro, m.progresso.nivel, prontos, rec ? rec.motivo || 'ok' : '', naFila(m, 'abastecerCocho', e.id), naFila(m, 'abastecerBebedouro', e.id),

@@ -6,7 +6,7 @@ import { T, numero } from './textos.js';
 import { J } from '../contexto.js';
 import { modosEmOrdem } from '../nucleo/registro.js';
 import { barraDeXp } from '../nucleo/sistemas/niveis.js';
-import { noCesto, foraDoCesto, capacidadeDoCesto, ferramentaNoCinto, ferramentaNoSuporte } from '../nucleo/sistemas/posses.js';
+import { noCesto, foraDoCesto, capacidadeDoCesto, ferramentaNoCinto, ferramentaGuardada } from '../nucleo/sistemas/posses.js';
 import { plantavel } from '../nucleo/sistemas/lavoura.js';
 import { PAINEIS, abrirPainel, painelAberto } from './paineis/registro.js';
 import { tela } from '../plataforma/tela.js';
@@ -106,9 +106,9 @@ export function criarHud(ui) {
     const nc = noCesto(m) - foraDoCesto(m), cap = capacidadeDoCesto(m); // (ovo e leite vão na caixa e no balde: não ocupam o cesto)
     num(nCesto, nc * 1000 + cap, `${nc}/${cap}`);
     classe(cesto, 'cheio', nc >= cap);
-    // regador: quanta água leva; se está no suporte do celeiro, avisa
-    const rc = ferramentaNoCinto(m, 'regador'), rs = rc || ferramentaNoSuporte(m, 'regador');
-    if (rs) { const f = P.ferramentas[rs], c = D.itens[rs].capacidade; num(nReg, (rc ? 0 : 1e6) + f.agua * 1000 + c, rc ? `${f.agua}/${c}` : T.hud.semRegador); classe(reg, 'vazio', f.agua === 0); }
+    // regador: quanta água leva; se está guardado (ao lado do poço ou no suporte do celeiro), avisa onde
+    const rc = ferramentaNoCinto(m, 'regador'), rs = rc || ferramentaGuardada(m, 'regador');
+    if (rs) { const f = P.ferramentas[rs], c = D.itens[rs].capacidade, noLugar = !rc && f.onde === 'lugar'; num(nReg, (rc ? 0 : noLugar ? 2e6 : 1e6) + f.agua * 1000 + c, rc ? `${f.agua}/${c}` : noLugar ? T.hud.regadorNoLugar : T.hud.semRegador); classe(reg, 'vazio', f.agua === 0); }
     if (reg.hidden !== !rs) reg.hidden = !rs;
     // fôlego: a barra some quando está cheia
     const F = D.regras.folego, cheio = p.folego >= F.max - 0.01;

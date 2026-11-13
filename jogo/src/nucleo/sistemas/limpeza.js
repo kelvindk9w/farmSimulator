@@ -4,7 +4,7 @@
 // (golpes = resistência / força). A foice com "area" leva junto o mato vizinho, numa passada só.
 // O material vai direto para a bolsa (o estoque de materiais), nunca para o cesto da colheita.
 import { registrarAcao, registrarTipo, registrarModo, registrarEvento, TIPOS } from '../registro.js';
-import { ferramentaNoCinto, ferramentaNoSuporte, darItem } from './posses.js';
+import { ferramentaNoCinto, ferramentaGuardada, darItem } from './posses.js';
 import { darXp } from './niveis.js';
 import { OBSTACULOS, tirarObstaculo } from './terras.js';
 import { cabe, acharCaminho } from '../caminho.js';
@@ -16,7 +16,7 @@ const NAO = (motivo, dados, limpar) => ({ ok: false, motivo, dados, limpar });
 
 const obst = (m, e) => m.dados.obstaculos[e.tipo];
 // a ferramenta que a personagem usaria: a do cinto; sem ela, a do suporte (ela busca)
-const ferramentaDe = (m, funcao) => ferramentaNoCinto(m, funcao) || ferramentaNoSuporte(m, funcao);
+const ferramentaDe = (m, funcao) => ferramentaNoCinto(m, funcao) || ferramentaGuardada(m, funcao);
 const forcaDe = (m, id) => (id && m.dados.itens[id].forca > 0 ? m.dados.itens[id].forca : 1);
 const areaDe = (m, id) => (id && m.dados.itens[id].area >= 1 ? Math.round(m.dados.itens[id].area) : 1);
 // quantos golpes ainda faltam para o obstáculo sair, com a ferramenta que ela tem
