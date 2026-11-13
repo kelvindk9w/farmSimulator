@@ -183,7 +183,7 @@ try {
   a = await abrir(844, 390, { toque: true, dpr: 2 }); pg = a.pg;
   const cdp = await a.ctx.newCDPSession(pg);
   await J(pg, () => { window.__jogo.comando({ tipo: 'comecarChegada' }); window.__jogo.seguir(); });
-  for (k = 0; k < 24 && (await cena(pg)).chegada; k++) {
+  for (k = 0; k < 32 && (await cena(pg)).chegada; k++) {
     if (k % 2 === 0) await foto(pg, `h-844-chegada-${String(k).padStart(2, '0')}.jpg`);
     // o botão "Pular" não pode ficar em cima de nada da interface
     if (k === 1) confere(await J(pg, () => { const b = document.querySelector('.pular-chegada'); if (!b) return false; const r = b.getBoundingClientRect(); const e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); const cruza = [...document.querySelectorAll('#ui .bt.agir, #ui .alavanca, #ui .balao')].filter((o) => o.offsetParent).some((o) => { const q = o.getBoundingClientRect(); return q.left < r.right && r.left < q.right && q.top < r.bottom && r.top < q.bottom; }); return r.right <= innerWidth && r.bottom <= innerHeight && (e === b || b.contains(e)) && !cruza; }), 'no celular, o "Pular" fica inteiro na tela, livre para o dedo e sem tapar o botão de agir, a alavanca nem o balão');
@@ -257,22 +257,66 @@ try {
   await a.ctx.close();
 
   // =====================================================================================================
-  console.log('a gravação de antes (feita pelo código de antes do começo humilde): abre a fazenda de antes, sem a cena');
+  console.log('a gravação de antes (feita pelo código de antes do começo humilde): abre a fazenda de antes, sem a cena;');
+  console.log('  a versão de teste pergunta uma vez se quer o começo novo ("Agora não" fica com a de antes; "Sim" começa de novo)');
   const velha = fs.readFileSync(path.join(raiz, 'testes', 'gravacoes', 'antes-nivel-5.json'), 'utf8');
-  const ctxV = await nav.newContext({ viewport: { width: 1280, height: 720 } });
-  await ctxV.addInitScript((t) => { if (!sessionStorage.getItem('velha')) { localStorage.setItem('fazenda.jogo.v1', t); sessionStorage.setItem('velha', '1'); } }, velha);
-  const pv = await ctxV.newPage(), errosV = [];
-  pv.on('console', (m) => { if (m.type() === 'error') errosV.push(m.text()); });
-  pv.on('pageerror', (e) => errosV.push('exceção: ' + e.message));
-  await pv.goto(srv.url);
-  await pv.waitForFunction(() => window.__jogo && window.__jogo.pronto !== undefined, null, { timeout: 20000 });
-  await esperar(600);
-  igual(await J(pv, () => { const m = window.__jogo.mundo, t = (id) => (m.locais.fazenda.porId[id] || {}).tipo || null; return { nivel: m.progresso.nivel, humilde: m.comeco.humilde, chegada: !!m.comeco.chegada, pular: !!document.querySelector('.pular-chegada'), casa: t('casa'), poco: t('poco'), banca: t('banca'), celeiro: t('celeiro'), quadro: t('quadro-de-pedidos'), vizinho: t('vizinho'), bau: t('bau-da-casa') }; }),
-    { nivel: 5, humilde: false, chegada: false, pular: false, casa: 'casa', poco: 'poco', banca: 'banca', celeiro: 'celeiro', quadro: 'quadro-de-pedidos', vizinho: null, bau: null },
-    'a gravação de antes abre com casa, poço, celeiro, banca e quadro prontos, sem a cena e sem o começo humilde');
-  await pv.screenshot({ path: path.join(capturas, 'h-1280-gravacao-de-antes.jpg'), type: 'jpeg', quality: 84 });
-  confere(errosV.length === 0, `gravação de antes: erro no console: ${errosV.slice(0, 3).join(' | ')}`);
-  await ctxV.close();
+  async function abrirVelha() {
+    const ctxV = await nav.newContext({ viewport: { width: 1280, height: 720 } });
+    await ctxV.addInitScript((t) => { if (!sessionStorage.getItem('velha')) { localStorage.setItem('fazenda.jogo.v1', t); sessionStorage.setItem('velha', '1'); } }, velha);
+    const pv = await ctxV.newPage(), erros = [];
+    pv.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()); });
+    pv.on('pageerror', (e) => erros.push('exceção: ' + e.message));
+    await pv.goto(srv.url);
+    await pv.waitForFunction(() => window.__jogo && window.__jogo.pronto !== undefined, null, { timeout: 20000 });
+    return { ctx: ctxV, pg: pv, erros };
+  }
+  const pergunta = (pg) => J(pg, () => {
+    const d = document.querySelector('.subida.dialogo');
+    if (!d) return null;
+    const b = (k) => { const e = d.querySelector(`[data-k="${k}"]`); return e ? e.textContent : null; };
+    return { texto: d.textContent, sim: b('sim'), nao: b('nao') };
+  });
+  const fazenda = (pg) => J(pg, () => { const m = window.__jogo.mundo, t = (id) => (m.locais.fazenda.porId[id] || {}).tipo || null; return { nivel: m.progresso.nivel, humilde: m.comeco.humilde, chegada: !!m.comeco.chegada, pular: !!document.querySelector('.pular-chegada'), casa: t('casa'), poco: t('poco'), banca: t('banca'), celeiro: t('celeiro'), quadro: t('quadro-de-pedidos'), vizinho: t('vizinho'), bau: t('bau-da-casa') }; });
+  const DE_ANTES = { nivel: 5, humilde: false, chegada: false, pular: false, casa: 'casa', poco: 'poco', banca: 'banca', celeiro: 'celeiro', quadro: 'quadro-de-pedidos', vizinho: null, bau: null };
+  let v = await abrirVelha();
+  await v.pg.waitForSelector('.subida.dialogo', { timeout: 15000 }).catch(() => {});
+  igual(await fazenda(v.pg), DE_ANTES, 'a gravação de antes abre com casa, poço, celeiro, banca e quadro prontos, sem a cena e sem o começo humilde');
+  let q = await pergunta(v.pg);
+  confere(q && /Esta versão tem um começo novo\. Quer começar de novo para ver\?/.test(q.texto) && /a fazenda deste aparelho será apagada/.test(q.texto) && q.sim === 'Sim, começar de novo' && q.nao === 'Agora não',
+    `a versão de teste pergunta se quer o começo novo, avisando que a fazenda será apagada (veio ${JSON.stringify(q)})`);
+  await v.pg.screenshot({ path: path.join(capturas, 'h-1280-pergunta-comeco-novo.jpg'), type: 'jpeg', quality: 84 });
+  let bt = await centroDe(v.pg, '.subida.dialogo [data-k="nao"]');
+  await v.pg.mouse.click(bt.x, bt.y);
+  await esperar(300);
+  confere(!(await pergunta(v.pg)), '"Agora não" fecha a pergunta');
+  igual(await fazenda(v.pg), DE_ANTES, '"Agora não": a fazenda de antes continua como estava');
+  await v.pg.screenshot({ path: path.join(capturas, 'h-1280-gravacao-de-antes.jpg'), type: 'jpeg', quality: 84 });
+  await v.pg.reload();
+  await v.pg.waitForFunction(() => window.__jogo && window.__jogo.pronto !== undefined, null, { timeout: 20000 });
+  await esperar(1500);
+  confere(!(await pergunta(v.pg)), 'aberta de novo, não pergunta outra vez (pergunta uma vez só)');
+  igual(await fazenda(v.pg), DE_ANTES, 'e a fazenda de antes continua');
+  confere(v.erros.length === 0, `gravação de antes ("Agora não"): erro no console: ${v.erros.slice(0, 3).join(' | ')}`);
+  await v.ctx.close();
+  // "Sim": a fazenda deste aparelho é apagada e começa o jogo novo, com a chegada
+  v = await abrirVelha();
+  await v.pg.waitForSelector('.subida.dialogo', { timeout: 15000 }).catch(() => {});
+  bt = await centroDe(v.pg, '.subida.dialogo [data-k="sim"]');
+  await v.pg.mouse.click(bt.x, bt.y);
+  await esperar(500);
+  confere(!(await pergunta(v.pg)), '"Sim" fecha a pergunta');
+  let f2 = await fazenda(v.pg);
+  confere(f2.nivel === 1 && f2.humilde && f2.casa === 'casa-velha' && f2.banca === 'caixote-de-venda' && f2.vizinho === 'vizinho' && !f2.celeiro && !f2.quadro && f2.chegada && f2.pular,
+    `"Sim, começar de novo": a fazenda nova do começo humilde, com a cena da chegada (veio ${JSON.stringify(f2)})`);
+  await v.pg.screenshot({ path: path.join(capturas, 'h-1280-comeco-novo-sim.jpg'), type: 'jpeg', quality: 84 });
+  await v.pg.waitForFunction(() => window.__jogo.mundo.comeco.chegou, null, { timeout: 20000 }).catch(() => {});
+  await v.pg.reload();
+  await v.pg.waitForFunction(() => window.__jogo && window.__jogo.pronto !== undefined, null, { timeout: 20000 });
+  await esperar(1500);
+  f2 = await fazenda(v.pg);
+  confere(!(await pergunta(v.pg)) && f2.humilde && f2.nivel === 1 && !f2.chegada, `aberta de novo, é a fazenda nova, sem pergunta e sem a cena (veio ${JSON.stringify(f2)})`);
+  confere(v.erros.length === 0, `gravação de antes ("Sim"): erro no console: ${v.erros.slice(0, 3).join(' | ')}`);
+  await v.ctx.close();
 } catch (err) {
   falhas.push('a verificação parou: ' + (err && err.stack ? err.stack.split('\n').slice(0, 3).join(' ') : err));
 }
