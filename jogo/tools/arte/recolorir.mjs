@@ -41,6 +41,11 @@ const RECEITAS = {
     { nome: 'pelo-escuro', sombra: true, serve: (r, C) => r.cor[0] >= 105 && r.cor[0] <= 142 && familia(r.cor, C) },
     { nome: 'pelo-na-meia-sombra', sombra: true, serve: (r, C) => r.cor[0] > 142 && familia(r.cor, C) && dist(r.cor, C) <= 62 && (r.colorido <= 0.85 || r.cor[2] / r.cor[0] <= C[2] / C[0] - 0.025) },
   ] },
+  // Cão boiadeiro: pelo cinza-azulado no lugar do caramelo; peito, patas e ponta do rabo brancos, focinho e coleira iguais.
+  boiadeiro: { base: [236, 138, 50], raioBase: 45, para: [104, 116, 138], classes: [
+    { nome: 'pelo', serve: (r, C) => dist(r.cor, C) <= 22 },
+    { nome: 'pelo-na-sombra', sombra: true, serve: (r, C) => familia(r.cor, C, 0.5) && dist(r.cor, C) > 22 && dist(r.cor, C) <= 110 && r.cor[0] >= 150 },
+  ] },
 };
 
 const o = {}; const args = process.argv.slice(2);

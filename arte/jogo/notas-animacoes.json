@@ -478,6 +478,16 @@
    "pedido": "recolorida de personagem/montada-galope-costas",
    "rodadas": 1,
    "nota": "A mesma folha da montada com o cavalo de pelagem baia (dourada), por código (recolorir.mjs --receita mangalarga); a personagem, a sela e as botas não mudam; mesma casa e apoio."
+  },
+  "animal/cachorro/parada-frente": {
+   "pedido": "cachorro-parada-frente.md",
+   "rodadas": 1,
+   "nota": "Vira-lata caramelo de coleira vermelha: descanso, ofega, abana o rabo e pisca; 4 desenhos em 8 quadros."
+  },
+  "animal/cachorro/parada-costas": {
+   "pedido": "cachorro-parada-costas.md",
+   "rodadas": 1,
+   "nota": "O mesmo, visto por trás: abana o rabo, vira a cabeça e ofega; 4 desenhos em 8 quadros."
   }
  },
  "geral": [
