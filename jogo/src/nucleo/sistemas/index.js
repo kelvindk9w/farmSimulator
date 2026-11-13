@@ -30,3 +30,6 @@ import './producao.js';
 // frente das indústrias e dos pedidos: receitas com fila (bancadas, moinho, cozinha, laticínio) e o quadro de pedidos
 import './industria.js'; // depois de construcao.js, de loja.js e de cash.js
 import './pedidos.js'; // depois de industria.js (o quadro só pede receita de indústria pronta)
+// frente dos animais de trabalho e de estimação: boi de arado, cavalo, jumento com carroça e barril; cachorro e gato
+import './trabalho.js'; // depois de animais.js, de loja.js, de lavoura.js e de poco.js
+import './estimacao.js';

@@ -1731,6 +1731,136 @@
    "altura-livre": true
   }
  },
+ "animal/gato/sentado-costas": {
+  "chave": "animal/gato/sentado-costas",
+  "crua": "sentado-costas.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 4,
+  "referencia": false,
+  "modo": "molde",
+  "emPe": 118,
+  "emPeReal": 117,
+  "emPeFonte": 568,
+  "escala": 0.2066,
+  "casa": [
+   104,
+   136
+  ],
+  "apoio": [
+   52,
+   117
+  ],
+  "quadros": 8,
+  "desenhos": 4,
+  "qps": 5,
+  "laco": true,
+  "alturas": [
+   117,
+   117,
+   118,
+   118
+  ],
+  "tamanhoPelaMassa": [
+   69.7,
+   69.6,
+   70.3,
+   70
+  ],
+  "variacaoAltura": 0.7,
+  "custosDoMolde": [
+   0,
+   13,
+   38,
+   25
+  ],
+  "bytes": 20826,
+  "avisos": [],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/gato/sentado-costas",
+   "altura": "118",
+   "quadros": "4",
+   "qps": "5",
+   "alinhar": "molde",
+   "molde": "0.35-0.9",
+   "em-pe-quadro": "1",
+   "faixa-pes": "0.2",
+   "chao": "0.06",
+   "sequencia": "1,2,3,2,3,1,4,1",
+   "tamanho-massa": "70",
+   "altura-livre": true
+  }
+ },
+ "animal/gato/sentado-frente": {
+  "chave": "animal/gato/sentado-frente",
+  "crua": "sentado-frente.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 4,
+  "referencia": false,
+  "modo": "molde",
+  "emPe": 118,
+  "emPeReal": 117,
+  "emPeFonte": 596,
+  "escala": 0.1968,
+  "casa": [
+   96,
+   136
+  ],
+  "apoio": [
+   48,
+   117
+  ],
+  "quadros": 8,
+  "desenhos": 4,
+  "qps": 5,
+  "laco": true,
+  "alturas": [
+   117,
+   118,
+   118,
+   118
+  ],
+  "tamanhoPelaMassa": [
+   69.1,
+   70,
+   70.2,
+   68.8
+  ],
+  "variacaoAltura": 0.7,
+  "custosDoMolde": [
+   0,
+   59,
+   106,
+   38
+  ],
+  "bytes": 20853,
+  "avisos": [],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/gato/sentado-frente",
+   "altura": "118",
+   "quadros": "4",
+   "qps": "5",
+   "alinhar": "molde",
+   "molde": "0.35-0.9",
+   "em-pe-quadro": "1",
+   "faixa-pes": "0.2",
+   "chao": "0.06",
+   "sequencia": "1,2,3,2,3,1,4,1",
+   "tamanho-massa": "70",
+   "altura-livre": true
+  }
+ },
  "animal/jumento/andar-barril-costas": {
   "chave": "animal/jumento/andar-barril-costas",
   "crua": "andar-barril-costas.png",

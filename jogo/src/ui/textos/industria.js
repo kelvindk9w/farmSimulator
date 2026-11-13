@@ -40,7 +40,8 @@ T.industria = {
   simVaga: 'Abrir a vaga', tituloVaga: 'Vaga a mais na fila',
 };
 T.ganhos.retirouProduto = (d, D) => '+' + lista(d.itens, D);
-T.ganhos.receitaPronta = (d, D) => `${nomeI(D, d.item)}: ficou pronto! Toque em ${minus(nomeC(D, d.construcao))} para retirar`;
+// (sem "pronto/pronta" nem "no/na": os nomes vêm dos dados, sem gênero)
+T.ganhos.receitaPronta = (d, D) => `${nomeC(D, d.construcao)}: saiu ${minus(nomeI(D, d.item))}! Toque lá para retirar`;
 T.ganhos.cancelouReceita = (d) => (d.devolveu ? 'Saiu da fila: os ingredientes voltaram' : 'Saiu da fila');
 
 T.pedidos = {
@@ -48,8 +49,8 @@ T.pedidos = {
   paga: 'Paga', entregar: 'Entregar', trocar: 'Trocar', trocarGratis: 'Trocar (grátis)',
   esperando: 'Pedido novo em', trancada: (n) => `Mais uma vaga no nível ${n}`, maisVagas: (n, nivel) => `${n} vagas no nível ${nivel}`,
   trocaGratis: 'Você tem uma troca grátis: o pedido novo chega na hora.', trocaEm: (seg) => `Próxima troca grátis em ${tempo(seg)}.`,
-  perguntaTrocaGratis: (nome) => `Trocar o pedido de ${nome}? Com a troca grátis, outro pedido chega na hora.`,
-  perguntaTroca: (nome, seg) => `Trocar o pedido de ${nome}? A vaga fica vazia por ${tempo(seg)} até chegar outro.`,
+  perguntaTrocaGratis: (nome) => `${nome}: trocar este pedido? Com a troca grátis, outro chega na hora.`,
+  perguntaTroca: (nome, seg) => `${nome}: trocar este pedido? A vaga fica vazia por ${tempo(seg)} até chegar outro.`,
   simTroca: 'Trocar', naoTroca: 'Ficar com este', tituloTroca: 'Trocar o pedido',
   entregou: (nome) => `Pedido entregue: ${nome}`, chegou: 'Chegou pedido novo no quadro', trocou: 'Pedido trocado',
   vazio: 'Ainda não há pedido: plante e colha, que a vizinhança logo pede.',

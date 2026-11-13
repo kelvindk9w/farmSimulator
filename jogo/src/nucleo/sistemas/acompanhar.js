@@ -15,6 +15,7 @@ import { acharCaminho, cabe } from '../caminho.js';
 const ACEL = 10, FREIO = 13; // unidades/s²
 const GIRO = 9; // rad/s
 const REPLANEJA = 24; // passos entre uma procura de caminho e a outra (o alvo anda)
+const SEM_ROTA = 40; // passos de espera depois de uma procura que não achou caminho
 
 // (m, e, v): o desenho ajusta a chave, o quadro e o lado da figura
 export const DESENHO = { bicho: null };
@@ -42,7 +43,7 @@ export function soltar(m, a, cx, cz, campos) {
   if (loc.porId[id]) return loc.porId[id];
   return loc.por({
     id, tipo: 'bichoDeTrabalho', x: cx - 0.5, z: cz - 0.5, l: 1, p: 1, animal: a.id, especie: a.especie, familia: a.familia, figura: a.especie,
-    rumo: 0.6, vel: 0, fase: 0, estado: 'parado', parado: 0, rota: null, rotaI: 0, metaX: 0, metaZ: 0, plano: 0, ...campos,
+    rumo: 0.6, vel: 0, fase: 0, estado: 'parado', parado: 0, indo: false, rota: null, rotaI: 0, metaX: 0, metaZ: 0, plano: 0, semRota: 0, ...campos,
   });
 }
 export function recolher(m, animalId) { return m.locais.fazenda.tirar(idDoBicho(animalId)); }
@@ -82,11 +83,12 @@ export function irAte(m, e, gx, gz, folga, vmax, chao, aTodoCusto) {
   const loc = chao || m.locais.fazenda, cx = e.x + 0.5, cz = e.z + 0.5;
   if (Math.hypot(gx - cx, gz - cz) <= folga + 0.03) { ficar(e); return false; }
   if (e.plano > 0) e.plano--;
+  if (e.semRota > 0) { e.semRota--; ficar(e); return false; } // não achou caminho há pouco: espera antes de procurar de novo
   const dx = gx - e.metaX, dz = gz - e.metaZ;
   if (!e.rota || (e.plano <= 0 && dx * dx + dz * dz > 0.5)) {
     e.metaX = gx; e.metaZ = gz; e.plano = REPLANEJA; e.rotaI = 0;
     e.rota = (cabe(loc, cx, cz) ? acharCaminho(loc, cx, cz, gx, gz) : null) || (aTodoCusto ? [[gx, gz]] : null);
-    if (!e.rota) { ficar(e); return false; }
+    if (!e.rota) { e.semRota = SEM_ROTA; ficar(e); return false; }
   }
   const r = e.rota, ultimo = e.rotaI >= r.length - 1;
   // no último trecho o alvo é o ponto de agora (ele se mexe); nos outros, o canto do caminho
@@ -108,7 +110,7 @@ export function portaDe(e, out = [0, 0]) { out[0] = e.x + e.l / 2; out[1] = e.z 
 
 // o chão em que os bichos de estimação andam: o da fazenda, menos as casas plantadas (não pisam na lavoura)
 export function chaoSemPlanta(m) {
-  if (m._chaoSemPlanta) return m._chaoSemPlanta;
-  const loc = m.locais.fazenda;
-  return (m._chaoSemPlanta = { l: loc.l, p: loc.p, dentro: (x, z) => loc.dentro(x, z), andavel: (x, z) => loc.andavel(x, z) && !loc.plantas[z * loc.l + x] });
+  const loc = m.locais.fazenda, c = m._chaoSemPlanta;
+  if (c && c.loc === loc) return c; // (a fazenda é trocada por outra quando a terra cresce)
+  return (m._chaoSemPlanta = { loc, l: loc.l, p: loc.p, dentro: (x, z) => loc.dentro(x, z), andavel: (x, z) => loc.andavel(x, z) && !loc.plantas[z * loc.l + x] });
 }

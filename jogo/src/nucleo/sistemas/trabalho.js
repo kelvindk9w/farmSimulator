@@ -16,7 +16,7 @@ import { PASSO, total, somar } from '../util.js';
 import { GRAMA, ARADA } from '../local.js';
 import { comprimento, cabe } from '../caminho.js';
 import { DESLOCAMENTO, PREPAROS, filaTem } from './personagem.js';
-import { AGUA_A_MAO } from './lavoura.js';
+import * as LAVOURA from './lavoura.js'; // AGUA_A_MAO e podeArar (este, da frente do campo de plantação: enquanto não existir, vale a grama)
 import './poco.js';
 import { CARGAS, RECIPIENTES, espacoNoCesto, ferramentaNoCinto } from './posses.js';
 import { VENDAVEL, jaTem } from './loja.js';
@@ -103,7 +103,13 @@ CARGAS.push((m) => (m.trabalho && m.trabalho.levando && pronto(m, 'carga') ? m.t
 // =====================================================================================================
 // O BOI DE ARADO
 // =====================================================================================================
-const aravel = (loc, x, z) => { if (!loc.ehPropria(x, z)) return false; const i = z * loc.l + x; return loc.chao[i] === GRAMA && !loc.ocupa[i]; };
+// o boi ara o mesmo que a enxada: grama livre ou campo livre (podeArar, de lavoura.js), só em terra própria
+function aravel(m, loc, x, z) {
+  if (!loc.ehPropria(x, z)) return false;
+  const i = z * loc.l + x;
+  if (loc.ocupa[i] || loc.plantas[i]) return false;
+  return LAVOURA.podeArar ? !!LAVOURA.podeArar(m, x, z) : loc.chao[i] === GRAMA;
+}
 // a casa (x, z) já vai ser arada por uma tarefa da fila (enxada ou boi)?
 function prometida(m, x, z) {
   if (filaTem(m, 'arar', x, z)) return true;
@@ -122,7 +128,7 @@ function prometida(m, x, z) {
 // arar (planta, caminho, construção, terra dos outros e casa já prometida ficam de fora, sem erro).
 export function casasDaPassada(m, x, z, dir, n = casasPorPassada(m)) {
   const loc = m.local, out = [[x, z]], d = DIRS[dir];
-  for (let k = 1; k < n; k++) { const cx = x + d[0] * k, cz = z + d[1] * k; if (aravel(loc, cx, cz) && !prometida(m, cx, cz)) out.push([cx, cz]); }
+  for (let k = 1; k < n; k++) { const cx = x + d[0] * k, cz = z + d[1] * k; if (aravel(m, loc, cx, cz) && !prometida(m, cx, cz)) out.push([cx, cz]); }
   return out;
 }
 // Para onde vai a fileira num toque simples: das quatro que saem da casa tocada, a que tem mais casas para arar;
@@ -147,7 +153,7 @@ function arrastar(m, x, z) {
 }
 
 function ararCasa(m, loc, x, z) {
-  if (!aravel(loc, x, z)) return false;
+  if (!aravel(m, loc, x, z)) return false;
   loc.chao[z * loc.l + x] = ARADA; // o chão fica igual ao da enxada
   m.eventos.emitir('chaoMudou', { local: loc.id, x, z });
   m.eventos.emitir('arou', { x, z, com: 'boi' });
@@ -167,7 +173,7 @@ registrarAcao({
     const c = args && args.casas;
     if (!c || !c.length) return NAO('nao-da-para-arar');
     if (args.passada) return SIM; // a passada já começou: as casas vão sendo aradas uma a uma
-    for (let k = 0; k < c.length; k++) if (aravel(m.local, c[k][0], c[k][1])) return SIM;
+    for (let k = 0; k < c.length; k++) if (aravel(m, m.local, c[k][0], c[k][1])) return SIM;
     return NAO('ja-arado');
   },
   // o fim da passada: o que o boi ainda não virou (a última casa) vira agora
@@ -183,7 +189,7 @@ registrarModo({
     const loc = m.local, i = z * loc.l + x;
     let dir = c && c.arrasto ? arrastar(m, x, z) : -1;
     if (loc.chao[i] === ARADA) return { acao: null, texto: 'ja-arado' };
-    if (loc.chao[i] !== GRAMA || loc.ocupa[i]) return null; // caminho: só anda
+    if (!aravel(m, loc, x, z)) return null; // caminho, terra plantada: só anda
     if (prometida(m, x, z)) return NA_FILA;
     const a = pronto(m, 'arar');
     if (!a) return { acao: null, texto: 'sem-boi', falta: true };
@@ -291,7 +297,7 @@ function aguaAMao(m) {
   const T = m.trabalho;
   return !!T && T.levando && T.barril > 0 && m.personagem.local === 'fazenda' && temBarril(m) && !!pronto(m, 'carga');
 }
-AGUA_A_MAO.push(aguaAMao);
+LAVOURA.AGUA_A_MAO.push(aguaAMao);
 // o barril está junto e cabe mais água
 function barrilPedeAgua(m) {
   const T = m.trabalho;
@@ -447,7 +453,7 @@ registrarGuia('arou', (m, f, out) => {
   let melhor = Infinity;
   out.tipo = null;
   for (let z = z0 - 9; z <= z0 + 9; z++) for (let x = x0 - 9; x <= x0 + 9; x++) {
-    if (!aravel(loc, x, z) || prometida(m, x, z)) continue;
+    if (!aravel(m, loc, x, z) || prometida(m, x, z)) continue;
     const d = Math.hypot(x + 0.5 - p.x, z + 0.5 - p.z);
     if (d < melhor) { melhor = d; out.tipo = 'casa'; out.x = x; out.z = z; }
   }

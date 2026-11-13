@@ -563,6 +563,16 @@
    "pedido": "gato-andar-costas.md",
    "rodadas": 1,
    "nota": "Trote leve de 6 quadros visto por trás; mesmo tamanho da espera (pela massa)."
+  },
+  "animal/gato/sentado-frente": {
+   "pedido": "gato-sentado-frente.md",
+   "rodadas": 1,
+   "nota": "Sentado com o rabo enrolado nas patas, para quando a personagem para: olha em volta, lambe a pata e pisca; 4 desenhos em 8 quadros; cabeça do mesmo tamanho da figura em pé."
+  },
+  "animal/gato/sentado-costas": {
+   "pedido": "gato-sentado-costas.md",
+   "rodadas": 1,
+   "nota": "Sentado visto por trás: vira a cabeça, lambe a pata e pisca; 4 desenhos em 8 quadros."
   }
  },
  "geral": [
