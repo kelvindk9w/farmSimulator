@@ -1,6 +1,9 @@
 {
   "escala": 128,
   "pecas": {
+    "animal/boi/parado-costas": { "arquivo": "animais/boi/parado-costas.png", "quadros": 8, "casa": [432, 392], "apoio": [216, 312], "qps": 4, "laco": true },
+    "animal/boi/parado-frente": { "arquivo": "animais/boi/parado-frente.png", "quadros": 8, "casa": [472, 320], "apoio": [236, 282], "qps": 4, "laco": true },
+    "animal/boi/puxar-frente": { "arquivo": "animais/boi/puxar-frente.png", "quadros": 8, "casa": [488, 296], "apoio": [244, 258], "qps": 8, "laco": true },
     "animal/galinha/andar-costas": { "arquivo": "animais/galinha/andar-costas.png", "quadros": 6, "casa": [112, 152], "apoio": [56, 134], "qps": 9, "laco": true },
     "animal/galinha/andar-frente": { "arquivo": "animais/galinha/andar-frente.png", "quadros": 6, "casa": [120, 152], "apoio": [60, 134], "qps": 9, "laco": true },
     "animal/galinha/ciscar-costas": { "arquivo": "animais/galinha/ciscar-costas.png", "quadros": 6, "casa": [152, 152], "apoio": [76, 134], "qps": 7, "laco": true },

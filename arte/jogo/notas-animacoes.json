@@ -49,6 +49,11 @@
    "arquivo": "cavalo.png",
    "pedido": "modelo-cavalo.md",
    "nota": "Cavalo castanho com sela de couro sobre manta vermelha, estribos, cabeçada e rédeas; ninguém montado: frente, costas e perfil. Uma rodada."
+  },
+  "montaria": {
+   "arquivo": "montaria.png",
+   "pedido": "modelo-montaria.md",
+   "nota": "Folha de modelo da INTERAÇÃO: a personagem montada no cavalo selado (pés nos estribos, mãos nas rédeas), de frente, de costas e de perfil. Anexada aos pedidos da personagem montada. A folha veio com um véu de sujeira quase transparente no fundo, que foi limpo antes de guardar. Uma rodada."
   }
  },
  "folhas": {
@@ -313,6 +318,21 @@
    "pedido": "ovelha-tosquiada-andar-costas.md",
    "rodadas": 1,
    "nota": "Par da de frente; saiu mais saltitante (as patas encolhem nos quadros 3 e 6). Tamanho pela massa 116."
+  },
+  "animal/boi/parado-frente": {
+   "pedido": "boi-parado-frente.md",
+   "rodadas": 1,
+   "nota": "Boi com o arado atrás (um desenho só): rumina, respira, pisca, abana o rabo; o arado não se mexe. 290 pontos de altura, um pouco maior que a vaca; apoio levado para baixo do corpo do boi (--apoio-dx -55). Tamanho pela massa 227."
+  },
+  "animal/boi/puxar-frente": {
+   "pedido": "boi-puxar-frente.md",
+   "rodadas": 1,
+   "nota": "Passo de quatro tempos com a cabeça baixa, fazendo força; o arado vem atrás, ligado pelos tirantes. Folha pedida em duas fileiras de 4 (3 por 2) para o desenho sair maior; ampliada 1,07 vez."
+  },
+  "animal/boi/parado-costas": {
+   "pedido": "boi-parado-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente. De costas o arado fica em primeiro plano, abaixo dos cascos: a figura inteira tem 358 pontos e o apoio fica no chão sob o corpo do boi (--chao 0.19 --apoio-dx 50), não na ponta do arado. Tamanho pela massa 226."
   }
  },
  "geral": [

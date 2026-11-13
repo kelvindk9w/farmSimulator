@@ -23,7 +23,7 @@
 //   --molde-quadro k|ref  quadro de partida do molde (padrão 1; "ref" usa a figura de referência)
 //   --faixa-pes f         faixa de baixo do quadro de partida que dá o meio dos pés (padrão 0.08; bichos de 4 patas: 0.25)
 //   --chao f              quanto o ponto de apoio fica acima do ponto mais baixo, em fração da altura (padrão 0.035)
-//   --apoio-dx n          desloca o ponto de apoio na horizontal, em pontos de saída (padrão: calculado)
+//   --apoio-dx n          desloca o ponto de apoio na horizontal, em pontos de saída (no ciclo, a partir do eixo; no molde, a partir do meio dos pés)
 //   --qps n  --laco sim|nao     vão para o catálogo (padrão 10 e sim)
 //   --sequencia 1,1,2,3   monta a folha final repetindo ou reordenando quadros (a piscada só de vez em quando)
 //   --altura-fonte n      altura da figura em pé na folha crua, quando não há referência nem serve o quadro mais alto
@@ -325,6 +325,7 @@ async function principal() {
     if (!part) throw new Error('quadro de partida do molde não existe');
     const pes = caixa(part, 1 - Number(o['faixa-pes'] || 0.08), 1);
     part.ax = (pes.x0 + pes.x1) / 2; part.by = part.ty0 + part.th;
+    if (o['apoio-dx'] !== undefined) part.ax += Number(o['apoio-dx']) / esc; // figura com apetrecho (arado, carroça): leva o apoio para baixo do bicho
     const cx = caixa(part, fa, fb), molde = { w: cx.x1 - cx.x0, h: cx.y1 - cx.y0, px: new Uint8ClampedArray((cx.x1 - cx.x0) * (cx.y1 - cx.y0) * 4) };
     for (let y = 0; y < molde.h; y++) for (let x = 0; x < molde.w; x++) for (let c = 0; c < 4; c++) molde.px[(y * molde.w + x) * 4 + c] = part.px[((y + cx.y0) * part.w + x + cx.x0) * 4 + c];
     for (const f of quadros) {

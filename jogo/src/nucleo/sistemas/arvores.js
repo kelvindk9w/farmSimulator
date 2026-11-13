@@ -43,6 +43,10 @@ export function esperaDaArvore(m, e) {
   if (safrasProntas(m, e) > 0) return 0;
   return (Math.max(adulta, e.colhida || 0) + a.safraSeg * 1000 - m.agora) / 1000;
 }
+// segundos até haver fruta para colher (0 = já tem)
+export function esperaDaFruta(m, e) {
+  return safrasProntas(m, e) > 0 ? 0 : Math.max(0, (Math.max(adultaEm(m, e), e.colhida || 0) + def(m, e).safraSeg * 1000 - m.agora) / 1000);
+}
 export const arvoresDe = (m) => m.arvores.todas;
 
 // ---------- onde dá para plantar ----------
@@ -260,7 +264,7 @@ registrarGuia('colheu', (m, f, out) => {
   let perto = null, melhor = Infinity, espera = Infinity;
   for (const e of m.arvores.todas) {
     if (e.arvore !== a.id) continue;
-    if (safrasProntas(m, e) > 0) { const d = Math.hypot(e.x - p.x, e.z - p.z); if (d < melhor && !colheitaNaFila(m, e.id)) { melhor = d; perto = e; } } else espera = Math.min(espera, esperaDaArvore(m, e));
+    if (safrasProntas(m, e) > 0) { const d = Math.hypot(e.x - p.x, e.z - p.z); if (d < melhor && !colheitaNaFila(m, e.id)) { melhor = d; perto = e; } } else espera = Math.min(espera, esperaDaFruta(m, e));
   }
   if (perto) {
     if (espacoNoCesto(m) - frutaPrometida(m) < a.rende) { out.tipo = 'entidade'; out.id = 'banca'; return out; }

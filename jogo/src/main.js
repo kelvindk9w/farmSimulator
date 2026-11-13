@@ -27,6 +27,7 @@ import { prepararAvisos, avisar, avisosNaTela, avisosEmEspera } from './ui/aviso
 import { prepararSubida, subidaAberta, fecharSubida } from './ui/subida.js';
 import { criarTutorial } from './ui/tutorial.js';
 import { ligarRetorno } from './ui/retorno.js';
+import { ligarFrentes } from './ui/ligacoes.js';
 import { prepararPaineis, abrirPainel, fecharPainel, painelAberto, atualizarPainel } from './ui/paineis/registro.js';
 import { ligarEntrada } from './entrada/index.js';
 import { foco } from './entrada/foco.js';
@@ -111,6 +112,7 @@ function comecar() {
   function instalar(m) {
     J.mundo = m;
     ligarRetorno(m, tutorial);
+    ligarFrentes(m, { tutorial, hud }); // o retorno de cada frente (ui/ligacoes.js: aoInstalarMundo)
     som.ouvir(m.eventos);
     const loc = m.local, p = m.personagem;
     cam.limites = [0, 0, loc.l, loc.p];

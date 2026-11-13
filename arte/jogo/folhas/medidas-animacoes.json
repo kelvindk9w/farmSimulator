@@ -1,4 +1,206 @@
 {
+ "animal/boi/parado-costas": {
+  "chave": "animal/boi/parado-costas",
+  "crua": "parado-costas.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 4,
+  "referencia": false,
+  "modo": "molde",
+  "emPe": 358,
+  "emPeReal": 358,
+  "emPeFonte": 472,
+  "escala": 0.7585,
+  "casa": [
+   432,
+   392
+  ],
+  "apoio": [
+   216,
+   312
+  ],
+  "quadros": 8,
+  "desenhos": 4,
+  "qps": 4,
+  "laco": true,
+  "alturas": [
+   358,
+   358,
+   366,
+   354
+  ],
+  "tamanhoPelaMassa": [
+   225.7,
+   227.1,
+   229.9,
+   224.6
+  ],
+  "variacaoAltura": 3.3,
+  "custosDoMolde": [
+   0,
+   49,
+   50,
+   35
+  ],
+  "bytes": 150470,
+  "avisos": [
+   "altura varia 3.3% entre quadros (358 358 366 354), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/boi/parado-costas",
+   "altura": "358",
+   "quadros": "4",
+   "qps": "4",
+   "alinhar": "molde",
+   "molde": "0.4-1",
+   "em-pe-quadro": "1",
+   "faixa-pes": "0.25",
+   "chao": "0.19",
+   "sequencia": "1,2,2,3,3,1,4,1",
+   "altura-livre": true,
+   "apoio-dx": "50"
+  }
+ },
+ "animal/boi/parado-frente": {
+  "chave": "animal/boi/parado-frente",
+  "crua": "parado-frente.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 4,
+  "referencia": false,
+  "modo": "molde",
+  "emPe": 290,
+  "emPeReal": 290,
+  "emPeFonte": 382,
+  "escala": 0.7592,
+  "casa": [
+   472,
+   320
+  ],
+  "apoio": [
+   236,
+   282
+  ],
+  "quadros": 8,
+  "desenhos": 4,
+  "qps": 4,
+  "laco": true,
+  "alturas": [
+   290,
+   290,
+   297,
+   288
+  ],
+  "tamanhoPelaMassa": [
+   227.4,
+   227.5,
+   230.4,
+   227.3
+  ],
+  "variacaoAltura": 3.1,
+  "custosDoMolde": [
+   0,
+   45,
+   96,
+   50
+  ],
+  "bytes": 151800,
+  "avisos": [
+   "altura varia 3.1% entre quadros (290 290 297 288), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/boi/parado-frente",
+   "altura": "290",
+   "quadros": "4",
+   "qps": "4",
+   "alinhar": "molde",
+   "molde": "0.4-1",
+   "em-pe-quadro": "1",
+   "faixa-pes": "0.25",
+   "chao": "0.09",
+   "sequencia": "1,2,2,3,3,1,4,1",
+   "altura-livre": true,
+   "apoio-dx": "-55"
+  }
+ },
+ "animal/boi/puxar-frente": {
+  "chave": "animal/boi/puxar-frente",
+  "crua": "puxar-frente.png",
+  "cruaTamanho": [
+   1536,
+   1024
+  ],
+  "linhasNaCrua": 2,
+  "figurasNaCrua": 8,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 290,
+  "emPeReal": 276,
+  "emPeFonte": 257,
+  "escala": 1.0721,
+  "casa": [
+   488,
+   296
+  ],
+  "apoio": [
+   244,
+   258
+  ],
+  "quadros": 8,
+  "desenhos": 8,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   276,
+   273,
+   272,
+   268,
+   276,
+   269,
+   261,
+   264
+  ],
+  "tamanhoPelaMassa": [
+   224.4,
+   227,
+   227.7,
+   226.6,
+   228.1,
+   228.5,
+   226.8,
+   226.5
+  ],
+  "variacaoAltura": 5.4,
+  "bytes": 263142,
+  "avisos": [
+   "a folha crua é menor que a saída (figura em pé com 257 pontos para 290): a figura foi ampliada 1.07 vezes",
+   "altura varia 5.4% entre quadros (276 273 272 268 276 269 261 264), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/boi/puxar-frente",
+   "altura": "290",
+   "quadros": "8",
+   "qps": "8",
+   "eixo": "massa",
+   "base": "linha",
+   "chao": "0.09",
+   "tamanho-massa": "227",
+   "altura-livre": true,
+   "apoio-dx": "-20"
+  }
+ },
  "animal/galinha/andar-costas": {
   "chave": "animal/galinha/andar-costas",
   "crua": "andar-costas.png",
