@@ -74,11 +74,12 @@ export const CSS_HUD = `
 #ui .balao.avulsa::before{background:#fff2c2}
 #ui .balao{isolation:isolate}
 
-/* ---------- o aviso curto (no alto, entre as pílulas e o balão) ---------- */
-#ui .avisos{top:calc(max(6px,env(safe-area-inset-top)) + 47px);left:214px;right:8px;gap:4px}
+/* ---------- o aviso curto (no alto, debaixo das duas fileiras de pílulas e ao lado do balão) ----------
+   (a segunda fileira muda de largura: "no poço", o fôlego, a carroça... então o aviso fica abaixo dela, e não ao lado) */
+#ui .avisos{top:calc(max(6px,env(safe-area-inset-top)) + 94px);left:8px;right:8px;gap:4px}
 #ui:has(.balao:not(.esq):not([hidden])) .avisos{right:calc(min(276px,34%) + 16px)}
 #ui:has(.balao:not(.esq):not(.pequeno):not([hidden])) .avisos{right:calc(min(330px,40%) + 16px)}
-#ui:has(.chip.folego:not([hidden])) .avisos,#ui:has(.chip.trab-carga:not([hidden])) .avisos,#ui:has(.chip.trab-agua:not([hidden])) .avisos{top:calc(max(6px,env(safe-area-inset-top)) + 94px)}
+#ui:has(.balao.esq:not([hidden])) .avisos{left:calc(min(330px,40%) + 16px)}
 body.com-painel #ui .avisos{top:max(6px,env(safe-area-inset-top));left:0;right:0}
 #ui .aviso{${mold('aviso', '14.3px 15px 14px 15px')}min-height:29px;border-width:4px 6px;padding:0 8px 0 3px;display:flex;align-items:center;gap:5px;max-width:100%;font-size:16px;font-weight:800;line-height:1.15;text-align:left;border-radius:15px}
 #ui .aviso canvas.ic{flex:none}
@@ -125,9 +126,12 @@ body.grande #ui .bt.agir>canvas.ic{width:62px!important;height:62px!important}
 body.grande #ui .alavanca{width:132px;height:134px}
 body.grande #ui .alavanca.solta{margin:-67px 0 0 -66px}
 
-/* o tutorial: um anel que pulsa em volta do botão (só opacidade e escala: leve para o celular) */
-#ui .alvo-tutorial{animation:none;position:relative}
-#ui .alvo-tutorial::after{content:'';position:absolute;inset:-7px;border-radius:20px;border:4px solid #ffb02e;box-shadow:0 0 10px 2px rgba(255,176,46,.8);pointer-events:none;animation:alvo-anel .7s ease-in-out infinite alternate;z-index:3}
-@keyframes alvo-anel{from{opacity:.25;transform:scale(.97)}to{opacity:1;transform:scale(1.03)}}
-#ui .bt.agir.alvo-tutorial::after,#ui .alavanca.alvo-tutorial::after{border-radius:50%}
+/* o tutorial: um anel em volta do botão e um brilho que pulsa (só opacidade: leve para o celular). O anel é sombra,
+   e não uma peça para fora do botão: assim ele não conta como texto que "não cabe" no botão */
+#ui .alvo-tutorial:not(.agir):not(.alavanca):not(.fechar){position:relative} /* (os que já são absolutos ficam como estão) */
+#ui .alvo-tutorial{animation:none;isolation:isolate;box-shadow:0 0 0 3px #fff6d0,0 0 0 7px #ffb02e!important}
+/* (o brilho fica atrás do texto do botão: z-index -1 dentro do próprio botão) */
+#ui .alvo-tutorial::after{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:0 0 12px 9px rgba(255,176,46,.85);pointer-events:none;animation:alvo-anel .7s ease-in-out infinite alternate;z-index:-1}
+@keyframes alvo-anel{from{opacity:.15}to{opacity:1}}
+#ui .bt.agir.alvo-tutorial,#ui .alavanca.alvo-tutorial,#ui .bt.agir.alvo-tutorial::after,#ui .alavanca.alvo-tutorial::after{border-radius:50%}
 `;

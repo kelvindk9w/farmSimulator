@@ -131,14 +131,14 @@ try {
   e = await estado(pg);
   const dia1 = (await P(pg, 'diaria')).dias[0].recompensa;
   confere(Object.keys(dia1.itens).every((k) => (e.bolsa[k] || 0) + (e.celeiro[k] || 0) > (antes1.bolsa[k] || 0) + (antes1.celeiro[k] || 0)) || e.ouro > antes1.ouro || e.cash > antes1.cash, 'o presente do dia 1 entra nas posses');
-  confere(await J(pg, () => document.querySelector('.topo-dir [data-k="correio"]').hidden), 'aberto o presente, a caixa de correio some do HUD');
+  confere(await J(pg, () => { const b = document.querySelector('.topo-dir [data-k="correio"]'); return !b.hidden && b.querySelector('.ponto').hidden; }), 'aberto o presente, a caixa de correio fica, sem a bolinha de novidade');
   confere(!(await J(pg, () => window.__jogo.comando({ tipo: 'abrirPresente' }).ok)), 'o presente de hoje não abre duas vezes');
 
   // ---- "Minha fazenda" e o painel do presente do dia
   await clicarEm('.topo-dir [data-painel="fazenda"]');
   igual(await J(pg, () => window.__jogo.painelAberto()), 'fazenda', 'o botão do HUD abre "Minha fazenda"');
   confere(await semVazar(pg), 'o painel "Minha fazenda" tem conteúdo e não vaza para os lados');
-  igual(await J(pg, () => document.querySelectorAll('.atalhos .atalho').length), 6, '"Minha fazenda" tem os seis atalhos');
+  igual(await J(pg, () => document.querySelectorAll('.atalhos .atalho').length), 7, '"Minha fazenda" tem os sete atalhos (Terras saiu da loja e veio para cá)');
   await foto(pg, 'd-02-minha-fazenda.jpg');
   // setas e Enter: o foco anda pelos atalhos e abre o escolhido
   await J(pg, () => document.querySelector('[data-k="ir-conquistas"]').focus());
@@ -228,7 +228,7 @@ try {
   const cashAmigo = (await estado(pg)).cash;
   await clicarEm('[data-k="simular-amigo"]');
   igual((await P(pg, 'amigos')).aReceber, 1, 'o amigo simulado deixa um presente esperando');
-  confere(await J(pg, () => !document.querySelector('.topo-dir [data-k="correio"]').hidden), 'com o presente do amigo, a caixa de correio volta ao HUD');
+  confere(await J(pg, () => !document.querySelector('.topo-dir [data-k="correio"] .ponto').hidden), 'com o presente do amigo, a bolinha de novidade volta à caixa de correio');
   igual((await estado(pg)).cash, cashAmigo, 'o presente do amigo não entra sozinho nas posses');
   await clicarEm('[data-k="receber-amigo"]');
   await recompensa('amigo', null, /amigo/i);
@@ -430,7 +430,61 @@ try {
   });
   confere(sobre.length === 0, 'celular, HUD com a caixa de correio e "Minha fazenda": ' + sobre.join('; '));
   await foto(pg, 'd-20-celular-hud.jpg');
-  // a recompensa no celular: cabe na tela, o toque no botão fecha
+
+  // ---- o Menu do celular: só Mochila, Loja, Construir e Menu à vista; a lista abre, escolhe, fecha; a bolinha
+  const vistos = await J(pg, () => [...document.querySelectorAll('.topo-dir > button')].filter((b) => !b.hidden && b.offsetParent).map((b) => b.dataset.painel || b.dataset.k).sort().join(','));
+  igual(vistos, 'construir,loja,menu,mochila', 'no celular deitado o alto direito mostra só Mochila, Loja, Construir e Menu');
+  const menuLista = () => J(pg, () => {
+    const l = document.getElementById('menu-lista'), bm = document.querySelector('[data-k="menu"]');
+    const itens = l ? [...l.querySelectorAll('button')].filter((b) => !b.hidden && b.offsetParent) : [];
+    const rs = itens.map((b) => b.getBoundingClientRect());
+    let encostam = 0;
+    for (let i = 0; i < rs.length; i++) for (let k = i + 1; k < rs.length; k++) { const a = rs[i], b = rs[k]; if (a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1) encostam++; }
+    return { aberta: document.querySelector('.topo-dir').classList.contains('menu-aberto'), visivel: !!l && !!l.offsetParent, expandido: bm.getAttribute('aria-expanded'), itens: itens.map((b) => b.dataset.painel || b.dataset.k), encostam, pontoMenu: !bm.querySelector('.ponto').hidden, pontoDentro: !!l.querySelector('.ponto:not([hidden])'), foco: document.activeElement ? document.activeElement.dataset.painel || document.activeElement.dataset.k || '' : '', focoNaLista: l.contains(document.activeElement) };
+  });
+  let ml = await menuLista();
+  confere(!ml.aberta && !ml.visivel && ml.expandido === 'false', 'a lista do Menu começa fechada');
+  confere(ml.pontoMenu && ml.pontoDentro, 'com o presente do dia no correio, o Menu mostra a bolinha de novidade');
+  await tocar('[data-k="menu"]');
+  ml = await menuLista();
+  confere(ml.aberta && ml.visivel && ml.expandido === 'true', 'o toque no Menu abre a lista');
+  confere(['correio', 'missoes', 'fazenda', 'config'].every((k) => ml.itens.includes(k)), `a lista tem Correio, Missões, Minha fazenda e Configurações (veio ${ml.itens.join(', ')})`);
+  igual(ml.encostam, 0, 'os itens da lista do Menu não encostam uns nos outros');
+  confere(await cabe(pg, '#menu-lista'), 'a lista do Menu cabe na tela');
+  ruins = await pequenos(pg);
+  confere(ruins.length === 0, 'celular, lista do Menu: ' + ruins.slice(0, 4).join('; '));
+  await foto(pg, 'd-20b-celular-menu.jpg');
+  // a seta do tutorial: com a lista fechada, um alvo lá dentro vira o Menu; aberta, o próprio item
+  confere(await J(pg, () => { const h = window.__jogo.hud, b = h.paineis.missoes; return h.alvo(b) === b; }), 'com a lista aberta, a seta aponta o próprio item');
+  await dedo(cdp, 420, 250);
+  ml = await menuLista();
+  confere(!ml.aberta && !ml.visivel, 'tocar fora fecha a lista do Menu');
+  confere(await J(pg, () => { const h = window.__jogo.hud; return h.alvo(h.paineis.missoes) === h.menu.botao && h.alvo(h.paineis.loja) === h.paineis.loja; }), 'com a lista fechada, a seta para Missões aponta o Menu (e a da Loja, que está à vista, a própria Loja)');
+  await tocar('[data-k="menu"]');
+  await tocar('#menu-lista [data-painel="missoes"]');
+  igual(await J(pg, () => window.__jogo.painelAberto()), 'missoes', 'escolher "Missões" na lista abre o painel');
+  confere(!(await menuLista()).aberta, 'escolhido o item, a lista fecha');
+  await tocar('.veu .fechar');
+  // teclado (e controle, que usa o mesmo foco): Tab entra nos botões, Enter no Menu abre com o foco no primeiro item,
+  // as setas andam só na lista, Esc fecha e devolve o foco ao Menu
+  await pg.keyboard.press('Tab');
+  await J(pg, () => document.querySelector('[data-k="menu"]').focus());
+  await pg.keyboard.press('Enter'); await esperar(80);
+  ml = await menuLista();
+  confere(ml.aberta && ml.focoNaLista, `Enter no Menu abre a lista com o foco nela (foco em "${ml.foco}")`);
+  const primeiro = ml.foco;
+  await pg.keyboard.press('ArrowDown'); await esperar(50);
+  ml = await menuLista();
+  confere(ml.focoNaLista && ml.foco !== primeiro, `a seta para baixo anda na lista (de "${primeiro}" para "${ml.foco}")`);
+  await pg.keyboard.press('ArrowUp'); await pg.keyboard.press('ArrowUp'); await pg.keyboard.press('ArrowRight'); await esperar(50);
+  confere((await menuLista()).focoNaLista, 'com a lista aberta, as setas não saem dela');
+  confere(await J(pg, () => { const e = document.activeElement, cs = e && getComputedStyle(e); return !!cs && (cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) >= 2 || cs.boxShadow !== 'none'); }), 'o item com o foco aparece marcado');
+  await pg.keyboard.press('Escape'); await esperar(80);
+  ml = await menuLista();
+  confere(!ml.aberta && ml.foco === 'menu', 'Esc fecha a lista e devolve o foco ao Menu');
+  await pg.keyboard.press('Escape'); await esperar(50);
+  // a recompensa no celular (pelo correio, dentro do Menu): cabe na tela, o toque no botão fecha
+  await tocar('[data-k="menu"]');
   await tocar('.topo-dir [data-k="correio"]');
   await esperar(1500);
   confere(await J(pg, () => !!document.querySelector('.subida.recompensa.tipo-presente')), 'no celular, o toque na caixa de correio abre o presente');
@@ -440,11 +494,14 @@ try {
   await pg.screenshot({ path: path.join(capturas, 'd-21-celular-recompensa.jpg'), type: 'jpeg', quality: 84 });
   await tocar('.recompensa [data-k="continuar"]');
   confere(!(await J(pg, () => window.__jogo.subidaAberta())), 'no celular, o toque em "Receber" fecha a recompensa');
+  ml = await menuLista();
+  igual(ml.pontoMenu, ml.pontoDentro, 'a bolinha do Menu acompanha as bolinhas de dentro da lista');
   // para as fotos do celular: três dias de presente (a conquista fica pronta), cash e um amigo esperando
   await J(pg, (DIA) => { const j = window.__jogo; j.pular(DIA); j.comando({ tipo: 'abrirPresente' }); j.pular(DIA); j.comando({ tipo: 'abrirPresente' }); j.pular(DIA); j.comando({ tipo: 'comprarCash', pacote: j.dados.bruto.loja.cash.pacotes[1].id }); j.comando({ tipo: 'amigoChegou', codigo: 'amigo1' }); j.comando({ tipo: 'nomearFazenda', nome: 'Sítio Boa Vista' }); }, DIA);
   for (let k = 0; k < 6 && (await J(pg, () => window.__jogo.subidaAberta())); k++) { await pg.keyboard.press('Enter'); await esperar(100); }
   await desenhar(pg);
   // cada painel: abre pelo toque, cabe na tela, não vaza, nada pequeno demais
+  await tocar('[data-k="menu"]');
   await tocar('.topo-dir [data-painel="fazenda"]');
   const paineis = [['fazenda', null, 'd-22-celular-minha-fazenda.jpg'], ['conquistas', 'ir-conquistas', 'd-23-celular-conquistas.jpg'], ['presentes', 'ir-presentes', 'd-24-celular-presente-do-dia.jpg'], ['amigos', 'ir-amigos', 'd-25-celular-amigos.jpg'], ['cash', 'ir-cash', 'd-26-celular-loja-de-cash.jpg'], ['guarda-roupa', 'ir-guarda-roupa', 'd-27-celular-guarda-roupa.jpg'], ['caderno', 'ir-caderno', 'd-28-celular-caderno.jpg']];
   for (const [id, atalho, arquivo] of paineis) {
