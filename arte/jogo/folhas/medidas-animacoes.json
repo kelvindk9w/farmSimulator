@@ -268,6 +268,134 @@
    "apoio-dx": "-20"
   }
  },
+ "animal/cachorro/parada-costas": {
+  "chave": "animal/cachorro/parada-costas",
+  "crua": "parada-costas.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 4,
+  "referencia": false,
+  "modo": "molde",
+  "emPe": 165,
+  "emPeReal": 165,
+  "emPeFonte": 601,
+  "escala": 0.2745,
+  "casa": [
+   144,
+   192
+  ],
+  "apoio": [
+   72,
+   165
+  ],
+  "quadros": 8,
+  "desenhos": 4,
+  "qps": 5,
+  "laco": true,
+  "alturas": [
+   165,
+   167,
+   169,
+   165
+  ],
+  "tamanhoPelaMassa": [
+   105.8,
+   106.8,
+   105.8,
+   105.9
+  ],
+  "variacaoAltura": 2.4,
+  "custosDoMolde": [
+   0,
+   16,
+   20,
+   27
+  ],
+  "bytes": 42403,
+  "avisos": [],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/cachorro/parada-costas",
+   "altura": "165",
+   "quadros": "4",
+   "qps": "5",
+   "alinhar": "molde",
+   "molde": "0.5-1",
+   "em-pe-quadro": "1",
+   "faixa-pes": "0.25",
+   "chao": "0.09",
+   "sequencia": "1,2,3,2,3,1,4,1",
+   "altura-livre": true
+  }
+ },
+ "animal/cachorro/parada-frente": {
+  "chave": "animal/cachorro/parada-frente",
+  "crua": "parada-frente.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 4,
+  "referencia": false,
+  "modo": "molde",
+  "emPe": 160,
+  "emPeReal": 160,
+  "emPeFonte": 582,
+  "escala": 0.2749,
+  "casa": [
+   136,
+   184
+  ],
+  "apoio": [
+   68,
+   158
+  ],
+  "quadros": 8,
+  "desenhos": 4,
+  "qps": 5,
+  "laco": true,
+  "alturas": [
+   160,
+   164,
+   164,
+   161
+  ],
+  "tamanhoPelaMassa": [
+   106.2,
+   106.5,
+   105.8,
+   105.9
+  ],
+  "variacaoAltura": 2.5,
+  "custosDoMolde": [
+   0,
+   13,
+   51,
+   27
+  ],
+  "bytes": 43188,
+  "avisos": [],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/cachorro/parada-frente",
+   "altura": "160",
+   "quadros": "4",
+   "qps": "5",
+   "alinhar": "molde",
+   "molde": "0.5-1",
+   "em-pe-quadro": "1",
+   "faixa-pes": "0.25",
+   "chao": "0.09",
+   "sequencia": "1,2,3,2,3,1,4,1",
+   "altura-livre": true
+  }
+ },
  "animal/cavalo/andar-costas": {
   "chave": "animal/cavalo/andar-costas",
   "crua": "andar-costas.png",

@@ -143,7 +143,7 @@ T.animais = {
   volta: (prontos, semTrato) => {
     const partes = [];
     if (prontos.length) partes.push(`Os bichos trabalharam: ${prontos.join(', ')} esperando você.`);
-    if (semTrato.length) partes.push(`${semTrato.join(' e ')} ${semTrato.length > 1 ? 'estão' : 'está'} sem comida ou sem água.`);
+    if (semTrato.length) partes.push(`${semTrato.map((n, k) => (k ? o(n) : O(n))).join(' e ')} ${semTrato.length > 1 ? 'estão' : 'está'} sem comida ou sem água.`);
     return partes.join(' ');
   },
   esperando: (d, D, n) => jeitoDe(d, D).conta(n),

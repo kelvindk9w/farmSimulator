@@ -5,6 +5,8 @@
     "animal/boi/parado-frente": { "arquivo": "animais/boi/parado-frente.png", "quadros": 8, "casa": [472, 320], "apoio": [236, 282], "qps": 4, "laco": true },
     "animal/boi/puxar-costas": { "arquivo": "animais/boi/puxar-costas.png", "quadros": 8, "casa": [448, 376], "apoio": [224, 296], "qps": 8, "laco": true },
     "animal/boi/puxar-frente": { "arquivo": "animais/boi/puxar-frente.png", "quadros": 8, "casa": [488, 296], "apoio": [244, 258], "qps": 8, "laco": true },
+    "animal/cachorro/parada-costas": { "arquivo": "animais/cachorro/parada-costas.png", "quadros": 8, "casa": [144, 192], "apoio": [72, 165], "qps": 5, "laco": true },
+    "animal/cachorro/parada-frente": { "arquivo": "animais/cachorro/parada-frente.png", "quadros": 8, "casa": [136, 184], "apoio": [68, 158], "qps": 5, "laco": true },
     "animal/cavalo-mangalarga/andar-costas": { "arquivo": "animais/cavalo-mangalarga/andar-costas.png", "quadros": 8, "casa": [288, 376], "apoio": [144, 332], "qps": 8, "laco": true },
     "animal/cavalo-mangalarga/andar-frente": { "arquivo": "animais/cavalo-mangalarga/andar-frente.png", "quadros": 8, "casa": [352, 352], "apoio": [176, 310], "qps": 8, "laco": true },
     "animal/cavalo-mangalarga/galope-costas": { "arquivo": "animais/cavalo-mangalarga/galope-costas.png", "quadros": 8, "casa": [392, 344], "apoio": [196, 300], "qps": 12, "laco": true },

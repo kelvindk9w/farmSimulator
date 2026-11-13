@@ -20,7 +20,7 @@ COR_DA_ACAO.entrarNoCeleiro = '#f6e3b5';
 //   cursor = só uma casa marcada, sem figura (modo de arrumar: escolher o que mudar)
 export const FANTASMA = { ligado: false, id: '', x: 0, z: 0, giro: 0, ok: false, ruins: [], nRuins: 0, mudando: null, cursor: false, local: '' };
 
-const VERDE = '#7be05a', VERMELHO = '#ff6a4d', MADEIRA = '#c98a45', MADEIRA_CLARA = '#e6b473';
+const VERDE = '#3fe24a', VERMELHO = '#ff4a36', MADEIRA = '#c98a45', MADEIRA_CLARA = '#e6b473';
 const caixa = [0, 0, 0, 0];
 const CHAVE = {};
 const chaveDe = (id) => CHAVE[id] || (CHAVE[id] = 'objeto/' + id);
@@ -250,12 +250,13 @@ registrarCamada('chao', (g, cam, m, S, cena) => {
     let ruim = !F.ok && F.nRuins === 0;
     for (let k = 0; k < F.nRuins && !ruim; k++) if (F.ruins[k * 2] === x && F.ruins[k * 2 + 1] === z) ruim = true;
     g.beginPath(); base(g, cam, x, z, 1, 1, 0.04);
-    g.globalAlpha = F.cursor ? 0.25 : 0.5 + 0.12 * pulso; g.fillStyle = F.cursor ? '#ffe07a' : ruim ? VERMELHO : VERDE; g.fill();
+    g.globalAlpha = F.cursor ? 0.25 : 0.62 + 0.14 * pulso; g.fillStyle = F.cursor ? '#ffe07a' : ruim ? VERMELHO : VERDE; g.fill();
     g.globalAlpha = 1;
   }
-  g.beginPath(); base(g, cam, F.x, F.z, cs[0], cs[1], 0.02);
-  g.lineWidth = Math.max(3, 0.08 * S); g.strokeStyle = 'rgba(58,36,18,.7)'; g.stroke();
-  g.lineWidth = Math.max(1.5, 0.045 * S); g.strokeStyle = F.cursor ? '#ffe07a' : F.ok ? '#eaffd8' : '#ffd9d0'; g.stroke();
+  // o contorno da base passa um pouco das casas, para aparecer mesmo com a figura por cima
+  g.beginPath(); base(g, cam, F.x, F.z, cs[0], cs[1], -0.07);
+  g.lineWidth = Math.max(4, 0.13 * S); g.strokeStyle = 'rgba(58,36,18,.75)'; g.stroke();
+  g.lineWidth = Math.max(2, 0.07 * S); g.strokeStyle = F.cursor ? '#ffe07a' : F.ok ? '#a9ff6e' : '#ff9a85'; g.stroke();
 });
 
 // ---------- por cima: o fantasma, a barra das obras e a seta da saída ----------

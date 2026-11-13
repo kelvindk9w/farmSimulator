@@ -90,7 +90,7 @@ function assentar(m, b) {
   // não há chão livre em volta (abrigo todo cercado): fica na frente da base, só para não sumir
   b.x = b.ax = e.x + e.l * (0.25 + 0.5 * r(b)); b.z = b.az = e.z + e.p + 0.3; b.fora = true;
 }
-function parar(b, atlas) {
+function parar(b) {
   const D = b.distracoes, p = b.j.pausa;
   b.estado = D.length && r(b) < 0.55 ? D[Math.floor(r(b) * D.length)] : 'parada';
   b.t = p[0] + r(b) * (p[1] - p[0]);

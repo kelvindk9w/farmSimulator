@@ -428,6 +428,56 @@
    "pedido": "jumento-andar-barril-costas.md",
    "rodadas": 1,
    "nota": "A mesma folha do andar de costas com o barril em pé na carroça; mesmos quadros, tamanho e apoio da carroça vazia. A madeira saiu um tom mais alaranjada que na carroça vazia."
+  },
+  "animal/cavalo-mangalarga/parado-frente": {
+   "pedido": "recolorida de animal/cavalo/parado-frente",
+   "rodadas": 1,
+   "nota": "Mesmo desenho do cavalo comum com a pelagem baia (dourada) no lugar da alazã, por código (jogo/tools/arte/recolorir.mjs --receita mangalarga); crina, rabo, meias e arreios iguais; mesma casa e apoio."
+  },
+  "animal/cavalo-mangalarga/parado-costas": {
+   "pedido": "recolorida de animal/cavalo/parado-costas",
+   "rodadas": 1,
+   "nota": "Mesmo desenho do cavalo comum com a pelagem baia (dourada) no lugar da alazã, por código (jogo/tools/arte/recolorir.mjs --receita mangalarga); crina, rabo, meias e arreios iguais; mesma casa e apoio."
+  },
+  "animal/cavalo-mangalarga/andar-frente": {
+   "pedido": "recolorida de animal/cavalo/andar-frente",
+   "rodadas": 1,
+   "nota": "Mesmo desenho do cavalo comum com a pelagem baia (dourada) no lugar da alazã, por código (jogo/tools/arte/recolorir.mjs --receita mangalarga); crina, rabo, meias e arreios iguais; mesma casa e apoio."
+  },
+  "animal/cavalo-mangalarga/andar-costas": {
+   "pedido": "recolorida de animal/cavalo/andar-costas",
+   "rodadas": 1,
+   "nota": "Mesmo desenho do cavalo comum com a pelagem baia (dourada) no lugar da alazã, por código (jogo/tools/arte/recolorir.mjs --receita mangalarga); crina, rabo, meias e arreios iguais; mesma casa e apoio."
+  },
+  "animal/cavalo-mangalarga/galope-frente": {
+   "pedido": "recolorida de animal/cavalo/galope-frente",
+   "rodadas": 1,
+   "nota": "Mesmo desenho do cavalo comum com a pelagem baia (dourada) no lugar da alazã, por código (jogo/tools/arte/recolorir.mjs --receita mangalarga); crina, rabo, meias e arreios iguais; mesma casa e apoio."
+  },
+  "animal/cavalo-mangalarga/galope-costas": {
+   "pedido": "recolorida de animal/cavalo/galope-costas",
+   "rodadas": 1,
+   "nota": "Mesmo desenho do cavalo comum com a pelagem baia (dourada) no lugar da alazã, por código (jogo/tools/arte/recolorir.mjs --receita mangalarga); crina, rabo, meias e arreios iguais; mesma casa e apoio."
+  },
+  "personagem/montada-mangalarga-andar-frente": {
+   "pedido": "recolorida de personagem/montada-andar-frente",
+   "rodadas": 1,
+   "nota": "A mesma folha da montada com o cavalo de pelagem baia (dourada), por código (recolorir.mjs --receita mangalarga); a personagem, a sela e as botas não mudam; mesma casa e apoio."
+  },
+  "personagem/montada-mangalarga-andar-costas": {
+   "pedido": "recolorida de personagem/montada-andar-costas",
+   "rodadas": 1,
+   "nota": "A mesma folha da montada com o cavalo de pelagem baia (dourada), por código (recolorir.mjs --receita mangalarga); a personagem, a sela e as botas não mudam; mesma casa e apoio."
+  },
+  "personagem/montada-mangalarga-galope-frente": {
+   "pedido": "recolorida de personagem/montada-galope-frente",
+   "rodadas": 1,
+   "nota": "A mesma folha da montada com o cavalo de pelagem baia (dourada), por código (recolorir.mjs --receita mangalarga); a personagem, a sela e as botas não mudam; mesma casa e apoio."
+  },
+  "personagem/montada-mangalarga-galope-costas": {
+   "pedido": "recolorida de personagem/montada-galope-costas",
+   "rodadas": 1,
+   "nota": "A mesma folha da montada com o cavalo de pelagem baia (dourada), por código (recolorir.mjs --receita mangalarga); a personagem, a sela e as botas não mudam; mesma casa e apoio."
   }
  },
  "geral": [
@@ -435,6 +485,7 @@
   "No andar, o chão de cada quadro é a média entre o ponto mais baixo do quadro e o da folha inteira (`--base 0.5`): guarda o sobe e desce que o Codex desenhou sem deixar os pés longe do chão.",
   "O tamanho da figura entre folhas é conferido pela área do lenço vermelho (coluna tamanho pela cor de `medidas-animacoes.json`): na folha de modelo, com 294 pontos de altura, dá 47,5 de frente e 48,7 de costas. Com `--tamanho-cor`, a escala é a média entre a da altura e a do lenço, para nem a altura nem a cabeça destoarem de uma folha para a outra. Quando a vista muda (mais de costas, cabeça baixa), o lenço engana e vale só a altura.",
   "Bichos: a galinha tem 129 pontos de altura (0,88 unidade de `escala.json`, na mesma proporção que dá 294 pontos à personagem de 2,0 unidades). A vaca tem 226 pontos até o lombo (1,54 unidade); como de frente três quartos a figura inteira (chifres até o casco mais baixo) mede 1,21 vez isso, a figura de frente tem 273 pontos e a de costas 297.",
-  "Ponto de apoio dos bichos: o meio das patas. Na vaca fica 9% da altura acima do casco mais baixo (as quatro patas se espalham na tela por causa da câmera); na galinha, 5%."
+  "Ponto de apoio dos bichos: o meio das patas. Na vaca fica 9% da altura acima do casco mais baixo (as quatro patas se espalham na tela por causa da câmera); na galinha, 5%.",
+  "Bichos especiais (cão boiadeiro, gato siamês, cavalo mangalarga): feitos por recoloração das folhas do bicho comum com `node jogo/tools/arte/recolorir.mjs --de <chave> --para <chave> --receita <nome>`. A ferramenta divide a figura em regiões pelo traço, classifica cada região pela cor e troca só a pelagem, guiada pela claridade; casa, apoio e quadros ficam iguais. Se a folha do bicho comum for refeita, rode a recoloração de novo."
  ]
 }
