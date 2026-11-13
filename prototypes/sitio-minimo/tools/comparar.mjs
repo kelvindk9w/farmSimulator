@@ -2,7 +2,7 @@
 // diante (canteiro 1 com sementes, canteiro 2 com milho pronto, ovo no ninho, leite pronto, personagem ao lado do milho),
 // fotografa sem a interface e monta um lado a lado: o alvo à esquerda, o jogo à direita.
 // Uso: node tools/comparar.mjs <conjunto> <alvo.png> <saida.jpg|png> [escala do aparelho, padrão 2]
-//   A foto do jogo sozinha fica ao lado da saída, com o sufixo "-jogo.png".
+//   A foto do jogo sozinha fica ao lado da saída, com o sufixo "-jogo" e o mesmo formato dela.
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { abrirNavegador, abrirPagina } from './comum.mjs';
@@ -41,8 +41,8 @@ try {
   console.log(`conjunto "${conjunto}": ${est.chamadas} chamadas de desenho, ${est.triangulos} triângulos; erros no console: ${erros.length}${erros.length ? '\n' + erros.join('\n') : ''}`);
 } finally { await amb.fechar(); }
 
-const semExt = saida.replace(/\.[a-z]+$/i, '');
-await sharp(foto).png().toFile(semExt + '-jogo.png');
+const jpeg = /\.jpe?g$/i.test(saida), soJogo = saida.replace(/\.[a-z]+$/i, '') + '-jogo' + (jpeg ? '.jpg' : '.png');
+await (jpeg ? sharp(foto).jpeg({ quality: 88 }) : sharp(foto).png()).toFile(soJogo);
 const A = 941, FAIXA = 80, VAO = 24;
 const paineis = [[alvo, 'O alvo (imagem do Codex)'], [foto, `O jogo rodando (conjunto "${conjunto}")`]];
 const pecas = [];
@@ -54,5 +54,5 @@ for (const [img, rotulo] of paineis) {
   x += w + VAO;
 }
 const folha = sharp({ create: { width: x - VAO, height: A + FAIXA, channels: 3, background: '#fff8ec' } }).composite(pecas);
-await (/\.jpe?g$/i.test(saida) ? folha.jpeg({ quality: 88 }) : folha.png()).toFile(saida);
-console.log('gravou', path.relative(process.cwd(), saida), 'e', path.relative(process.cwd(), semExt + '-jogo.png'));
+await (jpeg ? folha.jpeg({ quality: 88 }) : folha.png()).toFile(saida);
+console.log('gravou', path.relative(process.cwd(), saida), 'e', path.relative(process.cwd(), soJogo));

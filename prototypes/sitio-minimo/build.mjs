@@ -1,6 +1,6 @@
-// Monta dist/: um único main.js (three + jogo + os dois conjuntos de arte) e o index.html.
+// Monta dist/: um único main.js (three + jogo + os conjuntos de arte) e o index.html.
 // Uso: node build.mjs            (ou: npm run build)
-// A saída só tem .html e .js: a hospedagem recusa .glb e descarta o que vem depois de "?".
+// A saída só tem .html, .js e as imagens .png dos conjuntos de arte: a hospedagem recusa .glb e descarta o que vem depois de "?".
 import { build } from 'esbuild';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -23,6 +23,11 @@ const r = await build({
 fs.copyFileSync(path.join(aqui, 'index.html'), path.join(dist, 'index.html'));
 // as imagens-alvo do botão "Ver alvo" (feitas por tools/alvos.mjs); só são baixadas quando alguém pede para ver
 if (fs.existsSync(path.join(aqui, 'alvos'))) fs.cpSync(path.join(aqui, 'alvos'), path.join(dist, 'alvos'), { recursive: true });
+// imagens de um conjunto de arte (src/arte/<conjunto>/publico/*.png) vão soltas para dist/: o jogo só baixa as do conjunto em uso
+for (const conjunto of fs.readdirSync(path.join(aqui, 'src/arte'))) {
+  const pasta = path.join(aqui, 'src/arte', conjunto, 'publico');
+  if (fs.existsSync(pasta)) for (const f of fs.readdirSync(pasta)) if (f.endsWith('.png')) fs.copyFileSync(path.join(pasta, f), path.join(dist, f));
+}
 
 let total = 0, gz = 0, br = 0;
 for (const f of fs.readdirSync(dist).sort().filter((f) => fs.statSync(path.join(dist, f)).isFile())) {

@@ -1,0 +1,77 @@
+{
+ "tamanho": 1024,
+ "casa": 256,
+ "margem": 16,
+ "texturas": {
+  "madeira": {
+   "c": 0,
+   "l": 0,
+   "cor": "#de7a2e"
+  },
+  "telha": {
+   "c": 1,
+   "l": 0,
+   "cor": "#e2502a"
+  },
+  "pedra": {
+   "c": 2,
+   "l": 0,
+   "cor": "#cfa884"
+  },
+  "palha": {
+   "c": 3,
+   "l": 0,
+   "cor": "#eca824"
+  },
+  "grama": {
+   "c": 0,
+   "l": 1,
+   "cor": "#97b820"
+  },
+  "areia": {
+   "c": 1,
+   "l": 1,
+   "cor": "#fbae5c"
+  },
+  "arada": {
+   "c": 2,
+   "l": 1,
+   "cor": "#a85428"
+  },
+  "folhagem": {
+   "c": 3,
+   "l": 1,
+   "cor": "#6f9c22"
+  },
+  "barranco": {
+   "c": 0,
+   "l": 2,
+   "cor": "#956c26"
+  },
+  "casca": {
+   "c": 1,
+   "l": 2,
+   "cor": "#b85c26"
+  },
+  "liso": {
+   "c": 2,
+   "l": 2,
+   "cor": "#f6f2ec"
+  },
+  "penugem": {
+   "c": 3,
+   "l": 2,
+   "cor": "#f4f0ea"
+  },
+  "tabua": {
+   "c": 0,
+   "l": 3,
+   "cor": "#d3d3d3"
+  },
+  "branco": {
+   "c": 1,
+   "l": 3,
+   "cor": "#ffffff"
+  }
+ }
+}

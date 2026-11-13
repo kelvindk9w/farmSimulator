@@ -1,0 +1,15 @@
+Crie uma única imagem quadrada de 1024 x 1024 px: atlas de quatro texturas pintadas à mão para aplicar em modelos 3D simples de um jogo original de fazenda. Use a imagem anexada somente como referência de paleta e pinceladas: repinte tudo do zero, sem copiar recortes da cena.
+
+Layout exato: quatro quadrados iguais de 512 x 512 px em grade 2 por 2, divisão vertical em x=512 e horizontal em y=512. Os quadrados encostam diretamente, sem margens, linhas, molduras, espaçamento ou fundo. Cada material preenche completamente seu quadrado até as quatro bordas.
+
+SUPERIOR ESQUERDO — GRAMA: vista exatamente de cima, verde-limão quente igual ao chão da referência, manchas largas de três tons de verde, pinceladas curtas visíveis e alguns pequenos tufos pintados esparsos. Distribuição sem direção preferida. Sem fios individuais de grama, flores, pedras ou terra.
+
+SUPERIOR DIREITO — TERRA BATIDA: vista exatamente de cima, areia alaranjada clara igual ao caminho da referência. Pinceladas largas, manchas suaves ligeiramente mais claras e escuras, poucas pedrinhas pequenas claras espalhadas. Sem grama e sem pegadas.
+
+INFERIOR ESQUERDO — TERRA ARADA: vista exatamente de cima, marrom-escuro quente igual aos canteiros da referência. Toda a área coberta por torrões arredondados gordinhos, encostados uns nos outros como paralelepípedos irregulares. Alto de cada torrão ligeiramente mais claro e frestas escuras estreitas ao redor, apenas variação pintada de cor. Sem plantas, sementes ou objetos.
+
+INFERIOR DIREITO — FOLHAGEM: superfície de copa de árvore vista de frente, inteiramente coberta de folhas largas arredondadas pintadas a pincel em cachos, como a laranjeira da referência. Três tons de verde: escuro no fundo, médio e claro amarelado nas pontas. Sem galhos, frutas ou céu entre as folhas.
+
+Estilo de todas: texturas de jogo pintadas à mão com cores ricas e quentes e pinceladas visíveis, consistentes com a referência. São mapas de cor de material chapados, ortogonais, sem perspectiva, sem inclinação ou diminuição à distância. Iluminação perfeitamente uniforme em cada quadrado: sem sombras projetadas, sem luz direcional, sem um lado mais claro que outro, sem brilho de sol, sem degradê de iluminação e sem vinheta. A variação local de cor descreve o material, sem luz ou sombra global. Cada quadrado individual deve repetir sem emendas como azulejo nas suas quatro bordas, com distribuição homogênea e sem detalhe único chamativo. Só materiais: sem objetos, bichos, pessoas, céu, texto, números, logotipo ou marca-d'água. Gere somente esta única folha.
+
+Retoque posterior: somente redimensionamento para 1024 x 1024 px com filtro Lanczos, sem outras alterações.
