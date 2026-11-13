@@ -16,7 +16,7 @@ import { raiz, lerDados, conferirDados } from './comum.mjs';
 import { X, Mundo, FORA, DESLIGADAS } from './bot/jogo.mjs';
 import { criarJogador, ocupada } from './bot/contexto.mjs';
 import { decidir, fazer } from './bot/decidir.mjs';
-import { criarMedidas, ouvir, relato, resumo } from './bot/medir.mjs';
+import { criarMedidas, ouvir, relato, resumo, esperaDeMaterial, relatoDoMaterial } from './bot/medir.mjs';
 
 const PERFIS = {
   direto: { nome: 'direto', sessoes: null, aproveitamento: 0.8, inicio: 8 },
@@ -88,6 +88,7 @@ function sessao(ate) {
     }
     try { m.passo(); } catch (e) { grave = `o jogo quebrou no passo ${m.n} (${(m.agora - T0) / 1000} s): ${e && e.stack ? e.stack.split('\n').slice(0, 4).join(' | ') : e}`; return false; }
     S.jogado += 1 / 60;
+    if (m.n % 60 === 0) esperaDeMaterial(m, S, rel);
     if (motivo && !ocupada(J)) {
       S.parado[motivo] = (S.parado[motivo] || 0) + 1 / 60;
       if (semOuro) { S.semOuro += 1 / 60; S.semOuroPor[semOuro] = (S.semOuroPor[semOuro] || 0) + 1 / 60; }
@@ -112,6 +113,7 @@ if (tem('resumo')) {
   const a = X.missoes ? X.missoes.missaoAtual(m) : null;
   const fim = a ? `missão no fim: ${a.missao.id} (${a.conta}/${a.n}${a.esperaNivel ? `, espera o nível ${a.esperaNivel}` : ''})${grave ? ' | O JOGO QUEBROU: ' + grave : ''}` : (grave ? 'O JOGO QUEBROU: ' + grave : 'missão no fim: nenhuma (cumpriu todas)');
   console.log(resumo(S, fim));
+  console.log(relatoDoMaterial(S));
 }
 else console.log(relato(J, S, cfg));
 const arqJson = arg('json', null);

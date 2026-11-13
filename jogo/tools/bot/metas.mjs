@@ -87,6 +87,18 @@ function custoDoQueFalta(J, itens) {
   return v;
 }
 
+// ---------- a espera de material (medida para o relato) ----------
+// A obra entra na conta quando ela a quer de verdade (o nível já deixa e a missão ou o investimento pediu); sai quando
+// todo o material está em mãos (bot.mjs confere a cada segundo, esperaDeMaterial em medir.mjs). Fica de fora a obra
+// sem material e a que já começou com tudo em mãos conta como espera zero.
+function querObra(J, chave, nome, itens) {
+  const E = J.S && J.S.material;
+  if (!E || !itens || !Object.keys(itens).length || E.feitas[chave] || E.abertas[chave]) return;
+  const faltam = {};
+  for (const k in itens) { const f = itens[k] - tem(J, k); if (f > 0) faltam[k] = f; }
+  E.abertas[chave] = { chave, nome, itens, nivel: nivel(J), desde: J.S.jogado, desdeRel: (J.m.agora - J.T0) / 1000, faltam };
+}
+
 // ---------- projetos ----------
 // construção: as exigidas antes, depois material, ouro e lugar. "prep" = ainda espera o nível: só junta material.
 export function projetoConstrucao(J, id, prep) {
@@ -97,6 +109,7 @@ export function projetoConstrucao(J, id, prep) {
   for (const ex of d.exige || []) if (!temPronta(J, ex)) return emObra(J, ex) ? nota(J, `obra de ${def(J, ex).nome.toLowerCase()}`) : projetoConstrucao(J, ex, prep);
   const espera = d.nivel > nivel(J);
   const custo = d.custo || {};
+  if (!espera && !prep) querObra(J, `${id}#${quantas(J, id)}`, d.nome, custo.itens);
   J.reserva = Math.max(J.reserva, (custo.ouro || 0) + custoDoQueFalta(J, custo.itens));
   J.reservaPara = d.nome;
   for (const k in custo.itens || {}) { const s = obter(J, k, custo.itens[k]); if (s) return s; }
@@ -113,6 +126,7 @@ export function projetoAmpliacao(J, e) {
   if (a.cash > 0 && !(a.custo && a.custo.ouro > 0)) return nota(J, `${d.nome}: a ampliação só sai com cash`);
   J.reserva = Math.max(J.reserva, (a.custo.ouro || 0) + custoDoQueFalta(J, a.custo.itens));
   J.reservaPara = `${d.nome} (${a.nome})`;
+  if (a.nivel <= nivel(J)) querObra(J, `${e.id}>${a.nome}`, `${d.nome} (${a.nome})`, a.custo.itens);
   for (const k in a.custo.itens || {}) { const s = obter(J, k, a.custo.itens[k]); if (s) return s; }
   if (a.nivel > nivel(J)) return nota(J, `${d.nome}: a ampliação pede o nível ${a.nivel}`);
   if (J.P.ouro < a.custo.ouro) return nota(J, `juntando ouro para ${a.nome.toLowerCase()} (${a.custo.ouro})`);
@@ -128,6 +142,7 @@ export function projetoReforma(J, de, prep) {
   const custo = r.custo || {};
   J.reserva = Math.max(J.reserva, (custo.ouro || 0) + custoDoQueFalta(J, custo.itens));
   J.reservaPara = r.nome;
+  if (!prep && r.nivel <= nivel(J)) querObra(J, 'reforma:' + de, r.nome, custo.itens);
   for (const k in custo.itens || {}) { const s = obter(J, k, custo.itens[k]); if (s) return s; }
   if (prep || r.nivel > nivel(J)) return nota(J, `${r.nome}: espera o nível ${r.nivel}`);
   if (J.P.ouro < (custo.ouro || 0)) return nota(J, `juntando ouro para ${r.nome.toLowerCase()} (${custo.ouro})`);

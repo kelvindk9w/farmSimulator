@@ -215,12 +215,11 @@ test('missões de pomar: "plantou" com a muda e "colheu" com a fruta valem, e o 
   let g = guiaDaMissao(m, {});
   assert.equal(g.tipo, 'painel'); assert.equal(g.painel, 'loja'); assert.equal(g.item, MUDA);
   m.posses.ouro = 100; m.comando({ tipo: 'comprar', item: MUDA });
-  g = guiaDaMissao(m, {}); assert.equal(g.tipo, 'modo'); assert.equal(g.modo, 'semear');
-  modo(m, 'semear', 'semente-rabanete');
+  // sem escolher modo: o guia pede a muda na mão (a vaga) e depois a casa; o toque na grama planta
   g = guiaDaMissao(m, {}); assert.equal(g.tipo, 'semente'); assert.equal(g.item, MUDA);
-  modo(m, 'semear', MUDA);
+  assert.equal(m.comando({ tipo: 'naMao', item: MUDA }).ok, true);
   g = guiaDaMissao(m, {}); assert.equal(g.tipo, 'casa');
-  tocar(m, g.x, g.z); ateParar(m);
+  assert.equal(m.comando({ tipo: 'agirNoAlvo', x: g.x, z: g.z }).ok, true); ateParar(m);
   assert.equal(ev.de('missaoConcluida')[0].id, 'pomar');
   g = guiaDaMissao(m, {}); assert.equal(g.tipo, 'esperar'); assert.ok(g.seg > 100);
   pular(m, 200); m.avancar(1);

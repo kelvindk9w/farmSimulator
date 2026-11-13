@@ -43,7 +43,8 @@ export function contarNaFila(m, acao, filtro) {
 }
 export const ocupada = (m) => { const p = m.personagem; return !!(p.acao || p.rota || p.fila.length || p.rumando); };
 
-function enfileirar(m, t) {
+// põe a tarefa no fim da fila (a repetida não entra de novo); { ok, repetida } ou { ok: false, motivo: 'fila-cheia' }
+export function enfileirar(m, t) {
   const p = m.personagem;
   if (mesma(p.tarefa, t) || p.fila.some((q) => mesma(q, t))) return { ok: true, repetida: true };
   if (p.fila.length >= m.dados.regras.filaMax) return { ok: false, motivo: 'fila-cheia' };
@@ -376,17 +377,18 @@ registrarSistema({
   comandos: {
     // toque numa casa: no modo ativo, enfileira a ação que couber; sem ação, anda até lá.
     // arrasto = true quando o dedo está pintando casas: aí nunca anda, só enfileira o que der.
+    // modo (opcional) = o modo deste toque, sem trocar o escolhido (o arrasto das ações por toque: sistemas/acoes.js)
     tocarCasa(m, c) {
-      const loc = m.local, x = Math.floor(c.x), z = Math.floor(c.z);
+      const loc = m.local, x = Math.floor(c.x), z = Math.floor(c.z), modo = MODOS[c.modo] || MODOS[m.modo.id];
       if (!loc.dentro(x, z)) return { ok: false, motivo: 'fora-do-mapa' };
       const e = loc.entidadeEm(x, z);
       // pintando com o dedo, as entidades ficam de fora, a não ser as que o modo diz que pinta (o mato, no modo "limpar")
-      if (e) return c.arrasto && !(MODOS[m.modo.id].pintaEntidade && MODOS[m.modo.id].pintaEntidade(m, e)) ? { ok: false, motivo: null } : tocarEntidade(m, { id: e.id, arrasto: c.arrasto });
+      if (e) return c.arrasto && !(modo.pintaEntidade && modo.pintaEntidade(m, e)) ? { ok: false, motivo: null } : tocarEntidade(m, { id: e.id, arrasto: c.arrasto });
       if (!loc.ehPropria(x, z)) {
         if (!c.arrasto) m.eventos.emitir('faltou', { motivo: 'terra-a-venda', x, z });
         return { ok: false, motivo: 'terra-a-venda' };
       }
-      const modo = MODOS[m.modo.id], d = modo.acaoNaCasa(m, x, z, c); // c: o modo pode querer saber se o dedo está pintando
+      const d = modo.acaoNaCasa(m, x, z, c); // c: o modo pode querer saber se o dedo está pintando
       if (d && d.texto === 'na-fila') return { ok: true, repetida: true }; // já prometida: o toque repetido não muda nada
       if (d && d.acao) return enfileirar(m, { tipo: 'agir', acao: d.acao, x, z, args: d.args || null });
       if (d && d.info) { // só uma informação (planta crescendo): diz e não mexe na fila

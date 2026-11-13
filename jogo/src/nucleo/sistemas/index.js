@@ -36,5 +36,7 @@ import './trabalho.js'; // depois de animais.js, de loja.js, de lavoura.js e de 
 import './estimacao.js';
 // o começo humilde: o Seu Tonho na fazenda, a chegada, a cerca e as reformas (depois de trabalho.js: soma à figura dela)
 import './comeco.js';
+// as ações por toque: a ação natural de cada alvo, a roda de ações e a vaga "na mão" (depois de todas as frentes)
+import './acoes.js';
 // versão de teste: atalho para o dono pular de nível (sai quando o jogo for para a loja)
 import './atalho-de-teste.js';

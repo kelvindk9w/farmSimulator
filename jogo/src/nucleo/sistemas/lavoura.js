@@ -111,6 +111,24 @@ export const PLANTIOS = [];
 const plantioDe = (D, item) => { for (let k = 0; k < PLANTIOS.length; k++) if (PLANTIOS[k].serve(D, item)) return PLANTIOS[k]; return null; };
 // o item se planta pelo modo "semear"? (semente de cultura ou o que um plantio registrado aceita)
 export const plantavel = (D, item) => !!item && (!!D.culturaDaSemente[item] || !!plantioDe(D, item));
+// ---------- o que está "na mão" para plantar (a vaga da interface; o modo "semear" usa o mesmo m.modo.semente) ----------
+// a semente de cultura que vale para o nível dela
+const sementeQueVale = (m, id) => { const c = m.dados.culturas[m.dados.culturaDaSemente[id]]; return !!c && c.nivel <= m.progresso.nivel; };
+// O item na mão: o escolhido, enquanto houver na bolsa; senão a primeira semente que houver (na ordem da loja).
+// Muda de árvore só fica na mão por escolha. null = não há o que plantar.
+export function itemNaMao(m) {
+  const B = m.posses.bolsa, s = m.modo.semente;
+  if (s && B[s] > 0 && plantavel(m.dados, s)) return s;
+  return m.dados.loja.ouro.find((id) => B[id] > 0 && sementeQueVale(m, id)) || Object.keys(B).find((id) => B[id] > 0 && sementeQueVale(m, id)) || null;
+}
+// o que dá para pôr na mão: as sementes (na ordem da loja) e depois as mudas que há na bolsa
+export function itensParaAMao(m) {
+  const B = m.posses.bolsa, D = m.dados, out = [];
+  for (const id of D.loja.ouro) if (B[id] > 0 && plantavel(D, id) && !out.includes(id)) out.push(id);
+  for (const id in B) if (B[id] > 0 && plantavel(D, id) && !out.includes(id)) out.push(id);
+  const muda = (id) => !D.culturaDaSemente[id];
+  return out.filter((id) => !muda(id)).concat(out.filter(muda));
+}
 
 // ---------- rega com área ----------
 // quantas casas em linha o regador da personagem molha numa rega (1 = só a casa tocada)
@@ -332,8 +350,9 @@ registrarAutomatico((m, x, z) => {
 
 // ---------- a fileira ----------
 // segurar o dedo na casa (x, z) faz alguma fileira no modo ativo? (na lavoura, sempre; o modo com a fileira dele decide)
-export function podeSegurar(m, x, z) {
-  const modo = MODOS[m.modo.id];
+// modoId (opcional): a conta num outro modo, sem trocar o escolhido (as ações por toque: sistemas/acoes.js)
+export function podeSegurar(m, x, z, modoId) {
+  const modo = MODOS[modoId] || MODOS[m.modo.id];
   if (!m.local.dentro(x, z)) return false;
   return modo && modo.fileira ? !!modo.fileira(m, x, z) : deLavoura(m.local.chao[z * m.local.l + x]);
 }
@@ -356,8 +375,8 @@ export function casasDaFileira(m, x, z, loc = m.local) {
 // próxima casa já desconte a semente, a água e a vaga da fila; no fim a fila volta a ser a de antes.
 // O modo que tem a fileira dele (registrarModo({ fileira(m, x, z) })) responde por ela: o Arado mostra a fileira do boi
 // (até o limite do arado, no eixo com mais casas para arar, também na grama) e a faz numa tarefa só ("umaTarefa").
-export function fileiraDe(m, x, z) {
-  const modo = MODOS[m.modo.id];
+export function fileiraDe(m, x, z, modoId) {
+  const modo = MODOS[modoId] || MODOS[m.modo.id];
   if (modo && modo.fileira) return modo.fileira(m, x, z);
   const casas = casasDaFileira(m, x, z);
   if (!casas.length) return null;
@@ -448,16 +467,17 @@ registrarSistema({
   comandos: {
     // segurou o dedo (ou a tecla) numa casa do campo: a ação do modo vai para a fileira toda, como se o dedo
     // tivesse arrastado casa por casa (o que não cabe na fila, ou falta semente ou água, fica de fora)
+    // modo (opcional): a fileira num outro modo, sem trocar o escolhido (as ações por toque: sistemas/acoes.js)
     fileira(m, c) {
-      const x = Math.floor(c.x), z = Math.floor(c.z), f = fileiraDe(m, x, z);
+      const x = Math.floor(c.x), z = Math.floor(c.z), f = fileiraDe(m, x, z, c.modo);
       if (!f) return { ok: false, motivo: 'fora-do-campo' };
       let n = 0, motivo = f.motivo;
       if (f.umaTarefa) { // a fileira toda numa tarefa só (a passada do boi): o toque na casa segurada, como fileira
-        const r = f.n ? m.comando({ tipo: 'tocarCasa', x: x + 0.5, z: z + 0.5, fileira: true }) : null;
+        const r = f.n ? m.comando({ tipo: 'tocarCasa', x: x + 0.5, z: z + 0.5, fileira: true, modo: c.modo }) : null;
         if (r && r.ok && !r.repetida) n = f.n;
         else if (r && r.motivo) motivo = r.motivo;
       } else for (const [cx, cz] of f.alvo) {
-        const r = m.comando({ tipo: 'tocarCasa', x: cx + 0.5, z: cz + 0.5, arrasto: true });
+        const r = m.comando({ tipo: 'tocarCasa', x: cx + 0.5, z: cz + 0.5, arrasto: true, modo: c.modo });
         if (r.ok && !r.repetida) n++;
         else if (r.motivo === 'fila-cheia') { motivo = 'fila-cheia'; break; }
       }

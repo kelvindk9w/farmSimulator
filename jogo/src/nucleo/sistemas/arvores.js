@@ -12,7 +12,7 @@ import { cabe } from '../caminho.js';
 import { espacoNoCesto, porNoCesto } from './posses.js';
 import { darXp } from './niveis.js';
 import { VENDAVEL } from './loja.js';
-import { PLANTIOS } from './lavoura.js';
+import { PLANTIOS, itemNaMao } from './lavoura.js';
 import { filaTem, contarNaFila } from './personagem.js';
 import { registrarGuia } from '../guia.js';
 import { casaFechaCaminho } from './construcao.js';
@@ -253,8 +253,7 @@ function passoPlantarMuda(m, muda, out) {
   const id = m.dados.arvoreDaMuda[muda];
   if (!(m.posses.bolsa[muda] > 0)) { out.tipo = 'painel'; out.painel = 'loja'; out.item = muda; return out; }
   if (mudasLivres(m, muda) <= 0) { out.tipo = null; return out; } // as que há já estão prometidas na fila
-  if (m.modo.id !== 'semear') { out.tipo = 'modo'; out.modo = 'semear'; return out; }
-  if (m.modo.semente !== muda) { out.tipo = 'semente'; out.item = muda; return out; }
+  if (itemNaMao(m) !== muda) { out.tipo = 'semente'; out.item = muda; return out; } // a muda na mão (a vaga da interface)
   const c = casaParaArvore(m, id);
   if (!c) { out.tipo = null; return out; }
   out.tipo = 'casa'; out.x = c[0]; out.z = c[1];

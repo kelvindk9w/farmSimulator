@@ -9,6 +9,7 @@ export function criarMedidas() {
     niveis: [], missoes: [], ganho: {}, gasto: {}, cash: {}, cashGasto: {}, recusas: {}, parado: {}, colhido: {}, comprado: {},
     conta: {}, construido: [], ampliado: [], animais: { comprou: {}, vendeu: {} }, produziu: {}, limpou: {}, pedidos: { entregues: 0, ouro: 0, trocados: 0, trocasPagas: 0 },
     idas: { poco: 0, celeiro: 0, banca: 0 }, dias: [], linha: [], projetos: {}, semOuro: 0, semOuroPor: {}, xpPor: {}, preso: [], porqueSemente: {},
+    material: { abertas: {}, feitas: {}, lista: [] }, // a espera de material de cada obra (querObra em metas.mjs)
   };
 }
 
@@ -65,6 +66,31 @@ export function ouvir(m, S, rel) {
   });
 }
 
+// A cada segundo: as obras que ela quer e que já têm todo o material em mãos saem da lista de espera.
+// "ultimo" é o material que chegou por último (o que segurou a obra).
+export function esperaDeMaterial(m, S, rel) {
+  const E = S.material;
+  for (const k in E.abertas) {
+    const a = E.abertas[k];
+    let falta = null;
+    for (const i in a.itens) if ((m.posses.bolsa[i] || 0) + (m.posses.celeiro.itens[i] || 0) + (m.posses.cesto.itens[i] || 0) < a.itens[i]) { falta = i; break; }
+    if (falta) { a.ultimo = falta; continue; }
+    delete E.abertas[k];
+    E.feitas[k] = 1;
+    E.lista.push({ obra: a.nome, nivel: a.nivel, jogado: Math.round(S.jogado - a.desde), relogio: Math.round(rel() - a.desdeRel), dia: Math.floor(a.desdeRel / 86400) + 1, faltavam: a.faltam, ultimo: Object.keys(a.faltam).length ? a.ultimo || Object.keys(a.faltam)[0] : null });
+  }
+}
+// o resumo da espera de material: soma, as maiores e as que ainda esperam no fim
+export function relatoDoMaterial(S, rel) {
+  const E = S.material, out = [];
+  const L = E.lista.slice(), soma = L.reduce((s, x) => s + x.jogado, 0), com = L.filter((x) => x.jogado > 0);
+  out.push(`Espera de material (do "quer construir" ao "tem o material", em tempo jogado): ${L.length} obras, ${com.length} esperaram; soma ${hm(soma)}.`);
+  for (const x of L.slice().sort((a, b) => b.jogado - a.jogado).slice(0, 10)) if (x.jogado > 0) out.push(`  ${hm(x.jogado).padStart(14)} jogado, ${hm(x.relogio).padStart(12)} de relógio  ${x.obra} (nível ${x.nivel}, dia ${x.dia}; faltava ${Object.entries(x.faltavam).map(([k, v]) => v + ' ' + k).join(', ')}; segurou: ${x.ultimo || '-'})`);
+  const ab = Object.values(E.abertas);
+  if (ab.length) out.push('  ainda esperando no fim: ' + ab.map((a) => `${a.nome} (falta ${a.ultimo || Object.keys(a.faltam)[0] || '?'}, desde ${hm(S.jogado - a.desde)} jogados)`).join('; '));
+  return out.join('\n');
+}
+
 // ---------- o relato ----------
 const hm = (s) => { s = Math.round(s); const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), mi = Math.floor((s % 3600) / 60); return d ? `${d}d ${String(h).padStart(2, '0')}h${String(mi).padStart(2, '0')}` : h ? `${h} h ${String(mi).padStart(2, '0')} min` : mi ? `${mi} min ${String(s % 60).padStart(2, '0')} s` : `${s} s`; };
 const pc = (a, b) => (b > 0 ? ((100 * a) / b).toFixed(0) + '%' : '-');
@@ -110,6 +136,7 @@ export function relato(J, S, cfg) {
   L('Onde o jogador ficou sem ter o que fazer' + (parado.length ? ` (${pc(parado.reduce((s, [, v]) => s + v, 0), S.jogado)} do tempo jogado):` : ': em nenhum momento.'));
   for (const [k, v] of parado.slice(0, 20)) L(`  ${hm(v).padStart(14)}  ${k}`);
   if (S.semOuro > 1) L(`Tempo jogado com a meta da vez travada por ouro: ${hm(S.semOuro)} (${lista(S.semOuroPor, (k, v) => `${k} ${hm(v)}`)}).`);
+  L(relatoDoMaterial(S));
   const rec = Object.entries(S.recusas).sort((x, y) => y[1] - x[1]);
   if (rec.length) { L(''); L('Recusas do jogo (toques que não valeram e faltas no meio da fila): ' + rec.slice(0, 25).map(([k, v]) => `${k} ×${v}`).join(', ')); }
   if (S.preso.length) { L(''); L('Presos (o bicho que não segue mais; ela cercada): ' + S.preso.map(([t, txt]) => `${txt} (visto aos ${hm(t)})`).join(' · ')); }

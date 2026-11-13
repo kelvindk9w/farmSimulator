@@ -1,14 +1,17 @@
 // O guia: para a missão da vez, qual é o próximo passo do jogador? A interface usa para apontar a seta do tutorial
 // e o jogador automático usa para saber o que fazer. Só lê o mundo; não muda nada.
-// Devolve em "out": { tipo: 'casa', x, z } | { tipo: 'entidade', id } | { tipo: 'modo', modo } | { tipo: 'semente', item }
+// Devolve em "out": { tipo: 'casa', x, z } | { tipo: 'entidade', id } | { tipo: 'semente', item }
 //                 | { tipo: 'painel', painel, item } | { tipo: 'esperar', seg } | { tipo: null }
+// Com as ações por toque (sistemas/acoes.js) o toque na casa já faz a ação natural dela: o guia nunca pede para
+// escolher modo. "semente" = pôr o item na mão (a vaga "na mão" da interface; o comando "naMao").
+// ({ tipo: 'modo', modo } fica no contrato para as frentes antigas: a interface aponta a vaga.)
 // No campo de plantação, o passo de 'casa' também traz "casas": [[x, z]...] as da mesma fileira que pedem o mesmo
 // (a interface marca a fileira toda; null quando é uma casa só).
 import { GRAMA, ARADA, CAMPO, deLavoura } from './local.js';
 import { missaoAtual } from './sistemas/missoes.js';
 import { noCesto, espacoNoCesto, noCeleiro, espacoNoCeleiro, ferramentaNoCinto, ferramentaGuardada } from './sistemas/posses.js';
 import { espacoNoCaixote } from './sistemas/banca.js';
-import { estadoDaPlanta, segundosDeAgua, sementesLivres, regaPrometida, podeArar, casasDaFileira } from './sistemas/lavoura.js';
+import { estadoDaPlanta, segundosDeAgua, sementesLivres, regaPrometida, podeArar, casasDaFileira, itemNaMao } from './sistemas/lavoura.js';
 import { filaTem, contarNaFila } from './sistemas/personagem.js';
 
 // As frentes novas ensinam o guia a apontar o passo dos seus eventos, cada uma no seu arquivo:
@@ -19,7 +22,6 @@ export function registrarGuia(evento, fn) { (GUIAS[evento] || (GUIAS[evento] = [
 
 const casa = (out, x, z) => { out.tipo = 'casa'; out.x = x; out.z = z; return out; };
 const entidade = (out, id) => { out.tipo = 'entidade'; out.id = id; return out; };
-const modo = (out, id) => { out.tipo = 'modo'; out.modo = id; return out; };
 const nada = (out) => { out.tipo = null; return out; };
 const um = (v) => (Array.isArray(v) ? v[0] : v);
 
@@ -92,7 +94,6 @@ function algumaSemente(m) {
 // arar: primeiro o campo sem sulco, fileira por fileira; campo todo arado, a grama colada nele (o campo cresce);
 // sem campo nenhum, a grama livre mais perto do ponto da lavoura
 function passoArar(m, out) {
-  if (m.modo.id !== 'enxada') return modo(out, 'enxada');
   const c = lavoura(m), p = m.personagem;
   const livre = (loc, i, x, z) => podeArar(m, x, z) && !filaTem(m, 'arar', x, z);
   if (fileiraPerto(m, c, 12, (loc, i, x, z) => loc.chao[i] === CAMPO && livre(loc, i, x, z), out)) return out;
@@ -109,15 +110,13 @@ function passoPlantar(m, semente, out) {
   const vazia = (l, i, x, z) => l.chao[i] === ARADA && !l.plantas[i] && !filaTem(m, 'semear', x, z);
   // a fileira arada vazia mais perto da primeira; fora do campo, a terra arada vazia mais perto da personagem
   if (!fileiraPerto(m, c, 12, vazia, out) && !casaPerto(m, m.personagem.x, m.personagem.z, 12, vazia, out)) return passoArar(m, out);
-  if (m.modo.id !== 'semear') return modo(out, 'semear');
-  if (m.modo.semente !== s) { out.tipo = 'semente'; out.item = s; return out; }
+  if (itemNaMao(m) !== s) { out.tipo = 'semente'; out.item = s; return out; }
   return casa(out, out.x, out.z);
 }
 function passoRegar(m, cultura, out) {
   if (!plantaPerto(m, 'sede', cultura, out)) return null;
   const x = out.x, z = out.z, reg = ferramentaNoCinto(m, 'regador') || ferramentaGuardada(m, 'regador');
   if (reg && m.posses.ferramentas[reg].agua - contarNaFila(m, 'regar') <= 0 && !filaTem(m, 'encher')) return entidade(out, 'poco'); // a água que há já está prometida
-  if (m.modo.id !== 'mao' && m.modo.id !== 'regar') return modo(out, 'mao');
   naFileira(m, x, z, (l, i, cx, cz) => !!l.plantas[i] && estadoDaPlanta(m, l.plantas[i]) === 'sede' && (!cultura || l.plantas[i].cultura === cultura) && !regaPrometida(m, cx, cz), out);
   return casa(out, x, z);
 }
@@ -125,7 +124,6 @@ function passoColher(m, cultura, out) {
   if (plantaPerto(m, 'pronta', cultura, out)) {
     const x = out.x, z = out.z;
     if (espacoNoCesto(m) < m.dados.culturas[m.local.plantas[m.local.i(x, z)].cultura].rende) return entidade(out, ondeVender(m));
-    if (m.modo.id !== 'mao') return modo(out, 'mao');
     naFileira(m, x, z, (l, i, cx, cz) => !!l.plantas[i] && estadoDaPlanta(m, l.plantas[i]) === 'pronta' && (!cultura || l.plantas[i].cultura === cultura) && !filaTem(m, 'colher', cx, cz), out);
     return casa(out, x, z);
   }

@@ -197,7 +197,7 @@ test('o boi volta sozinho para o estábulo quando o modo muda', () => {
   assert.equal(bichoSolto(m, boi.id), null);
 });
 
-test('o guia da missão do boi: comprar o boi, o arado, escolher o modo e tocar na grama', () => {
+test('o guia da missão do boi: comprar o boi, o arado e tocar na grama (o toque com o boi pronto ara com ele)', () => {
   const m = mundoDoTrabalho();
   porEstabulo(m);
   const out = {};
@@ -208,11 +208,12 @@ test('o guia da missão do boi: comprar o boi, o arado, escolher o modo e tocar 
   assert.equal(out.tipo, 'painel'); assert.equal(out.item, 'arado');
   dar(m, { arado: 1 });
   guiaDoEvento(m, 'arou', { com: 'boi' }, out);
-  assert.deepEqual([out.tipo, out.modo], ['modo', 'arado']);
-  modo(m, 'arado');
-  guiaDoEvento(m, 'arou', { com: 'boi' }, out);
   assert.equal(out.tipo, 'casa');
   assert.equal(chao(m, out.x, out.z), GRAMA);
+  const ev = ouvirTudo(m);
+  assert.equal(m.comando({ tipo: 'agirNoAlvo', x: out.x, z: out.z }).ok, true);
+  ateParar(m);
+  assert.ok(ev.de('arou').length > 1 && ev.de('arou').every((d) => d.com === 'boi'), 'o toque mandou o boi arar a fileira');
 });
 
 // ---------------------------------------------------------------------------------------------------------------

@@ -541,20 +541,22 @@ function guiaDeTer(m, tipo, out) {
   if (falta) { guiaDoEvento(m, 'comprou', { item: falta }, out); return true; }
   return false;
 }
-// arar com o boi: comprar o que falta, escolher o modo "Arado" e tocar na grama mais perto
+// arar com o boi: comprar o que falta e tocar na casa para arar mais perto (com o boi pronto, o toque que ara é dele:
+// sistemas/acoes.js; no modo da barra, só no "Arado")
 registrarGuia('arou', (m, f, out) => {
   if (um(f.com) !== 'boi') return null;
   if (guiaDeTer(m, 'arar', out)) return out;
   const p = m.personagem, loc = m.local;
   if (p.local !== 'fazenda') { out.tipo = null; return out; }
-  if (m.modo.id !== 'arado') { out.tipo = 'modo'; out.modo = 'arado'; return out; }
   // a casa para arar mais perto dela (a do campo vale três casas de distância a menos: o boi refaz a lavoura antes de
-  // abrir grama nova), com a fileira que o boi faria dali marcada no chão
-  const x0 = Math.floor(p.x), z0 = Math.floor(p.z);
+  // abrir grama nova), com a fileira que o boi faria dali marcada no chão. Na grama, só a que encosta no campo (a que
+  // o toque ara; sem campo nenhum, qualquer uma)
+  const x0 = Math.floor(p.x), z0 = Math.floor(p.z), temCampo = loc.chao.some(deLavoura);
+  const encosta = (x, z) => !temCampo || loc.chao[z * loc.l + x] === CAMPO || [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dz]) => deLavoura(loc.chaoEm(x + dx, z + dz)));
   let melhor = Infinity;
   out.tipo = null;
   for (let z = z0 - 9; z <= z0 + 9; z++) for (let x = x0 - 9; x <= x0 + 9; x++) {
-    if (!aravel(m, loc, x, z) || prometida(m, x, z)) continue;
+    if (!aravel(m, loc, x, z) || prometida(m, x, z) || !encosta(x, z)) continue;
     const d = Math.hypot(x + 0.5 - p.x, z + 0.5 - p.z) - (loc.chao[z * loc.l + x] === CAMPO ? 3 : 0);
     if (d < melhor) { melhor = d; out.tipo = 'casa'; out.x = x; out.z = z; }
   }
@@ -628,13 +630,15 @@ registrarSistema({
     const boi = pronto(m, 'arar'), cav = T.aCavalo ? pronto(m, 'montaria') : null, jum = T.levando ? pronto(m, 'carga') : null;
     montaria(m, T, p, fora, cav);
 
-    // o boi: fora do estábulo enquanto o modo é "Arado" ou há passada na fila
+    // o boi: fora do estábulo enquanto o modo é "Arado" ou há passada na fila; depois da última passada (as ações por
+    // toque, sem modo), fica com ela um tempo, à espera da próxima, e volta sozinho
     const ac = p.acao && p.acao.id === 'ararComBoi' ? p.acao : null;
     let boiFora = false;
     if (boi && fora) {
       const naFila = !!ac || filaTem(m, 'ararComBoi');
-      if (naFila) T.boiOcioso = 0; else if (m.modo.id === 'arado') T.boiOcioso += PASSO;
-      boiFora = naFila || (m.modo.id === 'arado' && T.boiOcioso < BOI_OCIOSO);
+      if (naFila) { T.boiOcioso = 0; T.boiSolto = true; } else if (m.modo.id === 'arado' || T.boiSolto) T.boiOcioso += PASSO;
+      boiFora = naFila || ((m.modo.id === 'arado' || T.boiSolto) && T.boiOcioso < BOI_OCIOSO);
+      if (!boiFora) T.boiSolto = false;
       if (boiFora) {
         const e = bichoSolto(m, boi.id) || sair(m, boi, p);
         if (ac) passada(m, T, p, e, ac);

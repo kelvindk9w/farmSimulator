@@ -156,15 +156,15 @@ test('sem valeJaTer a missão de comprar conta só a compra feita depois (e os d
   assert.ok(prepararDados(b).problemas.some((p) => /valeJaTer/.test(p.texto)));
 });
 
-test('o guia leva um jogador obediente por todas as missões', () => {
+test('o guia leva um jogador obediente por todas as missões (só tocando: sem escolher modo)', () => {
   const m = novoMundo(), g = {};
   let voltas = 0;
   while (missaoAtual(m) && voltas++ < 200) {
     guiaDaMissao(m, g);
-    if (g.tipo === 'modo') m.comando({ tipo: 'escolherModo', modo: g.modo });
-    else if (g.tipo === 'semente') m.comando({ tipo: 'escolherModo', modo: 'semear', semente: g.item });
-    else if (g.tipo === 'casa') assert.equal(m.comando({ tipo: 'tocarCasa', x: g.x + 0.5, z: g.z + 0.5 }).ok, true, `o guia mandou tocar em (${g.x}, ${g.z}) e não valeu`);
-    else if (g.tipo === 'entidade') assert.equal(m.comando({ tipo: 'tocarEntidade', id: g.id }).ok, true, `o guia mandou tocar em ${g.id} e não valeu`);
+    if (g.tipo === 'modo') assert.fail(`o guia pediu o modo ${g.modo}: com as ações por toque o jogador não escolhe modo`);
+    else if (g.tipo === 'semente') assert.equal(m.comando({ tipo: 'naMao', item: g.item }).ok, true);
+    else if (g.tipo === 'casa') assert.equal(m.comando({ tipo: 'agirNoAlvo', x: g.x, z: g.z }).ok, true, `o guia mandou tocar em (${g.x}, ${g.z}) e não valeu`);
+    else if (g.tipo === 'entidade') assert.equal(m.comando({ tipo: 'agirNoAlvo', entidade: g.id }).ok, true, `o guia mandou tocar em ${g.id} e não valeu`);
     else if (g.tipo === 'painel') assert.equal(m.comando({ tipo: 'comprar', item: g.item || 'semente-rabanete', n: 1 }).ok, true);
     else if (g.tipo === 'esperar') m.acertarRelogio(m.agora + (g.seg + 1) * 1000);
     else assert.fail(`o guia ficou sem saber o que fazer na missão ${missaoAtual(m).missao.id}`);

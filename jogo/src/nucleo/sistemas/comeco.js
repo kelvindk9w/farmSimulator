@@ -176,7 +176,7 @@ DESLOCAMENTO.visual = (m, out) => {
 // as ordens que não terminam a cena (a hora do aparelho, a própria cena, o atalho da versão de teste)
 const NAO_TERMINA = { fuso: 1, comecarChegada: 1, pularChegada: 1, soltarChegada: 1, perguntouComecoNovo: 1 };
 // as que são só um toque: terminam a cena e não fazem mais nada (o toque seguinte já vale)
-const SO_TOQUE = { tocarCasa: 1, tocarEntidade: 1, irPara: 1, agir: 1, rumar: 1 };
+const SO_TOQUE = { tocarCasa: 1, tocarEntidade: 1, irPara: 1, agir: 1, agirNoAlvo: 1, rumar: 1 };
 
 // o caminho dela, de fora até a porteira, fica livre: tira o mato, o toco, a pedra e a árvore do mato que estão na
 // terra de fora (a estrada) em volta do caminho da chegada (só a figura: ninguém limpou nada)

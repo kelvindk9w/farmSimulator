@@ -6,6 +6,7 @@ import { Mundo } from '../src/nucleo/mundo.js';
 import { podeArar } from '../src/nucleo/sistemas/lavoura.js';
 import { missaoPossivel } from '../src/nucleo/sistemas/missoes.js';
 import { ofertasDaLoja } from '../src/nucleo/sistemas/loja.js';
+import { conferirFontes, pedidosDeMaterial, nivelDaFonte } from '../src/nucleo/fontes.js';
 
 const bruto = lerDados(path.join(raiz, 'dados'));
 const { dados, problemas, texto } = conferirDados(bruto);
@@ -30,4 +31,13 @@ console.log(`\nDados em ordem (${problemas.length} aviso(s)).`);
 console.log(`Mapa ${dados.terras.largura}x${dados.terras.profundidade}, ${m.locais.fazenda.entidades.length} entidades, ${dados.terras.lotes.length} lotes.`);
 console.log(`Missões do vizinho: ${valem.length} de ${lista.length} valem nesta versão: ${valem.map((x) => x.id).join(', ')}`);
 console.log(`Ficam para depois: ${lista.filter((x) => !valem.includes(x)).map((x) => `${x.id} (${x.objetivo.evento})`).join(', ') || 'nenhuma'}`);
+// os materiais: de onde vêm (itens.json → "fontes") e se cada obra que pede material tem fonte aberta até o nível dela
+{
+  const pf = conferirFontes(dados), graves = pf.filter((p) => p.grave);
+  for (const p of pf) console.log(`${p.grave ? 'ERRO' : 'aviso'} fontes: ${p.texto}`);
+  const mats = [...new Set(pedidosDeMaterial(dados).map((p) => p.item))].filter((k) => dados.itens[k].fontes);
+  const linha = (k) => `${k} (${dados.itens[k].fontes.map((f) => { const n = nivelDaFonte(dados, k, f); return f.tipo + (f.obstaculo || f.receita || f.animal ? ' ' + (f.obstaculo || f.receita || f.animal) : '') + (n ? ' nv' + n : ''); }).join(', ')})`;
+  console.log(`Materiais com fontes (${mats.length}): ${mats.map(linha).join('; ')}`);
+  if (graves.length) { console.log(`${graves.length} erro(s) nas fontes dos materiais: há obra pedindo material que o jogador ainda não tem como conseguir.`); process.exitCode = 1; }
+}
 console.log('Loja de ouro no nível 1: ' + ofertasDaLoja(m).map((a) => `${a.nome}: ${a.ofertas.map((o) => o.item + (o.liberado ? '' : ' [nível ' + o.nivel + ']')).join(', ')}`).join(' | '));
