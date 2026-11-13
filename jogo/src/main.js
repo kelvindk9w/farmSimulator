@@ -100,9 +100,9 @@ function comecar() {
   hud.aplicarPrefs();
 
   // ---------- gravação ----------
-  let pedido = false, relogioGravar = 0, semGravar = false;
+  let pedido = false, relogioGravar = 0, semGravar = false, resetando = false;
   function gravarAgora() {
-    if (!J.mundo) return false;
+    if (!J.mundo || resetando) return false;
     const ok = gravacao.gravar(J.mundo.salvar());
     if (!ok && !semGravar && gravacao.disponivel) console.warn('não deu para gravar agora');
     semGravar = !ok;
@@ -133,6 +133,8 @@ function comecar() {
     instalar(m);
     gravarAgora();
   };
+  // versão de teste: conta nova; apaga tudo e abre de novo, com a tela de carregando e a chegada
+  J.resetarConta = () => { resetando = true; gravacao.apagarTudo(); location.reload(); };
   instalar(mundo);
   if (gravacaoRuim) avisar(T.gravacaoRuim, '', 7000);
   if (!gravacao.disponivel) avisar(T.config.semGravacao, '', 7000);

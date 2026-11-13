@@ -27,7 +27,7 @@ function escolha(chave, opcoes, atual, aoEscolher) {
 registrarPainel({
   id: 'config', titulo: T.config.titulo, icone: 'ui/config', ordem: 40,
   montar(corpo, ctx) {
-    let aberta = null, nota = null; // 'exportar' | 'importar' | 'recomecar'
+    let aberta = null, nota = null; // 'exportar' | 'importar' | 'recomecar' | 'resetar'
     const C = T.config;
     function mudar(chave, valor) { J.prefs[chave] = valor; J.gravarPrefs(); desenhar(chave + '-' + valor); }
     function desenhar(foco) {
@@ -92,7 +92,14 @@ registrarPainel({
       };
       for (const n of [5, 9, 12, 16]) if (n > J.mundo.progresso.nivel) atalhos.append(pular(n, T.teste.nivel(n)));
       atalhos.append(pular(0, T.teste.material));
+      atalhos.append(bt('resetar', T.teste.resetar, 'ruim'));
       corpo.append(atalhos);
+      if (aberta === 'resetar') {
+        const sim = botao({ texto: T.teste.resetarSim, classe: 'ruim', aoClicar: () => { som.tocar('toque'); J.resetarConta(); } }); sim.dataset.k = 'resetar-sim';
+        const nao = botao({ texto: C.nao, aoClicar: () => { aberta = null; desenhar('abre-resetar'); } }); nao.dataset.k = 'resetar-nao';
+        const l = el('div', 'linha botoes-config'); l.append(nao, sim);
+        corpo.append(el('div', 'nota', T.teste.resetarInfo), el('div', 'nota ruim', T.teste.resetarCerteza), l);
+      }
       const n = el('div', 'nota'); n.id = 'nota-config'; n.hidden = true; corpo.append(n);
       mostrarNota();
       corpo.append(el('div', 'nota versao', C.versao));

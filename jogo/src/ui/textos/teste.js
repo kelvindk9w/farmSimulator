@@ -8,4 +8,8 @@ T.teste = {
   material: 'Só ouro e material',
   feito: (n, ouro) => `Pronto: nível ${n} e mais ${numero(ouro)} de ouro, madeira, tábua, prego, pedra, fibra, milho e ração.`,
   jaPassou: (n) => `Você já está no nível ${n}.`,
+  resetar: 'Resetar: conta nova',
+  resetarInfo: 'Apaga tudo deste aparelho (fazenda, configurações e avisos já vistos) e abre o jogo como na primeira vez, com a chegada.',
+  resetarCerteza: 'Tem certeza? Tudo deste aparelho será apagado e o jogo abre como conta nova.',
+  resetarSim: 'Sim, resetar',
 };

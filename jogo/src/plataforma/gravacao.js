@@ -23,6 +23,14 @@ export const gravacao = {
   ler: () => ler(CHAVE),
   gravar: (obj) => gravar(CHAVE, obj),
   apagar() { try { const s = achar(); if (s) s.removeItem(CHAVE); } catch { /* sem gravação */ } },
+  // conta nova (versão de teste): apaga tudo do jogo neste aparelho (fazenda, preferências e o que mais tiver "fazenda.")
+  apagarTudo() {
+    try {
+      const s = achar(); if (!s) return;
+      const chaves = []; for (let i = 0; i < s.length; i++) { const k = s.key(i); if (k && k.startsWith('fazenda.')) chaves.push(k); }
+      for (const k of chaves) s.removeItem(k);
+    } catch { /* sem gravação */ }
+  },
   // uma gravação que não abriu fica guardada à parte, para não se perder ao gravar por cima
   guardarRuim() { try { const s = achar(); const t = s && s.getItem(CHAVE); if (t) s.setItem(CHAVE + '.ruim', t); } catch { /* sem gravação */ } },
   lerPrefs: () => ler(CHAVE_PREFS) || {},

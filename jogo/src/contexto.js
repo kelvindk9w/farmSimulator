@@ -13,5 +13,6 @@ export const J = {
   gravarPrefs() {},
   gravarLogo() {}, // pede uma gravação no fim deste quadro
   trocarMundo() {}, // (obj | null): carrega uma gravação importada ou recomeça do zero
+  resetarConta() {}, // versão de teste: apaga tudo do jogo no aparelho e recarrega a página (conta nova)
   meio: 'mouse', // o último jeito de jogar usado: 'toque' | 'mouse' | 'teclas'
 };
