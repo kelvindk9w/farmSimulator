@@ -1,6 +1,7 @@
 // Cash: concluir um relógio, a compra simulada de pacotes e as ofertas (roupa, enfeite, animal especial).
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { dadosDeTeste, ouvirTudo, pular } from './apoio.mjs';
 import { comProgresso, mundoComProgresso, DIA } from './apoio-progresso.mjs';
 import { Mundo } from '../src/nucleo/mundo.js';
@@ -139,4 +140,11 @@ test('gastarCash é o caixa das outras frentes: recusa sem saldo e soma no gasto
   assert.equal(m.posses.cash, 1); assert.equal(m.cash.gasto, 2);
   m.eventos.emitir('gastouCash', { n: 7, destino: 'ampliacao' }); // quem cobra por conta (a ampliação da construção) também entra
   assert.equal(m.cash.gasto, 9);
+});
+
+test('nenhum passo do vizinho pede para gastar cash (nos dados de verdade)', () => {
+  const DE_CASH = ['concluiu', 'comprouCash', 'comprouComCash', 'gastouCash'];
+  const missoes = JSON.parse(readFileSync(new URL('../dados/missoes.json', import.meta.url), 'utf8'));
+  const pedem = missoes.vizinho.filter((p) => DE_CASH.includes(p.objetivo.evento) || (p.objetivo.filtro && 'cash' in p.objetivo.filtro));
+  assert.deepEqual(pedem.map((p) => p.id), []);
 });

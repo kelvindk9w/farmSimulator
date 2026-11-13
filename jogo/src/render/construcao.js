@@ -214,6 +214,7 @@ function conferirPlanos(loc) {
 registrarCamada('fundo', (g, cam, m, S, cena) => {
   const loc = m.local;
   ligarTipos(m);
+  if (FANTASMA.ligado) { const d = cena.destaque; d.x = -1; d.entidade = null; d.casas = null; } // escolhendo o lugar, só o fantasma fica marcado
   if (loc.interior) desenharInterior(g, cam, m, S, cena);
   conferirPlanos(loc);
   const W = cena.cv.width, H = cena.cv.height;

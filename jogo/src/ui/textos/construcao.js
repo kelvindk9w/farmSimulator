@@ -46,7 +46,7 @@ Object.assign(T.motivos, {
 T.botoes.construir = 'Construir';
 T.construir = {
   titulo: 'Construir',
-  categorias: { abrigo: 'Abrigos', industria: 'Indústrias', armazem: 'Móveis do celeiro', util: 'Úteis', cerca: 'Cercas e caminhos', decoracao: 'Decoração' },
+  categorias: { abrigo: 'Abrigos', industria: 'Indústrias', armazem: 'Armazém', util: 'Úteis', cerca: 'Cercas', decoracao: 'Decoração' },
   vazio: 'Nada para construir aqui ainda.',
   escolher: 'Escolher o lugar', colocar: 'Colocar', guardada: (n) => `guardada: ${n}`, tem: (n, lim) => (lim ? `tem ${n} de ${lim}` : `tem ${n}`),
   nivel: (n) => `Nível ${n}`, obra: (seg) => `obra de ${tempo(seg)}`, naHora: 'fica pronto na hora',
@@ -71,7 +71,7 @@ T.cartao = {
   vagas: (n) => `${n} vagas`, fila: (n) => `Fila de ${n}`, guardou: (nome) => `${nome} foi para o depósito: recoloque quando quiser, sem pagar`,
   celeiro: 'Toque no celeiro para guardar o cesto. Entre para montar prateleiras e baús.',
 };
-T.ganhos.construiu = (d, D) => `${nomeC(D, d.construcao)} ${d.classe === 'movel' ? 'montado' : 'pronta'}!`;
+T.ganhos.construiu = (d, D) => `${nomeC(D, d.construcao)}: ${d.classe === 'movel' ? 'montagem concluída' : 'obra concluída'}!`;
 T.ganhos.ampliou = (d) => `${d.nome}: pronto!`;
 T.celeiro = {
   titulo: 'O celeiro por dentro', produtos: 'Produtos nas prateleiras', materiais: 'Materiais nos baús', ferramentas: 'Ferramentas no suporte',

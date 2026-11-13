@@ -599,16 +599,17 @@ for (const vista of ['frente', 'costas']) {
       ['SENTADO: sentado sobre as patas de trás, as patas da frente juntas e retas apoiadas no chão, cabeça alta, o rabo enrolado em volta das patas.', 'RABO: a ponta do rabo bate no chão para um lado; uma orelha gira.', 'LAMBE: levanta uma pata da frente até a boca e lambe, a cabeça inclinada.', 'PISCA: a pata volta ao chão; os olhos fechados (duas linhas curvas), devagar; a ponta do rabo bate para o outro lado.'],
       'Andar macio e elegante de gato: passos leves, o lombo ondula de leve, a cabeça quase não balança, o rabo erguido com a ponta balançando.'],
   ]) {
-    pedidos[`${chave}-parado-${vista}`] = bicho({
-      ...G, arquivo: `parado-${vista}.png`, titulo: 'PARADO, olhando em volta', vista, n: 4, plantado: true, quadros: parado,
+    // o código do jogo chama de "parada" a folha de espera do cachorro e do gato
+    pedidos[`${chave}-parada-${vista}`] = bicho({
+      ...G, arquivo: `parada-${vista}.png`, titulo: 'PARADO, olhando em volta', vista, n: 4, plantado: true, quadros: parado,
       vivo: `Movimentos pequenos e vivos: só a cabeça, as orelhas, o rabo e o peito se mexem; as quatro patas ficam plantadas e o corpo não sai do lugar.`,
     });
     pedidos[`${chave}-andar-${vista}`] = bicho({
-      ...G, arquivo: `andar-${vista}.png`, titulo: 'ANDANDO', vista, n: 6, quadros: TROTE6, refs: [...parada(G, 'parado'), ...par('andar')],
+      ...G, arquivo: `andar-${vista}.png`, titulo: 'ANDANDO', vista, n: 6, quadros: TROTE6, refs: [...parada(G, 'parada'), ...par('andar')],
       vivo: `${andarVivo} As patas continuam do MESMO comprimento das da folha parada; o corpo e a cabeça têm o mesmo tamanho dela.`,
     });
     pedidos[`${chave}-sentado-${vista}`] = bicho({
-      ...G, arquivo: `sentado-${vista}.png`, titulo: 'SENTADO', vista, n: 4, plantado: true, quadros: sentado, refs: [...parada(G, 'parado'), ...par('sentado')],
+      ...G, arquivo: `sentado-${vista}.png`, titulo: 'SENTADO', vista, n: 4, plantado: true, quadros: sentado, refs: [...parada(G, 'parada'), ...par('sentado')],
       vivo: `Ele fica SENTADO em todos os quadros, no mesmo lugar: o traseiro e as patas não saem do ponto; só a cabeça, as orelhas, o rabo${chave === 'gato' ? ' e uma pata da frente' : ' e a língua'} se mexem. A cabeça e o corpo têm o MESMO tamanho da folha parada anexa.`,
     });
   }
@@ -726,6 +727,27 @@ ${quadros.map((q, i) => `  ${i + 1}. ${q}`).join('\n')}
 ${FIM.replace('Imagem bem larga (proporção perto de 3 por 1)', 'Imagem na proporção 3 por 2 (largura uma vez e meia a altura), com as duas fileiras ocupando bem o espaço')}
 `;
   }
+}
+
+// ---------- jumento com a carroça carregada (barril): a mesma folha do andar, com o barril na carroça ----------
+for (const vista of ['frente', 'costas']) {
+  pedidos[`jumento-andar-barril-${vista}`] = `${CABECA}
+- \`referencias/jumento.png\`: a FOLHA DE MODELO do jumento com a carroça (de frente três quartos, de costas três quartos e de perfil). Ela manda nas proporções, nas cores e nos detalhes.
+- \`referencias/andar-${vista}.png\`: a folha de animação já pronta do MESMO jumento andando e puxando a carroça VAZIA, nesta mesma vista: 8 quadros em duas fileiras de 4.
+${vista === 'costas' ? '- `referencias/andar-barril-frente.png`: a folha já pronta da carroça com o barril, vista de frente (dá o barril: o mesmo barril, do mesmo tamanho, aqui visto de costas).\n' : ''}
+Preciso de uma folha IGUAL à folha \`referencias/andar-${vista}.png\`, quadro a quadro, com uma única diferença: agora a carroça leva um BARRIL.
+
+Gere uma imagem e salve na pasta atual como \`andar-barril-${vista}.png\`:
+
+- O MESMO formato da folha anexa: DUAS fileiras horizontais com 4 quadros cada (em cima os quadros 1 a 4, embaixo os quadros 5 a 8), os mesmos 8 quadros, na mesma ordem, com o jumento nas MESMAS poses, do mesmo tamanho e no mesmo lugar de cada quadro; a carroça igual, com as rodas girando do mesmo jeito.
+- A diferença: dentro da caixa da carroça vai UM BARRIL de madeira, em pé: aduelas castanho-escuras, dois aros de ferro cinza, tampa de madeira em cima. Ele ocupa bem a caixa da carroça e a metade de cima dele aparece acima das tábuas. É o mesmo barril, do mesmo tamanho, nos 8 quadros; ele dá um leve tranco para cima e para baixo junto com a carroça.
+- É o MESMO jumento da folha de modelo: ${JUMENTO.igual.replace(', vazia,', ',')}
+- Tudo visto pela mesma câmera da cena (isométrica, de cima), ${B_VISTA[vista]}.
+- Os 8 quadros com o jumento do MESMO tamanho, cada fileira sobre a sua linha de base, com um vão vazio entre um quadro e o outro (nenhum quadro encosta no vizinho) e uma faixa vazia entre as duas fileiras.
+- NÃO desenhe condutor, outra carga, líquido derramando, poeira nem marcas de roda.
+- ${LIMPO}
+${FIM.replace('Imagem bem larga (proporção perto de 3 por 1)', 'Imagem na proporção 3 por 2 (largura uma vez e meia a altura), com as duas fileiras ocupando bem o espaço')}
+`;
 }
 
 const quais = process.argv.slice(2);

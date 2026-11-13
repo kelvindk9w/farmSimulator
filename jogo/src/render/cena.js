@@ -10,7 +10,7 @@ import { visualDaPersonagem } from '../nucleo/sistemas/personagem.js';
 import { estadoDaPlanta, estagioDaPlanta } from '../nucleo/sistemas/lavoura.js';
 
 const MAX = 1200; // figuras num quadro
-const ENT = 0, PLANTA = 1, PERS = 2;
+const ENT = 0, PLANTA = 1, PERS = 2, SOLTA = 3;
 export const COR_DA_ACAO = { arar: '#c98a45', semear: '#74b83a', regar: '#4aa9e6', colher: '#f6c12c', encher: '#4aa9e6', vender: '#f6c12c', guardar: '#f6e3b5', pegar: '#f6e3b5' }; // (as frentes acrescentam as suas)
 // o que as frentes desenham a mais, cada uma no seu arquivo: registrarCamada('chao' | 'cima', (g, cam, mundo, S, cena, dt) => ...)
 //   'chao' = rente ao chão, depois das marcas e antes das figuras; 'cima' = por cima de tudo, depois dos avisos das plantas
@@ -19,6 +19,10 @@ export const CAMADAS = { fundo: [], chao: [], cima: [] };
 export function registrarCamada(onde, f) { CAMADAS[onde].push(f); }
 // estado visual da personagem sem peça própria no catálogo: usa a de um gesto parecido
 export const GESTO_PARECIDO = {};
+// figuras soltas que entram na ordem de profundidade junto com as construções e a personagem (bichos passeando):
+//   SOLTAS.push((mundo, cena, dt) → lista de { x, z, raio (da sombra, em casas), desenhar(g, cena, sx, sy, S) })
+// a lista pode ser a mesma a cada quadro (quem a mantém é a frente dona); o que está fora da tela não é desenhado
+export const SOLTAS = [];
 // o que uma camada desenha por cima de tudo e recebe toque (a etiqueta de um lote): (mundo, px, py, cena) → id da entidade | null
 export const ALVOS_DE_CIMA = [];
 const PASSADA = { andar: true, correr: true, carregar: true }; // estados em que os quadros seguem o passo, não o relógio
@@ -108,6 +112,14 @@ export class Cena {
       if (sx + hx < 0 || sx - hx > W || sy + hy < 0 || sy - 2 * S > H) continue;
       const it = itens[n++]; it.tipo = PLANTA; it.ref = loc.plantas[i]; it.x = x + 0.5; it.z = z + 0.5; it.prof = x + z + 1; it.i = i;
     }
+    for (let f = 0; f < SOLTAS.length; f++) {
+      const L = SOLTAS[f](m, this, dt);
+      for (let k = 0; L && k < L.length && n < MAX - 2; k++) {
+        const s = L[k], sx = cam.telaX(s.x, s.z), sy = cam.telaY(s.x, 0, s.z);
+        if (sx + 2 * hx < 0 || sx - 2 * hx > W || sy + hy < 0 || sy - 3 * S > H) continue;
+        const it = itens[n++]; it.tipo = SOLTA; it.ref = s; it.x = s.x; it.z = s.z; it.prof = s.x + s.z;
+      }
+    }
     const pv = visualDaPersonagem(m, this.pv);
     { const it = itens[n++]; it.tipo = PERS; it.ref = null; it.x = pv.x; it.z = pv.z; it.prof = pv.x + pv.z + 0.02; }
     // ordena por profundidade em gavetas de 1/8 de casa (linear: o mapa tem mais de mil figuras)
@@ -128,6 +140,7 @@ export class Cena {
       let r;
       if (it.tipo === ENT) r = Math.min(it.ref.l, it.ref.p) * 0.52 * S * (it.ref.l + it.ref.p > 2 ? 1.05 : 0.6);
       else if (it.tipo === PERS) r = 0.34 * S;
+      else if (it.tipo === SOLTA) r = it.ref.raio * S;
       else continue;
       g.moveTo(sx + r, sy); g.ellipse(sx, sy + 0.04 * S, r, r * 0.55, 0, 0, 6.2832);
     }
@@ -149,7 +162,8 @@ export class Cena {
       } else if (it.tipo === PLANTA) {
         const pl = it.ref, chave = this.chaveDaCultura(pl.cultura, estagioDaPlanta(m, pl));
         if (!this.atlas.desenhar(g, chave, 0, sx, sy, S, false)) desenharReserva(g, figuraDeReserva(chave), sx, sy, S, false);
-      } else this._personagem(g, cam, pv, sx, sy, S);
+      } else if (it.tipo === SOLTA) it.ref.desenhar(g, this, sx, sy, S);
+      else this._personagem(g, cam, pv, sx, sy, S);
     }
 
     this._avisosDasPlantas(g, cam, m, S);

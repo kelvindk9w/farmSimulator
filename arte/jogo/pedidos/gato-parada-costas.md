@@ -6,7 +6,7 @@ As imagens anexas são de um jogo de fazenda original, em desenho com contorno:
 
 Preciso da folha de animação do MESMO gato PARADO, olhando em volta, visto de COSTAS três quartos, para usar como figura 2D animada dentro do jogo.
 
-Gere uma imagem e salve na pasta atual como `parado-costas.png`:
+Gere uma imagem e salve na pasta atual como `parada-costas.png`:
 
 - Uma única fileira horizontal com 4 quadros, da esquerda para a direita, nesta ordem:
   1. DESCANSO: em pé nas quatro patas, igual à folha de modelo, rabo erguido com a ponta curvada.

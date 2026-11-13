@@ -105,7 +105,7 @@ T.amigos = {
   naoCopiou: 'Não deu para copiar sozinho: o texto está selecionado, copie por ele.',
   comoFunciona: (nivel) => `Quando o seu amigo chegar ao nível ${nivel}, os dois ganham um presente.`,
   voceGanha: 'Você ganha', amigoGanha: 'O amigo ganha', chegaram: (n, limite) => `Amigos que chegaram: ${n} de ${limite}`,
-  texto: (nome, link) => `Estou cuidando ${nome ? 'da ' + nome : 'da minha fazenda'} e queria você de vizinho! Entre por este link e ganhe um presente para começar: ${link}`,
+  texto: (nome, link) => `${nome ? 'Minha fazenda se chama ' + nome + ' e eu queria' : 'Estou cuidando da minha fazenda e queria'} você de vizinho! Entre por este link e ganhe um presente para começar: ${link}`,
   semServidor: 'Versão de teste: ainda não há servidor, então o jogo não fica sabendo sozinho quando o amigo chega. O botão abaixo serve para experimentar.',
   simular: (nivel) => `Simular: um amigo chegou ao nível ${nivel} (teste)`,
   chegou: 'Um amigo chegou! Tem presente na caixa de correio.',
@@ -115,7 +115,7 @@ T.amigos = {
   compartilhar: 'Foto da fazenda', foto: 'Tirar foto', fotoInfo: 'Faz uma foto da fazenda para você mostrar a quem quiser. O jogo nunca publica nada sozinho.',
   agrado: 'Uma vez por dia, mostrar a fazenda rende um agrado:', agradoHoje: 'O agrado de hoje já veio.',
   guardarFoto: 'Para guardar: segure o dedo na foto (no computador, botão direito) e escolha salvar a imagem.',
-  textoDaFoto: (nome, link) => `Olha ${nome ? 'a ' + nome : 'a minha fazenda'}! ${link}`,
+  textoDaFoto: (nome, link) => `Olha a minha fazenda${nome ? ', ' + nome : ''}! ${link}`,
   textoCopiado: 'O texto para mandar junto foi copiado.', ganhouAgrado: (n) => `+${numero(n)} de ouro por mostrar a fazenda`,
   semFoto: 'Não deu para fazer a foto neste navegador.', legenda: 'Fazenda',
 };

@@ -86,8 +86,11 @@ registrarPainel({
       }
       secao(C.enfeites, 'construcao', (o) => cartao(m, o, chaveOu('icone/' + o.alvo, 'objeto/' + o.alvo), C.guardado));
       secao(C.animais, 'animal', (o) => {
-        const def = (D.bruto.animais && D.bruto.animais[o.alvo]) || {}, comum = o.alvo.split('-')[0];
-        return cartao(m, o, chaveOu('icone/' + o.alvo, 'icone/' + comum, `animal/${comum}/parado-frente`), C.especial(def.familia));
+        // a figura: a do próprio bicho; enquanto ela não chega, a do bicho comum que faz o mesmo (gato, cachorro, cavalo)
+        const A = D.bruto.animais || {}, def = A[o.alvo] || {}, efeito = JSON.stringify(def.efeito || 0);
+        const comum = Object.keys(A).find((k) => k !== o.alvo && !A[k].especial && JSON.stringify(A[k].efeito || 1) === efeito) || o.alvo.split('-')[0];
+        const poses = (id) => ['parado-frente', 'parada-frente', 'sentado-frente', 'sentada-frente'].map((p) => `animal/${id}/${p}`);
+        return cartao(m, o, chaveOu('icone/' + o.alvo, ...poses(o.alvo), 'icone/' + comum, ...poses(comum)), C.especial(def.familia));
       });
 
       // ---- tempo: o botão de concluir aparece onde há relógio; aqui, só a explicação e a tabela de preços

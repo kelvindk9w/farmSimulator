@@ -398,6 +398,36 @@
    "pedido": "personagem-montada-galope-costas.md",
    "rodadas": 1,
    "nota": "Par da de frente, na escala da montada andando de costas (tamanho pela massa 263). Pedido com cinco referências (sem a folha de modelo do cavalo, que a da montaria já mostra)."
+  },
+  "animal/jumento/parado-frente": {
+   "pedido": "jumento-parado-frente.md",
+   "rodadas": 1,
+   "nota": "Jumento com a carroça atrás (um desenho só): mexe as orelhas compridas, respira, pisca, balança o rabo; a carroça não se mexe. 255 pontos de altura (fora da tabela de escala); apoio sob o corpo do jumento (--apoio-dx -55). Tamanho pela massa 219."
+  },
+  "animal/jumento/andar-frente": {
+   "pedido": "jumento-andar-frente.md",
+   "rodadas": 1,
+   "nota": "Passo de quatro tempos com a carroça vazia atrás; as rodas mudam os raios de posição. Em duas fileiras de 4. O Codex avisou de um halo no fundo: era o véu de alfa baixo, que a limpeza tira."
+  },
+  "animal/jumento/parado-costas": {
+   "pedido": "jumento-parado-costas.md",
+   "rodadas": 1,
+   "nota": "Carroça em primeiro plano, jumento adiante; mexe as orelhas e o rabo e pisca. Preparada a 330 px (jumento mais carroça) para a roda bater com a da vista de frente; apoio levado para baixo do jumento."
+  },
+  "animal/jumento/andar-costas": {
+   "pedido": "jumento-andar-costas.md",
+   "rodadas": 1,
+   "nota": "Passo de quatro tempos visto por trás, com a carroça vazia em primeiro plano; em duas fileiras de 4. Mesmo tamanho e apoio da espera."
+  },
+  "animal/jumento/andar-barril-frente": {
+   "pedido": "jumento-andar-barril-frente.md",
+   "rodadas": 1,
+   "nota": "A mesma folha do andar com um barril em pé na carroça; mesmos quadros, tamanho e apoio da carroça vazia, para o jogo trocar uma pela outra sem pulo."
+  },
+  "animal/jumento/andar-barril-costas": {
+   "pedido": "jumento-andar-barril-costas.md",
+   "rodadas": 1,
+   "nota": "A mesma folha do andar de costas com o barril em pé na carroça; mesmos quadros, tamanho e apoio da carroça vazia. A madeira saiu um tom mais alaranjada que na carroça vazia."
   }
  },
  "geral": [

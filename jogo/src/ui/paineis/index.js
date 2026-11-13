@@ -14,3 +14,6 @@ import './amigos.js';
 import './cash.js';
 import './guarda-roupa.js';
 import './caderno.js';
+// frente das indústrias e dos pedidos: o painel de uma indústria (fila e receitas) e o quadro de pedidos
+import './industria.js';
+import './pedidos.js';

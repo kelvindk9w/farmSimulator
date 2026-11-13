@@ -11,7 +11,8 @@
 //       acrescenta uma aba ao cartão das construções em que serve() der true
 //   linhaDeArrumar(idDaEntidade, ctx)  → <div> com os botões Mudar de lugar e Guardar, para pôr no painel próprio
 //   iconeDaConstrucao(id, tamanho)     → o ícone de uma construção (a própria peça do cenário, reduzida)
-// E mais: o botão "Entrar" que aparece na porta do celeiro ("Sair", lá dentro) e as seções do celeiro na mochila.
+// E mais: o botão "Entrar" que aparece no HUD quando ela chega ao celeiro ("Sair", lá dentro) e as seções do
+// celeiro na mochila.
 import { el, icone, botao, por } from '../dom.js';
 import { T, frase, numero, tempo } from '../textos.js';
 import '../textos/construcao.js';
@@ -23,11 +24,12 @@ import { aoInstalarMundo } from '../ligacoes.js';
 import { avisar } from '../avisos.js';
 import { botaoConcluir } from '../concluir.js';
 import { som } from '../../plataforma/som.js';
+import { foco } from '../../entrada/foco.js';
 import { registrarCamada } from '../../render/cena.js';
 import { comecarColocacao, comecarMudanca, comecarArrumacao, colocando } from '../colocacao.js';
 import { defDe, podePagar, quantasGuardadas, construcoesDe, construcaoPorId, faltaDaObra, andamentoDaObra, proximaAmpliacao, guardavel, valorDe } from '../../nucleo/sistemas/construcao.js';
 import { quantoTem, listaDeFerramentas } from '../../nucleo/sistemas/posses.js';
-import { capacidadeDe, ocupacaoDe, guardaDoItem, moveisDe, celeiroDe, portaDoCeleiro } from '../../nucleo/sistemas/celeiro-dentro.js';
+import { capacidadeDe, ocupacaoDe, guardaDoItem, moveisDe, pertoDaPorta } from '../../nucleo/sistemas/celeiro-dentro.js';
 
 const TRAVADAS_A_MOSTRA = 2;
 // não há "icone/<id>" para construção: o ícone é a própria peça do cenário, encaixada na caixa (ui/dom.js já encaixa
@@ -263,45 +265,51 @@ SECOES.celeiro = (m, caixa, a) => {
 };
 T.mochila.dica = T.celeiro.dica;
 
-// ---------- o botão na porta do celeiro: "Entrar" lá fora, "Sair" lá dentro ----------
-let bPorta = null, tPorta = null, portaX = -1, portaY = -1;
-const pt = [0, 0];
-function montarPorta() {
-  if (bPorta) return;
-  bPorta = botao({ icone: 'objeto/celeiro-aberto', tamanho: 26, texto: T.celeiro.entrar, classe: 'cons-porta', aoClicar: () => { const m = J.mundo; som.tocar('toque'); m.comando({ tipo: m.personagem.local === 'celeiro' ? 'sair' : 'entrar' }); bPorta.blur(); } });
-  bPorta.dataset.k = 'porta-do-celeiro';
-  tPorta = bPorta.lastChild;
-  bPorta.hidden = true;
-  document.getElementById('ui').append(bPorta);
+// ---------- o botão da porta do celeiro: "Entrar" quando ela está perto dele, "Sair" lá dentro ----------
+// Fica na linha de baixo do HUD, ao lado da dica: não tapa o celeiro (o toque nele continua guardando o cesto), o
+// dedo alcança e, no teclado e no controle remoto, o foco cai nele assim que o menu abre.
+let bPorta = null, tPorta = null, noMenu = false;
+function montarPorta(hud) {
+  if (!bPorta) {
+    bPorta = botao({ icone: 'objeto/celeiro-aberto', tamanho: 30, texto: T.celeiro.entrar, classe: 'cons-porta', aoClicar: () => { const m = J.mundo; som.tocar('toque'); foco.sairDoMenu(); m.comando({ tipo: m.personagem.local === 'celeiro' ? 'sair' : 'entrar' }); bPorta.blur(); } });
+    bPorta.dataset.k = 'porta-do-celeiro';
+    tPorta = bPorta.lastChild;
+    bPorta.hidden = true;
+  }
+  const linha = hud.rodape.querySelector('.linha-info') || hud.rodape;
+  if (bPorta.parentNode !== linha) linha.append(bPorta);
+  hud.paineis['porta-do-celeiro'] = bPorta; // (é por este nome que o guia das missões manda a seta para cá)
 }
 registrarCamada('cima', (g, cam, m) => {
-  montarPorta();
-  const p = m.personagem, loc = m.local;
-  let x = 0, z = 0, alto = 0, mostra = !colocando() && !painelAberto();
-  if (mostra && loc.interior) { x = loc.porta[0] + 1; z = loc.piso[1] + 1.1; alto = 0; }
-  else if (mostra) {
-    const porta = portaDoCeleiro(m, pt), cel = porta && celeiroDe(m);
-    // aparece quando ela está por perto do celeiro (a porta fica no meio da face da frente)
-    if (!porta || !m.locais.celeiro || Math.hypot(p.x - porta[0], p.z - porta[1]) > 6.5 || cel.obraAte > 0) mostra = false;
-    else { x = porta[0]; z = porta[1] - 0.5; alto = 2.1; }
-  }
-  if (mostra) {
-    const sx = Math.round(cam.cssX(x, z)), sy = Math.round(cam.cssY(x, alto, z));
-    if (sx < 60 || sx > cam.w - 60 || sy < 96 || sy > cam.h - 96) mostra = false;
-    else if (sx !== portaX || sy !== portaY) { portaX = sx; portaY = sy; bPorta.style.transform = `translate(${sx}px, ${sy}px) translate(-50%, -50%)`; }
-  }
+  if (!bPorta) return;
+  const dentro = !!m.local.interior, mostra = dentro || pertoDaPorta(m);
   if (bPorta.hidden !== !mostra) bPorta.hidden = !mostra;
-  if (mostra) por(tPorta, loc.interior ? T.celeiro.sair : T.celeiro.entrar);
+  if (mostra) por(tPorta, dentro ? T.celeiro.sair : T.celeiro.entrar);
+  // teclado e controle remoto: ao abrir o menu (voltar) perto da porta, o foco já cai neste botão
+  if (foco.menu !== noMenu) { noMenu = foco.menu; if (noMenu && mostra) foco.focar(bPorta); }
 });
 
 // ---------- a ligação com os eventos do mundo ----------
 const GRAVA = ['comecouObra', 'construiu', 'enfeitou', 'ampliou', 'recolocou', 'moveuConstrucao', 'guardouConstrucao', 'ganhouConstrucao', 'mudouDeLocal'];
-aoInstalarMundo((m) => {
+aoInstalarMundo((m, ctx) => {
   const cena = J.cena, part = cena.part, ev = m.eventos, D = m.dados;
+  montarPorta(ctx.hud);
   const aqui = (d) => (d.local || d.onde || 'fazenda') === m.personagem.local;
   const centro = (d) => { const e = construcaoPorId(m, d.entidade); return e ? [e.x + e.l / 2, e.z + e.p / 2] : [(d.x || 0) + 0.5, (d.z || 0) + 0.5]; };
   // a entidade tocada abre um painel (obra, bancada, galinheiro...): quem pede é o toque, na lógica
-  ev.ouvir('pediuPainel', (d) => abrirPainel(d.painel, d.arg));
+  ev.ouvir('pediuPainel', (d) => {
+    const e = d.entidade ? construcaoPorId(m, d.entidade) : null;
+    // o painel pedido ainda não existe (a frente dona não o registrou): vale o cartão da construção
+    if (!abrirPainel(d.painel, d.arg)) { if (e) abrirPainel('construcao', { entidade: e.id }); return; }
+    // painel de outra frente (abrigo, indústria) que não trouxe o "Mudar de lugar": vai um botão no cabeçalho,
+    // para que toda construção do jogador ofereça a mudança no toque
+    if (!e || d.painel === 'construcao' || e.obraAte > 0 || defDe(m, e.tipo).inicial) return;
+    const veu = document.querySelector('#ui .veu'), x = veu && veu.querySelector('header .fechar');
+    if (!x || veu.querySelector('[data-k="mover"]')) return;
+    const b = botao({ icone: 'ui/mover', tamanho: 24, classe: 'quadrado', rotulo: T.cartao.mover, aoClicar: () => { fecharPainel(true); comecarMudanca(e.id); } });
+    b.dataset.k = 'mover';
+    x.before(b);
+  });
   for (const k of GRAVA) ev.ouvir(k, () => J.gravarLogo());
   // entrou ou saiu do celeiro: a câmera vale para o lugar novo e o chão é refeito
   const acertarCamera = () => { const loc = m.local, p = m.personagem, cam = cena.cam; cam.limites = [0, 0, loc.l, loc.p]; cam.seguindo = true; cam.pular(p.x, p.z); cena.chao.sujarTudo(); cena.destaque.x = -1; cena.destaque.entidade = null; };

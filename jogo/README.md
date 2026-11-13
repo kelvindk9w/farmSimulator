@@ -18,6 +18,7 @@ npm run validar      # confere dados/ do jeito que o jogo lê
 - Várias frentes na mesma pasta: `JOGO_DIST=dist-minha-frente` muda a pasta de saída do build, do servidor e da verificação; `JOGO_CAPTURAS=capturas-minha-frente` muda a das fotos; `JOGO_PORTA` muda a porta do servidor.
 - `npm run verificar` usa o Playwright instalado na máquina (não é dependência do jogo).
 - `node tools/verificar-terras.mjs` (depois do build) joga a frente das terras do mesmo jeito: limpar, comprar lote, bananeira, regador de área, desgaste e conserto, em 1280x720 e 844x390.
+- `node tools/verificar-progresso.mjs` (depois do build) joga a frente de progresso: presente do dia (com o relógio indo para o dia seguinte), conquista ganha e recebida, convite copiado e fazenda nova aberta por `#convite-<codigo>`, foto da fazenda, compra simulada de cash, concluir um relógio de teste, comprar e vestir roupa, caderno do vizinho, em 1280x720 e 844x390.
 - O endereço com `#teste` (por exemplo `http://127.0.0.1:8091/#teste`) abre o modo em que o tempo só anda quando a ferramenta manda, por `window.__jogo`.
 - Perfis do bot: `direto` (não fecha o jogo), `casual`, `regular`, `engajado` (sessões por dia, como no modelo de `tools/economia/ritmo.mjs`).
 
@@ -28,6 +29,7 @@ npm run validar      # confere dados/ do jeito que o jogo lê
 - **Controle de videogame e de TV**: direcional ou alavanca andam, A/OK age, B/voltar cancela ou fecha, ombros trocam o modo.
 - O poço enche o regador, a banca compra o que está no cesto, o celeiro guarda o cesto (e é onde fica o suporte de ferramentas).
 - **Terras**: a placa de um lote (ou a etiqueta do preço em cima dela) abre a compra; a aba "Terras" da loja mostra todos. Mato, toco e pedra saem com um toque (modo mão) ou arrastando no modo "Limpar", que aparece quando há foice, machado ou picareta; toco e pedra pedem vários golpes, num toque só. A muda de árvore aparece na barra de sementes: as casas onde ela cabe ficam marcadas. Regador e foice melhores alcançam várias casas (marcadas antes do toque). Ferramenta gasta não quebra: rende menos até o conserto, pelo aviso no alto da tela ou pelo botão "Ferramentas e conserto" da mochila.
+- **Minha fazenda** (o troféu no alto): conquistas, presente do dia, amigos (convite por link e foto da fazenda), guarda-roupa, loja de cash e o caderno com as lições do vizinho. Quando há presente esperando, aparece a caixa de correio no alto: um toque abre. A loja de cash é de teste: nenhuma cobrança é feita. Nada de útil é só de cash, e convidar nunca é obrigatório.
 - Configurações: som, esquema de toque (só toque, alavanca com botão, os dois), tamanho dos botões, tela cheia, exportar e importar a fazenda por texto, recomeçar.
 
 ## Organização
@@ -74,6 +76,7 @@ Funcionalidade nova entra por registro, em arquivo próprio: `registrarSistema`,
 ## O que ainda não existe (fica para os próximos marcos)
 
 - Mudar uma árvore frutífera de lugar (ela fica onde foi plantada).
-- O celeiro por dentro, construir, animais, árvores, indústria, pedidos, conquistas, recompensa diária, cash.
+- O celeiro por dentro, construir, animais, árvores, indústria, pedidos.
+- Progresso: não há servidor (o jogo não fica sabendo sozinho que o amigo convidado chegou: há um botão de teste), a compra de cash é simulada, chapéus, vestido e pintura das ferramentas estão "em breve" (pedem desenho novo) e a caixa de correio ainda não existe como objeto no terreno (só no HUD).
 - Cercas, porteira, o quadro de pedidos e o Seu Tonho em pessoa no terreno (hoje ele aparece no balão).
 - O fôlego segue `regras.json` (`folego`): hoje são 10 s de corrida e volta em 5 s andando ou 3 s parada.

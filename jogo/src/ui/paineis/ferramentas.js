@@ -21,7 +21,8 @@ registrarPainel({
       if (r.ok) som.tocar('moeda'); else { som.tocar('erro'); if (r.motivo !== 'sem-ouro') avisar(frase(r.motivo, r.dados, J.dados)); }
     }
     function cartao(m, id) {
-      const it = m.dados.itens[id], e = estadoDoItem(m, id), custo = precoDoConserto(m, id), c = el('div', 'oferta ferramenta' + (e.total && e.usos <= 0 ? ' gasta' : ''));
+      // (o conserto só se oferece para o que está gasto ou quase: antes disso não há o que decidir)
+      const it = m.dados.itens[id], e = estadoDoItem(m, id), pede = e.total > 0 && e.fracao <= m.dados.desgaste.avisoEm, custo = pede ? precoDoConserto(m, id) : 0, c = el('div', 'oferta ferramenta' + (e.total && e.usos <= 0 ? ' gasta' : ''));
       c.dataset.item = id;
       const nome = el('div', 'nome', it.nome), f = m.posses.ferramentas[id];
       if (f && it.funcao === 'regador') nome.append(el('small', '', ' ' + T.ferramentas.agua(f.agua, it.capacidade)));
@@ -53,7 +54,7 @@ registrarPainel({
       corpo.textContent = '';
       ctx.saldo.textContent = '';
       ctx.saldo.append(icone('icone/ouro', 20), el('span', '', numero(P.ouro)));
-      const aConsertar = itensGastando(m, false).filter((g) => g.preco > 0), total = aConsertar.reduce((s, g) => s + g.preco, 0);
+      const aConsertar = itensGastando(m).filter((g) => g.preco > 0), total = aConsertar.reduce((s, g) => s + g.preco, 0);
       if (aConsertar.length > 1) {
         const linha = el('div', 'abas'), b = botao({ classe: 'verde', aoClicar: () => consertar({ tudo: true }) });
         b.append(el('span', '', T.ferramentas.tudo(total))); b.dataset.k = 'conserto-tudo';

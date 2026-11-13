@@ -46,7 +46,11 @@ async function pronto(pg) {
 const J = (pg, f, arg) => pg.evaluate(f, arg);
 const estado = (pg) => pg.evaluate(() => window.__jogo.estado());
 const desenhar = async (pg) => { await pg.evaluate(() => window.__jogo.desenhar()); await esperar(90); };
-const foto = async (pg, nome, espera = 350) => { await pg.evaluate(() => window.__jogo.desenhar()); await esperar(espera); await pg.screenshot({ path: path.join(capturas, nome), type: 'jpeg', quality: 84 }); };
+// a foto espera os avisos saírem da frente (eles somem sozinhos em poucos segundos)
+const foto = async (pg, nome, espera = 350) => {
+  try { await pg.waitForFunction(() => !document.querySelector('.avisos .aviso'), null, { timeout: 9000 }); } catch { /* fica com aviso mesmo */ }
+  await pg.evaluate(() => window.__jogo.desenhar()); await esperar(espera); await pg.screenshot({ path: path.join(capturas, nome), type: 'jpeg', quality: 84 });
+};
 const semErros = (a, onde) => confere(a.erros.length === 0, `${onde}: erro no console: ${a.erros.slice(0, 3).join(' | ')}`);
 
 // centro de um elemento da interface, na janela (rola o painel até ele aparecer)
@@ -252,7 +256,7 @@ try {
   confere(await J(pg, () => { const v = document.querySelector('.vagas .vaga .precos'); return !!v && v.querySelectorAll('.preco').length === 2; }), 'a vaga de fila mostra os dois preços (ouro e cash)');
   confere(await semVazar(pg), 'a loja de cash não vaza para os lados');
   await foto(pg, 'd-09-loja-de-cash.jpg');
-  const cashLoja = (await estado(pg)).cash, pacote = await J(pg, () => window.__jogo.dados.bruto.loja.cash.pacotes[0]);
+  const cashLoja = (await estado(pg)).cash, pacote = await J(pg, () => window.__jogo.dados.bruto.loja.cash.pacotes[2]);
   await clicarEm(`[data-k="pacote-${pacote.id}"]`);
   confere(await J(pg, () => { const d = document.querySelector('.subida.dialogo'); return !!d && /R\$/.test(d.textContent) && /nenhuma cobrança/i.test(d.textContent) && document.activeElement === d.querySelector('[data-k="nao"]'); }), 'a compra pergunta antes, com o preço e o aviso de teste, e o foco começa no "não"');
   await foto(pg, 'd-10-pergunta-de-compra.jpg');
@@ -293,7 +297,9 @@ try {
   await clicarEm('[data-k="ir-guarda-roupa"]');
   igual(await J(pg, () => window.__jogo.painelAberto()), 'guarda-roupa', 'o atalho abre o guarda-roupa');
   const roupas = [].concat(...(await P(pg, 'roupas')).map((g) => g.itens));
-  const alvo = roupas.filter((p) => p.pronto && !p.tem && p.cash > 0 && p.liberado).sort((x, y) => x.cash - y.cash)[0];
+  // de preferência uma roupa de corpo inteiro que caiba no saldo (aparece mais na foto); senão, a mais barata
+  const saldoR = (await estado(pg)).cash, deCash = roupas.filter((p) => p.pronto && !p.tem && p.cash > 0 && p.liberado && p.cash <= saldoR).sort((x, y) => x.cash - y.cash);
+  const alvo = deCash.filter((p) => p.parte === 'roupa').pop() || deCash[0];
   confere(!!alvo, 'há uma roupa pronta para comprar com cash');
   const semDesenho = roupas.find((p) => !p.pronto);
   if (semDesenho) {
@@ -326,7 +332,7 @@ try {
   if (deOuro) {
     await clicarEm(`[data-k="peca-${deOuro.id}"]`);
     if (!deOuro.liberado) confere(await J(pg, () => /n[íi]vel/i.test(document.querySelector('.prova .acao').textContent) && !document.querySelector('.prova .acao button')), `a roupa de ouro (${deOuro.id}) diz o nível que a libera`);
-    await J(pg, ([n, o]) => { const m = window.__jogo.mundo; m.progresso.nivel = Math.max(m.progresso.nivel, n); m.posses.ouro += o; m.eventos.emitir('informou', { motivo: '' }); }, [deOuro.nivel, deOuro.ouro]);
+    await J(pg, ([n, o]) => { const m = window.__jogo.mundo; m.progresso.nivel = Math.max(m.progresso.nivel, n); m.progresso.xp = Math.max(m.progresso.xp, m.dados.niveis.limiar[m.progresso.nivel] || 0); m.posses.ouro += o; m.eventos.emitir('informou', { motivo: '' }); }, [deOuro.nivel, deOuro.ouro]);
     await desenhar(pg);
     const ouroR = (await estado(pg)).ouro;
     await clicarEm('[data-k="comprar-ouro"]');
@@ -457,6 +463,7 @@ try {
       confere(await cabe(pg, '.dialogo .cartao'), 'a pergunta de compra cabe na tela do celular');
       ruins = await pequenos(pg);
       confere(ruins.length === 0, 'celular, pergunta de compra: ' + ruins.slice(0, 4).join('; '));
+      await esperar(450); // a pergunta entra clareando: a foto espera ela assentar
       await pg.screenshot({ path: path.join(capturas, 'd-29-celular-pergunta.jpg'), type: 'jpeg', quality: 84 });
       await tocar('.dialogo [data-k="nao"]');
       confere(!(await J(pg, () => window.__jogo.subidaAberta())), 'no celular, "Agora não" fecha a pergunta');

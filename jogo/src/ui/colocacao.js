@@ -33,6 +33,8 @@ let seguirFantasma = false, relogio = 0;
 export const colocando = () => !!modo;
 export const modoDeColocacao = () => (modo ? { tipo: modo.tipo, id: modo.id, x: F.x, z: F.z, giro: F.giro, ok: F.ok, seq: !!modo.seq, postas: modo.postas || 0, motivo: modo.motivo ? modo.motivo.motivo : null } : null);
 
+J.colocacao = modoDeColocacao; // (as ferramentas de teste e o robô leem por aqui: window.__jogo.J.colocacao())
+
 // enfeite sem obra nasce na hora: dá para colocar vários de uma vez (cerca, porteira, calçamento, canteiro...)
 const emSequencia = (def) => def.tipo === 'decoracao' && !(def.obraSeg > 0) && !(def.limite === 1);
 
@@ -308,7 +310,9 @@ function ligarToques() {
       cam.chao(d1.x, d1.y, chao);
       const x = Math.floor(chao[0]), z = Math.floor(chao[1]);
       F.x = Math.max(0, Math.min(m.local.l - 1, x)); F.z = Math.max(0, Math.min(m.local.p - 1, z));
-      pegar((id !== null && construcaoPorId(m, id)) || construcaoEm(m, x, z));
+      // (a figura de uma construção que não muda de lugar, como a casa, não tapa o que está atrás dela)
+      const fig = id !== null ? construcaoPorId(m, id) : null, daCasa = construcaoEm(m, x, z), muda = (o) => !!o && !defDe(m, o.tipo).inicial;
+      pegar(muda(fig) ? fig : muda(daCasa) ? daCasa : fig || daCasa);
     } else if (g === 'fantasma' && modo.seq && !pintou && !andou && F.ok) confirmar(); // em sequência, um toque coloca um
   }
   toque.addEventListener('pointerup', (e) => soltar(e, false));
@@ -333,7 +337,8 @@ function ligarToques() {
     } else if (seguirFantasma) {
       const cs = casas(), fx = cam.cssX(F.x + cs[0] / 2, F.z + cs[1] / 2), fy = cam.cssY(F.x + cs[0] / 2, 0, F.z + cs[1] / 2);
       const ex = fx < W * 0.2 ? W * 0.2 - fx : fx > W * 0.8 ? W * 0.8 - fx : 0, ey = fy < H * 0.3 ? H * 0.3 - fy : fy > H * 0.62 ? H * 0.62 - fy : 0;
-      if (ex || ey) { const k = Math.min(1, dt * 8 + (dt === 0 ? 1 : 0)); cam.arrastar(ex * k, ey * k); }
+      // (só até ele aparecer: depois a tela fica onde o jogador a deixar, até a próxima seta)
+      if (Math.abs(ex) > 0.5 || Math.abs(ey) > 0.5) { const k = Math.min(1, dt * 8 + (dt === 0 ? 1 : 0)); cam.arrastar(ex * k, ey * k); } else seguirFantasma = false;
     }
   });
 }

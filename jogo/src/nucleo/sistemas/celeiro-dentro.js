@@ -101,6 +101,9 @@ function ligarMoveis(m) {
 // ---------- o celeiro visto de fora: a figura do seu nível, de porta aberta quando ela chega perto ----------
 export const celeiroDe = (m) => m.construcao.todas.find((e) => e.tipo === 'celeiro' && e.local === 'fazenda') || null;
 // o ponto diante da porta, na fazenda (o mesmo onde ela para para guardar o cesto)
+// ela está na fazenda, perto o bastante da porta para a interface oferecer "Entrar"?
+export const PERTO_DA_PORTA = 4.5;
+export function pertoDaPorta(m) { const p = m.personagem, e = celeiroDe(m); return !!e && p.local === 'fazenda' && !(e.obraAte > 0) && !!m.locais.celeiro && Math.hypot(p.x - (e.x + e.l / 2), p.z - (e.z + e.p + 0.5)) <= PERTO_DA_PORTA; }
 export function portaDoCeleiro(m, out = [0, 0]) { const e = celeiroDe(m); if (!e) return null; out[0] = e.x + e.l / 2; out[1] = e.z + e.p + 0.5; return out; }
 const pt = [0, 0], DO_CELEIRO = [];
 const NA_PORTA = { guardar: 1, pegar: 1, pegarFerramenta: 1, entrarNoCeleiro: 1 };
@@ -173,7 +176,13 @@ function guiaDeConstruir(m, f, out) {
   const obra = construcoesDe(m, id).find((e) => !estaPronta(e));
   if (obra) { out.tipo = 'esperar'; out.seg = faltaDaObra(m, obra); return out; }
   if (planejadas(m).some((a) => a.id === id)) { out.tipo = null; return out; } // ela já está indo martelar
-  if (def.onde === 'celeiro' && p.local !== 'celeiro') { const c = celeiroDe(m); if (!c) return null; out.tipo = 'entidade'; out.id = c.id; return out; }
+  if (def.onde === 'celeiro' && p.local !== 'celeiro') {
+    // de longe, a seta mostra o celeiro; chegando à porta, mostra o botão de entrar (a interface o registra como "porta-do-celeiro")
+    const c = celeiroDe(m);
+    if (!c) return null;
+    if (pertoDaPorta(m)) { out.tipo = 'painel'; out.painel = 'porta-do-celeiro'; out.item = null; } else { out.tipo = 'entidade'; out.id = c.id; }
+    return out;
+  }
   if (def.onde === 'fazenda' && p.local === 'celeiro') { const loc = m.locais.celeiro; out.tipo = 'casa'; out.x = loc.porta[0]; out.z = loc.porta[1]; return out; }
   out.tipo = 'painel'; out.painel = 'construir'; out.item = id;
   return out;

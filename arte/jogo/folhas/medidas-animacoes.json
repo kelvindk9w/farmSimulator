@@ -1091,6 +1091,337 @@
    "sequencia": "1,2,2,1,3,3,1,4"
   }
  },
+ "animal/jumento/andar-barril-costas": {
+  "chave": "animal/jumento/andar-barril-costas",
+  "crua": "andar-barril-costas.png",
+  "cruaTamanho": [
+   1536,
+   1024
+  ],
+  "linhasNaCrua": 2,
+  "figurasNaCrua": 8,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 330,
+  "emPeReal": 329,
+  "emPeFonte": 349,
+  "escala": 0.9437,
+  "casa": [
+   520,
+   352
+  ],
+  "apoio": [
+   260,
+   257
+  ],
+  "quadros": 8,
+  "desenhos": 8,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   328,
+   327,
+   327,
+   328,
+   329,
+   329,
+   327,
+   324
+  ],
+  "tamanhoPelaMassa": [
+   216,
+   216.3,
+   215.4,
+   216,
+   215.2,
+   217.9,
+   215.5,
+   215.9
+  ],
+  "variacaoAltura": 1.7,
+  "bytes": 265868,
+  "avisos": [],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/jumento/andar-barril-costas",
+   "altura": "330",
+   "quadros": "8",
+   "qps": "8",
+   "eixo": "massa",
+   "base": "linha",
+   "chao": "0.25",
+   "tamanho-massa": "216",
+   "altura-livre": true,
+   "apoio-dx": "90"
+  }
+ },
+ "animal/jumento/andar-barril-frente": {
+  "chave": "animal/jumento/andar-barril-frente",
+  "crua": "andar-barril-frente.png",
+  "cruaTamanho": [
+   1536,
+   1024
+  ],
+  "linhasNaCrua": 2,
+  "figurasNaCrua": 8,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 255,
+  "emPeReal": 258,
+  "emPeFonte": 265,
+  "escala": 0.9748,
+  "casa": [
+   384,
+   280
+  ],
+  "apoio": [
+   192,
+   245
+  ],
+  "quadros": 8,
+  "desenhos": 8,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   253,
+   248,
+   256,
+   252,
+   254,
+   252,
+   258,
+   255
+  ],
+  "tamanhoPelaMassa": [
+   222,
+   222.1,
+   222.3,
+   222.7,
+   222.1,
+   223.5,
+   221.2,
+   225
+  ],
+  "variacaoAltura": 4.2,
+  "bytes": 289110,
+  "avisos": [
+   "altura varia 4.2% entre quadros (253 248 256 252 254 252 258 255), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/jumento/andar-barril-frente",
+   "altura": "255",
+   "quadros": "8",
+   "qps": "8",
+   "eixo": "massa",
+   "base": "linha",
+   "chao": "0.09",
+   "tamanho-massa": "222.3",
+   "altura-livre": true,
+   "apoio-dx": "-23"
+  }
+ },
+ "animal/jumento/andar-costas": {
+  "chave": "animal/jumento/andar-costas",
+  "crua": "andar-costas.png",
+  "cruaTamanho": [
+   1536,
+   1024
+  ],
+  "linhasNaCrua": 2,
+  "figurasNaCrua": 8,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 330,
+  "emPeReal": 327,
+  "emPeFonte": 347,
+  "escala": 0.9437,
+  "casa": [
+   504,
+   352
+  ],
+  "apoio": [
+   252,
+   257
+  ],
+  "quadros": 8,
+  "desenhos": 8,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   325,
+   325,
+   326,
+   323,
+   327,
+   327,
+   323,
+   315
+  ],
+  "tamanhoPelaMassa": [
+   209,
+   209.2,
+   208.3,
+   209.2,
+   208.3,
+   210,
+   208.2,
+   208
+  ],
+  "variacaoAltura": 3.7,
+  "bytes": 260591,
+  "avisos": [
+   "altura varia 3.7% entre quadros (325 325 326 323 327 327 323 315), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/jumento/andar-costas",
+   "altura": "330",
+   "quadros": "8",
+   "qps": "8",
+   "eixo": "massa",
+   "base": "linha",
+   "chao": "0.25",
+   "tamanho-massa": "209",
+   "altura-livre": true,
+   "apoio-dx": "85"
+  }
+ },
+ "animal/jumento/andar-frente": {
+  "chave": "animal/jumento/andar-frente",
+  "crua": "andar-frente.png",
+  "cruaTamanho": [
+   1536,
+   1024
+  ],
+  "linhasNaCrua": 2,
+  "figurasNaCrua": 8,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 255,
+  "emPeReal": 256,
+  "emPeFonte": 263,
+  "escala": 0.9746,
+  "casa": [
+   384,
+   280
+  ],
+  "apoio": [
+   192,
+   245
+  ],
+  "quadros": 8,
+  "desenhos": 8,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   251,
+   244,
+   256,
+   251,
+   253,
+   248,
+   254,
+   252
+  ],
+  "tamanhoPelaMassa": [
+   218.7,
+   219,
+   219,
+   219.5,
+   218.9,
+   219.8,
+   217.4,
+   221.4
+  ],
+  "variacaoAltura": 4.9,
+  "bytes": 282101,
+  "avisos": [
+   "altura varia 4.9% entre quadros (251 244 256 251 253 248 254 252), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/jumento/andar-frente",
+   "altura": "255",
+   "quadros": "8",
+   "qps": "8",
+   "eixo": "massa",
+   "base": "linha",
+   "chao": "0.09",
+   "tamanho-massa": "219",
+   "altura-livre": true,
+   "apoio-dx": "-20"
+  }
+ },
+ "animal/jumento/parado-costas": {
+  "chave": "animal/jumento/parado-costas",
+  "crua": "parado-costas.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 4,
+  "referencia": false,
+  "modo": "molde",
+  "emPe": 330,
+  "emPeReal": 330,
+  "emPeFonte": 479,
+  "escala": 0.6889,
+  "casa": [
+   464,
+   352
+  ],
+  "apoio": [
+   232,
+   257
+  ],
+  "quadros": 8,
+  "desenhos": 4,
+  "qps": 4,
+  "laco": true,
+  "alturas": [
+   330,
+   330,
+   322,
+   324
+  ],
+  "tamanhoPelaMassa": [
+   209.4,
+   209.2,
+   209,
+   208.4
+  ],
+  "variacaoAltura": 2.3,
+  "custosDoMolde": [
+   0,
+   21,
+   23,
+   18
+  ],
+  "bytes": 138620,
+  "avisos": [],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "animal/jumento/parado-costas",
+   "altura": "330",
+   "quadros": "4",
+   "qps": "4",
+   "alinhar": "molde",
+   "molde": "0.4-1",
+   "em-pe-quadro": "1",
+   "faixa-pes": "0.25",
+   "chao": "0.25",
+   "sequencia": "1,2,2,3,3,1,4,1",
+   "altura-livre": true,
+   "apoio-dx": "92"
+  }
+ },
  "animal/jumento/parado-frente": {
   "chave": "animal/jumento/parado-frente",
   "crua": "parado-frente.png",
@@ -1107,11 +1438,11 @@
   "emPeFonte": 366,
   "escala": 0.6967,
   "casa": [
-   456,
+   424,
    280
   ],
   "apoio": [
-   228,
+   212,
    245
   ],
   "quadros": 8,
@@ -1137,7 +1468,7 @@
    73,
    44
   ],
-  "bytes": 150038,
+  "bytes": 148019,
   "avisos": [],
   "falhas": [],
   "ok": true,
@@ -1153,7 +1484,7 @@
    "chao": "0.09",
    "sequencia": "1,2,2,3,3,1,4,1",
    "altura-livre": true,
-   "apoio-dx": "-70"
+   "apoio-dx": "-55"
   }
  },
  "animal/ovelha-tosquiada/andar-costas": {

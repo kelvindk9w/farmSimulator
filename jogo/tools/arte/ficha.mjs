@@ -20,7 +20,12 @@ const LISTA = [
   ['4. Outros bichos e montaria', [
     ...duas('animal/ovelha', ['parada', 'andar']), ...duas('animal/ovelha-tosquiada', ['parada', 'andar']),
     ...duas('animal/boi', ['parado', 'puxar']), ...duas('animal/cavalo', ['parado', 'andar', 'galope']), ...duas('personagem', ['montada-andar', 'montada-galope']),
-    ...duas('animal/jumento', ['parado', 'andar']), ...duas('animal/cachorro', ['parado', 'andar', 'sentado']), ...duas('animal/gato', ['parado', 'andar', 'sentado']),
+    ...duas('animal/jumento', ['parado', 'andar', 'andar-barril']), ...duas('animal/cachorro', ['parada', 'andar', 'sentado']), ...duas('animal/gato', ['parada', 'andar', 'sentado']),
+  ]],
+  ['5. Acréscimos da coordenação: bichos especiais e Seu Tonho', [
+    ...duas('animal/cao-boiadeiro', ['parada', 'andar']), ...duas('animal/gato-siames', ['parada', 'andar']),
+    ...duas('animal/cavalo-mangalarga', ['parado', 'andar', 'galope']), ...duas('personagem', ['montada-mangalarga-andar', 'montada-mangalarga-galope']),
+    'animal/seu-tonho/parado-frente',
   ]],
 ];
 

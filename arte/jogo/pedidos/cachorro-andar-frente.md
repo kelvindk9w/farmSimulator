@@ -3,7 +3,7 @@ Use a sua ferramenta própria de geração de imagens. Não escreva código para
 As imagens anexas são de um jogo de fazenda original, em desenho com contorno:
 - `referencias/var-2-contorno.png`: a cena do jogo (dá o estilo e a câmera);
 - `referencias/cachorro.png`: a FOLHA DE MODELO do cachorro (parado de frente três quartos, de costas três quartos e de perfil). Ela manda nas proporções, nas cores e nos detalhes.
-- `referencias/parado-frente.png`: a folha já pronta do mesmo cachorro parado, nesta mesma vista (dá o formato da folha, o tamanho e o jeito do desenho: a figura tem de sair igual a esta).
+- `referencias/parada-frente.png`: a folha já pronta do mesmo cachorro parado, nesta mesma vista (dá o formato da folha, o tamanho e o jeito do desenho: a figura tem de sair igual a esta).
 
 Preciso da folha de animação do MESMO cachorro ANDANDO, visto de FRENTE três quartos, para usar como figura 2D animada dentro do jogo.
 

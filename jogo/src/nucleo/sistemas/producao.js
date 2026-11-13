@@ -15,7 +15,8 @@ import { RECIPIENTES, espacoNoCesto, porNoCesto, ferramentaNoCinto, ferramentaNo
 import { darXp } from './niveis.js';
 import { gastar, rendeDe } from './desgaste.js';
 import { construcaoPorId, estaPronta } from './construcao.js';
-import { registrarFamilia, animalPorId, defDoAnimal, comecarCiclo, pararCiclo, tirarAnimal, resolver, cicloDoAnimal, faltaNoAbrigo } from './animais.js';
+import { registrarGuia, guiaDoEvento } from '../guia.js';
+import { registrarFamilia, animalPorId, animaisDe, defDoAnimal, comecarCiclo, pararCiclo, tirarAnimal, resolver, cicloDoAnimal, faltaNoAbrigo } from './animais.js';
 
 const NAO = (motivo, dados, limpar) => ({ ok: false, motivo, dados, limpar });
 const SIM = { ok: true };
@@ -189,6 +190,32 @@ const produtores = (dados) => Object.values(dados.animais).filter((a) => a.famil
 registrarEvento('recolheu', {
   campos: ['item', 'n', 'animal', 'entidade'],
   aceita: (dados, f) => um(f.item, (it) => produtores(dados).some((a) => a.produto === it)) && um(f.animal, (id) => produtores(dados).some((a) => a.id === id)),
+});
+
+// ---------- o guia das missões de recolher (a seta do tutorial e o jogador automático) ----------
+// sem o bicho, o passo é comprá-lo; com produto esperando, é tocar no abrigo (ou comprar o que falta para recolher,
+// ou esvaziar o recipiente cheio na banca); com bicho sem trato, é tratar; senão, é esperar o ciclo
+registrarGuia('recolheu', (m, f, out) => {
+  const item = Array.isArray(f.item) ? f.item[0] : f.item, especie = Array.isArray(f.animal) ? f.animal[0] : f.animal;
+  const d = Object.values(m.dados.animais).find((a) => a.familia === 'producao' && (!item || a.produto === item) && (!especie || a.id === especie));
+  if (!d) return null;
+  const meus = animaisDe(m, { especie: d.id }).filter((a) => a.abrigo && m.local.porId[a.abrigo]);
+  if (!meus.some((a) => a.fim !== 'estimacao')) return guiaDoEvento(m, 'comprou', { animal: d.id }, out);
+  const pronto = meus.find((a) => a.pronto > 0);
+  if (pronto) {
+    const r = podeRecolher(m, d);
+    if (r.ok) { out.tipo = 'entidade'; out.id = pronto.abrigo; return out; }
+    if (r.motivo === 'falta-de-recolher' && r.dados.item) { out.tipo = 'painel'; out.painel = 'loja'; out.item = r.dados.item; return out; }
+    out.tipo = 'entidade'; out.id = 'banca';
+    return out;
+  }
+  const parado = meus.find((a) => a.fim === 'espera' || (a.cicloDesde > 0 && !a.tratado));
+  if (parado && parado.fim !== 'espera') return guiaDoEvento(m, 'tratou', { abrigo: d.abrigo }, out);
+  let seg = Infinity;
+  for (const a of meus) if (a.cicloDesde > 0 && !a.fim) seg = Math.min(seg, cicloDoAnimal(m, a).falta);
+  if (seg === Infinity) { out.tipo = 'entidade'; out.id = (parado || meus[0]).abrigo; return out; }
+  out.tipo = 'esperar'; out.seg = seg;
+  return out;
 });
 
 const falha = (m, r, quieto) => { if (!quieto) m.eventos.emitir('faltou', { motivo: r.motivo, dados: r.dados }); return { ok: false, motivo: r.motivo, dados: r.dados }; };

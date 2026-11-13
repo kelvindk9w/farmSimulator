@@ -7,7 +7,8 @@
 //     lista: [{ id, especie, familia, abrigo (id da ENTIDADE da construção, ou null), tratado, cicloDesde,
 //               pronto, produzidos, ...o que a família guardar }],
 //     abrigos: { [id da entidade]: { cocho, bebedouro } },     porções de comida e de água que há agora
-//     seq, versao, proximo, entregues }
+//     seq, versao, proximo, entregues,
+//     vistos: [chave] }                                        o que o vizinho já explicou (a primeira vez de cada mecânica)
 //
 // O relógio: bicho com "cicloSeg" e com abrigo vive em ciclos. No começo de cada ciclo ele come ("come") e bebe
 // ("bebe") do cocho e do bebedouro do seu abrigo; se faltou um dos dois, não consome nada e o ciclo fica "sem trato"
@@ -20,6 +21,7 @@ import { MOSTRA_LIBERADO } from './niveis.js';
 import { JA_COMPROU, VENDAVEL } from './loja.js';
 import { comportamento, COMPORTAMENTOS, construcaoPorId, estaPronta, valorDe } from './construcao.js';
 import { ENTREGAS, animaisEspeciais } from './cash.js';
+import { registrarGuia, guiaDoEvento } from '../guia.js';
 
 const NAO = (motivo, dados, limpar) => ({ ok: false, motivo, dados, limpar });
 const SIM = { ok: true };
@@ -380,26 +382,65 @@ MOSTRA_LIBERADO.animais = (m, x) => { const d = m.dados.animais[x.id]; return !!
 // a loja vende a ração se algum bicho do jogo come ração
 VENDAVEL.racao = (m, it) => Object.values(m.dados.animais).some((a) => a.comida === it.id);
 
+// ---------- o guia das missões (a seta do tutorial e o jogador automático): comprar bicho e tratar ----------
+const primeiro = (v) => (Array.isArray(v) ? v[0] : v);
+const paraEntidade = (out, id) => { out.tipo = 'entidade'; out.id = id; return out; };
+const aqui = (m, e) => e.local === m.personagem.local;
+// o vizinho já explicou esta mecânica? (a chave é de quem pergunta: 'cocho', 'recolher:ovo', 'fim'...)
+export const jaViuDica = (m, dica) => m.animais.vistos.includes(dica);
+// comprar um bicho: sem abrigo pronto, o passo é construir o abrigo; com abrigo, é tocar nele (o painel vende o bicho
+// e, se estiver cheio, oferece a ampliação). Bicho sem abrigo se compra na aba "Animais" da loja.
+registrarGuia('comprou', (m, f, out) => {
+  const d = m.dados.animais[primeiro(f.animal)];
+  if (!d || !FAMILIAS[d.familia] || !(d.preco.ouro > 0)) return null;
+  if (!d.abrigo) { out.tipo = 'painel'; out.painel = 'animais'; out.item = d.id; return out; }
+  const e = abrigoComVaga(m, d.abrigo) || abrigosProntos(m, d.abrigo)[0];
+  if (!e) return guiaDoEvento(m, 'construiu', { construcao: d.abrigo }, out);
+  return aqui(m, e) ? paraEntidade(out, e.id) : null;
+});
+// tratar: o abrigo que tem cocho ou bebedouro para encher; faltando a comida, o passo é consegui-la
+registrarGuia('tratou', (m, f, out) => {
+  const tipo = primeiro(f.abrigo), parte = primeiro(f.parte), lista = abrigosProntos(m, tipo).filter((e) => aqui(m, e));
+  if (!lista.length) return tipo ? guiaDoEvento(m, 'construiu', { construcao: tipo }, out) : null;
+  for (const e of lista) if ((parte !== 'bebedouro' && podeEncherCocho(m, e).ok) || (parte !== 'cocho' && podeEncherBebedouro(m, e).ok)) return paraEntidade(out, e.id);
+  for (const e of lista) {
+    const r = parte === 'bebedouro' ? SIM : podeEncherCocho(m, e);
+    if (r.motivo !== 'sem-comida') continue;
+    const it = m.dados.itens[r.dados.item];
+    if (it && it.tipo === 'colheita') return guiaDoEvento(m, 'colheu', { item: it.id }, out);
+    out.tipo = 'painel'; out.painel = 'loja'; out.item = r.dados.item;
+    return out;
+  }
+  // tudo cheio: é esperar os bichos comerem
+  let seg = Infinity;
+  for (const a of m.animais.lista) if (a.cicloDesde > 0 && lista.some((e) => e.id === a.abrigo)) seg = Math.min(seg, cicloDoAnimal(m, a).falta);
+  if (seg === Infinity) return paraEntidade(out, lista[0].id);
+  out.tipo = 'esperar'; out.seg = seg;
+  return out;
+});
+
 const falha = (m, r, quieto) => { if (!quieto) m.eventos.emitir('faltou', { motivo: r.motivo, dados: r.dados }); return { ok: false, motivo: r.motivo, dados: r.dados }; };
 
 // ---------- o sistema ----------
 registrarSistema({
   id: 'animais',
   iniciar(m) {
-    m.animais = { lista: [], abrigos: {}, seq: 0, versao: 0, proximo: Infinity, entregues: [] };
+    m.animais = { lista: [], abrigos: {}, seq: 0, versao: 0, proximo: Infinity, entregues: [], vistos: [] };
     for (const def of Object.values(m.dados.construcoes)) if (def.tipo === 'abrigo') darVidaAoAbrigo(def.id);
   },
   segundo: conferir,
   ausencia: conferir,
 
   comandos: {
-    // comprarAnimal { animal }: paga em ouro e o bicho vai para o primeiro abrigo pronto do tipo dele com vaga
+    // comprarAnimal { animal, abrigo? }: paga em ouro e o bicho vai para o abrigo pedido (id da entidade: o do painel
+    // aberto), se for do tipo dele e tiver vaga; senão, para o primeiro abrigo pronto do tipo dele com vaga
     comprarAnimal(m, c) {
       const r = podeComprarAnimal(m, c.animal);
       if (!r.ok) return falha(m, r, c.quieto);
-      const d = m.dados.animais[c.animal];
+      const d = m.dados.animais[c.animal], e = c.abrigo ? construcaoPorId(m, c.abrigo) : null;
+      const cabe = !!e && e.tipo === d.abrigo && estaPronta(e) && quantosNoAbrigo(m, e.id) < vagasDoAbrigo(m, e);
       gastarOuro(m, d.preco.ouro, 'animal');
-      const a = porAnimal(m, d.id);
+      const a = porAnimal(m, d.id, cabe ? { abrigo: e.id } : {});
       m.eventos.emitir('comprou', { animal: d.id, classe: 'animal', familia: d.familia, n: 1, ouro: d.preco.ouro, id: a.id, entidade: a.abrigo });
       return { ok: true, dados: { animal: d.id, id: a.id, ouro: d.preco.ouro, entidade: a.abrigo } };
     },
@@ -433,13 +474,20 @@ registrarSistema({
       p.fila.push({ tipo: 'agir', acao: 'abastecerBebedouro', entidade: e.id, args: null });
       return { ok: true };
     },
+    // viuDicaDeAnimal { dica }: o vizinho já explicou esta mecânica (a interface pergunta com jaViuDica e marca aqui); fica gravado
+    viuDicaDeAnimal(m, c) {
+      if (typeof c.dica !== 'string' || !c.dica) return { ok: false, motivo: 'nao-existe' };
+      if (m.animais.vistos.includes(c.dica)) return { ok: true, repetida: true };
+      m.animais.vistos.push(c.dica);
+      return { ok: true };
+    },
   },
 
   // cada bicho vai inteiro (a família guarda os seus campos nele); os instantes, arredondados
   salvar(m) {
     const A = m.animais, abrigos = {};
     for (const id in A.abrigos) abrigos[id] = [A.abrigos[id].cocho, A.abrigos[id].bebedouro];
-    return { seq: A.seq, entregues: [...A.entregues], abrigos, lista: A.lista.map((a) => ({ ...a, cicloDesde: Math.round(a.cicloDesde || 0) })) };
+    return { seq: A.seq, entregues: [...A.entregues], vistos: [...A.vistos], abrigos, lista: A.lista.map((a) => ({ ...a, cicloDesde: Math.round(a.cicloDesde || 0) })) };
   },
   // Gravação de antes dos animais não traz este sistema: vale o que iniciar() montou (nenhum bicho).
   // O bicho cuja espécie saiu dos dados fica de fora; o que perdeu o abrigo espera um com vaga (realojar).
@@ -447,6 +495,7 @@ registrarSistema({
     const A = m.animais, D = m.dados.animais, vistos = new Set();
     A.lista = []; A.seq = Math.round(d.seq) || 0;
     A.entregues = Array.isArray(d.entregues) ? d.entregues.filter((id) => D[id]) : [];
+    A.vistos = Array.isArray(d.vistos) ? d.vistos.filter((k) => typeof k === 'string') : [];
     for (const id in d.abrigos || {}) {
       const e = construcaoPorId(m, id), g = d.abrigos[id];
       if (!ehAbrigo(m, e) || !Array.isArray(g)) continue;

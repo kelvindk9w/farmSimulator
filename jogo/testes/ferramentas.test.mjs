@@ -133,17 +133,20 @@ test('conserto: um comando, de qualquer lugar; custa o ouro dos dados e a ferram
   assert.equal(estadoDoItem(m, 'enxada-de-ferro').usos, 4);
   assert.equal(rapidezDe(m, 'enxada-de-ferro'), 0.5);
   assert.deepEqual(itensGastando(m), []);
-  // conserto pela metade do caminho também vale (custa o mesmo: é um preço só)
+  // conserto pela metade do caminho também vale, e custa só a parte gasta (um uso de quatro: um quarto de 6, para cima)
   arar(m, [[14, 13]]);
-  assert.equal(precoDoConserto(m, 'enxada-de-ferro'), 6);
+  assert.equal(precoDoConserto(m, 'enxada-de-ferro'), 2);
+  // "tudo" só mexe no que está gasto ou quase: com três quartos por gastar, não há o que consertar
+  assert.equal(m.comando({ tipo: 'consertar', tudo: true }).motivo, 'nada-a-consertar');
   // sem "conserto" nos dados, vale a fração do preço de compra
   m.dados.itens['enxada-de-ferro'].conserto = 0;
-  assert.equal(precoDoConserto(m, 'enxada-de-ferro'), 6, '30% de 20');
-  // "tudo": conserta o que estiver gasto, do pior para o melhor
+  arar(m, [[15, 13], [14, 14]]);
+  assert.equal(precoDoConserto(m, 'enxada-de-ferro'), 5, '30% de 20, vezes os três quartos gastos, para cima');
+  // "tudo": conserta o que estiver gasto ou quase, do pior para o melhor
   darFerramenta(m, 'foice-de-ferro'); m.posses.ferramentas['foice-de-ferro'].usos = 5;
   m.posses.ouro = 100;
   const t = m.comando({ tipo: 'consertar', tudo: true });
-  assert.equal(t.ok, true); assert.equal(t.dados.n, 2); assert.equal(t.dados.ouro, 15);
+  assert.equal(t.ok, true); assert.equal(t.dados.n, 2); assert.equal(t.dados.ouro, 14);
   assert.equal(m.comando({ tipo: 'consertar', tudo: true }).motivo, 'nada-a-consertar');
 });
 

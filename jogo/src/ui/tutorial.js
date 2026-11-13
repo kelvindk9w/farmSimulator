@@ -18,11 +18,14 @@ export function criarTutorial(ui, hud) {
   balao.append(quem, texto);
   balao.hidden = true;
   // tocar no balão encolhe ou abre a fala; a missão inteira está sempre no painel de missões
-  balao.addEventListener('click', () => { pequeno = !pequeno; fixo = true; });
+  balao.addEventListener('click', () => { if (dito) { dito = null; return; } pequeno = !pequeno; fixo = true; }); // (a fala avulsa some no toque)
   ui.append(balao);
   const seta = el('div', 'seta-ui'); seta.append(icone('ui/seta', 34)); seta.hidden = true; ui.append(seta);
 
   let pequeno = true, fixo = false, ultima = null, relogio = 0, feitaAte = 0, aberto = 0, marcado = null, esq = false;
+  // falas avulsas do vizinho (a primeira vez de uma mecânica): tomam o balão por uns segundos, uma de cada vez
+  let dito = null;
+  const falas = [];
   const baixa = () => J.cena.cam.h < 500; // celular deitado: o balão já nasce compacto
   const passo = { tipo: null };
 
@@ -54,18 +57,22 @@ export function criarTutorial(ui, hud) {
   function atualizar(dt) {
     const m = J.mundo, a = missaoAtual(m), cena = J.cena;
     relogio -= dt; aberto += dt;
-    if (!a) { if (!balao.hidden) balao.hidden = true; apontarUi(null); cena.seta.ligada = false; return; }
+    if (!dito && falas.length) dito = falas.shift();
+    if (dito && !painelAberto() && !subidaAberta() && (dito.resta -= dt) <= 0) dito = null; // com um painel na frente, a fala espera
+    classe(balao, 'avulsa', !!dito);
+    if (!a && !dito) { if (!balao.hidden) balao.hidden = true; apontarUi(null); cena.seta.ligada = false; return; }
     if (balao.hidden) balao.hidden = false;
+    if (!a) { por(nome, m.dados.missoes.vizinhoNome); por(titulo, dito.titulo); por(fala, dito.fala); classe(balao, 'pequeno', false); if (!anda.hidden) anda.hidden = true; apontarUi(null); cena.seta.ligada = false; return; }
     // missão nova: o balão abre com a fala; depois de um tempo encolhe sozinho (a não ser que o jogador tenha mexido)
     if (ultima !== a.missao.id) { ultima = a.missao.id; pequeno = baixa(); fixo = false; aberto = 0; relogio = 0; }
     if (!fixo && !pequeno && aberto > 12) pequeno = true;
     por(nome, m.dados.missoes.vizinhoNome);
-    por(titulo, a.missao.titulo);
-    por(fala, a.esperaNivel ? T.missoes.espera(a.esperaNivel) : a.missao.fala);
-    classe(balao, 'pequeno', pequeno);
+    por(titulo, dito ? dito.titulo : a.missao.titulo);
+    por(fala, dito ? dito.fala : a.esperaNivel ? T.missoes.espera(a.esperaNivel) : a.missao.fala);
+    classe(balao, 'pequeno', pequeno && !dito);
     classe(balao, 'feita', feitaAte > 0);
     if (feitaAte > 0) feitaAte -= dt;
-    if (anda.hidden !== !!a.esperaNivel) anda.hidden = !!a.esperaNivel;
+    if (anda.hidden !== (!!a.esperaNivel || !!dito)) anda.hidden = !!a.esperaNivel || !!dito;
     if (!a.esperaNivel) { fracao(fio, a.conta / a.n); por(conta, T.tutorial.progresso(Math.min(a.conta, a.n), a.n)); }
 
     // a seta: recalcula umas vezes por segundo
@@ -103,6 +110,9 @@ export function criarTutorial(ui, hud) {
     atualizar,
     concluiu() { feitaAte = 1.6; pequeno = false; fixo = false; aberto = 0; relogio = 0; },
     abrirMissoes() { abrirPainel('missoes'); },
+    // o vizinho diz uma coisa fora da missão (título curto e uma ou duas frases); fica "seg" segundos ou até o toque
+    dizer(tituloDaFala, textoDaFala, seg = 11) { if (textoDaFala && falas.length < 3 && !(dito && dito.fala === textoDaFala) && !falas.some((f) => f.fala === textoDaFala)) falas.push({ titulo: tituloDaFala || '', fala: textoDaFala, resta: seg }); },
+    falando: () => (dito ? dito.fala : falas.length ? falas[0].fala : null),
     balao, seta,
   };
 }

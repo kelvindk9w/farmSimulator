@@ -59,7 +59,7 @@ async function pontoDaEntidade(pg, id) {
 }
 // centro de um elemento da interface, na janela
 async function centroDe(pg, seletor) {
-  const r = await pg.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height }; }, seletor);
+  const r = await pg.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; e.scrollIntoView({ block: 'nearest', inline: 'nearest' }); const r = e.getBoundingClientRect(); // painel mais alto que a tela: rola até o botão return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height }; }, seletor);
   if (!r) { falhas.push(`não achei "${seletor}" na tela`); return { x: 5, y: 5 }; }
   return r;
 }

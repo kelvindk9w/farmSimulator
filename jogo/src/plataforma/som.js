@@ -183,6 +183,11 @@ export const POR_EVENTO = {
   conquista: 'recompensa',
   recompensa: 'recompensa',
   subiuDeNivel: 'nivel',
+  // indústrias e pedidos
+  enfileirou: 'guardar',
+  receitaPronta: 'pronto',
+  cancelouReceita: 'fechar',
+  entregou: 'moeda',
 };
 
 // intervalo mínimo entre duas vezes do mesmo som, em segundos (o resto usa PADRAO)

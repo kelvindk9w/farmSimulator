@@ -36,10 +36,10 @@ async function pronto(pg) {
         const id = j.cena.entidadeEm(m, cam.cssX(x + 0.5, z + 0.5), cam.cssY(x + 0.5, 0, z + 0.5)), o = id ? m.local.porId[id] : null;
         return !o || o === m.local.entidadeEm(x, z) || !!NATUREZA[o.tipo];
       },
-      // obstáculos de um tipo em terra própria, à vista e com uma casa livre ao lado, do mais perto da personagem ao mais longe
+      // obstáculos de um tipo em terra própria, à vista e com um lado aonde ela chega, do mais perto da personagem ao mais longe
       obst(tipo, soCom) {
-        const m = j.mundo, loc = m.local, p = m.personagem;
-        return loc.entidades.filter((e) => e.tipo === tipo && loc.ehPropria(e.x, e.z) && V.some(([dx, dz]) => loc.andavel(e.x + dx, e.z + dz)) && (!soCom || V.some(([dx, dz]) => { const o = loc.entidadeEm(e.x + dx, e.z + dz); return o && o.tipo === tipo; })))
+        const m = j.mundo, loc = m.local, p = m.personagem, al = this.alcance();
+        return loc.entidades.filter((e) => e.tipo === tipo && loc.ehPropria(e.x, e.z) && V.some(([dx, dz]) => loc.dentro(e.x + dx, e.z + dz) && al[loc.i(e.x + dx, e.z + dz)]) && (!soCom || V.some(([dx, dz]) => { const o = loc.entidadeEm(e.x + dx, e.z + dz); return o && o.tipo === tipo; })))
           .sort((a, b) => Math.hypot(a.x - p.x, a.z - p.z) - Math.hypot(b.x - p.x, b.z - p.z)).filter((e) => this.visivel(e.x, e.z)).map((e) => ({ id: e.id, x: e.x, z: e.z }));
       },
       quantos(tipo) { const loc = j.mundo.local; return loc.entidades.filter((e) => e.tipo === tipo && loc.ehPropria(e.x, e.z)).length; },
@@ -47,14 +47,33 @@ async function pronto(pg) {
       ent(id) { const e = j.mundo.local.porId[id]; return e ? { x: e.x, z: e.z, tipo: e.tipo, dano: e.dano || 0 } : null; },
       planta(x, z) { const e = j.estado().plantas.find((p) => p.x === x && p.z === z); return e ? e.estado : null; },
       arvores() { return j.mundo.arvores.todas.map((e) => ({ id: e.id, x: e.x, z: e.z, arvore: e.arvore })); },
-      // uma casa de grama livre e à vista do retângulo, a mais perto de (x, z), onde a personagem chega
-      livre(a, x, z) {
-        const loc = j.mundo.local, todas = [];
+      // as casas aonde a personagem chega andando (pelos quatro lados)
+      alcance() {
+        const loc = j.mundo.local, p = j.mundo.personagem, visto = new Uint8Array(loc.l * loc.p), fila = [[Math.floor(p.x), Math.floor(p.z)]];
+        visto[loc.i(fila[0][0], fila[0][1])] = 1;
+        for (let k = 0; k < fila.length; k++) for (const [dx, dz] of V) { const x = fila[k][0] + dx, z = fila[k][1] + dz; if (loc.andavel(x, z) && !visto[loc.i(x, z)]) { visto[loc.i(x, z)] = 1; fila.push([x, z]); } }
+        return visto;
+      },
+      // uma casa de grama livre e à vista do retângulo, a mais perto de (x, z), aonde a personagem chega; com
+      // "folga", sem nada nas quatro casas vizinhas (para a árvore plantada ali não fechar a passagem)
+      livre(a, x, z, folga) {
+        const loc = j.mundo.local, todas = [], al = this.alcance();
         for (let cz = a[1]; cz < a[3]; cz++) for (let cx = a[0]; cx < a[2]; cx++) {
-          if (loc.andavel(cx, cz) && loc.ehPropria(cx, cz) && loc.chao[loc.i(cx, cz)] === 0 && !loc.plantas[loc.i(cx, cz)] && V.every(([dx, dz]) => !loc.entidadeEm(cx + dx, cz + dz))) todas.push([cx, cz]);
+          if (al[loc.i(cx, cz)] && loc.ehPropria(cx, cz) && loc.chao[loc.i(cx, cz)] === 0 && !loc.plantas[loc.i(cx, cz)] && (!folga || V.every(([dx, dz]) => loc.andavel(cx + dx, cz + dz)))) todas.push([cx, cz]);
         }
         todas.sort((p, q) => Math.hypot(p[0] - x, p[1] - z) - Math.hypot(q[0] - x, q[1] - z));
         return todas.find((c) => this.visivel(c[0], c[1])) || null;
+      },
+      // mato, toco ou pedra do retângulo, à vista: com "fechado", um que ela ainda não alcança (longe de onde chega);
+      // sem, o que está na beirada do que ela alcança, mais perto de (x, z)
+      doLote(a, x, z, fechado) {
+        const loc = j.mundo.local, al = this.alcance();
+        const perto = (e, r) => { for (let dz = -r; dz <= r; dz++) for (let dx = -r; dx <= r; dx++) if (loc.dentro(e.x + dx, e.z + dz) && al[loc.i(e.x + dx, e.z + dz)]) return true; return false; };
+        const todos = loc.entidades.filter((e) => (e.tipo === 'mato' || e.tipo === 'toco' || e.tipo === 'pedra') && e.x >= a[0] && e.x < a[2] && e.z >= a[1] && e.z < a[3] && loc.ehPropria(e.x, e.z)
+          && (fechado ? !perto(e, 2) : V.some(([dx, dz]) => loc.dentro(e.x + dx, e.z + dz) && al[loc.i(e.x + dx, e.z + dz)])));
+        todos.sort((p, q) => Math.hypot(p.x - x, p.z - z) - Math.hypot(q.x - x, q.z - z));
+        const e = todos.find((o) => this.visivel(o.x, o.z));
+        return e ? { id: e.id, x: e.x, z: e.z, tipo: e.tipo } : null;
       },
     };
     j.desenhar();
@@ -213,8 +232,29 @@ async function cenario(a, f) {
   await J(() => { const j = window.__jogo; j.olhar(32, 39); });
   await foto('lote-comprado');
 
+  // ---- o lote vem tomado de mato: o que está fechado explica o que fazer; limpa-se da beirada para dentro
+  const LOTE = [24, 30, 40, 44], ABRIR = [31, 37, 40, 44];
+  const fundo = await J((a) => window.__t.doLote(a, 30, 34, true), LOTE);
+  if (confere(!!fundo, 'no lote recém-comprado há mato fechado por outros obstáculos')) {
+    await tocarCasa(fundo.x, fundo.z);
+    await ateParar();
+    confere(await J(() => window.__jogo.avisos().some((t) => /limpe antes/i.test(t))), 'o toque no que está fechado diz para limpar antes o caminho');
+    confere(await J((id) => window.__t.tem(id), fundo.id), 'o que está fechado fica onde está');
+  }
+  let abertos = 0;
+  for (let k = 0; k < 14; k++) {
+    const o = await J((a) => window.__t.doLote(a, 35, 40), ABRIR);
+    if (!o) break;
+    await tocarCasa(o.x, o.z);
+    await ateParar();
+    if (!(await J((id) => window.__t.tem(id), o.id))) abertos++;
+  }
+  confere(abertos >= 4, `da beirada para dentro, o lote vai abrindo (saíram ${abertos} obstáculos)`);
+  await J(() => window.__jogo.olhar(35, 40));
+  await foto('lote-abrindo');
+
   // ---- andar no lote novo
-  const casa = await J(() => window.__t.livre([26, 34, 38, 42], 31, 39));
+  const casa = await J((a) => window.__t.livre(a, 34, 39), ABRIR);
   if (!confere(!!casa, 'há casa livre e à vista no lote novo')) return;
   await tocarCasa(casa[0], casa[1]);
   await ateParar();
@@ -227,7 +267,7 @@ async function cenario(a, f) {
   await tocarEm('.modo[data-modo="semear"]');
   await tocarEm('.semente[data-semente="muda-bananeira"]');
   igual(await J(() => window.__jogo.estado().modo.semente), 'muda-bananeira', 'a muda aparece na barra de sementes e pode ser escolhida');
-  const lugar = await J(() => window.__t.livre([26, 34, 38, 42], 30, 38));
+  const lugar = await J((a) => window.__t.livre(a, 35, 40, true), ABRIR);
   if (!confere(!!lugar, 'há lugar para a bananeira no lote novo')) return;
   await J(([x, z]) => window.__jogo.olhar(x, z), [lugar[0] + 0.5, lugar[1] + 0.5]);
   await esperar(400);
@@ -235,13 +275,14 @@ async function cenario(a, f) {
   await tocarCasa(lugar[0], lugar[1]);
   await ateParar();
   let arvores = await J(() => window.__t.arvores());
-  igual(arvores.length, 1, 'a bananeira foi plantada');
-  confere(arvores[0] && arvores[0].x === lugar[0] && arvores[0].z === lugar[1], 'na casa tocada');
+  if (!igual(arvores.length, 1, 'a bananeira foi plantada')) return;
+  confere(arvores[0].x === lugar[0] && arvores[0].z === lugar[1], 'na casa tocada');
   igual(await J(() => window.__jogo.estado().bolsa['muda-bananeira'] || 0), 0, 'a muda saiu da bolsa');
   await tocarEm('.modo[data-modo="mao"]');
   await tocarEntidade(arvores[0].id, 0.4);
   confere(await J(() => window.__jogo.avisos().some((t) => /crescendo/i.test(t))), 'o toque na muda diz quanto falta');
   await J(() => { window.__jogo.pular(4 * 3600 + 2 * 3600 + 60); window.__jogo.avancar(1.2); });
+  await esperar(250); // (o aviso junta as árvores que deram fruta ao mesmo tempo antes de sair)
   confere(await J(() => window.__jogo.avisos().some((t) => /fruta/i.test(t))), 'na volta, o jogo avisa que a árvore deu fruta');
   await J(([x, z]) => window.__jogo.olhar(x, z), [lugar[0] + 0.5, lugar[1] - 0.5]);
   await foto('arvore-com-fruta');
@@ -251,6 +292,11 @@ async function cenario(a, f) {
   igual((await J(() => window.__t.arvores())).length, 1, 'a árvore continua lá para a próxima safra');
 
   // ---- regador de área: comprar os degraus até o de crivo; uma rega molha três casas em linha
+  // (o regador velho ficou no suporte enquanto ela limpava: um toque no poço traz ele de volta ao cinto)
+  await tocarEm('.modo[data-modo="mao"]');
+  await tocarEntidade('poco', 0.7);
+  await ateParar();
+  igual(await J(() => window.__jogo.estado().ferramentas['regador-velho'].onde), 'cinto', 'para encher, ela busca o regador no suporte sozinha');
   for (const id of ['regador-de-lata', 'regador-grande', 'regador-de-crivo']) await comprar('ferramentas', id);
   await fecharPainel();
   confere(await J(() => window.__jogo.avisos().some((t) => /suporte/i.test(t))), 'a troca de ferramenta é avisada (a velha vai para o suporte)');

@@ -27,11 +27,13 @@ export const estaGasta = (m, id) => { const e = estadoDoItem(m, id); return e.to
 export const rendeDe = (m, id) => (m.desgaste && m.desgaste.gastas[id] ? m.dados.desgaste.rendeQuandoGasta : 1);
 // o que multiplica a duração da ação feita com a ferramenta: a "rapidez" dela e, gasta, a lentidão
 export const rapidezDe = (m, id) => itemDe(m, id).rapidez / rendeDe(m, id);
-// preço do conserto (0 = não há o que consertar: o item não gasta, ou está novo)
+// preço do conserto agora (0 = não há o que consertar: o item não gasta, ou está novo). O "conserto" dos dados é o
+// preço da ferramenta gasta de todo; antes disso paga-se só a parte já gasta (consertar cedo não sai mais caro).
 export function precoDoConserto(m, id) {
   const it = itemDe(m, id), e = estadoDoItem(m, id);
   if (!it || !e.total || e.usos >= e.total) return 0;
-  return it.conserto > 0 ? it.conserto : Math.max(1, Math.round((it.compra || 0) * m.dados.desgaste.consertoFracao));
+  const cheio = it.conserto > 0 ? it.conserto : Math.max(1, Math.round((it.compra || 0) * m.dados.desgaste.consertoFracao));
+  return Math.max(1, Math.ceil(cheio * (1 - e.fracao)));
 }
 // o que o jogador tem e pede atenção: [{ item, usos, total, fracao, gasta, preco }], do mais gasto para o menos
 export function itensGastando(m, soAviso = true) {
@@ -104,11 +106,12 @@ registrarSistema({
     m.eventos.ouvir('colheu', () => gastar(m, m.posses.cesto.item, 1));
   },
   comandos: {
-    // { item }: conserta um; { tudo: true }: conserta tudo o que o ouro der, do mais gasto para o menos
+    // { item }: conserta um; { tudo: true }: conserta o que está gasto ou quase (o que o painel mostra), do mais
+    // gasto para o menos, até onde o ouro der
     consertar(m, c) {
       if (!c.tudo) return consertarUm(m, c.item);
       let n = 0, ouro = 0, ultimo = null;
-      for (const g of itensGastando(m, false)) { if (!g.preco) continue; ultimo = consertarUm(m, g.item); if (!ultimo.ok) break; n++; ouro += ultimo.dados.ouro; }
+      for (const g of itensGastando(m)) { if (!g.preco) continue; ultimo = consertarUm(m, g.item); if (!ultimo.ok) break; n++; ouro += ultimo.dados.ouro; }
       return n ? { ok: true, dados: { n, ouro } } : ultimo || { ok: false, motivo: 'nada-a-consertar' };
     },
   },

@@ -6,7 +6,7 @@ import { Mundo } from '../src/nucleo/mundo.js';
 import { TIPOS } from '../src/nucleo/registro.js';
 import { guiaDaMissao } from '../src/nucleo/guia.js';
 import { construcoesDe, construcaoPorId } from '../src/nucleo/sistemas/construcao.js';
-import { capacidadeDe, ocupacaoDe, espacoPara, guardaDoItem, enchimento, celeiroDe, portaDoCeleiro } from '../src/nucleo/sistemas/celeiro-dentro.js';
+import { capacidadeDe, ocupacaoDe, espacoPara, guardaDoItem, enchimento, celeiroDe, portaDoCeleiro, pertoDaPorta } from '../src/nucleo/sistemas/celeiro-dentro.js';
 import { noCeleiro, espacoNoCeleiro, ferramentaNoCinto } from '../src/nucleo/sistemas/posses.js';
 
 const MAT = { madeira: 30, tabua: 30, prego: 30, pedra: 30 };
@@ -183,9 +183,17 @@ test('o guia da missão de montar aponta o celeiro, e lá dentro o painel de con
   const missoes = (b) => { b.missoes.vizinho = [{ id: 'prateleira', titulo: 'Prateleiras', objetivo: { evento: 'montou', filtro: { construcao: 'prateleira-simples' }, n: 1 }, recompensa: { ouro: 9 } }]; };
   const m = rico(novoMundo(missoes), MAT);
   porConstrucao(m, 'bancada-de-carpintaria', 16, 16);
+  const p = m.personagem, porta = portaDoCeleiro(m);
+  p.x = porta[0] + 7; p.z = porta[1] + 3;
   let g = guiaDaMissao(m);
   assert.equal(g.tipo, 'entidade'); assert.equal(g.id, celeiroDe(m).id);
+  // chegando à porta, a seta passa para o botão de entrar
+  p.x = porta[0] + 1; p.z = porta[1] + 1;
+  assert.ok(pertoDaPorta(m));
+  g = guiaDaMissao(m);
+  assert.equal(g.tipo, 'painel'); assert.equal(g.painel, 'porta-do-celeiro');
   dentro(m);
+  assert.ok(!pertoDaPorta(m));
   g = guiaDaMissao(m);
   assert.equal(g.tipo, 'painel'); assert.equal(g.painel, 'construir'); assert.equal(g.item, 'prateleira-simples');
   m.comando({ tipo: 'construir', id: 'prateleira-simples', x: 0, z: 2 });
