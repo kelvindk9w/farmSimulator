@@ -1,0 +1,9 @@
+Regras:
+- Cada ícone é UM objeto só, grande, simples e gordinho, visto de frente e um pouco de cima, que se reconhece mesmo bem pequeno (32 pixels): formas claras, poucas minúcias.
+- Exatamente o mesmo estilo da cena: o mesmo traço escuro grosso em volta de tudo, as mesmas cores chapadas com poucos tons, um brilho simples, luz vindo de cima e da esquerda.
+- Todos os ícones do mesmo tamanho, cada um centrado na sua parte da grade, alinhados em linhas e colunas retas, com bastante espaço transparente entre um e outro (nenhum encosta no vizinho).
+- Fundo transparente de verdade (canal alfa). Sem quadrado, círculo ou moldura atrás do ícone, sem sombra no chão, sem texto, sem letras, sem números, sem linhas de grade.
+- Tudo inteiro dentro da imagem, com folga transparente em toda a volta. Imagem quadrada.
+- Arte original; não imite nenhum jogo existente e não use nenhuma marca.
+
+No fim, liste os arquivos que salvou.

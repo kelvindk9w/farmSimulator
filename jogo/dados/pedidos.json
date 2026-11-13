@@ -1,0 +1,16 @@
+{
+  "nivel": 3,
+  "vagas": [{ "nivel": 3, "vagas": 2 }, { "nivel": 6, "vagas": 3 }, { "nivel": 10, "vagas": 4 }, { "nivel": 15, "vagas": 5 }, { "nivel": 20, "vagas": 6 }],
+  "valorAlvo": { "base": 8, "expoente": 1.6, "variacao": [0.75, 1.25], "nota": "valor do pedido, a preço de banca = base × nível^expoente" },
+  "bonusOuro": 1.25,
+  "xpPorOuro": 0.5,
+  "esperaSeg": { "base": 120, "porNivel": 20, "max": 900, "nota": "espera da vaga depois de entregar; não se pula com cash" },
+  "descartar": { "esperaVezes": 2 },
+  "trocaGratisAposSeg": 86400,
+  "linhas": [{ "ateNivel": 5, "pesos": [1] }, { "ateNivel": 13, "pesos": [0.5, 0.5] }, { "ateNivel": 999, "pesos": [0.25, 0.45, 0.3] }],
+  "categorias": { "cultura": 0.35, "fruta": 0.1, "animal": 0.2, "receita": 0.35 },
+  "loteMaximo": { "cultura": [{ "ateSeg": 3600, "n": 16 }, { "ateSeg": 14400, "n": 12 }, { "ateSeg": 3596400, "n": 8 }], "fruta": 8, "animal": [{ "ateSeg": 3600, "n": 8 }, { "ateSeg": 3596400, "n": 4 }], "receita": [{ "ateSeg": 1800, "n": 4 }, { "ateSeg": 7200, "n": 3 }, { "ateSeg": 3596400, "n": 2 }] },
+  "regras": { "soPedeOQueOJogadorProduz": true, "semItemRepetido": true, "fracaoMinimaDaLinha": 0.4, "viesDeEstoque": 0.5, "pesoDaNovidade": 3, "niveisDeNovidade": 4 },
+  "fora": ["racao"],
+  "clientes": [{ "id": "quitanda-da-dona-zefa", "nome": "Quitanda da Dona Zefa" }, { "id": "padaria-do-juca", "nome": "Padaria do Juca" }, { "id": "merenda-da-escola", "nome": "Merenda da escola" }, { "id": "feira-de-sabado", "nome": "Feira de sábado" }, { "id": "restaurante-da-estrada", "nome": "Restaurante da estrada" }, { "id": "venda-do-seu-tonho", "nome": "Venda do Seu Tonho" }]
+}

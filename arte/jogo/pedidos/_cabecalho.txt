@@ -1,0 +1,3 @@
+Use a sua ferramenta própria de geração de imagens. Não escreva código para desenhar.
+
+A imagem anexa (`referencias/var-2-contorno.png`) é a cena de um jogo de fazenda original, em desenho com contorno escuro e cores chapadas. Ela dá o ESTILO e a CÂMERA. Preciso de peças desse jogo desenhadas de novo, SOZINHAS, para entrar no jogo como figuras 2D. Cada peça tem de parecer recortada dessa cena.

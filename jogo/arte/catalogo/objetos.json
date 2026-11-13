@@ -1,0 +1,7 @@
+{
+  "escala": 128,
+  "pecas": {
+    "objeto/banca": { "arquivo": "objetos/banca.png", "quadros": 1, "casa": [275, 315], "apoio": [138, 233] },
+    "objeto/poco": { "arquivo": "objetos/poco.png", "quadros": 1, "casa": [308, 441], "apoio": [142, 370] }
+  }
+}

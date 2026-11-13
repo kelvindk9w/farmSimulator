@@ -1,0 +1,5 @@
+é um BLOCO-GUIA cinza, feito por computador na câmera exata do jogo. Ele dá o tamanho, a posição e os ângulos EXATOS da construção. Desenhe a construção exatamente em cima do bloco, como quem pinta por cima dele, com o mesmo enquadramento da guia:
+- os três cantos de baixo das paredes ficam nos mesmos pontos da imagem que os três cantos de baixo do bloco;
+- as arestas de baixo das duas paredes têm a mesma inclinação das da guia (30°), e as arestas verticais ficam no mesmo lugar;
+- a cumeeira e os beirais do telhado seguem as linhas do telhado da guia.
+O cinza da guia NÃO aparece no resultado: sobra só a construção, com fundo transparente.

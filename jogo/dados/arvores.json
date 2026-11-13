@@ -1,0 +1,5 @@
+{
+  "bananeira": { "nome": "Bananeira", "muda": "muda-bananeira", "fruto": "banana", "cresceSeg": 14400, "safraSeg": 7200, "rende": 3, "xp": 4, "nivel": 7, "casas": [1, 1], "espacamento": 2, "acumula": 1 },
+  "laranjeira": { "nome": "Laranjeira", "muda": "muda-laranjeira", "fruto": "laranja", "cresceSeg": 43200, "safraSeg": 14400, "rende": 3, "xp": 7, "nivel": 10, "casas": [1, 1], "espacamento": 3, "acumula": 1 },
+  "goiabeira": { "nome": "Goiabeira", "muda": "muda-goiabeira", "fruto": "goiaba", "cresceSeg": 86400, "safraSeg": 21600, "rende": 3, "xp": 10, "nivel": 16, "casas": [1, 1], "espacamento": 3, "acumula": 1 }
+}

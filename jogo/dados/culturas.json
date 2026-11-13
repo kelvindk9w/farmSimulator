@@ -1,0 +1,10 @@
+{
+  "alface": { "nome": "Alface", "semente": "semente-alface", "produto": "alface", "rende": 1, "tempoSeg": 60, "estagios": 3, "regas": 1, "xp": 1, "nivel": 1 },
+  "milho": { "nome": "Milho", "semente": "semente-milho", "produto": "milho", "rende": 2, "tempoSeg": 180, "estagios": 4, "regas": 1, "xp": 2, "nivel": 2 },
+  "feijao": { "nome": "Feijão", "semente": "semente-feijao", "produto": "feijao", "rende": 2, "tempoSeg": 480, "estagios": 4, "regas": 2, "xp": 3, "nivel": 4 },
+  "tomate": { "nome": "Tomate", "semente": "semente-tomate", "produto": "tomate", "rende": 3, "tempoSeg": 1200, "estagios": 4, "regas": 3, "xp": 4, "nivel": 6 },
+  "abobora": { "nome": "Abóbora", "semente": "semente-abobora", "produto": "abobora", "rende": 1, "tempoSeg": 2700, "estagios": 4, "regas": 2, "xp": 6, "nivel": 8 },
+  "arroz": { "nome": "Arroz", "semente": "semente-arroz", "produto": "arroz", "rende": 3, "tempoSeg": 5400, "estagios": 4, "regas": 2, "xp": 8, "nivel": 11 },
+  "cana": { "nome": "Cana-de-açúcar", "semente": "semente-cana", "produto": "cana", "rende": 2, "tempoSeg": 14400, "estagios": 4, "regas": 2, "xp": 12, "nivel": 13 },
+  "mandioca": { "nome": "Mandioca", "semente": "semente-mandioca", "produto": "mandioca", "rende": 2, "tempoSeg": 28800, "estagios": 4, "regas": 1, "xp": 16, "nivel": 17 }
+}

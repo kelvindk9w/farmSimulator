@@ -1,0 +1,64 @@
+{
+ "personagem/andar-frente": {
+  "chave": "personagem/andar-frente",
+  "crua": "andar-frente.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 8,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 294,
+  "emPeFonte": 517,
+  "escala": 0.5687,
+  "casa": [
+   160,
+   320
+  ],
+  "apoio": [
+   80,
+   298
+  ],
+  "quadros": 8,
+  "desenhos": 8,
+  "qps": 10,
+  "laco": true,
+  "alturas": [
+   294,
+   276,
+   290,
+   280,
+   289,
+   280,
+   289,
+   273
+  ],
+  "variacaoAltura": 7.2,
+  "tamanhoPelaCor": [
+   48.6,
+   49.1,
+   48.1,
+   47.9,
+   48.3,
+   50.4,
+   48.1,
+   48.3
+  ],
+  "bytes": 116745,
+  "avisos": [
+   "altura varia 7.2% entre quadros (294 276 290 280 289 280 289 273), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "personagem/andar-frente",
+   "quadros": "8",
+   "altura": "294",
+   "qps": "10",
+   "base": "linha",
+   "altura-livre": true
+  }
+ }
+}

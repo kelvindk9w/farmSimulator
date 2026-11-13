@@ -1,0 +1,21 @@
+{
+  "name": "fazenda-jogo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "O jogo de fazenda: marco M1 (o chão)",
+  "type": "module",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "node build.mjs",
+    "testar": "node --test testes/",
+    "verificar": "node tools/verificar.mjs",
+    "bot": "node tools/bot.mjs",
+    "servir": "node tools/servir.mjs dist 8091",
+    "capturas": "node tools/capturar.mjs",
+    "validar": "node tools/validar.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "sharp": "^0.35.5"
+  }
+}

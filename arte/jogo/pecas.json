@@ -1,0 +1,4 @@
+{
+  "objeto/banca": {"situacao":"pronto","casas":[2,1],"tamanho":"casas 2x1","pedido":"04-banca.md","cru":"jogo-04-banca/banca.png","fator":0.263},
+  "objeto/poco": {"situacao":"pronto","casas":[2,2],"tamanho":"largura 2.28","pedido":"01-poco.md","cru":"jogo-01-poco/poco.png","fator":0.386}
+}

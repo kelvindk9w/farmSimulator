@@ -1,0 +1,50 @@
+{
+  "ouro": {
+    "nota": "A loja de ouro vende tudo de itens.json que tem \"compra\", mais animais, construções e lotes (cada um no seu arquivo). Nas ferramentas, mostra só o próximo degrau de cada função.",
+    "abas": [
+      { "id": "sementes", "nome": "Sementes e mudas", "tipos": ["semente", "muda"] },
+      { "id": "ferramentas", "nome": "Ferramentas", "tipos": ["ferramenta", "recipiente"], "soProximoDegrau": true },
+      { "id": "materiais", "nome": "Materiais", "tipos": ["material", "embalagem", "racao"] },
+      { "id": "animais", "nome": "Animais", "fonte": "animais" },
+      { "id": "construcoes", "nome": "Construir", "fonte": "construcoes", "nota": "depois da bancada de carpintaria, a lista também abre nela" },
+      { "id": "terras", "nome": "Terras", "fonte": "terras" },
+      { "id": "enfeites", "nome": "Roupas e enfeites", "tipos": ["cosmetico"], "fonte": "construcoes", "filtro": { "tipo": "decoracao" } }
+    ],
+    "itens": [],
+    "fora": []
+  },
+  "cash": {
+    "nota": "Cash compra tempo, cosmético, animal especial de estimação e vaga de fila. Nunca compra ouro, produção, ferramenta melhor, conserto nem espaço. Na versão de teste a compra é simulada e avisada na tela.",
+    "compraSimulada": true,
+    "cashPorReal": 10,
+    "pacotes": [
+      { "id": "punhado", "nome": "Punhado de cash", "cash": 70, "precoBRL": 6.9 },
+      { "id": "saquinho", "nome": "Saquinho de cash", "cash": 140, "precoBRL": 12.9 },
+      { "id": "saco", "nome": "Saco de cash", "cash": 230, "precoBRL": 19.9 },
+      { "id": "bau", "nome": "Baú de cash", "cash": 360, "precoBRL": 29.9 },
+      { "id": "carroca", "nome": "Carroça de cash", "cash": 750, "precoBRL": 59.9 },
+      { "id": "celeiro", "nome": "Celeiro de cash", "cash": 1700, "precoBRL": 129.9 }
+    ],
+    "ofertas": [
+      { "id": "concluir-relogio", "nome": "Concluir na hora", "tipo": "tempo", "cash": null, "nota": "preço pela fórmula de regras.concluir; vale para obra, fila de indústria e muda crescendo" },
+      { "id": "vaga-4", "nome": "Quarta vaga na fila", "tipo": "vaga", "cash": 30, "fila": 4, "gratisCom": { "produzidos": 200 }, "nota": "por indústria; sai de graça depois de 200 itens feitos nela" },
+      { "id": "vaga-5", "nome": "Quinta vaga na fila", "tipo": "vaga", "cash": 60, "fila": 5, "gratisCom": { "produzidos": 1000 }, "nota": "por indústria; sai de graça depois de 1.000 itens feitos nela" },
+      { "id": "bone-vermelho", "nome": "Boné vermelho", "tipo": "cosmetico", "cash": 30, "item": "bone-vermelho" },
+      { "id": "chapeu-de-couro", "nome": "Chapéu de couro", "tipo": "cosmetico", "cash": 80, "item": "chapeu-de-couro" },
+      { "id": "macacao-jeans", "nome": "Macacão jeans", "tipo": "cosmetico", "cash": 120, "item": "macacao-jeans" },
+      { "id": "vestido-de-chita", "nome": "Vestido de chita", "tipo": "cosmetico", "cash": 150, "item": "vestido-de-chita" },
+      { "id": "roupa-de-festa-junina", "nome": "Roupa de festa junina", "tipo": "cosmetico", "cash": 200, "item": "roupa-de-festa-junina" },
+      { "id": "bota-de-couro", "nome": "Bota de couro", "tipo": "cosmetico", "cash": 60, "item": "bota-de-couro" },
+      { "id": "pintura-vermelha", "nome": "Ferramentas vermelhas", "tipo": "cosmetico", "cash": 80, "item": "pintura-vermelha" },
+      { "id": "pintura-azul", "nome": "Ferramentas azuis", "tipo": "cosmetico", "cash": 80, "item": "pintura-azul" },
+      { "id": "pintura-dourada", "nome": "Ferramentas douradas", "tipo": "cosmetico", "cash": 200, "item": "pintura-dourada" },
+      { "id": "bandeirinhas-de-festa", "nome": "Bandeirinhas de festa", "tipo": "cosmetico", "cash": 60, "construcao": "bandeirinhas-de-festa" },
+      { "id": "fogueira-de-sao-joao", "nome": "Fogueira de São João", "tipo": "cosmetico", "cash": 120, "construcao": "fogueira-de-sao-joao" },
+      { "id": "fonte-de-pedra", "nome": "Fonte de pedra", "tipo": "cosmetico", "cash": 180, "construcao": "fonte-de-pedra" },
+      { "id": "carro-de-boi-antigo", "nome": "Carro de boi antigo", "tipo": "cosmetico", "cash": 250, "construcao": "carro-de-boi-antigo" },
+      { "id": "gato-siames", "nome": "Gato siamês", "tipo": "estimacao", "cash": 200, "animal": "gato-siames" },
+      { "id": "cao-boiadeiro", "nome": "Cão boiadeiro", "tipo": "estimacao", "cash": 250, "animal": "cao-boiadeiro" },
+      { "id": "cavalo-mangalarga", "nome": "Cavalo mangalarga", "tipo": "estimacao", "cash": 500, "animal": "cavalo-mangalarga", "nota": "cavalo de apresentação: anda igual ao comum e pede nível 16, estábulo e sela" }
+    ]
+  }
+}

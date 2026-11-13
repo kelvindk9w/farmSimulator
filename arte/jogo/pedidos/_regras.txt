@@ -1,0 +1,8 @@
+Regras:
+- Mesma câmera da cena: isométrica verdadeira (girada 45°, olhando de cima a cerca de 35°), sem perspectiva: as arestas do chão sobem a 30° para a esquerda e para a direita, e linhas paralelas continuam paralelas.
+- Exatamente o mesmo estilo da cena: o mesmo traço escuro de espessura parecida, as mesmas cores chapadas com poucos tons, luz vindo de cima e da esquerda.
+- Fundo transparente de verdade (canal alfa). Sem chão, sem grama, sem terra, sem sombra projetada no chão, sem cenário, sem texto, sem letras, sem números, sem moldura.
+- Tudo inteiro dentro da imagem, sem cortar nada, com folga transparente em toda a volta.
+- Arte original; não imite nenhum jogo existente.
+
+No fim, liste os arquivos que salvou.
