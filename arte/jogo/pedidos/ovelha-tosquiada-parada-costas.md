@@ -1,0 +1,25 @@
+Use a sua ferramenta própria de geração de imagens. Não escreva código para desenhar.
+
+As imagens anexas são de um jogo de fazenda original, em desenho com contorno:
+- `referencias/var-2-contorno.png`: a cena do jogo (dá o estilo e a câmera);
+- `referencias/ovelha-tosquiada.png`: a FOLHA DE MODELO da ovelha tosquiada (parada de frente três quartos, de costas três quartos e de perfil). Ela manda nas proporções, nas cores e nos detalhes.
+- `referencias/ovelha-parada-costas.png`: a folha já pronta da ovelha COM LÃ na mesma ação e na mesma vista (dá o formato da folha, o tamanho e o movimento: a tosquiada faz o MESMO movimento, quadro a quadro, com a cabeça e as patas do mesmo tamanho).
+
+Preciso da folha de animação da MESMA ovelha tosquiada PARADA, mastigando, vista de COSTAS três quartos, para usar como figura 2D animada dentro do jogo.
+
+Gere uma imagem e salve na pasta atual como `parada-costas.png`:
+
+- Uma única fileira horizontal com 4 quadros, da esquerda para a direita, nesta ordem:
+  1. DESCANSO: em pé nas quatro patas, igual à folha de modelo, cabeça erguida.
+  2. MASTIGA: o queixo vai para um lado, mastigando; uma orelha abana para baixo.
+  3. RESPIRA: o corpo enche um pouco, a cabeça sobe um tiquinho e vira de leve; o rabinho mexe.
+  4. PISCA: os olhos fechados (uma linha curva), o queixo mastiga para o outro lado; a outra orelha abana.
+- É uma ovelha calma, mas viva: mastiga, pisca, abana as orelhas e o rabinho, o corpo respira. As quatro patas ficam plantadas e o corpo não sai do lugar.
+- Em todos os quadros ela é vista pela mesma câmera da cena (isométrica, de cima), de COSTAS três quartos, exatamente como a segunda figura da folha de modelo: o corpo virado para o fundo e para a direita de quem olha; a traseira fica em primeiro plano e a cabeça lá na frente, vista de trás. Ela NÃO sai do lugar: as patas ficam plantadas no mesmo ponto em todos os quadros.
+- Os 4 quadros têm a ovelha tosquiada do MESMO tamanho (o corpo tem o mesmo tamanho em todos), sobre a mesma linha de base, igualmente espaçados, cada um centrado numa casa de mesma largura, com um vão vazio entre um quadro e o outro (nenhum quadro encosta no vizinho).
+- É a MESMA ovelha tosquiada da folha de modelo em todos os quadros: corpo magro e liso cor creme-rosada (sem lã), topetinho curto, cara e orelhas castanho-escuras, patas castanho-escuras com cascos pretos. Mesmas cores chapadas, mesmo traço escuro grosso.
+- Fundo transparente de verdade (canal alfa). Sem chão, sem sombra, sem cenário, sem poeira, sem riscos de movimento, sem gotas, sem brilhos, sem números, sem texto, sem linhas de grade, sem moldura.
+- Nada cortado nas bordas. Imagem bem larga (proporção perto de 3 por 1).
+- Arte original; não imite nenhum jogo existente.
+
+No fim, liste os arquivos que salvou.

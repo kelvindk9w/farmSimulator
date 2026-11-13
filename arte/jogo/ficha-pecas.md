@@ -22,9 +22,9 @@ Construções, objetos, plantas, ícones e retratos do jogo, pedidos ao Codex de
 
 <!-- tabela:inicio -->
 
-No catálogo: 163 chaves (163 prontas, 0 pendentes).
+No catálogo: 200 chaves (200 prontas, 0 pendentes).
 
-### objetos (41)
+### objetos (54)
 
 | Chave | Arquivo | Quadro (px) | Apoio | Casas | Tamanho pedido | Pedido | Situação |
 |---|---|---|---|---|---|---|---|
@@ -34,8 +34,10 @@ No catálogo: 163 chaves (163 prontas, 0 pendentes).
 | `objeto/banca` | objetos/banca.png | 402 x 462 | 202, 344 | 3 x 2 | casas 3x2 | 04-banca.md | pronto |
 | `objeto/bancada-de-carpintaria` | objetos/bancada-de-carpintaria.png | 257 x 236 | 129, 159 | 2 x 1 | largura 1.88 | 29-bancadas.md | pronto |
 | `objeto/bancada-de-embalar` | objetos/bancada-de-embalar.png | 257 x 237 | 129, 160 | 2 x 1 | largura 1.88 | 29-bancadas.md | pronto |
+| `objeto/bau` | objetos/bau.png | 221 x 217 | 111, 150 | 2 x 1 | largura 1.6 | 39-moveis-do-celeiro.md | pronto |
 | `objeto/bebedouro` | objetos/bebedouro.png | 111 x 115 | 56, 81 | 1 x 1 | largura 0.74 | 28-pecas-de-trato.md | pronto |
 | `objeto/bebedouro-grande` | objetos/bebedouro-grande.png | 266 x 225 | 133, 145 | 2 x 1 | largura 1.95 | 28-pecas-de-trato.md | pronto |
+| `objeto/caixote` | objetos/caixote.png | 161 x 173 | 81, 123 | 1 x 1 | largura 1.13 | 39-moveis-do-celeiro.md | pronto: câmera um pouco mais de cima que o resto (inclinação da base 0,70 em vez de 0,58) |
 | `objeto/casa` | objetos/casa.png | 681 x 642 | 340, 470 | 4 x 3 | casas 4x3 | 25-casa.md | pronto |
 | `objeto/celeiro` | objetos/celeiro.png | 856 x 834 | 426, 601 | 5 x 4 | casas 5x4 | 23-celeiro-fechado.md | pronto |
 | `objeto/celeiro-aberto` | objetos/celeiro-aberto.png | 856 x 834 | 426, 601 | 5 x 4 | casas 5x4 | 24-celeiro-aberto.md | pronto: igual ao fechado fora da porta (só a região que muda foi tirada do desenho aberto) |
@@ -49,6 +51,7 @@ No catálogo: 163 chaves (163 prontas, 0 pendentes).
 | `objeto/curral-frente` | objetos/curral-frente.png | 1009 x 769 | 504, 474 | 6 x 5 | cercado de 6x5 montado por código | 05-cercas.md, 28-pecas-de-trato.md, 43-sombra-do-curral.md | pronto: camada da frente (cercas da frente e porteira) |
 | `objeto/curral-fundo` | objetos/curral-fundo.png | 1009 x 769 | 504, 474 | 6 x 5 | cercado de 6x5 montado por código | 05-cercas.md, 28-pecas-de-trato.md, 43-sombra-do-curral.md | pronto: camada de trás (cercas do fundo e o que fica dentro) |
 | `objeto/estabulo` | objetos/estabulo.png | 769 x 770 | 380, 570 | 4 x 4 | casas 4x4 | 33-estabulo.md | pronto |
+| `objeto/fardo-de-feno` | objetos/fardo-de-feno.png | 179 x 162 | 90, 107 | 1 x 1 | largura 1.27 | 39-moveis-do-celeiro.md | pronto |
 | `objeto/flores` | objetos/flores.png | 138 x 128 | 69, 98 | 1 x 1 | largura 0.95 | 06-natureza.md | pronto |
 | `objeto/galinheiro` | objetos/galinheiro.png | 567 x 525 | 279, 363 | 3 x 3 | casas 3x3 | 27-galinheiro.md | pronto |
 | `objeto/ipe` | objetos/ipe.png | 456 x 493 | 214, 457 | 1 x 1 | altura 4.3 | 07-arvores-enfeite.md | pronto |
@@ -58,16 +61,26 @@ No catálogo: 163 chaves (163 prontas, 0 pendentes).
 | `objeto/moinho` | objetos/moinho.png | 493 x 534 | 246, 389 | 3 x 3 | casas 3x3 | 30-moinho.md | pronto |
 | `objeto/mourao` | objetos/mourao.png | 50 x 117 | 25, 99 |  | fator 0.439 | 05-cercas.md | pronto |
 | `objeto/ninho` | objetos/ninho.png | 108 x 78 | 54, 48 | 1 x 1 | largura 0.72 | 28-pecas-de-trato.md | pronto |
+| `objeto/parede-x` | objetos/parede-x.png | 109 x 382 | 54, 348 |  | parede de 1 unidade, altura 3 | 40-texturas-do-celeiro.md | pronto |
+| `objeto/parede-z` | objetos/parede-z.png | 109 x 382 | 54, 348 |  | parede de 1 unidade, altura 3 | 40-texturas-do-celeiro.md | pronto |
 | `objeto/pedra` | objetos/pedra.png | 125 x 103 | 63, 74 | 1 x 1 | largura 0.85 | 06-natureza.md | pronto |
+| `objeto/piso-tabuas` | objetos/piso-tabuas.png | 198 x 121 | 99, 61 | 1 x 1 | piso de 1 casa | 40-texturas-do-celeiro.md | pronto |
 | `objeto/placa` | objetos/placa.png | 140 x 171 | 63, 158 | 1 x 1 | largo-px 124 | 05-cercas.md | pronto |
 | `objeto/poco` | objetos/poco.png | 308 x 441 | 142, 370 | 2 x 2 | largura 2.28 | 01-poco.md | pronto |
 | `objeto/porteira` | objetos/porteira.png | 252 x 292 | 126, 216 | 2 x 1 | fator 0.7016 | 05-cercas.md | pronto |
 | `objeto/porteira-aberta` | objetos/porteira-aberta.png | 252 x 311 | 126, 235 | 2 x 1 | fator 0.7016 | 05-cercas.md | pronto |
+| `objeto/prateleira-reforcada` | objetos/prateleira-reforcada.png | 222 x 360 | 111, 293 | 2 x 1 | fator 0.53 | 51-prateleira-reforcada.md | pronto |
+| `objeto/prateleira-reforcada-cheia` | objetos/prateleira-reforcada-cheia.png | 230 x 360 | 111, 293 | 2 x 1 | fator 0.53 | 51-prateleira-reforcada.md | pronto |
+| `objeto/prateleira-reforcada-meia` | objetos/prateleira-reforcada-meia.png | 221 x 360 | 111, 293 | 2 x 1 | fator 0.53 | 51-prateleira-reforcada.md | pronto |
+| `objeto/prateleira-simples` | objetos/prateleira-simples.png | 251 x 326 | 126, 250 | 2 x 1 | fator 0.566 | 38-prateleira.md | pronto |
+| `objeto/prateleira-simples-cheia` | objetos/prateleira-simples-cheia.png | 263 x 327 | 125, 251 | 2 x 1 | fator 0.566 | 38-prateleira.md | pronto |
+| `objeto/prateleira-simples-meia` | objetos/prateleira-simples-meia.png | 253 x 326 | 126, 250 | 2 x 1 | fator 0.566 | 38-prateleira.md | pronto |
 | `objeto/quadro-de-pedidos` | objetos/quadro-de-pedidos.png | 185 x 257 | 93, 217 | 1 x 1 | altura 2.0 | 28-pecas-de-trato.md | pronto |
 | `objeto/rochedo` | objetos/rochedo.png | 189 x 143 | 95, 91 | 1 x 1 | largura 1.35 | 06-natureza.md | pronto |
+| `objeto/saco-de-sementes` | objetos/saco-de-sementes.png | 106 x 134 | 53, 104 | 1 x 1 | largura 0.7 | 39-moveis-do-celeiro.md | pronto |
 | `objeto/sombra-do-curral` | objetos/sombra-do-curral.png | 541 x 477 | 275, 346 | 3 x 2 | casas 3x2 | 43-sombra-do-curral.md | pronto |
-| `objeto/suporte-de-ferramentas` | objetos/suporte-de-ferramentas.png | 203 x 260 | 102, 198 | 2 x 1 | fator 0.317 | 08-suporte-ferramentas.md | pronto |
-| `objeto/suporte-de-ferramentas-vazio` | objetos/suporte-de-ferramentas-vazio.png | 203 x 260 | 102, 198 | 2 x 1 | fator 0.317 | 08-suporte-ferramentas.md | pronto |
+| `objeto/suporte-de-ferramentas` | objetos/suporte-de-ferramentas.png | 223 x 286 | 112, 219 | 2 x 1 | fator 0.35 | 08-suporte-ferramentas.md | pronto |
+| `objeto/suporte-de-ferramentas-vazio` | objetos/suporte-de-ferramentas-vazio.png | 223 x 286 | 112, 219 | 2 x 1 | fator 0.35 | 08-suporte-ferramentas.md | pronto |
 | `objeto/toco` | objetos/toco.png | 144 x 126 | 72, 85 | 1 x 1 | largura 1.0 | 06-natureza.md | pronto |
 
 ### culturas (31)
@@ -105,6 +118,35 @@ No catálogo: 163 chaves (163 prontas, 0 pendentes).
 | `cultura/tomate-2` | culturas/tomate-2.png | 149 x 106 | 75, 88 |  | altura 1.5 | 12-cultura-tomate.md | pronto |
 | `cultura/tomate-3` | culturas/tomate-3.png | 174 x 182 | 87, 162 |  | altura 1.5 | 12-cultura-tomate.md | pronto |
 | `cultura/tomate-4` | culturas/tomate-4.png | 182 x 182 | 91, 161 |  | altura 1.5 | 12-cultura-tomate.md | pronto |
+
+### arvores (24)
+
+| Chave | Arquivo | Quadro (px) | Apoio | Casas | Tamanho pedido | Pedido | Situação |
+|---|---|---|---|---|---|---|---|
+| `arvore/bananeira-1` | arvores/bananeira-muda.png (apelido) | 126 x 107 | 64, 91 |  | altura 3.4 | 36-arvore-bananeira.md | pronto |
+| `arvore/bananeira-2` | arvores/bananeira-jovem.png (apelido) | 183 x 261 | 99, 243 |  | altura 3.4 | 36-arvore-bananeira.md | pronto |
+| `arvore/bananeira-3` | arvores/bananeira-adulta.png (apelido) | 297 x 398 | 144, 373 | 1 x 1 | fator 0.597 | 36-arvore-bananeira.md | pronto |
+| `arvore/bananeira-4` | arvores/bananeira-fruta.png (apelido) | 297 x 397 | 144, 372 | 1 x 1 | fator 0.597 | 36-arvore-bananeira.md | pronto |
+| `arvore/bananeira-adulta` | arvores/bananeira-adulta.png | 297 x 398 | 144, 373 | 1 x 1 | fator 0.597 | 36-arvore-bananeira.md | pronto |
+| `arvore/bananeira-fruta` | arvores/bananeira-fruta.png | 297 x 397 | 144, 372 | 1 x 1 | fator 0.597 | 36-arvore-bananeira.md | pronto |
+| `arvore/bananeira-jovem` | arvores/bananeira-jovem.png | 183 x 261 | 99, 243 |  | altura 3.4 | 36-arvore-bananeira.md | pronto |
+| `arvore/bananeira-muda` | arvores/bananeira-muda.png | 126 x 107 | 64, 91 |  | altura 3.4 | 36-arvore-bananeira.md | pronto |
+| `arvore/goiabeira-1` | arvores/goiabeira-muda.png (apelido) | 81 x 99 | 37, 88 |  | altura 3.3 | 37-arvore-goiabeira.md | pronto |
+| `arvore/goiabeira-2` | arvores/goiabeira-jovem.png (apelido) | 174 x 222 | 87, 204 |  | altura 3.3 | 37-arvore-goiabeira.md | pronto |
+| `arvore/goiabeira-3` | arvores/goiabeira-adulta.png (apelido) | 321 x 375 | 134, 353 |  | altura 3.3 | 37-arvore-goiabeira.md | pronto |
+| `arvore/goiabeira-4` | arvores/goiabeira-fruta.png (apelido) | 323 x 375 | 136, 353 |  | altura 3.3 | 37-arvore-goiabeira.md | pronto |
+| `arvore/goiabeira-adulta` | arvores/goiabeira-adulta.png | 321 x 375 | 134, 353 |  | altura 3.3 | 37-arvore-goiabeira.md | pronto |
+| `arvore/goiabeira-fruta` | arvores/goiabeira-fruta.png | 323 x 375 | 136, 353 |  | altura 3.3 | 37-arvore-goiabeira.md | pronto |
+| `arvore/goiabeira-jovem` | arvores/goiabeira-jovem.png | 174 x 222 | 87, 204 |  | altura 3.3 | 37-arvore-goiabeira.md | pronto |
+| `arvore/goiabeira-muda` | arvores/goiabeira-muda.png | 81 x 99 | 37, 88 |  | altura 3.3 | 37-arvore-goiabeira.md | pronto |
+| `arvore/laranjeira-1` | arvores/laranjeira-muda.png (apelido) | 88 x 127 | 43, 113 |  | altura 3.3 | 35-arvore-laranjeira.md | pronto |
+| `arvore/laranjeira-2` | arvores/laranjeira-jovem.png (apelido) | 185 x 235 | 95, 213 |  | altura 3.3 | 35-arvore-laranjeira.md | pronto |
+| `arvore/laranjeira-3` | arvores/laranjeira-adulta.png (apelido) | 348 x 389 | 176, 353 |  | altura 3.3 | 35-arvore-laranjeira.md | pronto |
+| `arvore/laranjeira-4` | arvores/laranjeira-fruta.png (apelido) | 349 x 389 | 176, 353 |  | altura 3.3 | 35-arvore-laranjeira.md | pronto |
+| `arvore/laranjeira-adulta` | arvores/laranjeira-adulta.png | 348 x 389 | 176, 353 |  | altura 3.3 | 35-arvore-laranjeira.md | pronto |
+| `arvore/laranjeira-fruta` | arvores/laranjeira-fruta.png | 349 x 389 | 176, 353 |  | altura 3.3 | 35-arvore-laranjeira.md | pronto |
+| `arvore/laranjeira-jovem` | arvores/laranjeira-jovem.png | 185 x 235 | 95, 213 |  | altura 3.3 | 35-arvore-laranjeira.md | pronto |
+| `arvore/laranjeira-muda` | arvores/laranjeira-muda.png | 88 x 127 | 43, 113 |  | altura 3.3 | 35-arvore-laranjeira.md | pronto |
 
 ### icones (67)
 

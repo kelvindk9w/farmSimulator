@@ -831,6 +831,161 @@
    "altura-livre": true
   }
  },
+ "personagem/alimentar-costas": {
+  "chave": "personagem/alimentar-costas",
+  "crua": "alimentar-costas.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 7,
+  "referencia": true,
+  "modo": "molde",
+  "emPe": 294,
+  "emPeReal": 304,
+  "emPeFonte": 610,
+  "escala": 0.4989,
+  "casa": [
+   208,
+   320
+  ],
+  "apoio": [
+   104,
+   298
+  ],
+  "quadros": 6,
+  "desenhos": 6,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   288,
+   302,
+   300,
+   293,
+   295,
+   298
+  ],
+  "tamanhoPelaMassa": [
+   150.8,
+   152.4,
+   153.7,
+   154.2,
+   153.9,
+   150.6
+  ],
+  "variacaoAltura": 4.6,
+  "tamanhoPelaCor": [
+   48.9,
+   48.4,
+   46.6,
+   46.7,
+   46.9,
+   46.1
+  ],
+  "custosDoMolde": [
+   0,
+   95,
+   103,
+   116,
+   121,
+   132
+  ],
+  "bytes": 102385,
+  "avisos": [
+   "altura varia 4.6% entre quadros (288 302 300 293 295 298), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "personagem/alimentar-costas",
+   "altura": "294",
+   "quadros": "7",
+   "ref": true,
+   "alinhar": "molde",
+   "tamanho-cor": "48.7",
+   "altura-livre": true,
+   "qps": "8"
+  }
+ },
+ "personagem/alimentar-frente": {
+  "chave": "personagem/alimentar-frente",
+  "crua": "alimentar-frente.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 7,
+  "referencia": true,
+  "modo": "molde",
+  "emPe": 294,
+  "emPeReal": 307,
+  "emPeFonte": 657,
+  "escala": 0.4673,
+  "casa": [
+   184,
+   328
+  ],
+  "apoio": [
+   92,
+   306
+  ],
+  "quadros": 6,
+  "desenhos": 6,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   295,
+   303,
+   299,
+   289,
+   299,
+   306
+  ],
+  "tamanhoPelaMassa": [
+   145.4,
+   151.5,
+   151.1,
+   152,
+   151.5,
+   150.8
+  ],
+  "variacaoAltura": 5.5,
+  "tamanhoPelaCor": [
+   45.9,
+   44,
+   44.7,
+   46.5,
+   44.8,
+   44.8
+  ],
+  "custosDoMolde": [
+   0,
+   154,
+   131,
+   162,
+   124,
+   46
+  ],
+  "bytes": 98106,
+  "avisos": [
+   "a proporção entre cabeça e corpo difere 9% da folha de modelo",
+   "altura varia 5.5% entre quadros (295 303 299 289 299 306), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "personagem/alimentar-frente",
+   "altura": "294",
+   "quadros": "7",
+   "ref": true,
+   "alinhar": "molde",
+   "tamanho-cor": "47.5",
+   "altura-livre": true,
+   "qps": "8"
+  }
+ },
  "personagem/andar-costas": {
   "chave": "personagem/andar-costas",
   "crua": "andar-costas.png",
@@ -1218,6 +1373,161 @@
   "ok": true,
   "opcoes": {
    "chave": "personagem/colher-frente",
+   "altura": "294",
+   "quadros": "7",
+   "ref": true,
+   "alinhar": "molde",
+   "tamanho-cor": "47.5",
+   "altura-livre": true,
+   "qps": "8"
+  }
+ },
+ "personagem/colher-fruta-costas": {
+  "chave": "personagem/colher-fruta-costas",
+  "crua": "colher-fruta-costas.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 7,
+  "referencia": true,
+  "modo": "molde",
+  "emPe": 294,
+  "emPeReal": 307,
+  "emPeFonte": 503,
+  "escala": 0.6099,
+  "casa": [
+   176,
+   336
+  ],
+  "apoio": [
+   88,
+   308
+  ],
+  "quadros": 6,
+  "desenhos": 6,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   304,
+   299,
+   320,
+   310,
+   303,
+   308
+  ],
+  "tamanhoPelaMassa": [
+   149.6,
+   147.3,
+   150.1,
+   148.8,
+   149,
+   150.9
+  ],
+  "variacaoAltura": 6.3,
+  "tamanhoPelaCor": [
+   45.5,
+   44.1,
+   43.3,
+   42.9,
+   46.1,
+   46.1
+  ],
+  "custosDoMolde": [
+   0,
+   151,
+   162,
+   162,
+   64,
+   110
+  ],
+  "bytes": 102184,
+  "avisos": [
+   "a proporção entre cabeça e corpo difere 9% da folha de modelo",
+   "altura varia 6.3% entre quadros (304 299 320 310 303 308), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "personagem/colher-fruta-costas",
+   "altura": "294",
+   "quadros": "7",
+   "ref": true,
+   "alinhar": "molde",
+   "tamanho-cor": "48.7",
+   "altura-livre": true,
+   "qps": "8"
+  }
+ },
+ "personagem/colher-fruta-frente": {
+  "chave": "personagem/colher-fruta-frente",
+  "crua": "colher-fruta-frente.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 7,
+  "referencia": true,
+  "modo": "molde",
+  "emPe": 294,
+  "emPeReal": 297,
+  "emPeFonte": 523,
+  "escala": 0.5684,
+  "casa": [
+   184,
+   328
+  ],
+  "apoio": [
+   92,
+   304
+  ],
+  "quadros": 6,
+  "desenhos": 6,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   297,
+   297,
+   312,
+   313,
+   295,
+   297
+  ],
+  "tamanhoPelaMassa": [
+   148.6,
+   149,
+   153.1,
+   152.6,
+   148.5,
+   147.4
+  ],
+  "variacaoAltura": 5.6,
+  "tamanhoPelaCor": [
+   46.1,
+   45.6,
+   45.4,
+   45.7,
+   49.4,
+   47.4
+  ],
+  "custosDoMolde": [
+   0,
+   90,
+   125,
+   130,
+   118,
+   114
+  ],
+  "bytes": 105010,
+  "avisos": [
+   "altura varia 5.6% entre quadros (297 297 312 313 295 297), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "personagem/colher-fruta-frente",
    "altura": "294",
    "quadros": "7",
    "ref": true,
@@ -1634,6 +1944,236 @@
    "tamanho-cor": "47.5",
    "altura-livre": true,
    "qps": "8"
+  }
+ },
+ "personagem/martelar-frente": {
+  "chave": "personagem/martelar-frente",
+  "crua": "martelar-frente.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 7,
+  "referencia": true,
+  "modo": "molde",
+  "emPe": 294,
+  "emPeReal": 303,
+  "emPeFonte": 546,
+  "escala": 0.5546,
+  "casa": [
+   208,
+   336
+  ],
+  "apoio": [
+   104,
+   314
+  ],
+  "quadros": 6,
+  "desenhos": 6,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   292,
+   299,
+   310,
+   288,
+   268,
+   290
+  ],
+  "tamanhoPelaMassa": [
+   143.3,
+   145.4,
+   151.9,
+   145.6,
+   141.5,
+   144.8
+  ],
+  "variacaoAltura": 13.6,
+  "tamanhoPelaCor": [
+   46.2,
+   45.7,
+   46.1,
+   46.2,
+   46.1,
+   46.8
+  ],
+  "custosDoMolde": [
+   0,
+   21,
+   33,
+   58,
+   74,
+   65
+  ],
+  "bytes": 97532,
+  "avisos": [
+   "altura varia 13.6% entre quadros (292 299 310 288 268 290), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "personagem/martelar-frente",
+   "altura": "294",
+   "quadros": "7",
+   "ref": true,
+   "alinhar": "molde",
+   "tamanho-cor": "47.5",
+   "altura-livre": true,
+   "qps": "8"
+  }
+ },
+ "personagem/ordenhar-costas": {
+  "chave": "personagem/ordenhar-costas",
+  "crua": "ordenhar-costas.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 7,
+  "referencia": true,
+  "modo": "molde",
+  "emPe": 294,
+  "emPeReal": 299,
+  "emPeFonte": 581,
+  "escala": 0.5138,
+  "casa": [
+   160,
+   296
+  ],
+  "apoio": [
+   80,
+   274
+  ],
+  "quadros": 6,
+  "desenhos": 6,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   270,
+   266,
+   269,
+   270,
+   263,
+   269
+  ],
+  "tamanhoPelaMassa": [
+   151,
+   149.8,
+   150.6,
+   151.4,
+   149.6,
+   151.5
+  ],
+  "variacaoAltura": 2.7,
+  "tamanhoPelaCor": [
+   49.4,
+   51.4,
+   49.5,
+   48.7,
+   47,
+   49.2
+  ],
+  "custosDoMolde": [
+   0,
+   29,
+   38,
+   25,
+   28,
+   32
+  ],
+  "bytes": 92269,
+  "avisos": [],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "personagem/ordenhar-costas",
+   "altura": "294",
+   "quadros": "7",
+   "ref": true,
+   "alinhar": "molde",
+   "tamanho-cor": "48.7",
+   "altura-livre": true,
+   "qps": "8"
+  }
+ },
+ "personagem/ordenhar-frente": {
+  "chave": "personagem/ordenhar-frente",
+  "crua": "ordenhar-frente.png",
+  "cruaTamanho": [
+   2172,
+   724
+  ],
+  "linhasNaCrua": 1,
+  "figurasNaCrua": 7,
+  "referencia": true,
+  "modo": "molde",
+  "emPe": 294,
+  "emPeReal": 307,
+  "emPeFonte": 623,
+  "escala": 0.4708,
+  "casa": [
+   184,
+   288
+  ],
+  "apoio": [
+   92,
+   266
+  ],
+  "quadros": 6,
+  "desenhos": 6,
+  "qps": 8,
+  "laco": true,
+  "alturas": [
+   268,
+   264,
+   268,
+   265,
+   264,
+   268
+  ],
+  "tamanhoPelaMassa": [
+   153.3,
+   152.3,
+   153.2,
+   151.6,
+   152.6,
+   153.5
+  ],
+  "variacaoAltura": 1.6,
+  "tamanhoPelaCor": [
+   47.8,
+   46.7,
+   47.7,
+   46.9,
+   47.1,
+   45.2
+  ],
+  "custosDoMolde": [
+   0,
+   21,
+   22,
+   20,
+   17,
+   30
+  ],
+  "bytes": 99015,
+  "avisos": [
+   "a proporção entre cabeça e corpo difere 9% da folha de modelo"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "personagem/ordenhar-frente",
+   "altura": "294",
+   "quadros": "7",
+   "ref": true,
+   "alinhar": "molde",
+   "tamanho-cor": "47.5",
+   "altura-livre": true,
+   "qps": "8",
+   "ajuste": "0.955"
   }
  },
  "personagem/parada-costas": {

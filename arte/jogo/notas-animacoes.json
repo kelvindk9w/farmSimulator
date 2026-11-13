@@ -24,6 +24,11 @@
    "arquivo": "ordenha.png",
    "pedido": "modelo-ordenha.md",
    "nota": "Folha de modelo da INTERAÇÃO: a personagem no banquinho ordenhando a vaca, vista por trás dela, pela frente dela (a vaca em primeiro plano) e a pose dela sozinha com banquinho e balde. Anexada aos pedidos de ordenhar. Uma rodada."
+  },
+  "ovelha": {
+   "arquivo": "ovelha.png",
+   "pedido": "modelo-ovelha.md",
+   "nota": "Ovelha com lã: frente, costas e perfil. Lã creme em tufos, cara e patas castanho-escuras. Uma rodada."
   }
  },
  "folhas": {
@@ -178,6 +183,41 @@
    "pedido": "vaca-andar-costas-r2.md",
    "rodadas": 2,
    "nota": "1ª rodada saiu um trote, com o corpo maior e as patas mais curtas que as da vaca parada; a 2ª pede passo lento de quatro tempos (uma pata por vez) e as proporções da folha parada: corpo igual, patas inteiras."
+  },
+  "personagem/alimentar-frente": {
+   "pedido": "personagem-alimentar-frente.md",
+   "rodadas": 1,
+   "nota": "Pega no balde, arma, lança num arco largo e volta. Pernas um pouco mais compridas que as da folha de modelo (aviso de 9% na proporção cabeça/corpo), no mesmo jeito de semear e regar."
+  },
+  "personagem/ordenhar-frente": {
+   "pedido": "personagem-ordenhar-frente.md",
+   "rodadas": 1,
+   "nota": "Sentada no banquinho com o balde entre os pés (fazem parte do desenho); as mãos sobem e descem alternadas, o tronco balança. A vaca é desenhada à parte pelo jogo. A figura sentada veio maior que a de referência em pé: --ajuste 0.955 deixa o lenço do tamanho da parada."
+  },
+  "personagem/alimentar-costas": {
+   "pedido": "personagem-alimentar-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente, com o balde na outra mão."
+  },
+  "personagem/ordenhar-costas": {
+   "pedido": "personagem-ordenhar-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente: de costas o corpo esconde parte do balde; os cotovelos sobem e descem alternados."
+  },
+  "personagem/martelar-frente": {
+   "pedido": "personagem-martelar-frente.md",
+   "rodadas": 1,
+   "nota": "Aponta, ergue, arma no alto, desce, bate na altura da cintura e quica."
+  },
+  "personagem/colher-fruta-frente": {
+   "pedido": "personagem-colher-fruta-frente.md",
+   "rodadas": 1,
+   "nota": "Olha para cima, estica na ponta dos pés, apanha no alto, desce e guarda. Mão vazia: a fruta é do jogo."
+  },
+  "personagem/colher-fruta-costas": {
+   "pedido": "personagem-colher-fruta-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente. Corpo um pouco mais esguio que o da folha de modelo (aviso de 9%)."
   }
  },
  "geral": [

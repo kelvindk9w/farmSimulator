@@ -2,7 +2,8 @@
 // ({ evento, filtro, n }); cumprida, dá a recompensa e a seguinte aparece. A sequência vem de missoes.json.
 // A missão da vez é a primeira da lista que ainda não foi feita e que este jogo sabe cumprir (o evento está
 // registrado e leva os campos do filtro): as que dependem de coisa que ainda não existe ficam para depois,
-// sem travar a fila. Missão de nível mais alto que o do jogador espera ele subir.
+// sem travar a fila. Missão de nível mais alto que o do jogador espera ele subir. Missão com "valeJaTer" se cumpre
+// na hora se o jogador já tem o que ela pede.
 import { registrarSistema, registrarEvento, EVENTOS } from '../registro.js';
 import { darRecompensa } from './posses.js';
 import { darXp } from './niveis.js';
@@ -43,26 +44,49 @@ function serve(objetivo, tipo, dados) {
   return true;
 }
 
+// cumpre a missão: marca, paga a recompensa e avisa (jaTinha = cumprida por "valeJaTer", sem o evento acontecer)
+function concluir(m, mi, jaTinha) {
+  const M = m.missoes;
+  // a recompensa emite eventos (ganhouOuro, subiuDeNivel...): eles não contam para a missão seguinte, que só
+  // começa depois de todos ouvirem o "missaoConcluida" desta (os avisos saem na ordem certa)
+  M.ocupado = true;
+  M.feitas.push(mi.id); M.de = null; M.conta = 0;
+  darRecompensa(m, mi.recompensa, 'missao');
+  if (mi.recompensa.xp > 0) darXp(m, mi.recompensa.xp, 'missao');
+  const prox = daVez(m);
+  m.eventos.emitir('missaoConcluida', { id: mi.id, titulo: mi.titulo, recompensa: mi.recompensa, proxima: prox ? prox.id : null, jaTinha: !!jaTinha });
+  M.ocupado = false;
+}
+
+// "valeJaTer": a missão da vez pede uma coisa que o jogador já tem (comprou o regador antes de o vizinho pedir)?
+// Então ela se cumpre na hora, e a seguinte também, se for o caso. Quem sabe se "já tem" é o evento do objetivo.
+function conferir(m) {
+  const M = m.missoes;
+  for (let k = 0; k < 100 && !M.ocupado; k++) {
+    const mi = daVez(m);
+    if (!mi || !mi.valeJaTer || (mi.nivel || 1) > m.progresso.nivel) return;
+    const ev = EVENTOS[mi.objetivo.evento];
+    if (!ev.jaTem || !ev.jaTem(m, mi.objetivo.filtro || {}, mi.objetivo.n)) return;
+    concluir(m, mi, true);
+  }
+}
+
 function ouvir(m, dados, tipo) {
   const M = m.missoes;
   if (M.ocupado || !EVENTOS[tipo]) return;
   const mi = daVez(m);
-  if (!mi || (mi.nivel || 1) > m.progresso.nivel || !serve(mi.objetivo, tipo, dados)) return;
-  if (M.de !== mi.id) { M.de = mi.id; M.conta = 0; }
-  // conta unidades quando o evento diz quantas ("n"); senão, uma por evento
-  M.conta += dados && typeof dados.n === 'number' ? dados.n : 1;
-  if (M.conta < mi.objetivo.n) { m.eventos.emitir('missaoAndou', { id: mi.id, conta: M.conta, n: mi.objetivo.n }); return; }
-  M.ocupado = true; // a recompensa emite eventos (ganhouOuro, subiuDeNivel...): eles não contam para a missão seguinte
-  M.feitas.push(mi.id); M.de = null; M.conta = 0;
-  darRecompensa(m, mi.recompensa, 'missao');
-  if (mi.recompensa.xp > 0) darXp(m, mi.recompensa.xp, 'missao');
-  M.ocupado = false;
-  const prox = daVez(m);
-  m.eventos.emitir('missaoConcluida', { id: mi.id, titulo: mi.titulo, recompensa: mi.recompensa, proxima: prox ? prox.id : null });
+  if (mi && (mi.nivel || 1) <= m.progresso.nivel && serve(mi.objetivo, tipo, dados)) {
+    if (M.de !== mi.id) { M.de = mi.id; M.conta = 0; }
+    // conta unidades quando o evento diz quantas ("n"); senão, uma por evento
+    M.conta += dados && typeof dados.n === 'number' ? dados.n : 1;
+    if (M.conta < mi.objetivo.n) m.eventos.emitir('missaoAndou', { id: mi.id, conta: M.conta, n: mi.objetivo.n });
+    else concluir(m, mi, false);
+  }
+  conferir(m); // a missão que passou a valer (a seguinte, ou a que esperava o nível) pode já estar cumprida
 }
 
 registrarEvento('missaoAndou', { campos: ['id', 'conta', 'n'] });
-registrarEvento('missaoConcluida', { campos: ['id', 'titulo', 'recompensa', 'proxima'] });
+registrarEvento('missaoConcluida', { campos: ['id', 'titulo', 'recompensa', 'proxima', 'jaTinha'] });
 
 registrarSistema({
   id: 'missoes',
@@ -70,6 +94,9 @@ registrarSistema({
     m.missoes = { feitas: [], de: null, conta: 0, ocupado: false };
     m.eventos.ouvir('*', (dados, tipo) => ouvir(m, dados, tipo));
   },
+  // ao abrir o jogo (novo ou gravado) e na volta de uma ausência não há evento: confere pelo relógio
+  segundo: conferir,
+  ausencia: conferir,
   salvar(m) { return { feitas: [...m.missoes.feitas], de: m.missoes.de, conta: m.missoes.conta }; },
   carregar(m, d) {
     const ids = new Set(m.dados.missoes.vizinho.map((x) => x.id)); // a lista pode ter mudado entre versões

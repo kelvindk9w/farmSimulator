@@ -5,8 +5,8 @@
 import { GRAMA, ARADA } from './local.js';
 import { missaoAtual } from './sistemas/missoes.js';
 import { noCesto, espacoNoCesto, noCeleiro, ferramentaNoCinto, ferramentaNoSuporte } from './sistemas/posses.js';
-import { estadoDaPlanta, segundosDeAgua } from './sistemas/lavoura.js';
-import { filaTem } from './sistemas/personagem.js';
+import { estadoDaPlanta, segundosDeAgua, sementesLivres } from './sistemas/lavoura.js';
+import { filaTem, contarNaFila } from './sistemas/personagem.js';
 
 const casa = (out, x, z) => { out.tipo = 'casa'; out.x = x; out.z = z; return out; };
 const entidade = (out, id) => { out.tipo = 'entidade'; out.id = id; return out; };
@@ -64,6 +64,7 @@ function passoArar(m, out) {
 function passoPlantar(m, semente, out) {
   const s = semente || algumaSemente(m);
   if (!s || !(m.posses.bolsa[s] > 0)) { out.tipo = 'painel'; out.painel = 'loja'; out.item = s || null; return out; }
+  if (sementesLivres(m, s) <= 0) return nada(out); // as que há já estão prometidas na fila: é esperar
   const c = lavoura(m), loc = m.local;
   const vazia = (l, i, x, z) => l.chao[i] === ARADA && !l.plantas[i] && !filaTem(m, 'semear', x, z);
   if (!casaPerto(m, c[0] + 0.5, c[1] + 0.5, 10, vazia, out)) return passoArar(m, out);
@@ -74,7 +75,7 @@ function passoPlantar(m, semente, out) {
 function passoRegar(m, cultura, out) {
   if (!plantaPerto(m, 'sede', cultura, out)) return null;
   const x = out.x, z = out.z, reg = ferramentaNoCinto(m, 'regador') || ferramentaNoSuporte(m, 'regador');
-  if (reg && !(m.posses.ferramentas[reg].agua > 0) && !filaTem(m, 'encher')) return entidade(out, 'poco');
+  if (reg && m.posses.ferramentas[reg].agua - contarNaFila(m, 'regar') <= 0 && !filaTem(m, 'encher')) return entidade(out, 'poco'); // a água que há já está prometida
   if (m.modo.id !== 'mao' && m.modo.id !== 'regar') return modo(out, 'mao');
   return casa(out, x, z);
 }

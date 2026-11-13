@@ -1,7 +1,9 @@
 // Experiência, níveis e as missões do vizinho.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { novoMundo, ateParar, ouvirTudo, arar, tocarEm, colher, plantarAtePronta, CAMPO } from './apoio.mjs';
+import { novoMundo, dadosDeTeste, brutoDeTeste, ateParar, ouvirTudo, arar, tocarEm, colher, plantarAtePronta, CAMPO } from './apoio.mjs';
+import { Mundo } from '../src/nucleo/mundo.js';
+import { prepararDados } from '../src/nucleo/dados.js';
 import { darXp, barraDeXp } from '../src/nucleo/sistemas/niveis.js';
 import { missaoAtual, missaoPossivel } from '../src/nucleo/sistemas/missoes.js';
 import { guiaDaMissao } from '../src/nucleo/guia.js';
@@ -20,6 +22,16 @@ test('a experiência enche a barra e sobe o nível no limiar, com a recompensa d
   assert.deepEqual(s[0].recompensa, { ouro: 15, cash: 1, itens: { 'semente-milho': 2 } });
   assert.deepEqual(s[0].liberou.map((x) => x.id).sort(), ['milho', 'regador-grande'], 'o que tem "nivel": 2 nos dados');
   assert.deepEqual(barraDeXp(m), { nivel: 2, feito: 0, precisa: 20, fracao: 0 });
+});
+
+test('a subida de nível só anuncia o que este jogo já sabe usar (os dados trazem conteúdo de marcos futuros)', () => {
+  const m = novoMundo((b) => {
+    b.itens.fibra = { nome: 'Fibra', tipo: 'material', compra: 3, venda: 1, nivel: 2 };
+    b.animais = { galinha: { nome: 'Galinha', nivel: 2 } };
+  }), ev = ouvirTudo(m);
+  darXp(m, 10, 'teste');
+  assert.deepEqual(ev.de('subiuDeNivel')[0].liberou.map((x) => x.id).sort(), ['milho', 'regador-grande']);
+  assert.equal(m.comando({ tipo: 'comprar', item: 'fibra' }).motivo, 'nao-vende');
 });
 
 test('experiência de sobra sobe vários níveis de uma vez (um evento por nível) e para no último', () => {
@@ -93,6 +105,55 @@ test('missão de nível mais alto espera o jogador subir (e não conta antes)', 
   assert.equal(missaoAtual(m).esperaNivel, 0);
   arar(m, [[12, 14], [13, 14]]);
   assert.deepEqual(m.missoes.feitas, ['arar-2']);
+});
+
+const COMPRAR_CESTO = { id: 'cesto-novo', titulo: 'Cesto novo', fala: 'Compre o cesto grande.', objetivo: { evento: 'comprou', filtro: { item: 'cesto-grande' }, n: 1 }, valeJaTer: true, recompensa: { ouro: 7 } };
+const COMPRAR_REGADOR = { id: 'regador-novo', nivel: 2, titulo: 'Regador novo', fala: 'Compre o regador grande.', objetivo: { evento: 'comprou', filtro: { item: 'regador-grande' }, n: 1 }, valeJaTer: true, recompensa: { cash: 2 } };
+
+test('valeJaTer: quem comprou antes de o vizinho pedir não fica preso (a missão se cumpre ao ficar valendo)', () => {
+  const m = novoMundo((b) => { b.missoes.vizinho.splice(1, 0, COMPRAR_CESTO, COMPRAR_REGADOR); }), ev = ouvirTudo(m);
+  m.posses.ouro = 100;
+  assert.equal(m.comando({ tipo: 'comprar', item: 'cesto-grande' }).ok, true);
+  assert.equal(missaoAtual(m).missao.id, 'arar-2', 'a compra adiantada não mexe na missão da vez');
+  const ouro = m.posses.ouro;
+  arar(m, [[12, 13], [13, 13]]);
+  // cumprida a primeira, a do cesto já vale e se cumpre na hora; a do regador espera o nível 2
+  assert.deepEqual(m.missoes.feitas, ['arar-2', 'cesto-novo']);
+  assert.equal(m.posses.ouro, ouro + 5 + 7);
+  assert.deepEqual(ev.de('missaoConcluida').map((d) => [d.id, d.jaTinha]), [['arar-2', false], ['cesto-novo', true]]);
+  assert.equal(missaoAtual(m).missao.id, 'regador-novo'); assert.equal(missaoAtual(m).esperaNivel, 2);
+});
+
+test('valeJaTer: vale um igual ou melhor do mesmo papel, vale ao subir de nível e vale ao abrir o jogo', () => {
+  const muda = (b) => { b.missoes.vizinho = [COMPRAR_REGADOR, ...b.missoes.vizinho]; };
+  const m = novoMundo(muda);
+  m.progresso.nivel = 2; m.posses.ouro = 100;
+  m.avancar(1.1);
+  assert.deepEqual(m.missoes.feitas, [], 'o regador velho não é "igual ou melhor" que o grande');
+  m.progresso.nivel = 1;
+  m.posses.ferramentas['regador-grande'] = { onde: 'suporte', agua: 0, usos: 0, vez: 0 }; // ganhou de presente antes da hora
+  m.avancar(1.1);
+  assert.deepEqual(m.missoes.feitas, [], 'a missão ainda espera o nível 2');
+  // abre o jogo gravado já no nível 2: sem evento nenhum, o relógio confere
+  const g = JSON.parse(JSON.stringify(m.salvar())); g.sistemas.niveis.nivel = 2;
+  const n = Mundo.carregar(dadosDeTeste(muda), g);
+  assert.deepEqual(n.missoes.feitas, []);
+  n.avancar(1.1);
+  assert.deepEqual(n.missoes.feitas, ['regador-novo']);
+  assert.equal(n.posses.cash, m.posses.cash + 2);
+  // e no mundo original, subir de nível também basta
+  darXp(m, 10, 'teste');
+  assert.deepEqual(m.missoes.feitas, ['regador-novo']);
+});
+
+test('sem valeJaTer a missão de comprar conta só a compra feita depois (e os dados avisam do risco)', () => {
+  const semChave = { ...COMPRAR_CESTO, valeJaTer: undefined };
+  const m = novoMundo((b) => { b.missoes.vizinho = [semChave]; });
+  m.posses.ouro = 100;
+  m.comando({ tipo: 'comprar', item: 'cesto-grande' });
+  assert.deepEqual(m.missoes.feitas, ['cesto-novo'], 'comprando com a missão valendo, conta');
+  const b = brutoDeTeste(); b.missoes.vizinho = [semChave];
+  assert.ok(prepararDados(b).problemas.some((p) => /valeJaTer/.test(p.texto)));
 });
 
 test('o guia leva um jogador obediente por todas as missões', () => {

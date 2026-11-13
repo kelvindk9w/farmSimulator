@@ -57,10 +57,12 @@ export function modosEmOrdem() { return Object.values(MODOS).sort((a, b) => a.or
 // fn(mundo, x, z) → { acao, args, texto } | null. O modo "mão" pergunta a cada um, na ordem de registro.
 export function registrarAutomatico(fn) { AUTOMATICOS.push(fn); }
 
-// nome, { campos: ['item', 'n', ...], aceita(dados, filtro) → bool }
+// nome, { campos: ['item', 'n', ...], aceita(dados, filtro) → bool, jaTem(mundo, filtro, n) → bool }
 //   campos = o que o evento leva (o filtro de uma missão só pode usar estes); "aceita" recusa filtros que este jogo
 //   ainda não sabe cumprir (plantar uma muda quando só existe lavoura, por exemplo). Uma missão cujo evento não está
 //   registrado, ou cujo filtro não é aceito, fica para depois: não trava a sequência.
+//   jaTem(mundo, filtro, n) → bool: para missões com "valeJaTer" (comprar, construir): o jogador já tem o que o
+//   objetivo pede? Se sim, a missão se cumpre na hora em que fica valendo (quem se adianta não fica preso).
 export function registrarEvento(nome, def = {}) {
-  EVENTOS[nome] = { campos: def.campos || [], aceita: def.aceita || null };
+  EVENTOS[nome] = { campos: def.campos || [], aceita: def.aceita || null, jaTem: def.jaTem || null };
 }

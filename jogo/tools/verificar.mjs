@@ -164,18 +164,23 @@ try {
   e = await estado(pg);
   igual(e.cesto.alface, 6, 'seis alfaces no cesto');
   igual(e.plantas.length, 0, 'as casas colhidas ficam sem planta');
-  let subiu = await J(pg, () => window.__jogo.subidaAberta());
-  if (!subiu) {
-    // se os números da economia ainda não deram o nível 2 aqui, vende antes e olha de novo
-    console.log('  (o nível 2 não veio na colheita; confiro depois da venda)');
-  } else {
-    await esperar(900);
-    await pg.screenshot({ path: path.join(capturas, '04-subida-de-nivel.jpg'), type: 'jpeg', quality: 82 });
-    confere(await J(pg, () => /n[íi]vel/i.test(document.querySelector('.subida').textContent) && !!document.querySelector('.subida .numero')), 'a tela de subida mostra o nível novo');
-    await pg.keyboard.press('Enter');
-    await esperar(80);
+  // a tela de subida de nível, quando aparece: confere, fotografa (só a primeira) e fecha com Enter
+  let subiu = false;
+  async function telaDeSubida() {
+    for (let k = 0; k < 6 && (await J(pg, () => window.__jogo.subidaAberta())); k++) {
+      await esperar(900);
+      if (!subiu) await pg.screenshot({ path: path.join(capturas, '04-subida-de-nivel.jpg'), type: 'jpeg', quality: 82 });
+      subiu = true;
+      confere(await J(pg, () => /n[íi]vel/i.test(document.querySelector('.subida').textContent) && !!document.querySelector('.subida .numero')), 'a tela de subida mostra o nível novo');
+      confere(await J(pg, () => document.querySelectorAll('.avisos .aviso').length === 0), 'com a tela de subida aberta, nenhum aviso aparece por cima dela');
+      await pg.keyboard.press('Enter');
+      await esperar(120);
+    }
     confere(!(await J(pg, () => window.__jogo.subidaAberta())), 'Enter fecha a tela de subida de nível');
+    confere(await J(pg, () => document.querySelectorAll('.avisos .aviso:not(.sai)').length <= 2), 'nunca há mais de dois avisos empilhados');
   }
+  await telaDeSubida();
+  if (!subiu) console.log('  (o nível 2 não veio na colheita; confiro depois da venda e da compra)');
 
   // ---- vender na banca
   const ouroAntes = (await estado(pg)).ouro;
@@ -187,11 +192,7 @@ try {
   e = await estado(pg);
   confere(e.ouro > ouroAntes, `vender na banca dá ouro (tinha ${ouroAntes}, ficou com ${e.ouro})`);
   igual(e.noCesto, 0, 'o cesto fica vazio depois da venda');
-  if (!subiu) {
-    subiu = await J(pg, () => window.__jogo.subidaAberta());
-    if (subiu) { await esperar(900); await pg.screenshot({ path: path.join(capturas, '04-subida-de-nivel.jpg'), type: 'jpeg', quality: 82 }); await pg.keyboard.press('Enter'); await esperar(80); }
-  }
-  if (await J(pg, () => window.__jogo.subidaAberta())) { await pg.keyboard.press('Enter'); await esperar(80); }
+  await telaDeSubida();
 
   // ---- comprar na loja: abre pelo botão, compra com o mouse e com o teclado, fecha com Esc
   await clicarEm('.topo-dir [data-painel="loja"]');
@@ -217,8 +218,7 @@ try {
   await pg.keyboard.press('Escape');
   igual(await J(pg, () => window.__jogo.painelAberto()), null, 'Esc fecha o painel');
   confere((await estado(pg)).feitas.includes('comprar-sementes') || (await estado(pg)).missao.id !== 'comprar-sementes', 'a missão de comprar sementes foi cumprida');
-  if (!subiu) { subiu = await J(pg, () => window.__jogo.subidaAberta()); if (subiu) { await esperar(900); await pg.screenshot({ path: path.join(capturas, '04-subida-de-nivel.jpg'), type: 'jpeg', quality: 82 }); } }
-  if (await J(pg, () => window.__jogo.subidaAberta())) { await pg.keyboard.press('Enter'); await esperar(80); }
+  await telaDeSubida();
   e = await estado(pg);
   confere(subiu, `a tela de subida de nível apareceu no começo do jogo (nível ${e.nivel}, ${e.xp} de experiência)`);
   confere(e.nivel >= 2, 'o começo do jogo leva ao nível 2');

@@ -4,6 +4,12 @@ import { registrarSistema, registrarEvento } from '../registro.js';
 import { liberaNoNivel } from '../dados.js';
 import { darRecompensa } from './posses.js';
 
+// O que a tela de subida mostra em "liberou": só o que este jogo já sabe usar (os dados já trazem o conteúdo dos
+// marcos seguintes). Uma função por tipo de novidade: (mundo, { tipo, id, nome, item }) → bool. A loja responde
+// pelos itens (MOSTRA_LIBERADO.item); cada frente acrescenta o seu tipo: 'animais', 'construcoes', 'arvores', 'receitas'.
+export const MOSTRA_LIBERADO = { cultura: () => true };
+const mostra = (m, x) => { const f = MOSTRA_LIBERADO[x.tipo] || MOSTRA_LIBERADO.item; return !!f && f(m, x); };
+
 export function darXp(m, n, origem) {
   if (!(n > 0)) return;
   const P = m.progresso, N = m.dados.niveis;
@@ -13,7 +19,7 @@ export function darXp(m, n, origem) {
     P.nivel++;
     const recompensa = N.recompensas[P.nivel] || null;
     darRecompensa(m, recompensa, 'nivel');
-    m.eventos.emitir('subiuDeNivel', { nivel: P.nivel, recompensa, liberou: liberaNoNivel(m.dados, P.nivel) });
+    m.eventos.emitir('subiuDeNivel', { nivel: P.nivel, recompensa, liberou: liberaNoNivel(m.dados, P.nivel).filter((x) => mostra(m, x)) });
   }
 }
 

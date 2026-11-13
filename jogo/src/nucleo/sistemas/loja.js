@@ -3,6 +3,7 @@
 // semente de cultura, ferramenta que alguma ação pede, recipiente com papel conhecido. O resto chega com a sua frente.
 import { registrarSistema, registrarEvento, ACOES } from '../registro.js';
 import { gastarOuro, darItem, valorDoCesto, RECIPIENTES } from './posses.js';
+import { MOSTRA_LIBERADO } from './niveis.js';
 
 // por tipo de item: este jogo já sabe usar? As frentes novas acrescentam aqui (VENDAVEL.material = () => true, ...)
 export const VENDAVEL = {
@@ -85,11 +86,29 @@ function socorro(m) {
   m.eventos.emitir('socorro', { item: A.semente, n: A.quantidade });
 }
 
+// "valeJaTer" numa missão de comprar: o jogador já tem a coisa? Uma função por chave do filtro; as frentes novas
+// acrescentam as suas (JA_COMPROU.animal = (m, id, n) => ..., JA_COMPROU.lote = ..., JA_COMPROU.familia = ...).
+export const JA_COMPROU = {
+  // ferramenta ou recipiente: já tem um igual ou melhor do mesmo papel
+  item: (m, id) => { const it = m.dados.itens[id]; return !!it && unico(it) && degrauQueTem(m, it) >= it.degrau; },
+};
+const um = (v, existe) => v === undefined || (Array.isArray(v) ? v.some(existe) : existe(v));
+// este jogo já sabe vender o item? (está na loja de ouro e alguém sabe usá-lo)
+const vende = (dados, id) => { const it = dados.itens[id], v = it && VENDAVEL[it.tipo]; return !!v && dados.loja.ouro.includes(id) && v({ dados }, it); };
+
+MOSTRA_LIBERADO.item = (m, x) => vende(m.dados, x.id); // na subida de nível, só aparece o item que a loja já vende
+
 registrarEvento('comprou', {
   campos: ['item', 'n', 'ouro', 'classe'],
-  aceita: (dados, f) => {
-    const um = (v, existe) => v === undefined || (Array.isArray(v) ? v.some(existe) : existe(v));
-    return um(f.item, (id) => dados.loja.ouro.includes(id)) && um(f.classe, (c) => dados.loja.ouro.some((id) => dados.itens[id].tipo === c));
+  aceita: (dados, f) => um(f.item, (id) => vende(dados, id)) && um(f.classe, (c) => dados.loja.ouro.some((id) => dados.itens[id].tipo === c && vende(dados, id))),
+  jaTem: (m, f, n) => {
+    let alguma = false;
+    for (const k in f) {
+      const tem = JA_COMPROU[k];
+      if (!tem || !um(f[k], (v) => tem(m, v, n))) return false;
+      alguma = true;
+    }
+    return alguma;
   },
 });
 registrarEvento('socorro', { campos: ['item', 'n'] });

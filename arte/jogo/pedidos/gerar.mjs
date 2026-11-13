@@ -414,6 +414,264 @@ for (const vista of ['frente', 'costas']) {
   });
 }
 
+// ---------- folhas de modelo dos outros bichos e das interações ----------
+
+function modeloBicho({ arquivo, nome, artigo = 'a', oQueE, descricao, refs = [], sem = '', pose }) {
+  const o = artigo === 'a' ? 'a' : 'o';
+  return `${CABECA}
+- \`referencias/personagem.png\`: a folha de modelo da personagem do jogo (dá o traço, o acabamento e o formato de uma folha de modelo).
+${refs.join('\n')}${refs.length ? '\n' : ''}
+Preciso da FOLHA DE MODELO d${o} ${nome} do jogo${oQueE ? `: ${oQueE}` : ''}. Ela vai ser anexada a todos os pedidos de animação dess${o === 'a' ? 'a figura' : 'e bicho'}, para sair sempre igual.
+
+Gere uma imagem e salve na pasta atual como \`${arquivo}\`:
+
+- Uma única fileira horizontal com 3 figuras d${o} MESM${o.toUpperCase()} ${nome}, parad${o} em pé nas quatro patas, da esquerda para a direita:
+  1. de FRENTE três quartos: o corpo virado para a esquerda de quem olha e para a câmera; vê-se a cara de frente, o peito, um lado inteiro do corpo e as quatro patas;
+  2. de COSTAS três quartos: o corpo virado para o fundo e para a direita de quem olha; vê-se a traseira e o rabo em primeiro plano, um lado do corpo, e a cabeça lá na frente, vista de trás;
+  3. de PERFIL: o corpo todo de lado, com a cabeça para a esquerda de quem olha.
+- As três são vistas pela mesma câmera da cena (isométrica, de cima, a cerca de 35 graus).
+- ${descricao} Os MESMOS detalhes, nos mesmos lugares, nas três vistas.
+- As três do mesmo tamanho e com as mesmas proporções, o lombo na mesma altura, as patas na mesma linha de base, bem separadas uma da outra por um vão vazio largo.
+- ${pose || 'Pose de descanso nas três: as quatro patas no chão, retas, cabeça erguida, rabo caído.'}
+- Mesmo estilo da cena e da personagem: traço escuro grosso, cores chapadas com poucos tons, jeito simpático.
+- Fundo transparente de verdade (canal alfa). Sem chão, sem sombra, sem cenário, sem cerca, sem capim${sem ? `, ${sem}` : ''}, sem números, sem texto, sem setas, sem linhas de grade, sem moldura.
+- As figuras inteiras dentro da imagem, sem cortar nada. Imagem bem larga (proporção perto de 3 por 1).
+- Arte original; não imite nenhum jogo existente.
+
+No fim, liste os arquivos que salvou.
+`;
+}
+
+const D_OVELHA = 'A ovelha: lanuda e simpática, corpo redondo e fofo coberto de LÃ creme-clara em tufos arredondados (o contorno do corpo parece uma nuvem), com um topete de lã na testa; cara castanho-escura sem lã, olhos pretos redondos, orelhas castanho-escuras caídas para os lados, quatro patas curtas e finas castanho-escuras com cascos pretos, rabinho curto de lã. É um bicho de porte médio: bem menor que uma vaca.';
+const D_TOSQUIADA = 'É a MESMA ovelha da folha de modelo anexa, logo DEPOIS DA TOSQUIA: sem a lã comprida, o corpo fica bem mais magro e liso, de cor creme-rosada clara, com algumas linhas curtas marcando a lã cortada rente; sobra só um topetinho curto de lã na testa e um tufinho na ponta do rabo. A mesma cara castanho-escura, as mesmas orelhas caídas, as mesmas patas castanho-escuras com cascos pretos. A cabeça e as patas têm o MESMO tamanho das da ovelha com lã; só o corpo emagrece.';
+const D_BOI = 'O boi de trabalho: grande e forte, um pouco maior e mais largo que a vaca do jogo, pelo cor de caramelo (castanho-avermelhado claro) com o focinho e a barriga mais claros, pescoço grosso com um cupim pequeno, dois chifres claros maiores que os da vaca, orelhas para os lados, SEM úbere, rabo comprido com tufo escuro, cascos escuros. Ele usa uma COALHEIRA de couro e madeira no pescoço, de onde saem dois tirantes de corrente, um de cada lado do corpo, até o ARADO que vem logo atrás dele: arado simples de madeira, com um só ferro cinza (a aiveca) apontado para o chão e duas rabiças (cabos) de madeira voltadas para trás e para cima. O arado FAZ PARTE da figura nas três vistas, sempre atrás do boi e ligado a ele pelos tirantes.';
+const D_CAVALO = 'O cavalo de sela: simpático, pelo castanho com a crina e o rabo castanho-escuros e compridos, uma listra branca na testa, quatro meias brancas acima dos cascos, cascos escuros, olhos pretos redondos, orelhas pontudas em pé. Estilizado como os outros bichos do jogo: cabeça grande, pernas firmes, não muito finas. Ele usa SELA de couro marrom sobre uma manta vermelha, com cilha na barriga e um estribo pendurado de cada lado, e uma cabeçada de couro com as rédeas apoiadas no pescoço. A sela e os arreios FAZEM PARTE da figura nas três vistas. NINGUÉM montado.';
+const D_JUMENTO = 'O jumento: pequeno e robusto, pelo cinza com o focinho, a barriga e a volta dos olhos brancos, orelhas bem compridas em pé, crina curta e escura em pé, uma listra escura ao longo do lombo, rabo fino com tufo escuro na ponta, cascos escuros, olhos pretos redondos. Ele está atrelado a uma CARROÇA pequena de madeira, de DUAS RODAS: caixa de tábuas castanho-claras, aberta em cima e VAZIA; duas rodas grandes de madeira com raios e aro de ferro; dois varais de madeira que saem da carroça e passam um de cada lado do jumento, presos a uma coalheira de couro no pescoço dele. A carroça FAZ PARTE da figura nas três vistas, sempre logo atrás do jumento. Ninguém na carroça.';
+const D_CACHORRO = 'O cachorro: vira-lata caramelo de porte médio, simpático e esperto, pelo curto cor de caramelo com o peito, a ponta das quatro patas e a ponta do rabo brancos, focinho um pouco mais escuro com nariz preto, olhos pretos redondos, orelhas dobradas (caídas na ponta), rabo comprido curvado para cima, coleira vermelha.';
+const D_GATO = 'O gato: gato de sítio laranja rajado (listras laranja-escuras no lombo, na cabeça e no rabo), com o peito, o focinho e a ponta das patas brancos, orelhas pontudas rosa por dentro, olhos verdes grandes, nariz rosa, bigodes, rabo comprido listrado. É pequeno e esguio.';
+
+pedidos['modelo-ovelha'] = modeloBicho({ arquivo: 'modelo-ovelha.png', nome: 'OVELHA', oQueE: 'a ovelha com lã', descricao: D_OVELHA, sem: 'sem sino', pose: 'Pose de descanso nas três: as quatro patas no chão, retas, cabeça erguida.' });
+pedidos['modelo-ovelha-tosquiada'] = modeloBicho({ arquivo: 'modelo-ovelha-tosquiada.png', nome: 'OVELHA TOSQUIADA', oQueE: 'a mesma ovelha depois de tosquiada', descricao: D_TOSQUIADA, sem: 'sem lã no chão, sem tesoura',
+  refs: ['- `referencias/ovelha.png`: a FOLHA DE MODELO da ovelha com lã. A tosquiada é a mesma ovelha, com as mesmas três vistas, na mesma ordem e do mesmo tamanho.'], pose: 'Pose de descanso nas três: as quatro patas no chão, retas, cabeça erguida.' });
+pedidos['modelo-boi'] = modeloBicho({ arquivo: 'modelo-boi.png', nome: 'BOI COM ARADO', artigo: 'o', oQueE: 'o boi de trabalho que puxa o arado', descricao: D_BOI, sem: 'sem terra, sem sulco, sem ninguém segurando o arado',
+  refs: ['- `referencias/vaca.png`: a folha de modelo da vaca do jogo (dá o jeito de desenhar o gado: o boi é da mesma família de desenho, mas é outro bicho, maior e de outra cor).'] });
+pedidos['modelo-cavalo'] = modeloBicho({ arquivo: 'modelo-cavalo.png', nome: 'CAVALO COM SELA', artigo: 'o', oQueE: 'o cavalo de montaria, selado', descricao: D_CAVALO, sem: 'sem cavaleiro',
+  refs: ['- `referencias/vaca.png`: a folha de modelo da vaca do jogo (dá o jeito de desenhar os bichos grandes e o tamanho: o cavalo tem o lombo um pouco mais alto que o da vaca).'], pose: 'Pose de descanso nas três: as quatro patas no chão, retas, cabeça erguida, rabo caído, rédeas apoiadas no pescoço.' });
+pedidos['modelo-jumento'] = modeloBicho({ arquivo: 'modelo-jumento.png', nome: 'JUMENTO COM CARROÇA', artigo: 'o', oQueE: 'o jumento atrelado à carroça de duas rodas', descricao: D_JUMENTO, sem: 'sem carga, sem condutor',
+  refs: ['- `referencias/vaca.png`: a folha de modelo da vaca do jogo (dá o jeito de desenhar os bichos; o jumento é bem menor que a vaca).'] });
+pedidos['modelo-cachorro'] = modeloBicho({ arquivo: 'modelo-cachorro.png', nome: 'CACHORRO', artigo: 'o', oQueE: 'o cachorro do sítio', descricao: D_CACHORRO, sem: 'sem osso, sem casinha',
+  refs: ['- `referencias/galinha.png`: a folha de modelo da galinha do jogo (dá o jeito de desenhar os bichos pequenos).'], pose: 'Pose de descanso nas três: em pé nas quatro patas, retas, cabeça erguida, boca fechada, rabo erguido.' });
+pedidos['modelo-gato'] = modeloBicho({ arquivo: 'modelo-gato.png', nome: 'GATO', artigo: 'o', oQueE: 'o gato do sítio', descricao: D_GATO, sem: 'sem novelo, sem peixe',
+  refs: ['- `referencias/galinha.png`: a folha de modelo da galinha do jogo (dá o jeito de desenhar os bichos pequenos).'], pose: 'Pose de descanso nas três: em pé nas quatro patas, retas, cabeça erguida, rabo erguido com a ponta curvada.' });
+
+// ---------- animações dos outros bichos ----------
+
+const OVELHA = { nome: 'ovelha', modelo: 'ovelha', igual: 'corpo redondo de lã creme em tufos, topete de lã, cara e orelhas castanho-escuras, patas curtas castanho-escuras com cascos pretos, rabinho de lã.' };
+const TOSQUIADA = { nome: 'ovelha tosquiada', modelo: 'ovelha-tosquiada', igual: 'corpo magro e liso cor creme-rosada (sem lã), topetinho curto, cara e orelhas castanho-escuras, patas castanho-escuras com cascos pretos.' };
+const BOI = { nome: 'boi com o arado', artigo: 'o', modelo: 'boi', igual: 'pelo caramelo, focinho claro, chifres claros, cupim pequeno, coalheira no pescoço, tirantes de corrente e o ARADO de madeira com ferro cinza e duas rabiças logo atrás dele, sempre inteiro e do mesmo tamanho.' };
+const CAVALO = { nome: 'cavalo selado', artigo: 'o', modelo: 'cavalo', igual: 'pelo castanho, crina e rabo castanho-escuros, listra branca na testa, quatro meias brancas, sela de couro marrom sobre manta vermelha, estribos, cabeçada e rédeas.' };
+const JUMENTO = { nome: 'jumento com a carroça', artigo: 'o', modelo: 'jumento', igual: 'pelo cinza, focinho e barriga brancos, orelhas compridas, crina curta escura, coalheira, os dois varais e a CARROÇA de madeira de duas rodas, vazia, logo atrás dele, sempre inteira e do mesmo tamanho.' };
+const CACHORRO = { nome: 'cachorro', artigo: 'o', modelo: 'cachorro', igual: 'pelo caramelo, peito, patas e ponta do rabo brancos, orelhas dobradas, nariz preto, coleira vermelha.' };
+const GATO = { nome: 'gato', artigo: 'o', modelo: 'gato', igual: 'laranja rajado, peito, focinho e patas brancos, orelhas pontudas, olhos verdes, rabo comprido listrado.' };
+
+// Passo lento de quatro tempos (uma pata de cada vez): é o que mantém as proporções da figura parada.
+const PASSO8 = [
+  'A pata de TRÁS do lado da câmera (a mais perto de quem olha) sai do chão, dobrada, o casco um pouco levantado. As outras três apoiadas.',
+  'Essa pata de trás pousa um pouco à frente. O quadril desse lado desce de leve.',
+  'A pata da FRENTE do mesmo lado sai do chão, dobrada no joelho.',
+  'Essa pata da frente pousa um pouco à frente. A cabeça desce um pouco.',
+  'A pata de TRÁS do lado de lá (a mais longe de quem olha) sai do chão, dobrada.',
+  'Essa pata pousa um pouco à frente. O quadril desse lado desce de leve.',
+  'A pata da FRENTE do lado de lá sai do chão, dobrada no joelho.',
+  'Essa pata da frente pousa um pouco à frente. A cabeça desce um pouco. O quadro 8 emenda no quadro 1.',
+];
+const PASSO8_VIVO = (extra) => `É um PASSO de quatro tempos, NÃO é trote nem corrida: só UMA pata sai do chão de cada vez; as outras três ficam apoiadas e quase retas, do MESMO comprimento das patas da figura parada. O corpo fica na mesma altura e na mesma inclinação da figura parada, sem se jogar para a frente; corpo, cabeça e patas têm as MESMAS proporções da folha parada anexa. ${extra}`;
+// Trotezinho de bicho pequeno, em seis quadros (as patas em diagonal andam juntas).
+const TROTE6 = [
+  'CONTATO: a pata da frente do lado da câmera e a pata de trás do lado de lá estão à frente, tocando o chão; as outras duas estão para trás.',
+  'PESO: o corpo passa por cima das patas apoiadas e desce um pouco; as duas patas de trás do passo saem do chão.',
+  'PASSAGEM: as duas patas no ar passam dobradas por baixo do corpo; o lombo sobe um pouco.',
+  'CONTATO do outro lado: agora a pata da frente do lado de lá e a pata de trás do lado da câmera tocam o chão à frente.',
+  'PESO do outro lado: o corpo desce um pouco.',
+  'PASSAGEM do outro lado: as outras duas patas passam dobradas por baixo do corpo. O quadro 6 emenda no quadro 1.',
+];
+const GALOPE8 = [
+  'RECOLHIDO: as quatro patas no ar, dobradas e juntas embaixo da barriga. É o ponto mais ALTO do corpo.',
+  'As duas patas de TRÁS descem e tocam o chão, bem embaixo do corpo; as da frente ainda no ar, dobradas.',
+  'APOIO ATRÁS: o peso sobre as patas de trás, que dobram; as patas da frente se esticam para a frente.',
+  'As patas da FRENTE tocam o chão à frente; o corpo se alonga.',
+  'APOIO NA FRENTE: o peso passa para as patas da frente; as de trás saem do chão e vão para trás. É o ponto mais BAIXO do corpo.',
+  'IMPULSO: as patas da frente empurram o chão para trás, quase retas; as de trás esticadas para trás, no ar.',
+  'ESTICADO: o corpo todo alongado no ar, as patas da frente saindo do chão para trás, as de trás lá atrás.',
+  'RECOLHE: as quatro patas começam a se juntar embaixo da barriga. O quadro 8 emenda no quadro 1.',
+];
+
+for (const vista of ['frente', 'costas']) {
+  const par = (n) => (vista === 'costas' ? [`- \`referencias/${n}-frente.png\`: a folha de animação já pronta da mesma ação vista de frente (dá o formato da folha, o tamanho e o jeito do movimento; aqui o bicho é visto de costas).`] : []);
+  const parada = (g, nomeArq) => [`- \`referencias/${nomeArq}-${vista}.png\`: a folha já pronta d${g.artigo === 'o' ? 'o' : 'a'} mesm${g.artigo === 'o' ? 'o' : 'a'} ${g.nome} parad${g.artigo === 'o' ? 'o' : 'a'}, nesta mesma vista (dá o formato da folha, o tamanho e o jeito do desenho: a figura tem de sair igual a esta).`];
+
+  // ovelha com lã e tosquiada
+  for (const [chave, G, outra] of [['ovelha', OVELHA, null], ['ovelha-tosquiada', TOSQUIADA, 'ovelha']]) {
+    const lanuda = (acao) => (outra ? [`- \`referencias/${outra}-${acao}-${vista}.png\`: a folha já pronta da ovelha COM LÃ na mesma ação e na mesma vista (dá o formato da folha, o tamanho e o movimento: a tosquiada faz o MESMO movimento, quadro a quadro, com a cabeça e as patas do mesmo tamanho).`] : []);
+    pedidos[`${chave}-parada-${vista}`] = bicho({
+      ...G, arquivo: `parada-${vista}.png`, titulo: 'PARADA, mastigando', vista, n: 4, plantado: true, refs: lanuda('parada'),
+      quadros: [
+        'DESCANSO: em pé nas quatro patas, igual à folha de modelo, cabeça erguida.',
+        'MASTIGA: o queixo vai para um lado, mastigando; uma orelha abana para baixo.',
+        'RESPIRA: o corpo enche um pouco, a cabeça sobe um tiquinho e vira de leve; o rabinho mexe.',
+        'PISCA: os olhos fechados (uma linha curva), o queixo mastiga para o outro lado; a outra orelha abana.',
+      ],
+      vivo: 'É uma ovelha calma, mas viva: mastiga, pisca, abana as orelhas e o rabinho, o corpo respira. As quatro patas ficam plantadas e o corpo não sai do lugar.',
+    });
+    pedidos[`${chave}-andar-${vista}`] = bicho({
+      ...G, arquivo: `andar-${vista}.png`, titulo: 'ANDANDO', vista, n: 6, quadros: TROTE6, refs: [...parada(G, 'parada'), ...lanuda('andar'), ...(outra ? [] : par('andar'))],
+      vivo: 'Andar miúdo e saltitante de ovelha: passos curtos, o corpo sobe e desce de leve a cada passo, a cabeça balança, as orelhas e o rabinho sacodem. As patas continuam do MESMO comprimento das da folha parada; o corpo e a cabeça têm o mesmo tamanho dela.',
+    });
+  }
+
+  // boi com arado
+  pedidos[`boi-parado-${vista}`] = bicho({
+    ...BOI, arquivo: `parado-${vista}.png`, titulo: 'PARADO, esperando', vista, n: 4, plantado: true,
+    quadros: [
+      'DESCANSO: em pé nas quatro patas, igual à folha de modelo, cabeça erguida, rabo caído, o arado atrás dele.',
+      'RUMINA: o queixo mastiga de lado; uma orelha abana; o rabo começa a balançar para um lado.',
+      'RESPIRA: o peito enche, a cabeça sobe um pouco e solta o ar pelo focinho; o rabo no alto do balanço.',
+      'PISCA: os olhos fechados (uma linha curva); a cabeça baixa de leve; a outra orelha abana; o rabo volta.',
+    ],
+    vivo: 'É um boi manso e paciente: mastiga, pisca, abana as orelhas e o rabo, o peito respira. As quatro patas ficam plantadas e o ARADO não se mexe: fica exatamente no mesmo lugar em todos os quadros.',
+    semObjeto: 'NÃO desenhe terra, sulco, torrões nem ninguém segurando o arado.',
+  });
+  pedidos[`boi-puxar-${vista}`] = bicho({
+    ...BOI, arquivo: `puxar-${vista}.png`, titulo: 'PUXANDO O ARADO', vista, n: 8, quadros: PASSO8, refs: [...parada(BOI, 'parado'), ...par('puxar')],
+    vivo: PASSO8_VIVO('Ele faz FORÇA para puxar: o pescoço esticado e a cabeça baixa, empurrando a coalheira; os tirantes de corrente sempre esticados; os ombros trabalham, o rabo balança. O arado vem atrás, sempre na mesma distância do boi e na mesma posição, com um leve tranco para cima e para baixo.'),
+    semObjeto: 'NÃO desenhe terra, sulco, torrões, poeira nem ninguém segurando o arado: o jogo faz a terra.',
+  });
+
+  // cavalo com sela
+  pedidos[`cavalo-parado-${vista}`] = bicho({
+    ...CAVALO, arquivo: `parado-${vista}.png`, titulo: 'PARADO, esperando', vista, n: 4, plantado: true,
+    quadros: [
+      'DESCANSO: em pé nas quatro patas, igual à folha de modelo, cabeça erguida, rabo caído.',
+      'ORELHAS: uma orelha gira para trás, a cabeça vira de leve; o rabo começa a balançar para um lado.',
+      'RESPIRA: o peito enche, a cabeça sobe e sacode de leve a crina; o rabo no alto do balanço.',
+      'PISCA: os olhos fechados (uma linha curva), a cabeça baixa um pouco; o rabo volta.',
+    ],
+    vivo: 'É um cavalo manso e atento: mexe as orelhas, sacode a crina, pisca, balança o rabo, o peito respira. As quatro patas ficam plantadas e o corpo não sai do lugar.',
+    semObjeto: 'NINGUÉM montado: a sela vazia.',
+  });
+  pedidos[`cavalo-andar-${vista}`] = bicho({
+    ...CAVALO, arquivo: `andar-${vista}.png`, titulo: 'ANDANDO A PASSO', vista, n: 8, quadros: PASSO8, refs: [...parada(CAVALO, 'parado'), ...par('andar')],
+    vivo: PASSO8_VIVO('A cabeça balança para cima e para baixo a cada passo, a crina e o rabo balançam, os estribos balançam de leve.'),
+    semObjeto: 'NINGUÉM montado: a sela vazia.',
+  });
+  pedidos[`cavalo-galope-${vista}`] = bicho({
+    ...CAVALO, arquivo: `galope-${vista}.png`, titulo: 'GALOPANDO', vista, n: 8, quadros: GALOPE8, refs: [...parada(CAVALO, 'parado'), ...par('galope')],
+    vivo: 'É um GALOPE de verdade, bem diferente do passo: o corpo se encolhe e se estica, as patas da frente e as de trás trabalham em pares, o pescoço esticado para a frente, a crina e o rabo voando para trás, os estribos sacudindo. O cavalo tem o MESMO tamanho de corpo e de cabeça da folha parada anexa.',
+    semObjeto: 'NINGUÉM montado: a sela vazia.',
+  });
+
+  // jumento com carroça
+  pedidos[`jumento-parado-${vista}`] = bicho({
+    ...JUMENTO, arquivo: `parado-${vista}.png`, titulo: 'PARADO, esperando', vista, n: 4, plantado: true,
+    quadros: [
+      'DESCANSO: em pé nas quatro patas, igual à folha de modelo, cabeça erguida, orelhas em pé, a carroça atrás dele.',
+      'ORELHAS: uma orelha comprida tomba para o lado; o rabo começa a balançar.',
+      'RESPIRA: o peito enche, a cabeça sobe um pouco; as duas orelhas para trás; o rabo no alto do balanço.',
+      'PISCA: os olhos fechados (uma linha curva), a cabeça baixa de leve; a outra orelha tomba; o rabo volta.',
+    ],
+    vivo: 'É um jumento manso e teimoso: mexe as orelhas compridas, pisca, balança o rabo, o peito respira. As quatro patas ficam plantadas e a CARROÇA não se mexe: fica exatamente no mesmo lugar, com as rodas na mesma posição, em todos os quadros.',
+    semObjeto: 'NÃO desenhe carga nem condutor: a carroça vazia.',
+  });
+  pedidos[`jumento-andar-${vista}`] = bicho({
+    ...JUMENTO, arquivo: `andar-${vista}.png`, titulo: 'ANDANDO E PUXANDO A CARROÇA', vista, n: 8, quadros: PASSO8, refs: [...parada(JUMENTO, 'parado'), ...par('andar')],
+    vivo: PASSO8_VIVO('A cabeça balança para cima e para baixo, as orelhas compridas balançam, o rabo balança. A carroça vem atrás, sempre na mesma distância e do mesmo tamanho; as RODAS GIRAM: os raios mudam de posição um pouco a cada quadro; a caixa da carroça dá um leve tranco para cima e para baixo.'),
+    semObjeto: 'NÃO desenhe carga, condutor, poeira nem marcas de roda: a carroça vazia.',
+  });
+
+  // cachorro e gato
+  for (const [chave, G, parado, sentado, andarVivo] of [
+    ['cachorro', CACHORRO,
+      ['DESCANSO: em pé nas quatro patas, igual à folha de modelo, boca fechada, rabo erguido.', 'OFEGA: a boca abre e a língua rosa aparece; o rabo abana para um lado; as orelhas sobem um pouco.', 'ABANA: o rabo abana para o outro lado; a cabeça inclina de lado, curiosa; a língua ainda de fora.', 'PISCA: os olhos fechados (uma linha curva), a boca fecha; o rabo no meio do caminho.'],
+      ['SENTADO: sentado sobre as patas de trás, as patas da frente retas apoiadas no chão, peito erguido, cabeça alta, boca fechada, rabo no chão para o lado.', 'OFEGA: a boca abre, a língua rosa de fora; o rabo varre o chão para um lado.', 'ABANA: o rabo varre o chão para o outro lado; a cabeça inclina de lado; uma orelha levanta.', 'PISCA: os olhos fechados (uma linha curva), contente; a boca fecha; o rabo volta.'],
+      'Trote alegre de cachorro: passos leves, o corpo sobe e desce a cada passo, a língua de fora, as orelhas sacodem, o rabo erguido abanando.'],
+    ['gato', GATO,
+      ['DESCANSO: em pé nas quatro patas, igual à folha de modelo, rabo erguido com a ponta curvada.', 'RABO: a ponta do rabo curva para um lado; uma orelha gira; a cabeça vira de leve.', 'ESPREGUIÇA: as patas da frente esticam um pouco à frente, o lombo arqueia de leve, o rabo bem alto.', 'PISCA: os olhos fechados (duas linhas curvas), devagar; o rabo curva para o outro lado.'],
+      ['SENTADO: sentado sobre as patas de trás, as patas da frente juntas e retas apoiadas no chão, cabeça alta, o rabo enrolado em volta das patas.', 'RABO: a ponta do rabo bate no chão para um lado; uma orelha gira.', 'LAMBE: levanta uma pata da frente até a boca e lambe, a cabeça inclinada.', 'PISCA: a pata volta ao chão; os olhos fechados (duas linhas curvas), devagar; a ponta do rabo bate para o outro lado.'],
+      'Andar macio e elegante de gato: passos leves, o lombo ondula de leve, a cabeça quase não balança, o rabo erguido com a ponta balançando.'],
+  ]) {
+    pedidos[`${chave}-parado-${vista}`] = bicho({
+      ...G, arquivo: `parado-${vista}.png`, titulo: 'PARADO, olhando em volta', vista, n: 4, plantado: true, quadros: parado,
+      vivo: `Movimentos pequenos e vivos: só a cabeça, as orelhas, o rabo e o peito se mexem; as quatro patas ficam plantadas e o corpo não sai do lugar.`,
+    });
+    pedidos[`${chave}-andar-${vista}`] = bicho({
+      ...G, arquivo: `andar-${vista}.png`, titulo: 'ANDANDO', vista, n: 6, quadros: TROTE6, refs: [...parada(G, 'parado'), ...par('andar')],
+      vivo: `${andarVivo} As patas continuam do MESMO comprimento das da folha parada; o corpo e a cabeça têm o mesmo tamanho dela.`,
+    });
+    pedidos[`${chave}-sentado-${vista}`] = bicho({
+      ...G, arquivo: `sentado-${vista}.png`, titulo: 'SENTADO', vista, n: 4, plantado: true, quadros: sentado, refs: [...parada(G, 'parado'), ...par('sentado')],
+      vivo: `Ele fica SENTADO em todos os quadros, no mesmo lugar: o traseiro e as patas não saem do ponto; só a cabeça, as orelhas, o rabo${chave === 'gato' ? ' e uma pata da frente' : ' e a língua'} se mexem. A cabeça e o corpo têm o MESMO tamanho da folha parada anexa.`,
+    });
+  }
+}
+
+// ---------- tosquia: folha de modelo da interação e a animação da personagem ----------
+
+pedidos['modelo-tosquia'] = `${CABECA}
+${P_MODELO}
+- \`referencias/ovelha.png\`: a FOLHA DE MODELO da ovelha com lã (de frente três quartos, de costas três quartos e de perfil).
+- \`referencias/ferramentas.png\`: a FOLHA DE MODELO das ferramentas, com a personagem ao lado para dar o tamanho. Dela sai a TESOURA DE TOSQUIA (tesoura de mola, de ferro cinza, com duas lâminas triangulares largas).
+
+Preciso da FOLHA DE MODELO DA TOSQUIA: a personagem ajoelhada ao lado da ovelha, tosquiando. Essa folha vai ser anexada aos pedidos de animação da tosquia, para a pose, a tesoura e o tamanho de uma figura em relação à outra saírem sempre iguais.
+
+Gere uma imagem e salve na pasta atual como \`modelo-tosquia.png\`, com TRÊS desenhos lado a lado, bem separados:
+
+1. A TOSQUIA VISTA POR TRÁS DELA (à esquerda): a ovelha está parada em pé, atravessada, com a cabeça para a direita de quem olha, vista pela câmera da cena. A personagem está do lado de cá da ovelha (em primeiro plano), com UM JOELHO NO CHÃO e o outro pé apoiado, virada para a ovelha: nós a vemos de COSTAS três quartos (o coque, o nó do lenço, as costas do macacão). A mão esquerda apoiada no lombo da ovelha, segurando; a mão direita com a tesoura de tosquia aberta, encostada na lã do flanco.
+2. A TOSQUIA VISTA PELA FRENTE DELA (no meio): a mesma cena vista do outro lado. A personagem ajoelhada, de FRENTE três quartos para a câmera (o rosto aparece, atento, olhando para a tesoura), e a ovelha está entre ela e a câmera, atravessada, em primeiro plano: a ovelha esconde as pernas dela; aparecem a cabeça, os ombros e os braços dela por cima do lombo da ovelha, com a mão esquerda no lombo e a tesoura na mão direita.
+3. A POSE DELA SOZINHA (à direita), SEM a ovelha: a personagem com um joelho no chão e o outro pé apoiado, de FRENTE três quartos como a primeira figura da folha de modelo dela (corpo virado para a esquerda de quem olha), o tronco inclinado para a frente, a mão esquerda espalmada à frente na altura do peito (como quem segura a ovelha, que não aparece) e a tesoura de tosquia aberta na mão direita, à frente, na altura da cintura. Ela aparece inteira.
+
+- Tamanhos certos: a ovelha é de porte médio; em pé, o lombo da ovelha bate na cintura da personagem em pé. Ajoelhada, a cabeça da personagem fica um pouco acima do topete da ovelha. A tesoura tem o tamanho do antebraço dela.
+- É a MESMA personagem da folha de modelo (lenço vermelho com nó, coque castanho, camisa amarela de mangas dobradas, macacão azul com dois botões amarelos, botas marrons) e a MESMA ovelha da folha de modelo (lã creme em tufos, topete, cara e orelhas castanho-escuras, patas castanho-escuras com cascos pretos).
+- Tudo visto pela mesma câmera da cena (isométrica, de cima, a cerca de 35 graus), no mesmo estilo: traço escuro grosso, cores chapadas com poucos tons.
+- NÃO desenhe lã cortada, tufos caindo nem lã no chão.
+- Fundo transparente de verdade (canal alfa). Sem chão, sem sombra, sem cenário, sem capim, sem números, sem nomes, sem texto, sem setas, sem linhas de grade, sem moldura.
+- Nada cortado nas bordas. Imagem bem larga (proporção perto de 3 por 1).
+- Arte original; não imite nenhum jogo existente.
+
+No fim, liste os arquivos que salvou.
+`;
+
+for (const vista of ['frente', 'costas']) {
+  const n = 6;
+  pedidos[`personagem-tosquiar-${vista}`] = `${CABECA}
+${P_MODELO}
+${P_FERRAMENTAS.replace('A ferramenta deste pedido tem', 'A tesoura de tosquia tem')}
+- \`referencias/tosquia.png\`: a FOLHA DE MODELO DA TOSQUIA (a personagem ajoelhada tosquiando a ovelha, vista por trás dela, pela frente dela, e a pose dela sozinha). Ela manda na pose.
+${vista === 'costas' ? '- `referencias/tosquiar-frente.png`: a folha de animação já pronta da mesma ação vista de frente (dá o formato da folha, o tamanho e o jeito do movimento; aqui a personagem é vista de costas).\n' : ''}
+Preciso da folha de animação da MESMA personagem TOSQUIANDO, ajoelhada, vista ${vista === 'frente' ? 'de FRENTE' : 'de COSTAS'} três quartos, para usar como figura 2D animada dentro do jogo. A OVELHA NÃO APARECE nesta folha: o jogo desenha a ovelha à parte, ${vista === 'frente' ? 'na frente dela' : 'atrás dela'}.
+
+Gere uma imagem e salve na pasta atual como \`tosquiar-${vista}.png\`:
+
+- Uma única fileira horizontal com ${n + 1} figuras, da esquerda para a direita:
+  - Figura 1 (referência de tamanho): ela PARADA EM PÉ, igual à folha de modelo, pés juntos, braços soltos, mãos vazias.
+  - Figuras 2 a ${n + 1}: os ${n} quadros da tosquia. Em todos ela está com UM JOELHO NO CHÃO e o outro pé apoiado à frente, o tronco inclinado para a frente, a mão esquerda espalmada à frente na altura do peito (segurando a ovelha, que não aparece) e a TESOURA DE TOSQUIA na mão direita. Nesta ordem:
+    1. SEGURA: a mão esquerda firme à frente; a tesoura ABERTA, encostada perto da mão esquerda. Ela olha para a tesoura.
+    2. CORTA: a tesoura FECHA; o braço direito avança um palmo; o ombro direito desce.
+    3. ABRE: a tesoura abre de novo, mais à frente; o tronco se inclina mais.
+    4. CORTA de novo: a tesoura FECHA no ponto mais distante; o braço direito esticado, o tronco bem inclinado. É o ponto de maior alcance.
+    5. AFASTA: a mão esquerda faz um gesto para o lado, como quem afasta a lã cortada (que não aparece); a tesoura aberta recua; ela sorri.
+    6. VOLTA: o tronco endireita um pouco, a mão esquerda volta a segurar, a tesoura volta para perto. Emenda no quadro 1.
+- Movimento ritmado e vivo: abre e fecha a tesoura, avança o braço, o tronco vai e volta, a cabeça segue a tesoura, as pontas do lenço balançam.
+- Em todas as figuras ela é vista pela mesma câmera da cena (isométrica, de cima), ${P_VISTA[vista]}. ${vista === 'frente' ? 'É a terceira pose da folha de modelo da tosquia (ela sozinha, de frente).' : 'É como no primeiro desenho da folha de modelo da tosquia (visto por trás dela), mas SEM a ovelha: o corpo dela esconde parte dos braços; aparecem os cotovelos, e a tesoura aparece ao lado do corpo quando o braço avança.'}
+- Nos ${n} quadros da tosquia o JOELHO no chão e o PÉ apoiado ficam exatamente no MESMO LUGAR; só os braços, os ombros, o tronco e a cabeça se mexem.
+- As ${n + 1} figuras na MESMA escala (a cabeça tem o mesmo tamanho em todas), os pés e o joelho na mesma linha de base, igualmente espaçadas, cada uma centrada numa casa de mesma largura, com um vão vazio entre uma e outra (nenhuma encosta na vizinha).
+- ${P_MESMA}
+- A TESOURA DE TOSQUIA é a da folha de ferramentas (tesoura de mola, de ferro cinza, duas lâminas triangulares largas, do tamanho do antebraço dela), inteira e do mesmo tamanho em todos os quadros da tosquia.
+- NÃO desenhe a ovelha, nem lã, nem tufos caindo, nem lã no chão: só a personagem e a tesoura.
+- ${LIMPO}
+${FIM}
+`;
+}
+
 const quais = process.argv.slice(2);
 for (const [nome, texto] of Object.entries(pedidos)) {
   if (quais.length && !quais.includes(nome)) continue;

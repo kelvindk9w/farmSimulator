@@ -17,6 +17,8 @@
 //   node jogo/tools/arte/peca.mjs ficha            (refaz a tabela de arte/jogo/ficha-pecas.md)
 //   node jogo/tools/arte/peca.mjs piso <textura.png> <chave>          (textura chapada vista de cima -> losango de 1 casa)
 //   node jogo/tools/arte/peca.mjs parede <textura.png> <chave> --altura U --lado x|z [--tom F]
+//   node jogo/tools/arte/peca.mjs chao <cru.png> <chave>              (calçamento chato de 1 casa, esticado até o losango da casa)
+//   node jogo/tools/arte/peca.mjs cercado <chave> --casas LxP [--porteira I] [--dentro "objeto/a@x,z;..."]   (cercado montado com peças do catálogo)
 //   node jogo/tools/arte/peca.mjs guia <saida.png> --bloco LxPxH [--telhado R] [--porta LxA] [--toldo H] [--copias N]
 //                                      (bloco cinza na câmera do jogo, para anexar ao pedido de uma construção)
 //
@@ -206,6 +208,10 @@ function separarGrade(img, colunas, linhas, vaoMinimo = 6) {
     return { faixas, menor, sobra };
   };
   const temLinha = (y) => { for (let x = tudo.x0; x < tudo.x1; x++) if (alfa(img, x, y) > 24) return true; return false; };
+  if (linhas === 1) { // fileira única: se não houver vão reto entre os desenhos (folhas que passam por cima do vizinho), separa pelas partes ligadas
+    try { cortes(tudo.x0, tudo.x1, (x) => { for (let y = tudo.y0; y < tudo.y1; y++) if (alfa(img, x, y) > 24) return true; return false; }, colunas - 1, 'entre colunas'); }
+    catch (e) { return { celulas: separarPorPartes(img, colunas), notas: [`separado pelas partes ligadas (${e.message})`] }; }
+  }
   const lin = cortes(tudo.y0, tudo.y1, temLinha, linhas - 1, 'entre linhas');
   const celulas = [], notas = [];
   if (linhas > 1) notas.push(`linhas: menor vão usado ${lin.menor} px, maior vão de dentro ${lin.sobra} px`);
@@ -218,9 +224,25 @@ function separarGrade(img, colunas, linhas, vaoMinimo = 6) {
   return { celulas, notas };
 }
 
+// As N maiores partes ligadas, da esquerda para a direita; as partes pequenas ficam com a grande mais próxima.
+function separarPorPartes(img, n) {
+  const { rot, lista } = partes(img, 24), ord = [...lista].sort((a, b) => b.area - a.area), chefes = ord.slice(0, n);
+  if (chefes.length < n) throw new Error(`faltam partes: achei ${chefes.length}, preciso de ${n}`);
+  const dono = new Map(chefes.map((c) => [c.id, c.id]));
+  const dist = (a, b) => Math.max(0, Math.max(a.x0, b.x0) - Math.min(a.x1, b.x1)) + Math.max(0, Math.max(a.y0, b.y0) - Math.min(a.y1, b.y1));
+  for (const p of ord.slice(n)) { let m = chefes[0], dm = Infinity; for (const c of chefes) { const d = dist(p, c); if (d < dm) { dm = d; m = c; } } dono.set(p.id, m.id); }
+  chefes.sort((a, b) => a.x0 + a.x1 - (b.x0 + b.x1));
+  return chefes.map((c) => {
+    let x0 = img.W, y0 = img.H, x1 = 0, y1 = 0; const ids = new Set();
+    for (const p of lista) if (dono.get(p.id) === c.id) { ids.add(p.id); x0 = Math.min(x0, p.x0); y0 = Math.min(y0, p.y0); x1 = Math.max(x1, p.x1); y1 = Math.max(y1, p.y1); }
+    return { x0, y0, x1, y1, w: x1 - x0, h: y1 - y0, ids, rot };
+  });
+}
+
 function recorte(img, c) {
   const data = Buffer.alloc(c.w * c.h * 4);
   for (let y = 0; y < c.h; y++) img.data.copy(data, y * c.w * 4, ((c.y0 + y) * img.W + c.x0) * 4, ((c.y0 + y) * img.W + c.x1) * 4);
+  if (c.ids) for (let y = 0; y < c.h; y++) for (let x = 0; x < c.w; x++) if (!c.ids.has(c.rot[(c.y0 + y) * img.W + c.x0 + x])) data.fill(0, (y * c.w + x) * 4, (y * c.w + x) * 4 + 4);
   return { data, W: c.w, H: c.h, temAlfa: true, arquivo: img.arquivo };
 }
 const paraPng = (img) => sharp(img.data, { raw: { width: img.W, height: img.H, channels: 4 } }).png();
@@ -393,7 +415,8 @@ async function abrir(arquivo, op) {
 const escXml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 async function folha(grupo) {
   const cat = lerCatalogo(grupo), reg = lerRegistro();
-  const chaves = Object.keys(cat.pecas).sort((a, b) => a.localeCompare(b, 'pt', { numeric: true }));
+  // os apelidos (outra chave para o mesmo desenho) não entram na folha
+  const chaves = Object.keys(cat.pecas).filter((k) => !reg[k]?.apelidoDe).sort((a, b) => a.localeCompare(b, 'pt', { numeric: true }));
   if (!chaves.length) { console.log(`${grupo}: catálogo vazio`); return; }
   const esc = { objetos: 0.5, culturas: 0.75, arvores: 0.5, icones: 0.75, retratos: 0.75, interface: 0.5 }[grupo] ?? 0.5;
   const mini = grupo === 'icones' ? 0.25 : esc / 2;
@@ -593,6 +616,17 @@ async function cercado(chave, op) {
   await gravarFeita(`${chave}-frente`, await camada('frente'), W, H, apoio, { ...o, obs: 'camada da frente (cercas da frente e porteira)' }, dito);
 }
 
+// chao <cru.png> <chave> [--ocupacao F]: peça chata de 1 casa (calçamento). O desenho é esticado até caber
+// exatamente no losango da casa (181 x 104,5 px), para as casas vizinhas encostarem sem vão; apoio no centro.
+async function chao(arq, chave, op) {
+  const img = await abrir(arq, op), cx = caixaDe(img), oc = op.ocupacao ? +op.ocupacao : 1;
+  const w = Math.round(2 * MEIA_L * oc) + 2, h = Math.round(2 * MEIA_A * oc) + 2, W = w + 2 * MARGEM, H = h + 2 * MARGEM;
+  const peca = await paraPng(recorte(img, cx)).resize(w, h, { fit: 'fill', kernel: 'lanczos3' }).toBuffer();
+  const buf = await sharp({ create: { width: W, height: H, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } }).composite([{ input: peca, left: MARGEM, top: MARGEM }]).raw().toBuffer();
+  console.log(`${path.basename(arq)}: losango desenhado com ${cx.w}x${cx.h} (proporção ${(cx.w / cx.h).toFixed(2)}; o certo é 1,73), esticado para ${w}x${h}`);
+  await gravarFeita(chave, buf, W, H, [Math.round(W / 2), Math.round(H / 2)], { ...op, cru: arq, footprint: '1x1' }, 'chão de 1 casa');
+}
+
 // ---------- comandos ----------
 const [comando, ...resto] = process.argv.slice(2);
 const { pos, op } = lerArgs(resto);
@@ -639,6 +673,8 @@ try {
     const img = await abrir(arq, op); const { celulas, notas } = separarGrade(img, C, L, op.vao ? +op.vao : 6);
     notas.forEach((n) => console.log('  ' + n));
     for (let i = 0; i < celulas.length; i++) { if (!nomes[i] || nomes[i] === '-') continue; await fazerPeca(recorte(img, celulas[i]), `${prefixo}/${nomes[i]}`, { ...op, caixa: op.caixa ?? 128 }); }
+  } else if (comando === 'chao') {
+    await chao(pos[0], pos[1], op);
   } else if (comando === 'cercado') {
     await cercado(pos[0], op);
   } else if (comando === 'situacao') {
