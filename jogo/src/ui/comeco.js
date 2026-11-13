@@ -1,7 +1,10 @@
 // A interface do começo humilde (a lógica está em nucleo/sistemas/comeco.js; o desenho, em render/comeco.js):
 //   - a chegada, no jogo novo: a cena começa sozinha (menos no modo #teste das ferramentas), com o botão "Pular" no
-//     canto; o balão do vizinho fica escondido até o Seu Tonho acenar, e aí ele dá as boas-vindas. Qualquer toque na
-//     tela também termina a cena (a lógica cuida disso: o jogo nunca fica preso).
+//     canto; o balão fica escondido enquanto ela anda. No fim do caminho ela fala primeiro (o balão com o nome e o
+//     retrato dela, e "+6 sementes de alface" saindo da trouxa); depois o Seu Tonho acena e dá as boas-vindas.
+//     Qualquer toque na tela também termina a cena (a lógica cuida disso: o jogo nunca fica preso).
+//   - só na versão de teste (regras.json versaoDeTeste): ao abrir uma gravação de um começo mais antigo que o desta
+//     versão, pergunta uma vez se quer começar de novo (a fazenda deste aparelho é apagada).
 //   - o caixote de venda: "6 no caixote" quando ela põe, "+4 ouro" sobre ele a cada coisa que o freguês leva (na
 //     volta de uma ausência, um "+ouro" só, com a soma).
 //   - o Seu Tonho: depois da primeira conversa, tocar nele abre o painel de missões (para reler o que ele pediu).
@@ -14,12 +17,27 @@ import { botao } from './dom.js';
 import { T } from './textos.js';
 import { J } from '../contexto.js';
 import { avisar } from './avisos.js';
+import { perguntar } from './dialogo.js';
+import { nomeDoItem } from './textos.js';
 import { som } from '../plataforma/som.js';
+import { querComecoNovo } from '../nucleo/sistemas/comeco.js';
 
-const DOURADO = '#ffe07a';
-const ESPERA_MAX = 12000; // ms: a chegada não espera a tela de carregando mais do que isso
+const DOURADO = '#ffe07a', VERDE = '#c8f08c';
+const ESPERA_MAX = 12000; // ms: nada espera a tela de carregando mais do que isso
 const carregando = () => !!document.documentElement.dataset.carregando;
 let pular = null;
+let abriu = false; // a primeira instalação de mundo é a abertura do jogo (importar e recomeçar não perguntam nada)
+
+// chama f quando a tela de carregando sumir (<html data-carregando> sai e vem o evento "jogo-carregou"; se o sinal se
+// perder, depois de ESPERA_MAX); sem a tela, na hora
+function depoisDoCarregando(f) {
+  if (!carregando()) { f(); return; }
+  let feito = false, olho = 0;
+  const ir = () => { if (feito) return; feito = true; clearInterval(olho); window.removeEventListener('jogo-carregou', ir); f(); };
+  const t0 = Date.now();
+  window.addEventListener('jogo-carregou', ir);
+  olho = setInterval(() => { if (!carregando() || Date.now() - t0 > ESPERA_MAX) ir(); }, 200);
+}
 
 function esconderBalao(ctx, esconder) {
   const t = ctx && ctx.tutorial;
@@ -32,17 +50,29 @@ function tirarPular() { if (pular) { pular.remove(); pular = null; } }
 aoInstalarMundo((m, ctx) => {
   const ev = m.eventos, part = J.cena.part;
   const centro = (id) => { const e = m.locais.fazenda.porId[id]; return e ? [e.x + e.l / 2, e.z + e.p / 2] : [m.personagem.x, m.personagem.z]; };
+  const D = m.dados.missoes;
   tirarPular();
   esconderBalao(ctx, false);
 
-  ev.ouvir('tonhoAcenou', () => {
+  // a chegada: ela fala primeiro (as sementes saem da trouxa); o Seu Tonho responde com as boas-vindas (uma vez só)
+  ev.ouvir('elaFalou', (d) => {
+    const p = m.personagem;
     esconderBalao(ctx, false);
-    if (ctx && ctx.tutorial) ctx.tutorial.dizer(T.comeco.boasVindas.titulo, T.comeco.boasVindas.fala, 7);
+    if (ctx && ctx.tutorial) ctx.tutorial.dizer(D.elaNome, T.comeco.fala, d.seg || 4.5, { nome: D.elaNome, retrato: 'retrato/' + D.elaId });
+    for (const id in d.itens) part.texto(T.comeco.daTrouxa(d.itens[id], nomeDoItem(m.dados, id)), p.x, 1.9, p.z, VERDE);
+    part.brilho(p.x, 1.0, p.z, 4);
   });
+  let deuBoasVindas = false;
+  const boasVindas = () => {
+    if (deuBoasVindas || !ctx || !ctx.tutorial) return;
+    deuBoasVindas = true;
+    ctx.tutorial.dizer(T.comeco.boasVindas.titulo, T.comeco.boasVindas.fala, 7, { nome: D.vizinhoNome, retrato: 'retrato/' + D.vizinhoId + '-alegre' });
+  };
+  ev.ouvir('tonhoAcenou', () => { esconderBalao(ctx, false); boasVindas(); });
   ev.ouvir('chegou', (d) => {
     tirarPular();
     esconderBalao(ctx, false);
-    if (d.pulou && ctx && ctx.tutorial && !ctx.tutorial.falando()) ctx.tutorial.dizer(T.comeco.boasVindas.titulo, T.comeco.boasVindas.fala, 7);
+    if (d.pulou) boasVindas(); // (pulando, ele não chegou a acenar: as boas-vindas vêm depois da fala dela)
   });
   ev.ouvir('conversou', (d) => { if (d.vez > 1 && ctx && ctx.tutorial) ctx.tutorial.abrirMissoes(); });
   ev.ouvir('encheuCaixote', (d) => { const c = centro(d.entidade); if (d.n > 0) part.texto(T.comeco.noCaixote(d.n), c[0], 1.6, c[1]); });
@@ -67,22 +97,22 @@ aoInstalarMundo((m, ctx) => {
     document.getElementById('ui').append(pular);
   });
   // a chegada começa sozinha no jogo novo do começo humilde (no modo #teste, quem pede é a ferramenta). Com a tela de
-  // carregando à vista (<html data-carregando>), ela já aparece na porteira, parada, e só anda quando a tela some
-  // (o atributo sai e vem o evento "jogo-carregou"); se o sinal se perder, anda sozinha depois de ESPERA_MAX.
+  // carregando à vista (<html data-carregando>), ela já aparece na porteira, parada, e só anda quando a tela some.
   const C = m.comeco;
   if (!J.teste && C && C.humilde && !C.chegou && !C.chegada) {
     const espera = carregando();
     m.comando({ tipo: 'comecarChegada', espera });
-    if (espera) {
-      let solta = false, olho = 0;
-      const soltar = () => {
-        if (solta) return;
-        solta = true; clearInterval(olho); window.removeEventListener('jogo-carregou', soltar);
-        if (m.comeco.chegada) m.comando({ tipo: 'soltarChegada' });
-      };
-      const t0 = Date.now();
-      window.addEventListener('jogo-carregou', soltar);
-      olho = setInterval(() => { if (!carregando() || Date.now() - t0 > ESPERA_MAX || !m.comeco.chegada) soltar(); }, 200);
-    }
+    if (espera) depoisDoCarregando(() => { if (m.comeco.chegada) m.comando({ tipo: 'soltarChegada' }); });
   }
+  // a versão de teste, ao abrir o jogo com a gravação de um começo mais antigo: pergunta uma vez (já fica marcado ao
+  // perguntar, responda ou não), depois que a tela de carregando some. Sim: a fazenda nova, com a chegada.
+  const primeira = !abriu;
+  abriu = true;
+  if (primeira && !J.teste && querComecoNovo(m)) depoisDoCarregando(() => {
+    if (J.mundo !== m || !querComecoNovo(m)) return;
+    m.comando({ tipo: 'perguntouComecoNovo' });
+    J.gravarLogo();
+    const P = T.comeco.comecoNovo;
+    perguntar({ titulo: P.titulo, texto: P.texto, nota: P.nota, sim: P.sim, nao: P.nao, classeSim: 'ruim', aoSim: () => J.trocarMundo(null) });
+  });
 });

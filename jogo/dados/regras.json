@@ -112,5 +112,9 @@
   },
   "estimacao": {
     "mimosPorDia": 1
+  },
+  "versaoDeTeste": {
+    "ligada": true,
+    "nota": "A versão de teste (enquanto o jogo não vai para a loja): quem abre o jogo com a gravação de um começo mais antigo que o atual (terras.json comeco.versao) recebe, uma vez, a pergunta se quer começar de novo para ver o começo novo. Na versão da loja, \"ligada\": false, e a gravação velha continua como está, sem pergunta."
   }
 }

@@ -92,6 +92,8 @@ export function prepararDados(bruto) {
     filaMax: R.filaMax > 0 ? R.filaMax : 40,
     reararAposColher: !!(obj(R.lavoura) && R.lavoura.reararAposColher), // colheu, a casa volta a ser campo sem sulco (pede a enxada de novo)
     antiTrava: obj(R.antiTrava) && R.antiTrava.semente ? { semente: R.antiTrava.semente, quantidade: R.antiTrava.quantidade > 0 ? R.antiTrava.quantidade : 1 } : null,
+    // a versão de teste (sai, ou fica "ligada": false, quando o jogo for para a loja): a pergunta do começo novo
+    versaoDeTeste: R.versaoDeTeste === true || (obj(R.versaoDeTeste) && R.versaoDeTeste.ligada === true),
   };
   if (regras.antiTrava && !itens[regras.antiTrava.semente]) { aviso('regras.json', `antiTrava.semente: "${regras.antiTrava.semente}" não existe em itens.json`); regras.antiTrava = null; }
   if (obj(R.acoes)) for (const [k, v] of Object.entries(R.acoes)) {
@@ -180,7 +182,7 @@ export function prepararDados(bruto) {
     const cerca = obj(C.cerca) && ehConstrucao(C.cerca.de) ? { de: C.cerca.de, vao: Array.isArray(C.cerca.vao) ? C.cerca.vao.filter(pontoOk).map((v) => [Math.round(v[0]), Math.round(v[1])]) : [] } : null;
     if (obj(C.cerca) && !cerca) aviso('terras.json', 'comeco.cerca: "de" tem de ser uma construção de construcoes.json (a cerca de arame); sem ela, a fazenda nasce sem cerca');
     const chegada = Array.isArray(C.chegada) ? C.chegada.filter(pontoOk).map((v) => [v[0], v[1]]) : [];
-    terras.comeco = { construcoes: lista, cerca, vizinho: pontoOk(C.vizinho) ? [Math.round(C.vizinho[0]), Math.round(C.vizinho[1])] : pontoOk(terras.pontos.vizinho) ? [Math.round(terras.pontos.vizinho[0]), Math.round(terras.pontos.vizinho[1])] : null, chegada: chegada.length >= 2 ? chegada : null };
+    terras.comeco = { versao: C.versao >= 1 ? Math.floor(C.versao) : 1, construcoes: lista, cerca, vizinho: pontoOk(C.vizinho) ? [Math.round(C.vizinho[0]), Math.round(C.vizinho[1])] : pontoOk(terras.pontos.vizinho) ? [Math.round(terras.pontos.vizinho[0]), Math.round(terras.pontos.vizinho[1])] : null, chegada: chegada.length >= 2 ? chegada : null };
     terras.iniciais = lista;
   } else terras.iniciais = terras.classicas;
   for (const c of terras.iniciais) terras.casas[c.tipo] = terras.casas[c.tipo] || [1, 1];
@@ -207,7 +209,7 @@ export function prepararDados(bruto) {
   }
 
   // ---------- missões ----------
-  const missoes = { vizinho: [], vizinhoNome: 'Seu Tonho', vizinhoId: 'vizinho' };
+  const missoes = { vizinho: [], vizinhoNome: 'Seu Tonho', vizinhoId: 'vizinho', elaNome: 'Rosa', elaId: 'personagem' };
   if (tem('missoes')) {
     const v = bruto.missoes.vizinho;
     if (!Array.isArray(v)) aviso('missoes.json', 'falta a lista "vizinho" (as missões do Seu Tonho)');
@@ -222,6 +224,10 @@ export function prepararDados(bruto) {
     }
     missoes.vizinhoNome = (obj(bruto.missoes.quem) && bruto.missoes.quem.nome) || bruto.missoes.vizinhoNome || 'Seu Tonho';
     missoes.vizinhoId = (obj(bruto.missoes.quem) && bruto.missoes.quem.id) || 'vizinho'; // o retrato é a peça retrato/<id>
+    // ela (a personagem de quem joga), no balão das falas dela: o nome e o retrato (retrato/<id>, retrato/<id>-alegre)
+    const E = obj(bruto.missoes.ela) ? bruto.missoes.ela : {};
+    if (typeof E.nome === 'string' && E.nome.trim()) missoes.elaNome = E.nome.trim();
+    if (typeof E.id === 'string' && E.id.trim()) missoes.elaId = E.id.trim();
   }
 
   // ---------- loja de ouro ----------

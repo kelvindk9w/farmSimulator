@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import esbuild from 'esbuild';
 import { montarAtlas } from './tools/atlas.mjs';
 import { montarMolduras } from './tools/molduras.mjs';
+import { montarCarregando } from './tools/carregando.mjs';
 import { lerDados, conferirDados, pastaDist } from './tools/comum.mjs';
 
 const raiz = path.dirname(fileURLToPath(import.meta.url));
@@ -29,13 +30,16 @@ for (const a of atlas.avisos) console.log('arte: ' + a);
 // as molduras da interface (9 fatias e peças fixas do CSS): inteiras e pela metade (tools/molduras.mjs)
 const molduras = await montarMolduras(path.join(raiz, 'arte'), path.join(dist, 'molduras'));
 for (const a of molduras.avisos) console.log('interface: ' + a);
+// o fundo da tela de carregando (WebP dentro de um .js: tools/carregando.mjs)
+const carga = await montarCarregando(path.join(raiz, 'arte'), path.join(dist, 'carregando'));
+for (const a of carga.avisos) console.log('carregando: ' + a);
 
 // 3. código
 const virtuais = {
   'virtual:dados': 'export default ' + JSON.stringify(bruto) + ';',
   'virtual:atlas': 'export default ' + JSON.stringify({ paginas: atlas.def.paginas, pecas: atlas.def.pecas }) + ';',
 };
-for (const f of fs.readdirSync(dist)) if (f !== 'arte' && f !== 'molduras') fs.rmSync(path.join(dist, f), { recursive: true, force: true });
+for (const f of fs.readdirSync(dist)) if (f !== 'arte' && f !== 'molduras' && f !== 'carregando') fs.rmSync(path.join(dist, f), { recursive: true, force: true });
 await esbuild.build({
   entryPoints: [path.join(raiz, 'src/main.js')],
   outfile: path.join(dist, 'main.js'),
@@ -64,4 +68,5 @@ const linhas = [];
 })(dist);
 console.log(linhas.join('\n'));
 console.log(`molduras da interface: ${molduras.arquivos} peças, ${(molduras.inteira / 1024).toFixed(0)} kB inteiras + ${(molduras.meia / 1024).toFixed(0)} kB pela metade (cada aparelho baixa só um dos dois, e só as que aparecem)${molduras.reaproveitado ? ' (reaproveitadas)' : ''}`);
+console.log(`tela de carregando: ${carga.arquivos.map((a) => `${a.nome} ${(a.webp / 1024).toFixed(0)} kB de WebP (${a.l}x${a.a})`).join(', ')}${carga.reaproveitado ? ' (reaproveitado)' : ''}`);
 console.log(`${path.relative(raiz, dist) || '.'}/: ${linhas.length} arquivos, ${(total / 1024).toFixed(0)} kB, ${atlas.def.paginas.length} páginas de arte${atlas.reaproveitado ? ' (reaproveitadas)' : ''}, ${Object.keys(atlas.def.pecas).length} peças. ${((Date.now() - t0) / 1000).toFixed(1)} s`);

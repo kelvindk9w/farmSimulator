@@ -254,6 +254,8 @@
   "objeto/suporte-de-ferramentas-vazio": {"situacao":"pronto","casas":[2,1],"tamanho":"fator 0.35","pedido":"08-suporte-ferramentas.md","cru":"jogo-08-suporte/partes/vazio.png","fator":0.35},
   "objeto/toco": {"situacao":"pronto","casas":[1,1],"tamanho":"largura 1.0","pedido":"06-natureza.md","cru":"jogo-06-natureza/sep/toco.png","fator":0.425},
   "objeto/vaso": {"situacao":"pronto","casas":[1,1],"tamanho":"largura 0.75","pedido":"41-decoracao-1.md","cru":"jogo-41-decoracao/partes/vaso.png","fator":0.331},
+  "retrato/personagem": {"situacao":"pronto","tamanho":"caixa 256","pedido":"64-retratos-personagem-r2.md","cru":"jogo-64-retratos-personagem/partes/neutra.png","fator":0.295,"obs":"neutra e simpática; mesmo formato dos retratos do Seu Tonho"},
+  "retrato/personagem-alegre": {"situacao":"pronto","tamanho":"caixa 256","pedido":"64-retratos-personagem-r2.md","cru":"jogo-64-retratos-personagem/partes/alegre.png","fator":0.295,"obs":"sorriso aberto, olhos fechados em arco; mesmo formato dos retratos do Seu Tonho"},
   "retrato/seu-tonho": {"situacao":"pronto","tamanho":"caixa 256","pedido":"21-retratos-seu-tonho.md","cru":"jogo-21-retratos/partes/neutro.png","fator":0.415},
   "retrato/seu-tonho-alegre": {"situacao":"pronto","tamanho":"caixa 256","pedido":"21-retratos-seu-tonho.md","cru":"jogo-21-retratos/partes/alegre.png","fator":0.415},
   "retrato/seu-tonho-explicando": {"situacao":"pronto","tamanho":"caixa 256","pedido":"21-retratos-seu-tonho.md","cru":"jogo-21-retratos/partes/explicando.png","fator":0.415},

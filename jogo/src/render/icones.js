@@ -123,11 +123,27 @@ function retratoVizinho(g) {
   forma(g, '#c98a5a', () => g.ellipse(50, 58, 5, 4, 0, 0, 6.2832));
 }
 
+function retratoDela(g, alegre) {
+  // ela: lenço vermelho com o coque castanho atrás, camisa amarela e o macacão azul (enquanto o retrato não chega)
+  circ(g, 64, 20, 15, '#6b3f2a');
+  forma(g, '#f2c531', () => { g.moveTo(14, 100); g.quadraticCurveTo(18, 74, 50, 72); g.quadraticCurveTo(82, 74, 86, 100); g.closePath(); });
+  forma(g, '#2f6fd6', () => { g.moveTo(32, 100); g.lineTo(34, 84); g.lineTo(66, 84); g.lineTo(68, 100); g.closePath(); });
+  circ(g, 50, 50, 26, '#d99a6c');
+  forma(g, '#6b3f2a', () => { g.moveTo(26, 48); g.quadraticCurveTo(28, 32, 50, 32); g.quadraticCurveTo(72, 32, 74, 48); g.quadraticCurveTo(60, 40, 50, 42); g.quadraticCurveTo(38, 40, 26, 48); });
+  forma(g, '#e8392f', () => { g.moveTo(24, 40); g.quadraticCurveTo(26, 16, 50, 16); g.quadraticCurveTo(74, 16, 76, 40); g.quadraticCurveTo(50, 30, 24, 40); });
+  forma(g, '#e8392f', () => { g.moveTo(74, 34); g.lineTo(90, 28); g.lineTo(84, 42); g.closePath(); });
+  g.fillStyle = T; g.beginPath();
+  if (alegre) { g.lineWidth = 3; g.strokeStyle = T; g.arc(40, 54, 4, Math.PI, 0); g.moveTo(56, 54); g.arc(60, 54, 4, Math.PI, 0); g.stroke(); }
+  else { g.arc(40, 52, 3.5, 0, 6.2832); g.arc(60, 52, 3.5, 0, 6.2832); g.fill(); }
+  g.beginPath(); g.lineWidth = 3; g.strokeStyle = T; g.arc(50, 60, alegre ? 9 : 7, 0.2, Math.PI - 0.2); g.stroke();
+}
+
 // pinta o ícone de reserva de "chave" numa caixa de t por t pontos, com a origem em (0, 0)
 export function pintarIconeDeReserva(g, chave, t, dados) {
   const [grupo, nome = ''] = chave.split('/');
   g.save(); g.scale(t / 100, t / 100); comeco(g);
   if (grupo === 'ui' && UI[nome]) UI[nome](g);
+  else if (grupo === 'retrato' && nome.startsWith('personagem')) retratoDela(g, nome.endsWith('-alegre'));
   else if (grupo === 'retrato') retratoVizinho(g);
   else if (grupo === 'icone' && ICONE[nome]) ICONE[nome](g);
   else if (grupo === 'icone') {

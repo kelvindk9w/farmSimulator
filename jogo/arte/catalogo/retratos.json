@@ -1,6 +1,8 @@
 {
   "escala": 128,
   "pecas": {
+    "retrato/personagem": { "arquivo": "retratos/personagem.png", "quadros": 1, "casa": [256, 256], "apoio": [128, 248] },
+    "retrato/personagem-alegre": { "arquivo": "retratos/personagem-alegre.png", "quadros": 1, "casa": [256, 256], "apoio": [128, 248] },
     "retrato/seu-tonho": { "arquivo": "retratos/seu-tonho.png", "quadros": 1, "casa": [256, 256], "apoio": [128, 248] },
     "retrato/seu-tonho-alegre": { "arquivo": "retratos/seu-tonho-alegre.png", "quadros": 1, "casa": [256, 256], "apoio": [128, 248] },
     "retrato/seu-tonho-explicando": { "arquivo": "retratos/seu-tonho-explicando.png", "quadros": 1, "casa": [256, 256], "apoio": [128, 248] },

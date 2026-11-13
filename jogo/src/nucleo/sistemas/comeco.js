@@ -5,9 +5,14 @@
 //   - o Seu Tonho na fazenda: a entidade "vizinho", que não bloqueia nada; tocar nele é ir conversar (evento
 //     conversou). Se construírem em cima do lugar dele, ele dá um passo para o lado.
 //   - a chegada (só no jogo novo, quando a interface pede: comando comecarChegada): ela entra pela porteira de costas
-//     para a câmera, com a trouxa, até perto do Seu Tonho, que acena uma vez. Qualquer ordem do jogador (ou o comando
-//     pularChegada) termina a cena na hora; nada fica preso. Com { espera: true } ela fica parada na porteira até o
+//     para a câmera, com a trouxa, até perto do Seu Tonho; vira para ele e fala primeiro (evento elaFalou: a trouxa
+//     abre e saem as sementes do início, regras.json inicio.itens, que já estão na bolsa desde o começo); depois ele
+//     acena e dá as boas-vindas (tonhoAcenou). Qualquer ordem do jogador (ou o comando pularChegada) termina a cena na
+//     hora, e a fala dela vem do mesmo jeito; nada fica preso. Com { espera: true } ela fica parada na porteira até o
 //     comando soltarChegada (a interface solta quando a tela de carregando some).
+//   - a versão do começo (terras.json comeco.versao) fica na gravação: na versão de teste (regras.json versaoDeTeste),
+//     quem abre a gravação de um começo mais antigo recebe, uma vez, a pergunta se quer começar de novo
+//     (querComecoNovo; a interface pergunta e marca com o comando perguntouComecoNovo).
 //   - a cerca: trechos na beira da terra própria (a de arame, caída aqui e ali; depois da reforma, a de madeira),
 //     com o vão da entrada. Não é entidade (não bloqueia nada): o desenho é de render/comeco.js.
 //   - as reformas: comando reformar { entidade | 'cerca', jaJa } (ela vai até lá e martela; o preço sai na martelada).
@@ -16,8 +21,11 @@
 //     celeiro, banca e quadro prontos, sem cerca e sem as missões do começo humilde (antesDeCarregar).
 //   - o atalho de teste: quem pula para um nível ganha o que um jogador daquele nível já teria construído e reformado.
 //   mundo.comeco = { humilde, chegou, chegada (a cena em curso, ou null), cerca: { tipo, obraAte, obraDur } | null,
-//                    esperaDosPedidos (fator da espera das vagas do quadro: a cerca nova encurta), acenouEm, conversas }
-// Eventos: conversou { entidade, n, vez }, comecouChegada { seg }, chegou { pulou }, tonhoAcenou {}, reformou { construcao, para, entidade, n }
+//                    esperaDosPedidos (fator da espera das vagas do quadro: a cerca nova encurta), acenouEm, conversas,
+//                    versao (de que começo é esta fazenda: 0 = a de antes do começo humilde), perguntou (a versão do
+//                    começo sobre a qual já se perguntou) }
+// Eventos: conversou { entidade, n, vez }, comecouChegada { seg }, elaFalou { itens, seg }, tonhoAcenou {}, chegou { pulou },
+// reformou { construcao, para, entidade, n }
 // (o de construções sai de construcao.js), comecouObra (da cerca: { entidade: 'cerca', ... }).
 import { registrarSistema, registrarAcao, registrarTipo, registrarEvento } from '../registro.js';
 import { PASSO, acaso, rumoPara } from '../util.js';
@@ -36,6 +44,13 @@ const um = (v) => (Array.isArray(v) ? v[0] : v);
 
 export const ehHumilde = (m) => !!(m.comeco && m.comeco.humilde);
 const dadosDoComeco = (m) => m.dados.terras.comeco;
+// o número do começo de agora (0 sem começo humilde nos dados)
+export const versaoDoComeco = (m) => (m.dados.terras.comeco ? m.dados.terras.comeco.versao : 0);
+// na versão de teste, esta fazenda é de um começo mais antigo e ainda não se perguntou se quer começar de novo
+export function querComecoNovo(m) {
+  const C = m.comeco, atual = versaoDoComeco(m);
+  return !!m.dados.regras.versaoDeTeste && atual > 0 && C.versao < atual && !(C.perguntou >= atual);
+}
 
 // ---------- o Seu Tonho na fazenda ----------
 // ela para na frente dele (de qualquer lado), para conversar
@@ -84,7 +99,8 @@ function arrumarVizinho(m) {
 
 // ---------- a chegada ----------
 const VELOCIDADE = 2.3; // unidades/s (um pouco mais devagar que o passo normal: ela chega olhando tudo)
-const PARADA = 1.4; // segundos parada no fim, com a trouxa, antes de a cena acabar
+const FALA_DELA = 4.5; // segundos: no fim do caminho ela fala primeiro (o balão dela); depois o Seu Tonho responde
+const PARADA = 1.6; // segundos depois do aceno dele, antes de a cena acabar
 const PASSADA = 1.5; // unidades de chão por ciclo do desenho (a mesma da personagem)
 function caminhoDaChegada(m) {
   const C = dadosDoComeco(m), P = m.dados.terras.pontos.personagem;
@@ -110,6 +126,12 @@ function noCaminho(c, d, out) {
   return out;
 }
 const ponto = { x: 0, z: 0, rumo: 0 };
+// ela fala (uma vez por cena): a trouxa abre e saem as sementes do início (já estão na bolsa: a figura é a trouxa)
+function elaFala(m, c) {
+  if (c.falou) return;
+  c.falou = true;
+  m.eventos.emitir('elaFalou', { itens: { ...m.dados.regras.inicio.itens }, seg: FALA_DELA });
+}
 // a cena acabou (andou tudo, pulou, ou o jogador deu uma ordem): ela fica no fim do caminho, olhando o Seu Tonho
 function terminarChegada(m, pulou) {
   const C = m.comeco, c = C.chegada, p = m.personagem;
@@ -119,6 +141,7 @@ function terminarChegada(m, pulou) {
   p.x = fim[0]; p.z = fim[1]; p.vel = 0; p.rota = null; p.tarefa = null; p.acao = null; p.rumando = false;
   const v = m.locais.fazenda.porId[VIZINHO];
   if (v) p.rumo = rumoPara(p.x, p.z, v.x + 0.5, v.z + 0.5);
+  elaFala(m, c); // (pulando, a fala dela vem do mesmo jeito, já no fim do caminho: as sementes são da trouxa)
   if (!C.acenouEm) C.acenouEm = m.agora;
   m.eventos.emitir('chegou', { pulou: !!pulou });
 }
@@ -133,9 +156,16 @@ function andarNaChegada(m) {
   noCaminho(c.caminho, c.d, ponto);
   p.local = 'fazenda'; p.x = ponto.x; p.z = ponto.z; p.fila.length = 0; p.rota = null; p.tarefa = null;
   if (c.d > antes) { p.rumo = ponto.rumo; p.vel = VELOCIDADE; p.fase += (VELOCIDADE * PASSO) / PASSADA; } else p.vel = 0;
-  // o Seu Tonho acena quando ela passa da porteira (entra na terra própria)
-  if (!c.acenou && m.locais.fazenda.ehPropria(Math.floor(p.x), Math.floor(p.z))) { c.acenou = true; C.acenouEm = m.agora; m.eventos.emitir('tonhoAcenou', {}); }
-  if (c.d >= c.caminho.total) { c.parada += PASSO; if (c.parada >= PARADA) terminarChegada(m, false); }
+  if (c.d < c.caminho.total) return;
+  // no fim do caminho: vira para o Seu Tonho e fala primeiro; ele responde (acena e dá as boas-vindas); a cena acaba
+  if (!c.falou) {
+    const v = m.locais.fazenda.porId[VIZINHO];
+    if (v) p.rumo = rumoPara(p.x, p.z, v.x + 0.5, v.z + 0.5);
+    elaFala(m, c);
+  }
+  c.parada += PASSO;
+  if (!c.acenou && c.parada >= FALA_DELA) { c.acenou = true; C.acenouEm = m.agora; m.eventos.emitir('tonhoAcenou', {}); }
+  if (c.parada >= FALA_DELA + PARADA) terminarChegada(m, false);
 }
 // com a trouxa nas costas: a figura de andar e a de parada trocam pelas da trouxa (render/cena.js)
 const visualAntes = DESLOCAMENTO.visual;
@@ -144,7 +174,7 @@ DESLOCAMENTO.visual = (m, out) => {
   if (m.comeco && m.comeco.chegada) out.estado = out.vel > 0.35 ? 'andar-trouxa' : 'parada-trouxa';
 };
 // as ordens que não terminam a cena (a hora do aparelho, a própria cena, o atalho da versão de teste)
-const NAO_TERMINA = { fuso: 1, comecarChegada: 1, pularChegada: 1, soltarChegada: 1 };
+const NAO_TERMINA = { fuso: 1, comecarChegada: 1, pularChegada: 1, soltarChegada: 1, perguntouComecoNovo: 1 };
 // as que são só um toque: terminam a cena e não fazem mais nada (o toque seguinte já vale)
 const SO_TOQUE = { tocarCasa: 1, tocarEntidade: 1, irPara: 1, agir: 1, rumar: 1 };
 
@@ -395,7 +425,7 @@ registrarSistema({
   id: 'comeco',
   iniciar(m) {
     const C = dadosDoComeco(m);
-    m.comeco = { humilde: !!C, chegou: !C, chegada: null, cerca: C && C.cerca ? { tipo: C.cerca.de, para: null, obraAte: 0, obraDur: 0 } : null, esperaDosPedidos: 1, acenouEm: 0, conversas: 0 };
+    m.comeco = { humilde: !!C, chegou: !C, chegada: null, cerca: C && C.cerca ? { tipo: C.cerca.de, para: null, obraAte: 0, obraDur: 0 } : null, esperaDosPedidos: 1, acenouEm: 0, conversas: 0, versao: versaoDoComeco(m), perguntou: 0 };
     arrumarVizinho(m);
     abrirTrilha(m);
     if (C) prepararLugarDoCeleiro(m);
@@ -416,15 +446,17 @@ registrarSistema({
       if (!C.humilde || C.chegou || C.chegada || !caminho) return { ok: false, motivo: 'ja-chegou' };
       const p = m.personagem;
       p.fila.length = 0; p.rota = null; p.tarefa = null; p.acao = null; p.rumando = false; p.local = 'fazenda';
-      C.chegada = { t: 0, d: 0, parada: 0, acenou: false, caminho, espera: !!c.espera };
+      C.chegada = { t: 0, d: 0, parada: 0, falou: false, acenou: false, caminho, espera: !!c.espera };
       andarNaChegada(m);
-      const seg = caminho.total / VELOCIDADE + PARADA;
+      const seg = caminho.total / VELOCIDADE + FALA_DELA + PARADA;
       m.eventos.emitir('comecouChegada', { seg });
       return { ok: true, dados: { seg } };
     },
     pularChegada(m) { if (!m.comeco.chegada) return { ok: false, motivo: 'ja-chegou' }; terminarChegada(m, true); return { ok: true }; },
     // a cena pedida com { espera: true } fica parada na porteira até este comando (a tela de carregando sumiu)
     soltarChegada(m) { const c = m.comeco.chegada; if (!c || !c.espera) return { ok: false, motivo: 'sem-espera' }; c.espera = false; return { ok: true }; },
+    // a interface perguntou (versão de teste) se quer começar de novo: não pergunta mais sobre este começo
+    perguntouComecoNovo(m) { if (!querComecoNovo(m)) return { ok: false, motivo: 'sem-pergunta' }; m.comeco.perguntou = versaoDoComeco(m); return { ok: true }; },
     // reformar { entidade, jaJa }: entidade = o id da construção velha ("casa", "poco", "banca") ou "cerca"
     reformar(m, c) {
       const alvo = c.entidade, loc = m.locais.fazenda, p = m.personagem, q = !c.quieto;
@@ -443,10 +475,13 @@ registrarSistema({
     // a gravação de antes do começo humilde (ou de uma fazenda que já abriu como antes): a fazenda de antes
     const g = obj.sistemas.comeco;
     if (ehHumilde(m) && (!g || !g.humilde)) tornarClassica(m);
+    // de que começo é a fazenda: a de antes é 0; a do primeiro começo humilde (gravada sem o número) é 1
+    m.comeco.versao = g && g.versao >= 0 ? Math.floor(g.versao) : g && g.humilde ? 1 : 0;
+    m.comeco.perguntou = g && g.perguntou > 0 ? Math.floor(g.perguntou) : 0;
   },
   salvar(m) {
     const C = m.comeco, c = C.cerca;
-    return { v: 1, humilde: C.humilde, chegou: true, conversas: C.conversas || 0, cerca: c ? { tipo: c.tipo, para: c.para || null, obraAte: Math.round(c.obraAte || 0), obraDur: c.obraDur || 0 } : null };
+    return { v: 1, humilde: C.humilde, chegou: true, versao: C.versao, perguntou: C.perguntou || 0, conversas: C.conversas || 0, cerca: c ? { tipo: c.tipo, para: c.para || null, obraAte: Math.round(c.obraAte || 0), obraDur: c.obraDur || 0 } : null };
   },
   carregar(m, d) {
     const C = m.comeco;

@@ -26,13 +26,13 @@ Construções, objetos, plantas, ícones e retratos do jogo, pedidos ao Codex de
 - Árvores: `arvore/<id>-muda`, `-jovem`, `-adulta`, `-fruta` (adulta carregada), com os apelidos `-1` a `-4`; apoio no pé do tronco, o mesmo em `adulta` e `fruta`.
 - Ícones: `icone/<id do item>` para todos os itens de `jogo/dados/itens.json`, 128 x 128, apoio no centro. Fora dos itens: `icone/ouro`, `cash`, `xp`, `folego`, `gota`, `convite`, `martelo`; `icone/enxada`, `icone/regador` e `icone/cesto` são apelidos dos do começo do jogo.
 - Interface (`ui/...`, 128 x 128): `mao`, `enxada`, `semear`, `regar`, `loja`, `mochila`, `missoes`, `pedidos`, `config`, `fechar`, `seta`, `cadeado`, `som`, `tela-cheia`, `relogio`, `trofeu`, `presente`, `concluir` (terminar na hora), `vaga` (vaga de fila), `compartilhar`, `lote` (comprar terra), `mover` (mudar construção de lugar). `ui/subida-de-nivel` é a faixa da tela de nível (528 x 278, sem texto: o número vai por cima); `ui/bau-fechado` e `ui/bau-aberto` são o baú de recompensa, com o apoio no pé.
-- Retratos (256 x 256): `retrato/seu-tonho` (neutro; apelido `-neutro`), `-alegre`, `-explicando`. Folha de modelo: `arte/jogo/modelos/seu-tonho.png`.
+- Retratos (256 x 256): `retrato/seu-tonho` (neutro; apelido `-neutro`), `-alegre`, `-explicando`. Folha de modelo: `arte/jogo/modelos/seu-tonho.png`. A personagem principal, no mesmo formato (busto do alto do coque ao meio do peito, encostado a 8 px do pé, apoio 128, 248): `retrato/personagem` (neutra) e `retrato/personagem-alegre`, pedido 64 (a rodada 1 saiu com as cores escuras e o rosto pequeno; valeu a `-r2`). Folha de modelo: `arte/jogo/modelos/personagem.png`; comparação com o Seu Tonho e no círculo do balão: `arte/jogo/folhas/retratos-personagem.png`. O círculo e o fundo azul do balão vêm do CSS, não do PNG.
 
 ## Peças
 
 <!-- tabela:inicio -->
 
-No catálogo: 297 chaves (297 prontas, 0 pendentes).
+No catálogo: 299 chaves (299 prontas, 0 pendentes).
 
 ### objetos (86)
 
@@ -309,10 +309,12 @@ No catálogo: 297 chaves (297 prontas, 0 pendentes).
 | `icone/vestido-de-chita` | icones/vestido-de-chita.png | 128 x 128 | 64, 64 |  | caixa 128 | 48-icones-cosmeticos.md | pronto |
 | `icone/xp` | icones/xp.png | 128 x 128 | 64, 64 |  | caixa 128 | 18-icones-ferramentas.md | pronto |
 
-### retratos (4)
+### retratos (6)
 
 | Chave | Arquivo | Quadro (px) | Apoio | Casas | Tamanho pedido | Pedido | Situação |
 |---|---|---|---|---|---|---|---|
+| `retrato/personagem` | retratos/personagem.png | 256 x 256 | 128, 248 |  | caixa 256 | 64-retratos-personagem-r2.md | pronto: neutra e simpática; mesmo formato dos retratos do Seu Tonho |
+| `retrato/personagem-alegre` | retratos/personagem-alegre.png | 256 x 256 | 128, 248 |  | caixa 256 | 64-retratos-personagem-r2.md | pronto: sorriso aberto, olhos fechados em arco; mesmo formato dos retratos do Seu Tonho |
 | `retrato/seu-tonho` | retratos/seu-tonho.png | 256 x 256 | 128, 248 |  | caixa 256 | 21-retratos-seu-tonho.md | pronto |
 | `retrato/seu-tonho-alegre` | retratos/seu-tonho-alegre.png | 256 x 256 | 128, 248 |  | caixa 256 | 21-retratos-seu-tonho.md | pronto |
 | `retrato/seu-tonho-explicando` | retratos/seu-tonho-explicando.png | 256 x 256 | 128, 248 |  | caixa 256 | 21-retratos-seu-tonho.md | pronto |

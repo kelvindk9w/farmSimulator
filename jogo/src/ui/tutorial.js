@@ -1,6 +1,7 @@
 // O vizinho (Seu Tonho): balão com retrato e a missão da vez, e a seta que aponta o próximo passo, no mundo
 // (uma casa, o poço) ou na interface (um botão de modo, a loja). O passo vem de nucleo/guia.js.
-import { el, icone, por, classe, encher } from './dom.js';
+// As falas avulsas podem ser de outra pessoa (a dela, na chegada): o balão troca o nome e o retrato enquanto dura.
+import { el, icone, trocarIcone, por, classe, encher } from './dom.js';
 import { T } from './textos.js';
 import { J } from '../contexto.js';
 import { missaoAtual } from '../nucleo/sistemas/missoes.js';
@@ -12,7 +13,8 @@ import { subidaAberta } from './subida.js';
 export function criarTutorial(ui, hud) {
   const balao = el('button', 'balao'); balao.type = 'button';
   const quem = el('div', 'quem'), retrato = el('div', 'retrato'), nome = el('div');
-  retrato.append(icone('retrato/' + J.dados.missoes.vizinhoId, 58)); quem.append(retrato, nome);
+  const retratoDoVizinho = 'retrato/' + J.dados.missoes.vizinhoId, rosto = icone(retratoDoVizinho, 58);
+  retrato.append(rosto); quem.append(retrato, nome);
   const texto = el('div', 'texto'), titulo = el('b'), fala = el('div', 'fala'), anda = el('div', 'anda'), barra = el('div', 'barra hud'), fio = el('i'), conta = el('span');
   barra.append(fio); anda.append(barra, conta); texto.append(titulo, fala, anda);
   balao.append(quem, texto);
@@ -62,11 +64,14 @@ export function criarTutorial(ui, hud) {
     classe(balao, 'avulsa', !!dito);
     if (!a && !dito) { if (!balao.hidden) balao.hidden = true; apontarUi(null); cena.seta.ligada = false; return; }
     if (balao.hidden) balao.hidden = false;
-    if (!a) { por(nome, m.dados.missoes.vizinhoNome); por(titulo, dito.titulo); por(fala, dito.fala); classe(balao, 'pequeno', false); if (!anda.hidden) anda.hidden = true; apontarUi(null); cena.seta.ligada = false; return; }
+    // quem fala: o vizinho, ou quem a fala avulsa disser ({ nome, retrato })
+    const q = dito && dito.quem;
+    por(nome, q && q.nome ? q.nome : m.dados.missoes.vizinhoNome);
+    trocarIcone(rosto, q && q.retrato ? q.retrato : retratoDoVizinho);
+    if (!a) { por(titulo, dito.titulo); por(fala, dito.fala); classe(balao, 'pequeno', false); if (!anda.hidden) anda.hidden = true; apontarUi(null); cena.seta.ligada = false; return; }
     // missão nova: o balão abre com a fala; depois de um tempo encolhe sozinho (a não ser que o jogador tenha mexido)
     if (ultima !== a.missao.id) { ultima = a.missao.id; pequeno = baixa(); fixo = false; aberto = 0; relogio = 0; }
     if (!fixo && !pequeno && aberto > 12) pequeno = true;
-    por(nome, m.dados.missoes.vizinhoNome);
     por(titulo, dito ? dito.titulo : a.missao.titulo);
     por(fala, dito ? dito.fala : a.esperaNivel ? T.missoes.espera(a.esperaNivel) : a.missao.fala);
     classe(balao, 'pequeno', pequeno && !dito);
@@ -113,8 +118,9 @@ export function criarTutorial(ui, hud) {
     atualizar,
     concluiu() { feitaAte = 1.6; pequeno = false; fixo = false; aberto = 0; relogio = 0; },
     abrirMissoes() { abrirPainel('missoes'); },
-    // o vizinho diz uma coisa fora da missão (título curto e uma ou duas frases); fica "seg" segundos ou até o toque
-    dizer(tituloDaFala, textoDaFala, seg = 11) { if (textoDaFala && falas.length < 3 && !(dito && dito.fala === textoDaFala) && !falas.some((f) => f.fala === textoDaFala)) falas.push({ titulo: tituloDaFala || '', fala: textoDaFala, resta: seg }); },
+    // o vizinho diz uma coisa fora da missão (título curto e uma ou duas frases); fica "seg" segundos ou até o toque.
+    // quem = { nome, retrato (a chave da peça) }: a fala é de outra pessoa (ou dele com outra cara)
+    dizer(tituloDaFala, textoDaFala, seg = 11, quem = null) { if (textoDaFala && falas.length < 3 && !(dito && dito.fala === textoDaFala) && !falas.some((f) => f.fala === textoDaFala)) falas.push({ titulo: tituloDaFala || '', fala: textoDaFala, resta: seg, quem }); },
     falando: () => (dito ? dito.fala : falas.length ? falas[0].fala : null),
     balao, seta,
   };

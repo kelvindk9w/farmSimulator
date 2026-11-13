@@ -9,15 +9,22 @@ const vivos = new Set(); // ícones na tela, para repintar quando a página de a
 export function prepararIcones(atlas, dados) { ctx.atlas = atlas; ctx.dados = dados; }
 export function repintarIcones() { for (const c of vivos) { if (!c.isConnected) vivos.delete(c); else pintar(c); } }
 
+// peças que ainda não estão no catálogo e têm um substituto dele: o retrato dela é o busto da figura parada de frente
+const BUSTO = { 'retrato/personagem': 'personagem/parada-frente', 'retrato/personagem-alegre': 'personagem/parada-frente' };
+
 function pintar(c) {
   const g = c.getContext('2d'), t = c.width, chave = c.dataset.chave, A = ctx.atlas;
   g.setTransform(1, 0, 0, 1, 0, 0);
   g.clearRect(0, 0, t, t);
-  const p = A && A.peca(chave);
+  const p = A && A.peca(chave), sub = !p && A && BUSTO[chave], ps = sub && A.peca(sub);
   if (p && A.pronta(chave)) {
     // encaixa o quadro inteiro da peça na caixa do ícone
     const k = Math.min(t / p.casa[0], t / p.casa[1]), S = k * p.e;
     A.desenhar(g, chave, 0, (t - p.casa[0] * k) / 2 + p.apoio[0] * k, (t - p.casa[1] * k) / 2 + p.apoio[1] * k, S, false);
+  } else if (ps && A.pronta(sub)) {
+    // o busto: os 60% de cima da figura (do alto da cabeça ao peito), centrado; o resto fica fora da caixa
+    const alto = ps.apoio[1] - ps.q[0][6], k = t / (alto * 0.6);
+    A.desenhar(g, sub, 0, t / 2, alto * k + t * 0.04, k * ps.e, false);
   } else pintarIconeDeReserva(g, chave, t, ctx.dados);
 }
 
