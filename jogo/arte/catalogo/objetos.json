@@ -1,7 +1,26 @@
 {
   "escala": 128,
   "pecas": {
-    "objeto/banca": { "arquivo": "objetos/banca.png", "quadros": 1, "casa": [275, 315], "apoio": [138, 233] },
-    "objeto/poco": { "arquivo": "objetos/poco.png", "quadros": 1, "casa": [308, 441], "apoio": [142, 370] }
+    "objeto/arbusto": { "arquivo": "objetos/arbusto.png", "quadros": 1, "casa": [170, 142], "apoio": [85, 97] },
+    "objeto/arvore": { "arquivo": "objetos/mata.png", "quadros": 1, "casa": [444, 503], "apoio": [224, 457] },
+    "objeto/banca": { "arquivo": "objetos/banca.png", "quadros": 1, "casa": [402, 462], "apoio": [202, 344] },
+    "objeto/casa": { "arquivo": "objetos/casa.png", "quadros": 1, "casa": [681, 642], "apoio": [340, 470] },
+    "objeto/celeiro": { "arquivo": "objetos/celeiro.png", "quadros": 1, "casa": [856, 834], "apoio": [426, 601] },
+    "objeto/celeiro-aberto": { "arquivo": "objetos/celeiro-aberto.png", "quadros": 1, "casa": [856, 834], "apoio": [426, 601] },
+    "objeto/cerca-de-madeira": { "arquivo": "objetos/cerca-x.png", "quadros": 1, "casa": [142, 163], "apoio": [71, 119] },
+    "objeto/cerca-x": { "arquivo": "objetos/cerca-x.png", "quadros": 1, "casa": [142, 163], "apoio": [71, 119] },
+    "objeto/cerca-z": { "arquivo": "objetos/cerca-z.png", "quadros": 1, "casa": [142, 163], "apoio": [71, 119] },
+    "objeto/flores": { "arquivo": "objetos/flores.png", "quadros": 1, "casa": [138, 128], "apoio": [69, 98] },
+    "objeto/ipe": { "arquivo": "objetos/ipe.png", "quadros": 1, "casa": [456, 493], "apoio": [214, 457] },
+    "objeto/mata": { "arquivo": "objetos/mata.png", "quadros": 1, "casa": [444, 503], "apoio": [224, 457] },
+    "objeto/mato": { "arquivo": "objetos/mato.png", "quadros": 1, "casa": [144, 158], "apoio": [72, 128] },
+    "objeto/mourao": { "arquivo": "objetos/mourao.png", "quadros": 1, "casa": [50, 117], "apoio": [25, 99] },
+    "objeto/pedra": { "arquivo": "objetos/pedra.png", "quadros": 1, "casa": [125, 103], "apoio": [63, 74] },
+    "objeto/placa": { "arquivo": "objetos/placa.png", "quadros": 1, "casa": [140, 171], "apoio": [63, 158] },
+    "objeto/poco": { "arquivo": "objetos/poco.png", "quadros": 1, "casa": [308, 441], "apoio": [142, 370] },
+    "objeto/porteira": { "arquivo": "objetos/porteira.png", "quadros": 1, "casa": [252, 292], "apoio": [126, 216] },
+    "objeto/porteira-aberta": { "arquivo": "objetos/porteira-aberta.png", "quadros": 1, "casa": [252, 311], "apoio": [126, 235] },
+    "objeto/rochedo": { "arquivo": "objetos/rochedo.png", "quadros": 1, "casa": [189, 143], "apoio": [95, 91] },
+    "objeto/toco": { "arquivo": "objetos/toco.png", "quadros": 1, "casa": [144, 126], "apoio": [72, 85] }
   }
 }

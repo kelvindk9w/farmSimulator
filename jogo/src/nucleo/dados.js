@@ -24,6 +24,8 @@ export function prepararDados(bruto) {
       if (it.tipo === 'ferramenta' || it.tipo === 'recipiente') {
         n.funcao = it.funcao || id.split('-')[0]; // "regador-grande" faz o papel de "regador"
         n.capacidade = num(it.capacidade) ? it.capacidade : 0;
+        n.degrau = num(it.degrau) ? it.degrau : 1; // entre duas da mesma função, vale a de degrau maior
+        n.rapidez = it.rapidez > 0 ? it.rapidez : 1; // multiplica a duração da ação (0.75 = um quarto mais rápida)
         if (it.tipo === 'recipiente' && !(n.capacidade > 0)) erro('itens.json', `"${id}": recipiente precisa de "capacidade" maior que zero`);
         if (n.funcao === 'regador' && !(n.capacidade > 0)) erro('itens.json', `"${id}": o regador precisa de "capacidade" (quantas regas leva)`);
       }
@@ -84,7 +86,10 @@ export function prepararDados(bruto) {
     },
     celeiro: { capacidade: obj(R.celeiro) && R.celeiro.capacidade > 0 ? R.celeiro.capacidade : 50 },
     filaMax: R.filaMax > 0 ? R.filaMax : 40,
+    reararAposColher: !!(obj(R.lavoura) && R.lavoura.reararAposColher), // colheu, a casa volta a ser grama
+    antiTrava: obj(R.antiTrava) && R.antiTrava.semente ? { semente: R.antiTrava.semente, quantidade: R.antiTrava.quantidade > 0 ? R.antiTrava.quantidade : 1 } : null,
   };
+  if (regras.antiTrava && !itens[regras.antiTrava.semente]) { aviso('regras.json', `antiTrava.semente: "${regras.antiTrava.semente}" não existe em itens.json`); regras.antiTrava = null; }
   if (obj(R.acoes)) for (const [k, v] of Object.entries(R.acoes)) {
     const seg = num(v) ? v : obj(v) && num(v.seg) ? v.seg : obj(v) && num(v.dur) ? v.dur : null;
     if (seg === null || !(seg > 0)) aviso('regras.json', `acoes.${k}: esperava segundos (número maior que zero)`); else regras.acoes[k] = seg;
@@ -104,15 +109,22 @@ export function prepararDados(bruto) {
   const terras = {
     largura: Math.round(mapa.largura || 0), profundidade: Math.round(mapa.profundidade || 0),
     inicial: Array.isArray(T.inicial) ? T.inicial : obj(T.inicial) && Array.isArray(T.inicial.area) ? T.inicial.area : null,
+    limpo: obj(T.inicial) && Array.isArray(T.inicial.limpo) ? T.inicial.limpo : null, // miolo da área inicial que nasce sem mato (sem isto, ela toda)
+    naturezaInicial: obj(T.inicial) && obj(T.inicial.natureza) ? T.inicial.natureza : {}, // mato, pedra e toco nas beiradas da área inicial
     lotes: Array.isArray(T.lotes) ? T.lotes.filter(obj) : [],
     pontos: obj(T.pontos) ? T.pontos : {}, // onde nascem poço, banca, celeiro, casa e a personagem: [x, z]
     caminhos: Array.isArray(T.caminhos) ? T.caminhos : [], // faixas de caminho de terra: [x0, z0, x1, z1]
-    natureza: obj(T.natureza) ? T.natureza : {}, // o que enfeita a terra à venda: { arvore: 0.03, mato: 0.05, pedra: 0.02, toco: 0.01 } (chance por casa)
+    natureza: obj(T.natureza) ? T.natureza : {}, // o que cobre a terra fora dos lotes: { mata: 0.03, mato: 0.05, pedra: 0.02, toco: 0.01 } (chance por casa); cada lote pode ter a sua
+    casas: {}, // tamanho da base de cada construção inicial, de construcoes.json: { celeiro: [5, 4], ... }
   };
+  if (obj(bruto.construcoes)) for (const [id, c] of Object.entries(bruto.construcoes)) {
+    if (obj(c) && Array.isArray(c.casas) && c.casas.length === 2 && c.casas[0] >= 1 && c.casas[1] >= 1) terras.casas[id] = [Math.round(c.casas[0]), Math.round(c.casas[1])];
+  }
   const area = (a) => Array.isArray(a) && a.length === 4 && a.every(num) && a[2] > a[0] && a[3] > a[1];
   if (obj(bruto.terras)) {
     if (!(terras.largura >= 8 && terras.profundidade >= 8)) erro('terras.json', 'falta "mapa": { largura, profundidade } (8 ou mais casas)');
     else if (terras.largura * terras.profundidade > 65536) erro('terras.json', 'o mapa é grande demais (o limite é 65 536 casas)');
+    if (terras.limpo && !area(terras.limpo)) { aviso('terras.json', '"inicial.limpo" ignorado: esperava [x0, z0, x1, z1]'); terras.limpo = null; }
     if (!area(terras.inicial)) erro('terras.json', 'falta "inicial": { area: [x0, z0, x1, z1] } (x1 e z1 ficam de fora)');
     else if (terras.inicial[0] < 0 || terras.inicial[1] < 0 || terras.inicial[2] > terras.largura || terras.inicial[3] > terras.profundidade) erro('terras.json', 'a área inicial sai do mapa');
     for (const l of terras.lotes) {
@@ -122,6 +134,7 @@ export function prepararDados(bruto) {
     for (const p of ['poco', 'banca', 'celeiro', 'casa', 'personagem']) {
       const v = terras.pontos[p];
       if (!(Array.isArray(v) && v.length >= 2 && num(v[0]) && num(v[1]))) erro('terras.json', `falta "pontos.${p}": [x, z]`);
+      else if (area(terras.inicial) && (v[0] < terras.inicial[0] || v[1] < terras.inicial[1] || v[0] >= terras.inicial[2] || v[1] >= terras.inicial[3])) erro('terras.json', `"pontos.${p}" fica fora da área inicial`);
     }
     terras.caminhos = terras.caminhos.filter((c) => { if (area(c)) return true; aviso('terras.json', 'caminho ignorado: esperava [x0, z0, x1, z1]'); return false; });
   }
@@ -170,7 +183,14 @@ export function prepararDados(bruto) {
     const ordem = lojaOuro.itens.filter((id) => itens[id] && itens[id].compra > 0);
     ofertas = [...ordem, ...ofertas.filter((id) => !ordem.includes(id))];
   }
-  const loja = { ouro: ofertas };
+  // abas: as de loja.json que listam tipos de item; as que vêm de outro arquivo (animais, construções, terras) entram com as suas frentes
+  const abas = [];
+  if (Array.isArray(lojaOuro.abas)) for (const a of lojaOuro.abas) {
+    if (!obj(a) || !a.id || !Array.isArray(a.tipos) || a.fonte) continue;
+    abas.push({ id: a.id, nome: a.nome || a.id, tipos: a.tipos, soProximoDegrau: !!a.soProximoDegrau, itens: ofertas.filter((id) => a.tipos.includes(itens[id].tipo)) });
+  }
+  if (!abas.length) abas.push({ id: 'tudo', nome: 'Loja', tipos: TIPOS_DE_ITEM, soProximoDegrau: false, itens: ofertas });
+  const loja = { ouro: ofertas, abas };
 
   const dados = { regras, itens, culturas, culturaDaSemente, terras, niveis, missoes, loja, bruto };
   return { dados, problemas };

@@ -1,0 +1,11 @@
+{
+  "rabanete": { "nome": "Rabanete", "tipo": "colheita", "venda": 4 },
+  "milho": { "nome": "Milho", "tipo": "colheita", "venda": 9 },
+  "semente-rabanete": { "nome": "Semente de rabanete", "tipo": "semente", "compra": 2, "nivel": 1 },
+  "semente-milho": { "nome": "Semente de milho", "tipo": "semente", "compra": 5, "nivel": 2 },
+  "enxada": { "nome": "Enxada", "tipo": "ferramenta", "nivel": 1 },
+  "regador": { "nome": "Regador", "tipo": "ferramenta", "capacidade": 3, "nivel": 1 },
+  "regador-grande": { "nome": "Regador grande", "tipo": "ferramenta", "capacidade": 8, "compra": 30, "nivel": 2 },
+  "cesto": { "nome": "Cesto", "tipo": "recipiente", "capacidade": 6 },
+  "cesto-grande": { "nome": "Cesto grande", "tipo": "recipiente", "capacidade": 12, "compra": 25, "nivel": 1 }
+}

@@ -50,7 +50,7 @@ function melhor(m, funcao, onde) {
   const F = m.posses.ferramentas, I = m.dados.itens;
   for (const id in F) {
     if (F[id].onde !== onde || I[id].funcao !== funcao) continue;
-    if (!achou || I[id].capacidade > I[achou].capacidade || (I[id].capacidade === I[achou].capacidade && I[id].nivel > I[achou].nivel)) achou = id;
+    if (!achou || I[id].degrau > I[achou].degrau || (I[id].degrau === I[achou].degrau && I[id].capacidade > I[achou].capacidade)) achou = id;
   }
   return achou;
 }
@@ -79,7 +79,7 @@ export function adquirirFerramenta(m, id) {
   if (P.ferramentas[id]) return false;
   const f = P.ferramentas[id] = { onde: 'suporte', agua: 0, usos: 0, vez: 0 };
   const velha = ferramentaNoCinto(m, it.funcao);
-  if (velha && m.dados.itens[velha].capacidade <= it.capacidade) {
+  if (velha && m.dados.itens[velha].degrau <= it.degrau) {
     f.agua = Math.min(it.capacidade, P.ferramentas[velha].agua); // a água do regador velho passa para o novo
     P.ferramentas[velha].agua = 0;
     P.ferramentas[velha].onde = 'suporte'; f.onde = 'cinto'; f.vez = ++P.vez;
@@ -87,13 +87,21 @@ export function adquirirFerramenta(m, id) {
   return true;
 }
 
+// ---------- recipientes ----------
+// o que cada função de recipiente faz ao chegar; as frentes novas (caixa de ovos, balde...) registram a sua aqui
+export const RECIPIENTES = {
+  cesto(m, it) { if (it.capacidade > capacidadeDoCesto(m)) m.posses.cesto.item = it.id; }, // o que já está no cesto continua nele
+  cinto(m, it) { if (it.capacidade > m.posses.vagasNoCinto) m.posses.vagasNoCinto = it.capacidade; },
+};
+function equiparRecipiente(m, it) { const f = RECIPIENTES[it.funcao]; if (f) f(m, it); }
+
 // ---------- dar um item qualquer (compra, recompensa) ----------
 // semente e miudeza vão para a bolsa; colheita e produto, para o celeiro; ferramenta e recipiente são equipados
 export function darItem(m, id, n = 1, origem = '') {
   const it = m.dados.itens[id], P = m.posses;
   if (!it || !(n > 0)) return false;
   if (it.tipo === 'ferramenta') adquirirFerramenta(m, id);
-  else if (it.tipo === 'recipiente') { if (!P.recipientes.includes(id)) P.recipientes.push(id); if (it.capacidade > capacidadeDoCesto(m)) P.cesto.item = id; }
+  else if (it.tipo === 'recipiente') { if (!P.recipientes.includes(id)) P.recipientes.push(id); equiparRecipiente(m, it); }
   else if (it.tipo === 'colheita' || it.tipo === 'produto') somar(P.celeiro.itens, id, n);
   else somar(P.bolsa, id, n);
   m.eventos.emitir('ganhouItem', { item: id, n, origem });
@@ -143,6 +151,10 @@ registrarSistema({
       for (const k in d.ferramentas) if (I[k] && I[k].tipo === 'ferramenta') { const f = d.ferramentas[k]; P.ferramentas[k] = { onde: f.onde === 'cinto' ? 'cinto' : 'suporte', agua: Math.min(f.agua || 0, I[k].capacidade), usos: f.usos || 0, vez: f.vez || 0 }; }
     }
     P.vez = d.vez || 0;
+    P.vagasNoCinto = m.dados.regras.inicio.vagasNoCinto;
+    for (const k of P.recipientes) if (I[k].funcao === 'cinto') P.vagasNoCinto = Math.max(P.vagasNoCinto, I[k].capacidade);
+    // se sobrou ferramenta demais no cinto (os dados mudaram), as usadas há mais tempo voltam para o suporte
+    for (let c = listaDeFerramentas(m, 'cinto'); c.length > P.vagasNoCinto; c = listaDeFerramentas(m, 'cinto')) P.ferramentas[c.reduce((a, b) => (P.ferramentas[a].vez <= P.ferramentas[b].vez ? a : b))].onde = 'suporte';
     if (d.celeiro) P.celeiro.itens = soExistentes(d.celeiro.itens);
     if (d.conta) P.conta = { ganho: d.conta.ganho || 0, gasto: d.conta.gasto || 0 };
   },

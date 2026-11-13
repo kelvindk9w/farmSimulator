@@ -1,0 +1,9 @@
+{
+  "personagem": { "andar": 2.5, "correr": 5, "correrAcimaDe": 5, "alcance": 1.3 },
+  "folego": { "max": 100, "gastoPorSeg": 20, "recuperaAndando": 5, "recuperaParado": 10 },
+  "acoes": { "arar": 1, "semear": 0.5, "regar": 0.5, "colher": 0.5, "encher": 1, "vender": 1, "guardar": 1, "pegar": 1, "pegarFerramenta": 1 },
+  "xp": { "arar": 1 },
+  "inicio": { "ouro": 20, "cash": 3, "cesto": "cesto", "cinto": ["enxada"], "suporte": ["regador"], "vagasNoCinto": 1, "itens": { "semente-rabanete": 3 } },
+  "celeiro": { "capacidade": 10 },
+  "filaMax": 20
+}

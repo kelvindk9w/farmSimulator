@@ -12,7 +12,11 @@
 //   node jogo/tools/arte/peca.mjs icones <cru.png> --grade CxL --nomes enxada,regador,... [--prefixo icone]
 //   node jogo/tools/arte/peca.mjs situacao <chave> pronto|pendente ["observação"]
 //   node jogo/tools/arte/peca.mjs remover <chave>
+//   node jogo/tools/arte/peca.mjs apelido <chave que existe> <chave nova> [...] [--pendente "motivo"]
 //   node jogo/tools/arte/peca.mjs folha [grupo ...]
+//   node jogo/tools/arte/peca.mjs ficha            (refaz a tabela de arte/jogo/ficha-pecas.md)
+//   node jogo/tools/arte/peca.mjs piso <textura.png> <chave>          (textura chapada vista de cima -> losango de 1 casa)
+//   node jogo/tools/arte/peca.mjs parede <textura.png> <chave> --altura U --lado x|z [--tom F]
 //   node jogo/tools/arte/peca.mjs guia <saida.png> --bloco LxPxH [--telhado R] [--porta LxA] [--toldo H] [--copias N]
 //                                      (bloco cinza na câmera do jogo, para anexar ao pedido de uma construção)
 //
@@ -31,6 +35,8 @@
 //   --apoio-pe N       apoio a N px do pé do desenho (em vez de --base)
 //   --ancora centro|frente|pe    "centro" (padrão) é o centro da base; "pe" põe o apoio no pé do desenho
 //   --footprint LxP    só para a ficha e a folha (casas ocupadas), quando o tamanho não veio de --casas
+//   --guia guia.png    com --casas: escala e apoio tirados do bloco-guia usado no pedido (mesmo enquadramento da crua)
+//   --inclinar S       inclina na vertical (y' = y + S·x) antes de medir: acerta a diagonal de cercas e porteiras
 //   --pedido nome.md   --pendente "motivo"   --obs "texto"   --cisco N (área mínima de parte solta)
 //   --manter-soltas    não apaga partes soltas pequenas
 import { createRequire } from 'node:module';
@@ -219,6 +225,22 @@ function recorte(img, c) {
 }
 const paraPng = (img) => sharp(img.data, { raw: { width: img.W, height: img.H, channels: 4 } }).png();
 
+// Inclina o desenho na vertical (y' = y + S·x): as linhas em pé continuam em pé e as que correm na
+// diagonal mudam de inclinação. Serve para acertar na câmera uma peça comprida (cerca, porteira).
+async function inclinar(img, S) {
+  const { data, info } = await paraPng(img).affine([[1, 0], [S, 1]], { background: { r: 0, g: 0, b: 0, alpha: 0 }, interpolator: 'bicubic' }).raw().toBuffer({ resolveWithObject: true });
+  const novo = { data, W: info.width, H: info.height, temAlfa: true, arquivo: img.arquivo };
+  limpar(novo, { manter: true });
+  return novo;
+}
+
+// Os dois pés de uma peça comprida: o ponto mais baixo do terço da esquerda e o do terço da direita.
+function medirPes(img, cx = caixaDe(img, 128)) {
+  const pe = (xa, xb) => { let yb = -1; const xs = []; for (let x = xa; x < xb; x++) for (let y = cx.y1 - 1; y >= cx.y0; y--) if (alfa(img, x, y) >= 128) { if (y > yb + 1) { yb = y; xs.length = 0; } if (y >= yb - 1) xs.push(x); break; } return { x: xs[Math.floor(xs.length / 2)], y: yb }; };
+  const terco = Math.round(cx.w * 0.3), e = pe(cx.x0, cx.x0 + terco), d = pe(cx.x1 - terco, cx.x1);
+  return { e, d, dx: d.x - e.x, incl: (d.y - e.y) / Math.max(1, d.x - e.x) };
+}
+
 // ---------- catálogo e registro ----------
 function grupoDe(chave) {
   const [tipo, ...resto] = chave.split('/'); const grupo = GRUPOS[tipo];
@@ -246,6 +268,7 @@ function gravarRegistro(reg) {
 // img: imagem crua já limpa (um item só). Devolve o resumo do que gravou.
 async function fazerPeca(img, chave, op, fatorDado = null) {
   const { grupo, nome } = grupoDe(chave);
+  if (op.inclinar) img = await inclinar(img, +op.inclinar);
   const cx = caixaDe(img); if (!cx) throw new Error(`${chave}: imagem vazia`);
   const casas = op.casas ? par(op.casas) : null;
   const ocup = op.ocupacao ? +op.ocupacao : 0.94;
@@ -266,7 +289,16 @@ async function fazerPeca(img, chave, op, fatorDado = null) {
   } else {
     // contato com o chão, em px da imagem crua, e o fator de escala
     let baseCrua = null; // largura do contato com o chão na imagem crua
-    if (fatorDado) fator = fatorDado;
+    let daGuia = null; // base medida no bloco-guia (mesmo enquadramento da imagem crua)
+    if (op.guia) {
+      const g = await ler(op.guia), bg = medirBase(g, caixaDe(g, 128));
+      if (!bg?.ok || g.W !== img.W || g.H !== img.H) throw new Error(`${chave}: a guia não serve (sem V de base ou tamanho diferente da imagem)`);
+      daGuia = { largura: bg.largura, x: (bg.xe + bg.xd) / 2, y: bg.yb - bg.largura * 0.288675 };
+      const meu = medirBase(img, caixaDe(img, 128));
+      notas.push(`pela guia: base de ${bg.largura} px na crua; canto da frente do desenho a ${meu ? (meu.xb - bg.xb) + ',' + (meu.yb - bg.yb) : '?'} px do da guia`);
+    }
+    if (daGuia && casas && !fatorDado && !op.fator) { fator = ((casas[0] + casas[1]) * MEIA_L * (op.ocupacao ? +op.ocupacao : 0.9)) / daGuia.largura; baseCrua = daGuia.largura; }
+    else if (fatorDado) fator = fatorDado;
     else if (op.fator) fator = +op.fator;
     else if (casas) {
       const alvo = (casas[0] + casas[1]) * MEIA_L * ocup;
@@ -296,6 +328,7 @@ async function fazerPeca(img, chave, op, fatorDado = null) {
     else if (modoCx === 'vbase' && base?.ok) fx = ((base.xe + base.xd) / 2 - cx.x0) / cx.w;
     else if (modoCx === 'base' || modoCx === 'vbase') fx = ((faixa.x0 + faixa.x1) / 2 - cx.x0) / cx.w;
     else fx = +modoCx;
+    if (daGuia) { fx = (daGuia.x - cx.x0) / cx.w; sobe = (cx.y1 - daGuia.y) * fator; }
     const peca = await paraPng(recorte(img, cx)).resize(w, h, { kernel: 'lanczos3' }).toBuffer();
     const W2 = w + 2 * MARGEM, H2 = h + 2 * MARGEM;
     final = { buf: await sharp({ create: { width: W2, height: H2, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } }).composite([{ input: peca, left: MARGEM, top: MARGEM }]).png().toBuffer(), w: W2, h: H2, apoio: [Math.round(MARGEM + fx * w), Math.round(MARGEM + h - sobe)] };
@@ -374,7 +407,11 @@ async function folha(grupo) {
   // paginação: linhas de até 1560 px, páginas de até ~1000 px de altura por painel
   const LARG = 1600, PAD = 14, ROT = 30, paginas = [[]]; let x = PAD, y = PAD, altoLinha = 0;
   for (const it of itens) {
-    const cw = Math.max(it.w + it.w2 + 10, Math.min(260, it.k.length * 8 + 10)) + PAD, ch = it.h + ROT + PAD;
+    // folga para o losango das casas, quando ele passa do desenho
+    let fx = 0, fy = 0, fx1 = 0, fy1 = 0;
+    if (it.casas) { const s2 = (it.casas[0] + it.casas[1]) / 2, ax = it.e.apoio[0] * esc, ay = it.e.apoio[1] * esc; fx = Math.max(0, Math.ceil(s2 * MEIA_L * esc - ax)); fy = Math.max(0, Math.ceil(s2 * MEIA_A * esc - ay)); fx1 = Math.max(0, Math.ceil(ax + s2 * MEIA_L * esc - it.w)); fy1 = Math.max(0, Math.ceil(ay + s2 * MEIA_A * esc - it.h)); }
+    it.fx = fx; it.fy = fy;
+    const cw = Math.max(fx + it.w + Math.max(fx1, it.w2 + 10), Math.min(260, it.k.length * 8 + 10)) + PAD, ch = fy + it.h + fy1 + ROT + PAD;
     if (x + cw > LARG) { x = PAD; y += altoLinha; altoLinha = 0; }
     if (y + ch > 1050 && paginas[paginas.length - 1].length) { paginas.push([]); x = PAD; y = PAD; altoLinha = 0; }
     paginas[paginas.length - 1].push({ ...it, x, y, cw, ch }); x += cw; altoLinha = Math.max(altoLinha, ch);
@@ -386,7 +423,7 @@ async function folha(grupo) {
     let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${LARG}" height="${alto * 2}"><rect width="${LARG}" height="${alto}" fill="#7fc23c"/><rect y="${alto}" width="${LARG}" height="${alto}" fill="#f4ecd8"/>`;
     const comp = [];
     for (const c of pag) for (const painel of [0, 1]) {
-      const ox = c.x, oy = c.y + painel * alto;
+      const ox = c.x + c.fx, oy = c.y + c.fy + painel * alto;
       if (c.casas && painel === 0) {
         const [L, P] = c.casas, ax = ox + c.e.apoio[0] * esc, ay = oy + c.e.apoio[1] * esc;
         const pt = (i, j) => `${(ax + ((i - L / 2) - (j - P / 2)) * MEIA_L * esc).toFixed(1)},${(ay + ((i - L / 2) + (j - P / 2)) * MEIA_A * esc).toFixed(1)}`;
@@ -397,7 +434,7 @@ async function folha(grupo) {
       }
       comp.push({ input: c.buf, left: ox, top: oy });
       comp.push({ input: c.buf2, left: ox + c.w + 10, top: oy + c.h - c.h2 });
-      svg += `<text x="${ox}" y="${oy + c.h + 20}" font-family="DejaVu Sans, sans-serif" font-size="14" fill="${c.pend ? '#b00020' : '#1c1c1c'}">${escXml(c.k.replace(/^[a-z]+\//, ''))}${c.pend ? ' (pendente)' : ''}</text>`;
+      svg += `<text x="${c.x}" y="${c.y + painel * alto + c.ch - PAD - 8}" font-family="DejaVu Sans, sans-serif" font-size="14" fill="${c.pend ? '#b00020' : '#1c1c1c'}">${escXml(c.k.replace(/^[a-z]+\//, ''))}${c.pend ? ' (pendente)' : ''}</text>`;
     }
     svg += '</svg>';
     const nome = path.join(FOLHAS, paginas.length > 1 ? `${grupo}-${p + 1}.png` : `${grupo}.png`);
@@ -451,6 +488,78 @@ async function guia(saida, op) {
   console.log(`guia: ${saida} (${TW}x${TH}, ${E.toFixed(0)} px por unidade)`);
 }
 
+// ---------- piso e parede a partir de textura chapada ----------
+// O Codex desenha a madeira de frente, sem câmera; aqui ela é deitada na câmera do jogo com as medidas exatas,
+// para o padrão se repetir sem emenda de uma casa para a outra.
+async function lerTextura(arq) {
+  const { data, info } = await sharp(arq).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  return { data, W: info.width, H: info.height };
+}
+// riscos escuros que atravessam a textura (emendas das tábuas): posições ao longo do eixo dado
+function emendas(tex, eixo) {
+  const n = eixo === 'v' ? tex.H : tex.W, m = eixo === 'v' ? tex.W : tex.H, luz = new Float64Array(n);
+  for (let i = 0; i < n; i++) { let t = 0; for (let j = Math.floor(m * 0.2); j < m * 0.8; j++) { const q = (eixo === 'v' ? i * tex.W + j : j * tex.W + i) * 3; t += tex.data[q] + tex.data[q + 1] + tex.data[q + 2]; } luz[i] = t / (m * 0.6 * 3); }
+  const ord = [...luz].sort((a, b) => a - b), med = ord[Math.floor(n / 2)], corte = med * 0.72, achadas = [];
+  for (let i = 0; i < n; i++) if (luz[i] < corte) { let j = i; while (j + 1 < n && luz[j + 1] < corte) j++; achadas.push((i + j) / 2); i = j; }
+  return achadas;
+}
+function amostra(tex, u, v) { // bilinear, com as bordas presas
+  const x = Math.min(tex.W - 1.001, Math.max(0, u)), y = Math.min(tex.H - 1.001, Math.max(0, v)), x0 = Math.floor(x), y0 = Math.floor(y), fx = x - x0, fy = y - y0, o = [0, 0, 0];
+  for (let c = 0; c < 3; c++) { const a = tex.data[(y0 * tex.W + x0) * 3 + c], b = tex.data[(y0 * tex.W + x0 + 1) * 3 + c], d = tex.data[((y0 + 1) * tex.W + x0) * 3 + c], e = tex.data[((y0 + 1) * tex.W + x0 + 1) * 3 + c]; o[c] = (a * (1 - fx) + b * fx) * (1 - fy) + (d * (1 - fx) + e * fx) * fy; }
+  return o;
+}
+async function gravarFeita(chave, buf, w, h, apoio, op, tamanho) {
+  const { grupo, nome } = grupoDe(chave), rel = `${grupo}/${nome}.png`;
+  fs.mkdirSync(path.join(ARTE, grupo), { recursive: true });
+  await sharp(buf, { raw: { width: w, height: h, channels: 4 } }).png().toFile(path.join(ARTE, rel));
+  const cat = lerCatalogo(grupo); cat.pecas[chave] = { arquivo: rel, quadros: 1, casa: [w, h], apoio }; gravarCatalogo(grupo, cat);
+  const reg = lerRegistro(); reg[chave] = { situacao: 'pronto', ...(op.footprint ? { casas: par(op.footprint) } : {}), tamanho, pedido: op.pedido ?? '', cru: path.relative('/root/arte-codex', op.cru ?? ''), ...(op.obs ? { obs: String(op.obs) } : {}) }; gravarRegistro(reg);
+  console.log(`  ${chave}: ${w}x${h}, apoio ${apoio.join(',')}`);
+}
+// piso <textura.png> <chave>: uma casa de piso (losango), tábuas correndo em X, que se repete sem emenda
+async function piso(arq, chave, op) {
+  const tex = await lerTextura(arq), em = emendas(tex, 'v');
+  // de emenda a emenda: número inteiro de tábuas por casa
+  const v0 = em.length >= 2 ? em[0] : 0, v1 = em.length >= 2 ? em[em.length - 1] : tex.H;
+  const tabuas = em.length >= 2 ? em.length - 1 : 0, f = 0.18, P = tex.W * (1 - f) * 0.96, u0 = tex.W * 0.02;
+  const SS = 4, sobra = 1, LW = Math.ceil(2 * MEIA_L) + 2 * MARGEM, LH = Math.ceil(2 * MEIA_A) + 2 * MARGEM, cx = LW / 2, cy = LH / 2, out = Buffer.alloc(LW * LH * 4);
+  for (let py = 0; py < LH; py++) for (let px = 0; px < LW; px++) {
+    let r = 0, g = 0, b = 0, n = 0;
+    for (let sy = 0; sy < SS; sy++) for (let sx = 0; sx < SS; sx++) {
+      const dx = px + (sx + 0.5) / SS - cx, dy = py + (sy + 0.5) / SS - cy;
+      if (Math.abs(dx) / (MEIA_L + sobra) + Math.abs(dy) / (MEIA_A + sobra * 0.577) > 1) continue;
+      const a = dx / MEIA_L, c = dy / MEIA_A; let x = (a + c) / 2 + 0.5, z = (c - a) / 2 + 0.5; x -= Math.floor(x); z -= Math.floor(z);
+      const pu = x * P, v = v0 + z * (v1 - v0); let cor = amostra(tex, u0 + pu, v);
+      if (pu < f * tex.W) { const t = pu / (f * tex.W), o2 = amostra(tex, u0 + pu + P, v); cor = cor.map((k, i) => o2[i] * (1 - t) + k * t); }
+      r += cor[0]; g += cor[1]; b += cor[2]; n++;
+    }
+    const q = (py * LW + px) * 4; if (n) { out[q] = r / n; out[q + 1] = g / n; out[q + 2] = b / n; out[q + 3] = Math.round((255 * n) / (SS * SS)); }
+  }
+  console.log(`${path.basename(arq)}: ${tabuas || '?'} tábuas por casa (emendas em ${em.map((e) => Math.round(e)).join(', ') || 'nenhuma achada'})`);
+  await gravarFeita(chave, out, LW, LH, [Math.round(cx), Math.round(cy)], { ...op, cru: arq, footprint: '1x1' }, 'piso de 1 casa');
+}
+// parede <textura.png> <chave> --altura U --lado x|z [--tom F]: trecho de parede de 1 unidade, em pé
+// lado x: a parede corre em X (desce para a direita na tela) e olha para +Z; lado z: corre em Z (desce para a esquerda) e olha para +X
+async function parede(arq, chave, op) {
+  const tex = await lerTextura(arq), em = emendas(tex, 'h'), U = +(op.altura ?? 3), tom = op.tom ? +op.tom : 1, ladoZ = op.lado === 'z';
+  const u0 = em.length >= 2 ? em[0] : 0, u1 = em.length >= 2 ? em[em.length - 1] : tex.W, Hpx = U * ALTURA_PX, sobra = 1;
+  const SS = 4, LW = Math.ceil(MEIA_L) + 2 * MARGEM + 2 * sobra, LH = Math.ceil(Hpx + MEIA_A) + 2 * MARGEM, out = Buffer.alloc(LW * LH * 4), x0 = MARGEM + sobra, yTopo = MARGEM;
+  for (let py = 0; py < LH; py++) for (let px = 0; px < LW; px++) {
+    let r = 0, g = 0, b = 0, n = 0;
+    for (let sy = 0; sy < SS; sy++) for (let sx = 0; sx < SS; sx++) {
+      let dx = px + (sx + 0.5) / SS - x0; const y = py + (sy + 0.5) / SS;
+      if (dx < -sobra || dx > MEIA_L + sobra) continue;
+      if (ladoZ) dx = MEIA_L - dx;
+      const t = dx / MEIA_L, base = yTopo + Hpx + t * MEIA_A, v = 1 - (base - y) / Hpx; if (v < 0 || v > 1) continue;
+      let tt = t - Math.floor(t); const cor = amostra(tex, u0 + tt * (u1 - u0), tex.H * (0.005 + v * 0.99));
+      r += cor[0] * tom; g += cor[1] * tom; b += cor[2] * tom; n++;
+    }
+    const q = (py * LW + px) * 4; if (n) { out[q] = Math.min(255, r / n); out[q + 1] = Math.min(255, g / n); out[q + 2] = Math.min(255, b / n); out[q + 3] = Math.round((255 * n) / (SS * SS)); }
+  }
+  console.log(`${path.basename(arq)}: ${em.length >= 2 ? em.length - 1 : '?'} tábuas por unidade`);
+  await gravarFeita(chave, out, LW, LH, [Math.round(x0 + MEIA_L / 2), Math.round(yTopo + Hpx + MEIA_A / 2)], { ...op, cru: arq }, `parede de 1 unidade, altura ${U}`);
+}
+
 // ---------- comandos ----------
 const [comando, ...resto] = process.argv.slice(2);
 const { pos, op } = lerArgs(resto);
@@ -462,7 +571,8 @@ try {
   } else if (comando === 'medir') {
     for (const arq of pos) {
       const img = await ler(arq); limpar(img); const cx = caixaDe(img), b = medirBase(img, caixaDe(img, 128)), f = faixaDeBaixo(img, cx);
-      console.log(`${path.basename(arq)}: imagem ${img.W}x${img.H}, desenho ${cx.w}x${cx.h}, faixa de baixo ${f.w} px` + (b?.ok ? `, base em V ${b.largura} px (inclinação ${b.inclEsq.toFixed(2)} / ${b.inclDir.toFixed(2)}), canto da frente a ${((b.xb - b.xe) / b.largura).toFixed(2)} da largura` : ', sem V de base'));
+      const pes = medirPes(img);
+      console.log(`${path.basename(arq)}: imagem ${img.W}x${img.H}, desenho ${cx.w}x${cx.h}, faixa de baixo ${f.w} px` + (b?.ok ? `, base em V ${b.largura} px (inclinação ${b.inclEsq.toFixed(2)} / ${b.inclDir.toFixed(2)}), canto da frente a ${((b.xb - b.xe) / b.largura).toFixed(2)} da largura` : ', sem V de base') + `; pés a ${pes.dx} px um do outro, inclinação ${pes.incl.toFixed(3)}`);
     }
   } else if (comando === 'separar') {
     const [arq, pasta] = pos; const [C, L] = par(op.grade); const nomes = String(op.nomes).split(',');
@@ -479,7 +589,18 @@ try {
     const iRef = Math.max(0, nomes.indexOf(String(op.ref ?? nomes[nomes.length - 1])));
     const subs = celulas.map((c) => recorte(img, c));
     const fator = fatorDaReferencia(subs[iRef], op);
-    for (let i = 0; i < subs.length; i++) { if (!nomes[i] || nomes[i] === '-') continue; await fazerPeca(subs[i], `${prefixo}-${nomes[i]}`, op, fator); }
+    // o apoio de cada estágio acompanha o tamanho dele: broto pequeno tem pouco fundo, fica apoiado quase no pé
+    const cxRef = caixaDe(subs[iRef]);
+    for (let i = 0; i < subs.length; i++) {
+      if (!nomes[i] || nomes[i] === '-') continue;
+      let opI = op;
+      if (op.base && op['apoio-pe'] === undefined) {
+        const cxI = caixaDe(subs[i]);
+        const sobe = Math.min(+op.base * ESCALA * 0.288675 * Math.min(1, cxI.w / cxRef.w), cxI.h * fator * 0.5);
+        opI = { ...op, 'apoio-pe': Math.round(sobe) };
+      }
+      await fazerPeca(subs[i], `${prefixo}-${nomes[i]}`, opI, fator);
+    }
   } else if (comando === 'icones') {
     const [arq] = pos; const [C, L] = par(op.grade); const nomes = String(op.nomes).split(','); const prefixo = op.prefixo ?? 'icone';
     const img = await abrir(arq, op); const { celulas, notas } = separarGrade(img, C, L, op.vao ? +op.vao : 6);
@@ -488,15 +609,47 @@ try {
   } else if (comando === 'situacao') {
     const [chave, situacao, obs] = pos; const reg = lerRegistro(); if (!reg[chave]) throw new Error(`não há ${chave} no registro`);
     reg[chave].situacao = situacao; if (obs) reg[chave].obs = obs; else delete reg[chave].obs; gravarRegistro(reg); console.log(`${chave}: ${situacao}`);
+  } else if (comando === 'ficha') {
+    // reescreve a tabela de arte/jogo/ficha-pecas.md (entre as marcas) a partir do registro e dos catálogos
+    const arq = path.join(RAIZ, 'arte/jogo/ficha-pecas.md'), A = '<!-- tabela:inicio -->', B = '<!-- tabela:fim -->';
+    const reg = lerRegistro(); let txt = fs.existsSync(arq) ? fs.readFileSync(arq, 'utf8') : `# Ficha das peças\n\n${A}\n${B}\n`;
+    if (!txt.includes(A) || !txt.includes(B)) throw new Error('faltam as marcas da tabela na ficha');
+    let tab = '', prontas = 0, pend = 0;
+    for (const g of Object.values(GRUPOS)) {
+      const cat = lerCatalogo(g), chaves = Object.keys(cat.pecas).sort((a, b) => a.localeCompare(b, 'pt', { numeric: true })); if (!chaves.length) continue;
+      tab += `\n### ${g} (${chaves.length})\n\n| Chave | Arquivo | Quadro (px) | Apoio | Casas | Tamanho pedido | Pedido | Situação |\n|---|---|---|---|---|---|---|---|\n`;
+      for (const k of chaves) {
+        const e = cat.pecas[k], r = reg[k] ?? {}; if (r.situacao === 'pendente') pend++; else prontas++;
+        tab += `| \`${k}\` | ${e.arquivo}${r.apelidoDe ? ' (apelido)' : ''} | ${e.casa.join(' x ')} | ${e.apoio.join(', ')} | ${r.casas ? r.casas.join(' x ') : ''} | ${r.tamanho ?? ''} | ${r.pedido ?? ''} | ${r.situacao === 'pendente' ? '**pendente**' : 'pronto'}${r.obs ? ': ' + r.obs : ''} |\n`;
+      }
+    }
+    const i = txt.indexOf(A) + A.length, j = txt.indexOf(B);
+    fs.writeFileSync(arq, `${txt.slice(0, i)}\n\nNo catálogo: ${prontas + pend} chaves (${prontas} prontas, ${pend} pendentes).\n${tab}\n${txt.slice(j)}`);
+    console.log(`ficha: ${prontas} prontas, ${pend} pendentes`);
+  } else if (comando === 'apelido') {
+    // outra chave para a mesma peça (mesmo arquivo): apelido <chave que existe> <chave nova> [...]
+    const [origem, ...novas] = pos; const g = grupoDe(origem).grupo, cat = lerCatalogo(g), reg = lerRegistro();
+    if (!cat.pecas[origem]) throw new Error(`não há ${origem} no catálogo`);
+    for (const nova of novas) {
+      if (grupoDe(nova).grupo !== g) throw new Error(`${nova} é de outro grupo`);
+      cat.pecas[nova] = { ...cat.pecas[origem] };
+      reg[nova] = { ...reg[origem], situacao: op.pendente ? 'pendente' : reg[origem]?.situacao ?? 'pronto', apelidoDe: origem, ...(op.pendente ? { obs: String(op.pendente) } : {}) };
+      console.log(`apelido: ${nova} -> ${origem}`);
+    }
+    gravarCatalogo(g, cat); gravarRegistro(reg);
   } else if (comando === 'remover') {
-    for (const chave of pos) { const { grupo } = grupoDe(chave); const cat = lerCatalogo(grupo); const e = cat.pecas[chave]; if (e) { fs.rmSync(path.join(ARTE, e.arquivo), { force: true }); delete cat.pecas[chave]; gravarCatalogo(grupo, cat); } const reg = lerRegistro(); delete reg[chave]; gravarRegistro(reg); console.log(`removida: ${chave}`); }
+    for (const chave of pos) { const { grupo } = grupoDe(chave); const cat = lerCatalogo(grupo); const e = cat.pecas[chave]; if (e) { delete cat.pecas[chave]; if (!Object.values(cat.pecas).some((o) => o.arquivo === e.arquivo)) fs.rmSync(path.join(ARTE, e.arquivo), { force: true }); gravarCatalogo(grupo, cat); } const reg = lerRegistro(); delete reg[chave]; gravarRegistro(reg); console.log(`removida: ${chave}`); }
+  } else if (comando === 'piso') {
+    await piso(pos[0], pos[1], op);
+  } else if (comando === 'parede') {
+    await parede(pos[0], pos[1], op);
   } else if (comando === 'guia') {
     await guia(pos[0], op);
   } else if (comando === 'folha') {
     const grupos = pos.length ? pos : Object.values(GRUPOS).filter((g) => fs.existsSync(path.join(CATALOGO, `${g}.json`)));
     for (const g of grupos) await folha(g);
   } else {
-    console.log(fs.readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1, 35).map((l) => l.replace(/^\/\/ ?/, '')).join('\n'));
+    console.log(fs.readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1, 41).map((l) => l.replace(/^\/\/ ?/, '')).join('\n'));
     process.exitCode = comando ? 2 : 0;
   }
 } catch (e) { console.error(`ERRO: ${e.message}`); process.exitCode = 1; }

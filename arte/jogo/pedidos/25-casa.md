@@ -12,7 +12,7 @@ A terceira imagem anexa (`referencias/casa.png`) é a casa que eu quero, já no 
 
 Gere uma imagem quadrada e salve na pasta atual como `casa-na-guia.png`:
 
-A MESMA CASINHA de `casa.png`, redesenhada exatamente em cima do bloco-guia: casa pequena de sítio, base quadrada, paredes caiadas de branco com rodapé azul, telhado de duas águas com telhas de barro laranja e cumeeira de telhas redondas, chaminé pequena de tijolo. Na fachada da ESQUERDA de quem olha: porta de madeira azul com um degrau baixo de pedra e uma janela de madeira com as folhas abertas. Na parede da direita: uma janela igual com uma jardineira de flores vermelhas. Mesmas cores e mesmos detalhes de `casa.png`.
+A MESMA CASINHA de `casa.png`, redesenhada exatamente em cima do bloco-guia: casa pequena de sítio, de base retangular (a fachada da esquerda é mais larga que a parede da direita, na proporção de 4 por 3, como no bloco-guia), paredes caiadas de branco com rodapé azul, telhado de duas águas com telhas de barro laranja e cumeeira de telhas redondas, chaminé pequena de tijolo. Na fachada da ESQUERDA de quem olha: porta de madeira azul com um degrau baixo de pedra e uma janela de madeira com as folhas abertas. Na parede da direita: uma janela igual com uma jardineira de flores vermelhas. Mesmas cores e mesmos detalhes de `casa.png`.
 
 Regras:
 - Mesma câmera da cena: isométrica verdadeira (girada 45°, olhando de cima a cerca de 35°), sem perspectiva: as arestas do chão sobem a 30° para a esquerda e para a direita, e linhas paralelas continuam paralelas.

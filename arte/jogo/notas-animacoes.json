@@ -1,0 +1,88 @@
+{
+ "modelos": {
+  "personagem": {
+   "arquivo": "personagem.png",
+   "pedido": "modelo-personagem.md",
+   "nota": "Frente, costas e perfil. Feita a partir das duas figuras aprovadas da rodada 4. Uma rodada."
+  },
+  "ferramentas": {
+   "arquivo": "ferramentas.png",
+   "pedido": "modelo-ferramentas.md",
+   "nota": "As dez ferramentas de mão (enxada, regador, cesto, saquinho de sementes, martelo, machado, picareta, tesoura de tosquia, balde, banquinho) ao lado da personagem, para dar o tamanho. Vai anexada a toda ação com ferramenta. Uma rodada."
+  }
+ },
+ "folhas": {
+  "personagem/andar-frente": {
+   "pedido": "personagem-andar-frente.md",
+   "rodadas": 1,
+   "estado": "pendente",
+   "nota": "Viva e coerente, mas os quadros 5 a 8 repetem os 1 a 4: as pernas não trocam de verdade (é um ciclo de 4 poses tocado duas vezes)."
+  },
+  "personagem/andar-costas": {
+   "pedido": "personagem-andar-costas.md",
+   "rodadas": 1,
+   "estado": "pendente",
+   "nota": "Mesmo caso da de frente: 4 poses tocadas duas vezes."
+  },
+  "personagem/parada-frente": {
+   "pedido": "personagem-parada-frente.md",
+   "rodadas": 1,
+   "nota": "4 desenhos (descanso, inspira, peito cheio, piscada) montados em 12 quadros para a piscada vir uma vez a cada 2 segundos."
+  },
+  "personagem/parada-costas": {
+   "pedido": "personagem-parada-costas.md",
+   "rodadas": 1,
+   "nota": "3 desenhos montados em 12 quadros. Vista um pouco mais de costas que a do andar; escala só pela altura (o lenço aparece mais e enganaria a medida)."
+  },
+  "personagem/correr-frente": {
+   "pedido": "personagem-correr-frente.md",
+   "rodadas": 1,
+   "nota": "Corrida inclinada, com dois quadros no ar (4 e 8). Escala só pelo lenço, porque correndo ela não chega à altura de pé."
+  },
+  "personagem/enxadar-frente": {
+   "pedido": "personagem-enxadar-frente.md",
+   "rodadas": 1,
+   "nota": "Prepara, ergue, topo, golpe, crava, puxa. Pés plantados (alinhados pelas botas); a lâmina desce abaixo dos pés no golpe, por isso a casa é alta."
+  },
+  "personagem/correr-costas": {
+   "pedido": "personagem-correr-costas.md",
+   "rodadas": 1,
+   "nota": "Par da corrida de frente; dois quadros no ar (4 e 8)."
+  },
+  "personagem/enxadar-costas": {
+   "pedido": "personagem-enxadar-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente. A lâmina cai à direita dela, quase na altura dos pés."
+  },
+  "personagem/semear-frente": {
+   "pedido": "personagem-semear-frente.md",
+   "rodadas": 1,
+   "nota": "Pega no saquinho, tira, abaixa, solta, cobre a terra, levanta. O saquinho fica na mão esquerda."
+  },
+  "personagem/regar-frente": {
+   "pedido": "personagem-regar-frente.md",
+   "rodadas": 1,
+   "nota": "Segura, ergue (antecipação), inclina, rega, espalha, volta. Sem água: o jogo faz com partículas."
+  },
+  "personagem/semear-costas": {
+   "pedido": "personagem-semear-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente; o saquinho aparece ao lado do quadril."
+  },
+  "personagem/regar-costas": {
+   "pedido": "personagem-regar-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente; o regador aparece ao lado do corpo."
+  },
+  "personagem/colher-frente": {
+   "pedido": "personagem-colher-frente.md",
+   "rodadas": 1,
+   "nota": "Prepara, abaixa, agarra, puxa com força (cara de esforço), levanta contente, guarda. Mãos vazias: o jogo desenha o que foi colhido."
+  }
+ },
+ "geral": [
+  "Altura da personagem em pé: 294 pontos (2,3 unidades de tela a 128 por unidade).",
+  "No andar, o chão de cada quadro é a média entre o ponto mais baixo do quadro e o da folha inteira (`--base 0.5`): guarda o sobe e desce que o Codex desenhou sem deixar os pés longe do chão.",
+  "O tamanho da figura entre folhas é conferido pela área do lenço vermelho (coluna tamanho pela cor de `medidas-animacoes.json`): na folha de modelo, com 294 pontos de altura, dá 47,5 de frente e 48,7 de costas. Com `--tamanho-cor`, a escala é a média entre a da altura e a do lenço, para nem a altura nem a cabeça destoarem de uma folha para a outra. Quando a vista muda (mais de costas, cabeça baixa), o lenço engana e vale só a altura."
+ ]
+}

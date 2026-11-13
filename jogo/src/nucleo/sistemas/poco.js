@@ -1,5 +1,5 @@
 // O poço: enche o regador que está no cinto (ou busca o regador no suporte antes, como toda ação com ferramenta).
-import { registrarAcao, registrarTipo } from '../registro.js';
+import { registrarAcao, registrarTipo, registrarEvento } from '../registro.js';
 import { ferramentaNoCinto, ferramentaNoSuporte } from './posses.js';
 
 // o regador que a ação usaria: o do cinto; sem ele, o do suporte (a personagem vai buscar)
@@ -30,5 +30,6 @@ registrarTipo({
     if (f.agua >= cap) return { acao: null, texto: 'regador-cheio' };
     return { acao: 'encher', dados: { agua: f.agua, capacidade: cap } };
   },
-  visual: () => ({ chave: 'objeto/poco' }),
 });
+
+registrarEvento('encheu', { campos: ['item', 'n', 'agua', 'entidade'] });

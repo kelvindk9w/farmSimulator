@@ -19,5 +19,6 @@ Gere uma imagem e salve na pasta atual como `modelo-seu-tonho.png`:
 - Fundo transparente de verdade (canal alfa). Sem chão, sem sombra, sem cenário, sem números, sem texto, sem setas, sem linhas de grade, sem moldura.
 - As figuras inteiras dentro da imagem, bem separadas por vãos vazios largos, sem cortar nada. Imagem larga (proporção perto de 3 por 2).
 - Arte original; não imite nenhum personagem nem jogo existente.
+- Gere cada imagem UMA vez só. Cor que sobra em pixels totalmente transparentes (um "halo" que só aparece para quem ignora o canal alfa) não é defeito: não refaça nem retoque por causa disso.
 
 No fim, liste os arquivos que salvou.

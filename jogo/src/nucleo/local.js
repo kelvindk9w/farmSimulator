@@ -19,6 +19,7 @@ export class Local {
     this.porId = {};
     this.porNum = [null]; // número → entidade (o número 0 é "ninguém")
     this.entrada = [0.5, 0.5]; // onde a personagem aparece ao entrar
+    this.versao = 0; // sobe a cada entidade posta ou tirada (o desenho refaz as suas listas quando muda)
   }
 
   dentro(x, z) { return x >= 0 && z >= 0 && x < this.l && z < this.p; }
@@ -45,6 +46,7 @@ export class Local {
     this.porNum.push(e);
     this.porId[e.id] = e;
     this.entidades.push(e);
+    this.versao++;
     if (t.bloqueia) for (let z = e.z; z < e.z + e.p; z++) for (let x = e.x; x < e.x + e.l; x++) if (this.dentro(x, z)) this.ocupa[this.i(x, z)] = e.num;
     return e;
   }
@@ -52,10 +54,11 @@ export class Local {
   tirar(id) {
     const e = this.porId[id];
     if (!e) return null;
-    for (let i = 0; i < this.ocupa.length; i++) if (this.ocupa[i] === e.num) this.ocupa[i] = 0;
+    for (let z = e.z; z < e.z + e.p; z++) for (let x = e.x; x < e.x + e.l; x++) if (this.dentro(x, z) && this.ocupa[this.i(x, z)] === e.num) this.ocupa[this.i(x, z)] = 0;
     this.porNum[e.num] = null;
     delete this.porId[id];
     this.entidades.splice(this.entidades.indexOf(e), 1);
+    this.versao++;
     return e;
   }
 

@@ -19,5 +19,6 @@ Regras:
 - Fundo transparente de verdade (canal alfa). Sem moldura, sem círculo atrás, sem cenário, sem balão, sem texto.
 - Tudo inteiro dentro da imagem, com folga transparente em toda a volta.
 - Arte original; não imite nenhum personagem nem jogo existente.
+- Gere cada imagem UMA vez só. Cor que sobra em pixels totalmente transparentes (um "halo" que só aparece para quem ignora o canal alfa) não é defeito: não refaça nem retoque por causa disso.
 
 No fim, liste os arquivos que salvou.

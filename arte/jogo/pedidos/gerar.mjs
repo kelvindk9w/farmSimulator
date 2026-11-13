@@ -202,6 +202,110 @@ for (const vista of ['frente', 'costas']) {
   });
 }
 
+// ---------- bichos ----------
+
+const B_VISTA = {
+  frente: 'de FRENTE três quartos, exatamente como a primeira figura da folha de modelo: o corpo virado para a esquerda de quem olha e para a câmera, a cara aparece',
+  costas: 'de COSTAS três quartos, exatamente como a segunda figura da folha de modelo: o corpo virado para o fundo e para a direita de quem olha; a traseira fica em primeiro plano e a cabeça lá na frente, vista de trás',
+};
+// Folha de um bicho. plantado: as patas não saem do lugar (parada, ciscar, pastar); senão é um ciclo de andar.
+function bicho({ nome, artigo = 'a', modelo, igual, arquivo, titulo, n, quadros, vivo, vista, plantado, refs = [], semObjeto = '' }) {
+  return `${CABECA}
+- \`referencias/${modelo}.png\`: a FOLHA DE MODELO d${artigo} ${nome} (parad${artigo} de frente três quartos, de costas três quartos e de perfil). Ela manda nas proporções, nas cores e nos detalhes.
+${refs.join('\n')}${refs.length ? '\n' : ''}
+Preciso da folha de animação d${artigo} MESM${artigo.toUpperCase()} ${nome} ${titulo}, vist${artigo} ${vista === 'frente' ? 'de FRENTE' : 'de COSTAS'} três quartos, para usar como figura 2D animada dentro do jogo.
+
+Gere uma imagem e salve na pasta atual como \`${arquivo}\`:
+
+- Uma única fileira horizontal com ${n} quadros, da esquerda para a direita, nesta ordem:
+${quadros.map((q, i) => `  ${i + 1}. ${q}`).join('\n')}
+- ${vivo}
+- Em todos os quadros el${artigo} é vist${artigo} pela mesma câmera da cena (isométrica, de cima), ${B_VISTA[vista]}. ${plantado ? `El${artigo} NÃO sai do lugar: as patas ficam plantadas no mesmo ponto em todos os quadros.` : `El${artigo} anda nessa direção (${P_RUMO[vista]}) sem sair do lugar.`}
+- Os ${n} quadros têm ${artigo} ${nome} do MESMO tamanho (o corpo tem o mesmo tamanho em todos), sobre a mesma linha de base, igualmente espaçados, cada um centrado numa casa de mesma largura, com um vão vazio entre um quadro e o outro (nenhum quadro encosta no vizinho).
+- É ${artigo} MESM${artigo.toUpperCase()} ${nome} da folha de modelo em todos os quadros: ${igual} Mesmas cores chapadas, mesmo traço escuro grosso.
+${semObjeto ? `- ${semObjeto}\n` : ''}- ${LIMPO}
+${FIM}
+`;
+}
+
+const GALINHA = { nome: 'galinha', modelo: 'galinha', igual: 'corpo branco gordinho, crista e barbela vermelhas, bico amarelo-alaranjado, olho preto, asa marcada, rabo curto erguido, pernas finas amarelo-alaranjadas.' };
+const VACA = { nome: 'vaca', modelo: 'vaca', igual: 'branca com as MESMAS manchas pretas nos mesmos lugares, focinho rosa, chifres curtos, orelhas para os lados, úbere rosa, rabo com tufo preto, cascos cinza-escuros.' };
+const ANDAR4 = (b) => [
+  `PASSO 1: a pata da frente do lado da câmera avança e toca o chão; a pata de trás do outro lado avança junto. As outras duas ficam para trás, empurrando.`,
+  `PESO: o corpo passa por cima das patas apoiadas e desce um pouco; as patas que estavam atrás saem do chão.`,
+  `PASSAGEM: as duas patas no ar passam dobradas embaixo do corpo; o lombo sobe um pouco.`,
+  `ESTICA: as patas no ar se esticam para a frente, quase tocando o chão.`,
+  `PASSO 2: agora é a pata da frente do lado de lá que toca o chão à frente, junto com a pata de trás do lado da câmera.`,
+  `PESO do outro lado: o corpo desce um pouco.`,
+  `PASSAGEM do outro lado: as outras duas patas passam dobradas embaixo do corpo.`,
+  `ESTICA do outro lado. O quadro 8 emenda no quadro 1.`,
+];
+for (const vista of ['frente', 'costas']) {
+  const fmt = (b, n) => (vista === 'costas' ? [`- \`referencias/${n}-frente.png\`: a folha de animação já pronta da mesma ação vista de frente (dá o formato da folha, o tamanho e o jeito do movimento; aqui o bicho é visto de costas).`] : []);
+  pedidos[`galinha-parada-${vista}`] = bicho({
+    ...GALINHA, arquivo: `parada-${vista}.png`, titulo: 'PARADA, olhando em volta', vista, n: 4, plantado: true,
+    quadros: [
+      'DESCANSO: em pé, igual à folha de modelo, bico fechado.',
+      'ESPICHA: o pescoço estica e a cabeça vai para a frente e para cima, atenta; o rabo sobe um pouco.',
+      'VIRA: a cabeça vira de lado e inclina, olhando com um olho só, do jeito das galinhas.',
+      'AFOFA: a cabeça volta, o corpo se abaixa um tiquinho e as penas afofam (o corpo fica um pouco mais redondo); olho fechado (uma linha curva).',
+    ],
+    vivo: 'Movimentos curtos e secos de galinha: só o pescoço, a cabeça, o rabo e as penas se mexem; o corpo quase não sai do lugar e as duas patas ficam plantadas.',
+  });
+  pedidos[`galinha-andar-${vista}`] = bicho({
+    ...GALINHA, arquivo: `andar-${vista}.png`, titulo: 'ANDANDO', vista, n: 6, refs: fmt('galinha', 'andar'),
+    quadros: [
+      'CONTATO: uma pata esticada à frente, tocando o chão; a outra atrás. A cabeça está recuada, junto ao corpo.',
+      'PESO: o corpo passa por cima da pata da frente e desce um pouco; a cabeça avança num tranco para a frente.',
+      'PASSAGEM: a pata de trás sobe dobrada, com os dedos fechados, e passa ao lado da outra; a cabeça fica esticada à frente.',
+      'CONTATO do outro lado: a outra pata esticada à frente, tocando o chão. A cabeça recua.',
+      'PESO do outro lado: o corpo desce um pouco; a cabeça avança num tranco.',
+      'PASSAGEM do outro lado: a pata de trás sobe dobrada e passa. O quadro 6 emenda no quadro 1.',
+    ],
+    vivo: 'Andar de galinha, engraçado e vivo: a cabeça vai e vem a cada passo (avança, para, avança), o corpo gingando de um lado para o outro, o rabo balançando, as patas subindo bem dobradas.',
+  });
+  pedidos[`galinha-ciscar-${vista}`] = bicho({
+    ...GALINHA, arquivo: `ciscar-${vista}.png`, titulo: 'CISCANDO E BICANDO O CHÃO', vista, n: 6, plantado: true, refs: fmt('galinha', 'ciscar'),
+    quadros: [
+      'OLHA: em pé, a cabeça inclinada para baixo, olhando o chão à frente.',
+      'CISCA 1: uma pata risca o chão para trás (a perna estica para trás, dedos abertos); o corpo se inclina para a frente.',
+      'CISCA 2: a outra pata risca o chão para trás; o corpo balança para o outro lado.',
+      'ABAIXA: o corpo tomba para a frente, o rabo sobe bem alto, o pescoço desce.',
+      'BICA: o bico toca o chão logo à frente das patas; o rabo é o ponto mais alto do corpo.',
+      'LEVANTA: a cabeça sobe com o bico entreaberto, engolindo; o corpo volta a ficar reto. Emenda no quadro 1.',
+    ],
+    vivo: 'Movimento vivo: o corpo inteiro tomba para a frente na bicada (cabeça embaixo, rabo em cima) e volta.',
+    semObjeto: 'NÃO desenhe milho, grãos, minhoca, terra voando nem buraco: só a galinha.',
+  });
+  pedidos[`vaca-parada-${vista}`] = bicho({
+    ...VACA, arquivo: `parada-${vista}.png`, titulo: 'PARADA, ruminando', vista, n: 4, plantado: true,
+    quadros: [
+      'DESCANSO: em pé nas quatro patas, igual à folha de modelo, cabeça erguida, rabo caído.',
+      'RUMINA: a boca mastiga de lado (o queixo vai para um lado); uma orelha abaixa; o rabo começa a balançar para um lado.',
+      'RESPIRA: a barriga enche um pouco, a cabeça sobe um tiquinho; o rabo no alto do balanço, com o tufo para o lado.',
+      'PISCA: os olhos fechados (uma linha curva), o queixo mastiga para o outro lado; a outra orelha abana; o rabo volta.',
+    ],
+    vivo: 'É uma vaca calma, mas viva: mastiga, pisca, abana as orelhas e o rabo, a barriga respira. As quatro patas ficam plantadas e o corpo não sai do lugar.',
+  });
+  pedidos[`vaca-andar-${vista}`] = bicho({
+    ...VACA, arquivo: `andar-${vista}.png`, titulo: 'ANDANDO', vista, n: 8, quadros: ANDAR4(), refs: fmt('vaca', 'andar'),
+    vivo: 'Andar pesado e calmo de vaca: as patas em diagonal andam juntas, a cabeça balança para cima e para baixo a cada passo, o lombo sobe e desce de leve, o rabo balança de um lado para o outro, o úbere balança.',
+  });
+  pedidos[`vaca-pastar-${vista}`] = bicho({
+    ...VACA, arquivo: `pastar-${vista}.png`, titulo: 'PASTANDO', vista, n: 6, plantado: true, refs: fmt('vaca', 'pastar'),
+    quadros: [
+      'COMEÇA: em pé, a cabeça começa a descer, o pescoço se estica para a frente e para baixo.',
+      'DESCE: a cabeça na altura dos joelhos, o focinho apontando para o chão.',
+      'MORDE: o focinho encosta no chão logo à frente das patas da frente; a boca aberta.',
+      'ARRANCA: a boca fecha e a cabeça dá um puxão curto para o lado e para cima, ainda perto do chão; o rabo balança.',
+      'MASTIGA: a cabeça sobe até a altura dos joelhos, o queixo mastiga de lado; uma orelha abana.',
+      'SOBE: a cabeça volta a subir, mastigando. Emenda no quadro 1.',
+    ],
+    vivo: 'Só o pescoço, a cabeça, as orelhas e o rabo se mexem; o corpo balança de leve para a frente quando a cabeça desce.',
+    semObjeto: 'NÃO desenhe capim, folhas, chão nem cocho: só a vaca.',
+  });
+}
+
 const quais = process.argv.slice(2);
 for (const [nome, texto] of Object.entries(pedidos)) {
   if (quais.length && !quais.includes(nome)) continue;

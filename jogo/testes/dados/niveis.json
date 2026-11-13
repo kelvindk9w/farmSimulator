@@ -1,0 +1,4 @@
+{
+  "xp": [0, 10, 30, 80],
+  "recompensas": { "2": { "ouro": 15, "cash": 1, "itens": { "semente-milho": 2 } }, "3": { "ouro": 30 } }
+}

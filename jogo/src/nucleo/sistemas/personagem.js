@@ -57,7 +57,8 @@ function pontoDeParada(m, p, t) {
   cand.length = 0;
   if (t.entidade !== undefined) {
     const e = loc.porId[t.entidade], tipo = TIPOS[e.tipo];
-    if (tipo.pontos && tipo.pontos.ficar) for (const [dx, dz] of tipo.pontos.ficar) cand.push([e.x + dx, e.z + dz]);
+    const ficar = tipo.pontos && tipo.pontos.ficar ? (typeof tipo.pontos.ficar === 'function' ? tipo.pontos.ficar(e) : tipo.pontos.ficar) : null;
+    if (ficar) for (const [dx, dz] of ficar) cand.push([e.x + dx, e.z + dz]);
     else {
       for (let x = e.x; x < e.x + e.l; x++) cand.push([x + 0.5, e.z - 0.5], [x + 0.5, e.z + e.p + 0.5]);
       for (let z = e.z; z < e.z + e.p; z++) cand.push([e.x - 0.5, z + 0.5], [e.x + e.l + 0.5, z + 0.5]);
@@ -88,7 +89,11 @@ function comecarAcao(m, p, t) {
   const a = ACOES[t.acao], r = a.pode(m, t, t.args);
   p.rota = null; p.vel = 0; p.correndo = false;
   if (!r.ok) { falhar(m, p, t, r); p.tarefa = null; return; }
-  const dur = m.dados.regras.acoes[a.id] || a.dur;
+  // a ferramenta da ação e a ajudante (se estiver no cinto) mudam a duração: "rapidez" 0.75 = um quarto mais rápida
+  let dur = m.dados.regras.acoes[a.id] || a.dur;
+  const fer = a.ferramenta && ferramentaNoCinto(m, a.ferramenta), aju = a.ajudante && ferramentaNoCinto(m, a.ajudante);
+  if (fer) dur *= m.dados.itens[fer].rapidez;
+  if (aju) dur *= m.dados.itens[aju].rapidez;
   const efeito = (a.efeitoEm === null ? 0.6 : a.efeitoEm / a.dur) * dur;
   centroDoAlvo(m, p, t, centro);
   if (Math.hypot(centro[0] - p.x, centro[1] - p.z) > 0.05) p.rumo = rumoPara(p.x, p.z, centro[0], centro[1]);
@@ -131,6 +136,7 @@ function avancarAcao(m, p) {
     const r = a.pode(m, t, t.args);
     if (!r.ok) { falhar(m, p, t, r); p.acao = null; p.tarefa = null; return; }
     if (a.ferramenta) usarFerramenta(m, ferramentaNoCinto(m, a.ferramenta));
+    if (a.ajudante && ferramentaNoCinto(m, a.ajudante)) usarFerramenta(m, ferramentaNoCinto(m, a.ajudante));
     ac.feito = true;
     a.aoEfeito(m, t, t.args);
     const xp = m.dados.regras.xp[a.id];
@@ -326,6 +332,7 @@ registrarSistema({
         return { ok: false, motivo: 'terra-a-venda' };
       }
       const modo = MODOS[m.modo.id], d = modo.acaoNaCasa(m, x, z);
+      if (d && d.texto === 'na-fila') return { ok: true, repetida: true }; // já prometida: o toque repetido não muda nada
       if (d && d.acao) return enfileirar(m, { tipo: 'agir', acao: d.acao, x, z, args: d.args || null });
       if (d && d.texto && (d.falta || (modo.id !== 'mao' && !c.arrasto))) {
         m.eventos.emitir('faltou', { motivo: d.texto, dados: d.dados, x, z });

@@ -1,0 +1,7 @@
+{
+  "vizinho": [
+    { "id": "arar-2", "titulo": "Prepare a terra", "fala": "Passe a enxada em duas casas.", "objetivo": { "evento": "arou", "n": 2 }, "recompensa": { "ouro": 5 }, "ensina": "enxada" },
+    { "id": "colher-rabanete", "titulo": "Primeira colheita", "fala": "Colha quatro rabanetes.", "objetivo": { "evento": "colheu", "filtro": { "item": "rabanete" }, "n": 4 }, "recompensa": { "ouro": 10, "xp": 6, "itens": { "semente-rabanete": 2 } }, "ensina": "colher" },
+    { "id": "vender", "titulo": "Venda na banca", "fala": "Leve a colheita para a banca.", "objetivo": { "evento": "vendeu", "n": 1 }, "recompensa": { "cash": 1 }, "ensina": "banca" }
+  ]
+}

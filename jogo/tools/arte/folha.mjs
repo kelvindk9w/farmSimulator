@@ -16,8 +16,9 @@
 //                         molde: os quadros são casados com um pedaço de um quadro de partida (pés plantados: enxadar, colher,
 //                         regar; bichos). Serve quando a ferramenta ou a cabeça descem abaixo dos pés.
 //   --eixo cabeca|massa|caixa   no ciclo, de onde sai o eixo do corpo (padrão cabeca: o quarto de cima da figura)
-//   --base quadro|linha   no ciclo: o chão é o ponto mais baixo de cada quadro (padrão) ou o mais baixo da linha inteira
-//                         (corrida e pulo, em que há quadros com os dois pés no ar)
+//   --base quadro|linha|k no ciclo: o chão é o ponto mais baixo de cada quadro (padrão) ou o mais baixo da linha inteira
+//                         (corrida e pulo, em que há quadros com os dois pés no ar); um número k entre 0 e 1 mistura os dois
+//                         (0.5 no andar: guarda o sobe e desce desenhado sem deixar os pés longe do chão)
 //   --molde a-b           no molde: faixa do quadro de partida usada para casar, em fração da altura (padrão 0.80-1: as botas)
 //   --molde-quadro k|ref  quadro de partida do molde (padrão 1; "ref" usa a figura de referência)
 //   --faixa-pes f         faixa de baixo do quadro de partida que dá o meio dos pés (padrão 0.08; bichos de 4 patas: 0.25)
@@ -28,6 +29,10 @@
 //   --altura-fonte n      altura da figura em pé na folha crua, quando não há referência nem serve o quadro mais alto
 //   --em-pe-quadro k      sem referência: o quadro k é a figura em pé (parada: o quadro 1)
 //   --fator-max f         sem referência: o quadro mais alto vale f vezes a figura em pé (padrão 1)
+//   --tamanho-cor t       a escala sai do tamanho da cor de referência (raiz da área, em pontos de saída), medido na figura de
+//                         referência ou, sem ela, na mediana dos quadros. Na personagem a cor é o vermelho do lenço e o alvo
+//                         vem da folha de modelo: 47.5 de frente e 48.7 de costas. A escala final é a média geométrica entre
+//                         a da altura e a da cor (--peso-cor 0.5), para nem a altura nem a cabeça destoarem entre folhas.
 //   --ajuste f            multiplica a escala (acerto fino depois de comparar com outra folha)
 //   --altura-livre        a altura muda de propósito (agachar, erguer a ferramenta): a variação é só informada
 //   --soltas juntar|apagar  peças soltas da figura (padrão juntar ao quadro mais próximo; ciscos sempre saem)
@@ -292,7 +297,17 @@ async function principal() {
   const ref = o.ref ? recortes[0] : null, quadros = o.ref ? recortes.slice(1) : recortes;
   const maiorAltura = Math.max(...quadros.map((f) => f.th));
   const emPeFonte = o['altura-fonte'] ? Number(o['altura-fonte']) : ref ? ref.th : o['em-pe-quadro'] ? quadros[Number(o['em-pe-quadro']) - 1].th : maiorAltura / Number(o['fator-max'] || 1);
-  const esc = (emPe / emPeFonte) * Number(o.ajuste || 1);
+  const cor = o['cor-ref'] ? o['cor-ref'].split(',').map(Number) : cam.grupo === 'personagem' ? [236, 40, 40] : null;
+  let esc = emPe / emPeFonte, emPeReal = emPe;
+  if (o['tamanho-cor']) { // a escala vem do tamanho da cor de referência (o lenço), que tem de bater com o da folha de modelo
+    if (!cor) throw new Error('--tamanho-cor pede uma cor de referência (--cor-ref)');
+    const tam = (ref ? [ref] : quadros).map((f) => Math.sqrt(areaDaCor(f, cor, 80))).sort((a, b) => a - b), med = tam[tam.length >> 1];
+    if (!med) throw new Error('a cor de referência não aparece na folha');
+    const peso = Number(o['peso-cor'] ?? 0.5); // meio a meio: nem a altura nem a cabeça destoam das outras folhas
+    esc = (emPe / emPeFonte) ** (1 - peso) * (Number(o['tamanho-cor']) / med) ** peso; emPeReal = emPeFonte * esc;
+    if (peso < 1 && Math.abs(Number(o['tamanho-cor']) / med / (emPe / emPeFonte) - 1) > 0.08) avisos.push(`a proporção entre cabeça e corpo difere ${(Math.abs(Number(o['tamanho-cor']) / med / (emPe / emPeFonte) - 1) * 100).toFixed(0)}% da folha de modelo`);
+  }
+  esc *= Number(o.ajuste || 1);
   if (esc > 1.02) avisos.push(`a folha crua é menor que a saída (figura em pé com ${emPeFonte.toFixed(0)} pontos para ${emPe}): a figura foi ampliada ${esc.toFixed(2)} vezes`);
 
   // 4. alinhamento: para cada quadro, o ponto de apoio em x (ax) e a linha do chão (by), em pontos do recorte
@@ -310,15 +325,16 @@ async function principal() {
       const m = casar(molde, f, emPeFonte);
       f.ax = m.ox + (part.ax - cx.x0); f.by = m.oy + (part.by - cx.y0); custos.push(Math.round(m.c));
     }
-    const ruins = custos.map((c, i) => (c > 150 ? i + 1 : 0)).filter(Boolean);
+    const ruins = custos.map((c, i) => (c > 220 ? i + 1 : 0)).filter(Boolean);
     if (ruins.length) avisos.push(`alinhamento incerto pelo molde nos quadros ${ruins.join(', ')} (custos ${custos.join(' ')}): olhe a sobreposição na tira`);
   } else {
     const eixo = o.eixo || 'cabeca';
     const baseLinha = {}; for (const f of quadros) baseLinha[f.linha] = Math.max(baseLinha[f.linha] || 0, f.baixoFonte);
+    const mistura = o.base === 'linha' ? 1 : !o.base || o.base === 'quadro' ? 0 : Number(o.base);
     let soma = 0;
     for (const f of quadros) {
       f.eixo = eixo === 'massa' ? centroX(f, 0, 1) : eixo === 'caixa' ? f.tx0 + f.tw / 2 : centroX(f, 0, 0.28);
-      f.by = o.base === 'linha' ? baseLinha[f.linha] - f.Y0 : f.ty0 + f.th;
+      f.by = f.ty0 + f.th + mistura * (baseLinha[f.linha] - f.Y0 - (f.ty0 + f.th));
       const pes = caixa(f, 0.8, 1); soma += (pes.x0 + pes.x1) / 2 - f.eixo;
     }
     const dx = o['apoio-dx'] !== undefined ? Number(o['apoio-dx']) / esc : soma / quadros.length;
@@ -355,7 +371,6 @@ async function principal() {
   // 7. conferências
   const alturas = quadros.map((f) => f.th * esc), aMax = Math.max(...alturas), aMin = Math.min(...alturas), varAlt = (aMax - aMin) / aMax;
   if (varAlt > 0.03) (o['altura-livre'] ? avisos : falhas).push(`altura varia ${(varAlt * 100).toFixed(1)}% entre quadros (${alturas.map((a) => a.toFixed(0)).join(' ')})${o['altura-livre'] ? ', esperado nesta ação' : ''}`);
-  const cor = o['cor-ref'] ? o['cor-ref'].split(',').map(Number) : cam.grupo === 'personagem' ? [236, 40, 40] : null;
   let tamCor = null;
   if (cor) {
     tamCor = quadros.map((f) => Math.sqrt(areaDaCor(f, cor, 80)) * esc);
@@ -413,7 +428,7 @@ async function principal() {
   // medidas
   const medidas = {
     chave: o.chave, crua: path.basename(crua), cruaTamanho: [W, H], linhasNaCrua: nLinhas, figurasNaCrua: recortes.length, referencia: !!ref, modo,
-    emPe, emPeFonte: Math.round(emPeFonte), escala: Number(esc.toFixed(4)), casa: [cw, ch], apoio, quadros: seq.length, desenhos: n, qps: entrada.qps, laco: entrada.laco,
+    emPe, emPeReal: Math.round(emPeReal), emPeFonte: Math.round(emPeFonte), escala: Number(esc.toFixed(4)), casa: [cw, ch], apoio, quadros: seq.length, desenhos: n, qps: entrada.qps, laco: entrada.laco,
     alturas: alturas.map((a) => Math.round(a)), variacaoAltura: Number((varAlt * 100).toFixed(1)), tamanhoPelaCor: tamCor ? tamCor.map((t) => Number(t.toFixed(1))) : undefined,
     custosDoMolde: custos.length ? custos : undefined, bytes: folha.length, avisos, falhas, ok,
     opcoes: Object.fromEntries(Object.entries(o).filter(([k]) => k !== '_' && k !== 'ensaio')),
@@ -425,7 +440,7 @@ async function principal() {
 
   // relato
   console.log(`${o.chave}: ${recortes.length} figura(s) em ${nLinhas} linha(s) na folha crua de ${W}x${H}${ref ? ', a primeira é a referência em pé' : ''}`);
-  console.log(`  figura em pé: ${emPeFonte.toFixed(0)} pontos na crua -> ${emPe} (escala ${esc.toFixed(3)}); casa ${cw}x${ch}; apoio ${apoio.join(',')}; ${seq.length} quadro(s) de ${n} desenho(s); ${(folha.length / 1024).toFixed(0)} KB`);
+  console.log(`  figura em pé: ${emPeFonte.toFixed(0)} pontos na crua -> ${(emPeFonte * esc).toFixed(0)} (escala ${esc.toFixed(3)}); casa ${cw}x${ch}; apoio ${apoio.join(',')}; ${seq.length} quadro(s) de ${n} desenho(s); ${(folha.length / 1024).toFixed(0)} KB`);
   console.log(`  alturas: ${alturas.map((a) => a.toFixed(0)).join(' ')} (variação ${(varAlt * 100).toFixed(1)}%)`);
   if (tamCor) console.log(`  tamanho pela cor: ${tamCor.map((t) => t.toFixed(1)).join(' ')}`);
   if (custos.length) console.log(`  custos do molde: ${custos.join(' ')}`);

@@ -1,7 +1,7 @@
 // O celeiro visto de fora (M1): um toque guarda o que está no cesto; com o cesto vazio, um toque pega de volta
 // (para vender). É nele que fica o suporte de ferramentas: a personagem vai até ele buscar a que não está no cinto.
 // A casa também mora aqui, por enquanto só como construção.
-import { registrarAcao, registrarTipo } from '../registro.js';
+import { registrarAcao, registrarTipo, registrarEvento } from '../registro.js';
 import { somar } from '../util.js';
 import { noCesto, espacoNoCesto, noCeleiro, espacoNoCeleiro, ferramentaNoCinto, ferramentaNoSuporte, pegarDoSuporte } from './posses.js';
 import { filaTem } from './personagem.js';
@@ -64,18 +64,20 @@ registrarAcao({
 
 registrarTipo({
   tipo: 'celeiro', casas: [5, 4], bloqueia: true, suporte: true,
-  pontos: { ficar: [[2.5, 4.5]] }, // diante da porta, na face de +Z (a que olha para a câmera, à esquerda)
+  pontos: { ficar: (e) => [[e.l / 2, e.p + 0.5]] }, // diante da porta, no meio da face de +Z (a que olha para a câmera, à esquerda)
   acaoPossivel(m) {
     if (noCesto(m) > 0 || filaTem(m, 'colher')) return espacoNoCeleiro(m) > 0 ? { acao: 'guardar', dados: { n: noCesto(m), livre: espacoNoCeleiro(m) } } : { acao: null, texto: 'celeiro-cheio' };
     if (noCeleiro(m) > 0) return { acao: 'pegar', dados: { n: noCeleiro(m) } };
     return { acao: null, texto: 'celeiro-vazio' };
   },
-  visual: () => ({ chave: 'objeto/celeiro' }),
 });
 
 registrarTipo({
-  tipo: 'casa', casas: [4, 4], bloqueia: true,
-  pontos: { ficar: [[2, 4.5]] },
+  tipo: 'casa', casas: [4, 3], bloqueia: true,
+  pontos: { ficar: (e) => [[e.l / 2, e.p + 0.5]] },
   acaoPossivel: () => ({ acao: null, texto: 'sua-casa' }),
-  visual: () => ({ chave: 'objeto/casa' }),
 });
+
+registrarEvento('guardou', { campos: ['itens', 'n', 'entidade'] });
+registrarEvento('pegou', { campos: ['itens', 'n', 'entidade'] });
+registrarEvento('pegouFerramenta', { campos: ['item', 'guardou', 'entidade'] });

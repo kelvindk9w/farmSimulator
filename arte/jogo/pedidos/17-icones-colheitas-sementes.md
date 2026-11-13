@@ -5,20 +5,25 @@ A imagem anexa (`referencias/var-2-contorno.png`) é a cena de um jogo de fazend
 Gere UMA imagem quadrada e salve na pasta atual como `icones-colheitas.png`. Nela, DEZESSEIS ícones numa grade de 4 colunas por 4 linhas.
 
 Linha 1 (colheitas), da esquerda para a direita:
-1. Uma espiga de MILHO amarela com a palha verde aberta.
-2. FEIJÃO: duas vagens bege, uma delas aberta mostrando os grãos marrons.
-3. Um pé de ALFACE crespa verde-clara.
+1. Um pé de ALFACE crespa verde-clara.
+2. Uma espiga de MILHO amarela com a palha verde aberta.
+3. FEIJÃO: duas vagens bege, uma delas aberta mostrando os grãos marrons.
 4. Um TOMATE vermelho com o cabinho verde.
 
 Linha 2 (colheitas):
-5. Uma CENOURA laranja com a rama verde.
-6. Uma ABÓBORA laranja de gomos com o cabinho.
-7. MANDIOCA: duas raízes marrons compridas, uma cortada mostrando o miolo branco.
-8. Duas BATATAS bege-douradas.
+5. Uma ABÓBORA laranja de gomos com o cabinho.
+6. ARROZ: um feixe de cachos de arroz dourados, amarrado no meio.
+7. CANA-DE-AÇÚCAR: três pedaços de cana (colmos de gomos, amarelo-esverdeados) amarrados juntos.
+8. MANDIOCA: duas raízes marrons compridas, uma cortada mostrando o miolo branco.
 
-Linhas 3 e 4 (sementes): OITO SAQUINHOS DE SEMENTES, todos iguais na forma (saquinho de papel pardo em pé, com a boca dobrada e amarrada com um barbante), cada um com o desenho grande e colorido da planta na frente, na mesma ordem das colheitas:
-9. saquinho com o desenho da espiga de milho; 10. com o desenho do feijão; 11. com o desenho da alface; 12. com o desenho do tomate;
-13. com o desenho da cenoura; 14. com o desenho da abóbora; 15. com o desenho da mandioca; 16. com o desenho da batata.
+Linha 3 (sementes): SAQUINHOS DE SEMENTES, todos iguais na forma (saquinho de papel pardo em pé, com a boca dobrada e amarrada com um barbante), cada um com o desenho grande e colorido da planta na frente:
+9. saquinho com o desenho da alface; 10. com o desenho da espiga de milho; 11. com o desenho do feijão; 12. com o desenho do tomate.
+
+Linha 4 (sementes e mudas de plantar):
+13. saquinho igual aos outros, com o desenho da abóbora;
+14. saquinho igual aos outros, com o desenho do cacho de arroz;
+15. TOLETES DE CANA: três pedaços curtos de cana, cada um com um brotinho verde nascendo do nó;
+16. MANIVAS DE MANDIOCA: um feixe de quatro pedaços curtos de caule marrom-acinzentado com gemas, amarrado com barbante.
 
 Regras:
 - Cada ícone é UM objeto só, grande, simples e gordinho, visto de frente e um pouco de cima, que se reconhece mesmo bem pequeno (32 pixels): formas claras, poucas minúcias.
@@ -27,5 +32,6 @@ Regras:
 - Fundo transparente de verdade (canal alfa). Sem quadrado, círculo ou moldura atrás do ícone, sem sombra no chão, sem texto, sem letras, sem números, sem linhas de grade.
 - Tudo inteiro dentro da imagem, com folga transparente em toda a volta. Imagem quadrada.
 - Arte original; não imite nenhum jogo existente e não use nenhuma marca.
+- Gere cada imagem UMA vez só. Cor que sobra em pixels totalmente transparentes (um "halo" que só aparece para quem ignora o canal alfa) não é defeito: não refaça nem retoque por causa disso.
 
 No fim, liste os arquivos que salvou.

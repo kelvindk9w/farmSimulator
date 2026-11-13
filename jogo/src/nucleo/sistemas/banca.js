@@ -1,5 +1,5 @@
 // A banca na porteira: sempre compra, pelo preço base de cada item (campo "venda" de itens.json).
-import { registrarAcao, registrarTipo } from '../registro.js';
+import { registrarAcao, registrarTipo, registrarEvento } from '../registro.js';
 import { ganharOuro, noCesto, valorDoCesto } from './posses.js';
 import { filaTem } from './personagem.js';
 
@@ -27,5 +27,7 @@ registrarTipo({
     if (noCesto(m) > 0 || filaTem(m, 'colher') || filaTem(m, 'pegar')) return { acao: 'vender', dados: { ouro: valorDoCesto(m), n: noCesto(m) } };
     return { acao: null, texto: 'cesto-vazio' };
   },
-  visual: () => ({ chave: 'objeto/banca' }),
 });
+
+registrarEvento('vendeu', { campos: ['item', 'n', 'ouro', 'entidade'] });
+registrarEvento('vendeuTudo', { campos: ['n', 'ouro', 'entidade'] });

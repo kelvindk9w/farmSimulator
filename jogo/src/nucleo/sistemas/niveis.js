@@ -1,6 +1,6 @@
 // Experiência e níveis. Subir de nível dá a recompensa de niveis.json e avisa o que foi liberado
 // (tudo que tem "nivel": n nos outros arquivos de dados).
-import { registrarSistema } from '../registro.js';
+import { registrarSistema, registrarEvento } from '../registro.js';
 import { liberaNoNivel } from '../dados.js';
 import { darRecompensa } from './posses.js';
 
@@ -36,3 +36,6 @@ registrarSistema({
     m.progresso.nivel = Math.max(1, Math.min(N.max, d.nivel || 1));
   },
 });
+
+registrarEvento('ganhouXp', { campos: ['n', 'origem'] });
+registrarEvento('subiuDeNivel', { campos: ['nivel', 'recompensa', 'liberou'] });

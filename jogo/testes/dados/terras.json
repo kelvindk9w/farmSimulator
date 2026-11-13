@@ -1,0 +1,8 @@
+{
+  "mapa": { "largura": 24, "profundidade": 24 },
+  "inicial": { "area": [4, 4, 20, 20] },
+  "lotes": [ { "id": "lote-leste", "nome": "Lote do leste", "area": [20, 4, 24, 20], "preco": 100, "nivel": 2 } ],
+  "pontos": { "casa": [4, 4], "celeiro": [9, 4], "poco": [15, 5], "banca": [17, 9], "personagem": [10.5, 10.5] },
+  "caminhos": [ [4, 9, 20, 10] ],
+  "natureza": { "mata": 0.05, "mato": 0.05, "pedra": 0.02, "toco": 0.02 }
+}

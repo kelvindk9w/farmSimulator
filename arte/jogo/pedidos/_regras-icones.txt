@@ -5,5 +5,6 @@ Regras:
 - Fundo transparente de verdade (canal alfa). Sem quadrado, círculo ou moldura atrás do ícone, sem sombra no chão, sem texto, sem letras, sem números, sem linhas de grade.
 - Tudo inteiro dentro da imagem, com folga transparente em toda a volta. Imagem quadrada.
 - Arte original; não imite nenhum jogo existente e não use nenhuma marca.
+- Gere cada imagem UMA vez só. Cor que sobra em pixels totalmente transparentes (um "halo" que só aparece para quem ignora o canal alfa) não é defeito: não refaça nem retoque por causa disso.
 
 No fim, liste os arquivos que salvou.

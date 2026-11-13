@@ -4,6 +4,7 @@
 //   registrarTipo     tipos de entidade do terreno (poço, celeiro, árvore, animal...)
 //   registrarModo     botões da barra de modo (mão, enxada, semear, regar...)
 //   registrarAutomatico  o que o modo "mão" faz sozinho numa casa (regar o que tem sede, colher o que está pronto...)
+//   registrarEvento   os eventos que a lógica emite e os campos que cada um leva (as missões só valem se o evento existir)
 // Os contratos de cada um estão em docs/jogo/ARQUITETURA.md.
 
 export const SISTEMAS = []; // na ordem de registro (é a ordem de iniciar, do passo e de carregar)
@@ -11,6 +12,7 @@ export const ACOES = {};
 export const TIPOS = {};
 export const MODOS = {};
 export const AUTOMATICOS = [];
+export const EVENTOS = {};
 
 function unico(mapa, id, o, oque) {
   if (!id) throw new Error(`${oque} sem id`);
@@ -27,18 +29,19 @@ export function registrarSistema(s) {
 // { id, ferramenta, dur, efeitoEm, estadoVisual, pode(mundo, alvo, args) → { ok, motivo, dados, limpar }, aoEfeito(mundo, alvo, args) }
 //   alvo = { x, z } (uma casa) ou { entidade } (uma entidade do local da personagem)
 //   ferramenta = função da ferramenta que tem de estar no cinto ("enxada", "regador"); sem ela, a personagem busca no celeiro
+//   ajudante = função de uma ferramenta que não é obrigatória mas apressa a ação se estiver no cinto ("plantadeira")
 //   dur e efeitoEm em segundos; regras.json pode trocar a duração (campo acoes.<id>)
 export function registrarAcao(a) {
   unico(ACOES, a.id, a, 'ação');
-  ACOES[a.id] = { dur: 0.8, efeitoEm: null, estadoVisual: 'trabalhar', ferramenta: null, pode: () => ({ ok: true }), ...a };
+  ACOES[a.id] = { dur: 0.8, efeitoEm: null, estadoVisual: 'trabalhar', ferramenta: null, ajudante: null, pode: () => ({ ok: true }), ...a };
   return ACOES[a.id];
 }
 
-// { tipo, casas: [l, p], bloqueia, pontos: { ficar: [[dx, dz], ...] }, acaoPossivel(mundo, e) → { acao, texto, dados, args },
-//   visual(mundo, e) → { chave, quadro | fase, espelhar, extras } }
+// { tipo, casas: [l, p], bloqueia, pontos: { ficar: [[dx, dz], ...] | (e) => [[dx, dz], ...] }, acaoPossivel(mundo, e) → { acao, texto, dados, args },
+//   visual(mundo, e, v) → preenche e devolve v: { chave, quadro | fase, espelhar, variante } (não aloca: v é reaproveitado) }
 export function registrarTipo(t) {
   unico(TIPOS, t.tipo, t, 'tipo de entidade');
-  TIPOS[t.tipo] = { casas: [1, 1], bloqueia: true, pontos: null, acaoPossivel: () => ({ acao: null, texto: null }), visual: (m, e) => ({ chave: 'objeto/' + e.tipo }), ...t };
+  TIPOS[t.tipo] = { casas: [1, 1], bloqueia: true, pontos: null, acaoPossivel: () => ({ acao: null, texto: null }), visual: (m, e, v) => { v.chave = 'objeto/' + e.tipo; v.variante = e.v || 0; return v; }, ...t };
   return TIPOS[t.tipo];
 }
 
@@ -53,3 +56,11 @@ export function modosEmOrdem() { return Object.values(MODOS).sort((a, b) => a.or
 
 // fn(mundo, x, z) → { acao, args, texto } | null. O modo "mão" pergunta a cada um, na ordem de registro.
 export function registrarAutomatico(fn) { AUTOMATICOS.push(fn); }
+
+// nome, { campos: ['item', 'n', ...], aceita(dados, filtro) → bool }
+//   campos = o que o evento leva (o filtro de uma missão só pode usar estes); "aceita" recusa filtros que este jogo
+//   ainda não sabe cumprir (plantar uma muda quando só existe lavoura, por exemplo). Uma missão cujo evento não está
+//   registrado, ou cujo filtro não é aceito, fica para depois: não trava a sequência.
+export function registrarEvento(nome, def = {}) {
+  EVENTOS[nome] = { campos: def.campos || [], aceita: def.aceita || null };
+}

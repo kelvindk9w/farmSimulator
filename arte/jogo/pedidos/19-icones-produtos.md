@@ -5,28 +5,28 @@ A imagem anexa (`referencias/var-2-contorno.png`) é a cena de um jogo de fazend
 Gere UMA imagem quadrada e salve na pasta atual como `icones-produtos.png`. Nela, DEZESSEIS ícones numa grade de 4 colunas por 4 linhas.
 
 Linha 1, da esquerda para a direita:
-1. TÁBUA: três tábuas de madeira serrada empilhadas.
-2. PREGO: três pregos de ferro cruzados.
-3. FIBRA: um feixe de capim seco amarrado no meio com um barbante.
-4. Um OVO branco.
+1. FIBRA: um feixe de capim seco amarrado no meio com um barbante.
+2. MADEIRA: três toras curtas empilhadas, com os anéis aparecendo nas pontas.
+3. PEDRA: três pedras cinza de construção empilhadas.
+4. TÁBUA: três tábuas de madeira serrada empilhadas.
 
 Linha 2:
-5. LEITE: uma garrafa de vidro cheia de leite, com tampa.
-6. LÃ: um chumaço fofo de lã branca.
-7. QUEIJO: um queijo redondo amarelo-claro com uma fatia cortada.
-8. MANTEIGA: um tablete de manteiga amarela num pratinho.
+5. PREGO: três pregos de ferro cruzados.
+6. Um OVO branco.
+7. LEITE: um balde de metal cheio de leite branco.
+8. LÃ: um chumaço fofo de lã branca.
 
 Linha 3:
 9. FUBÁ: um saquinho de pano aberto, cheio de farinha amarela de milho.
 10. RAÇÃO: um saco de estopa aberto, cheio de grãos misturados, com uma pazinha.
-11. PÃO DE MILHO: uma broa redonda dourada, com um pedaço cortado mostrando o miolo amarelo.
-12. Um CADEADO de ferro fechado.
+11. QUEIJO MINAS: um queijo redondo e branco, com uma fatia cortada.
+12. MANTEIGA: um tablete de manteiga amarela num pratinho.
 
 Linha 4:
-13. Um RELÓGIO despertador redondo (só os ponteiros, sem números).
-14. Uma SACOLA DE COMPRAS de pano bege com duas alças, com uma folha verde desenhada.
-15. Uma MOCHILA de couro marrom com fivela.
-16. MISSÃO: um pergaminho meio enrolado com três risquinhos e um sinal de visto verde.
+13. DÚZIA DE OVOS: uma cartela de papelão fechada, com a tampa abaulada.
+14. GARRAFA DE LEITE: uma garrafa de vidro cheia de leite, com tampa.
+15. Um cacho de BANANAS amarelas.
+16. Uma LARANJA com uma folha verde.
 
 Regras:
 - Cada ícone é UM objeto só, grande, simples e gordinho, visto de frente e um pouco de cima, que se reconhece mesmo bem pequeno (32 pixels): formas claras, poucas minúcias.
@@ -35,5 +35,6 @@ Regras:
 - Fundo transparente de verdade (canal alfa). Sem quadrado, círculo ou moldura atrás do ícone, sem sombra no chão, sem texto, sem letras, sem números, sem linhas de grade.
 - Tudo inteiro dentro da imagem, com folga transparente em toda a volta. Imagem quadrada.
 - Arte original; não imite nenhum jogo existente e não use nenhuma marca.
+- Gere cada imagem UMA vez só. Cor que sobra em pixels totalmente transparentes (um "halo" que só aparece para quem ignora o canal alfa) não é defeito: não refaça nem retoque por causa disso.
 
 No fim, liste os arquivos que salvou.

@@ -1,0 +1,4 @@
+{
+  "rabanete": { "nome": "Rabanete", "semente": "semente-rabanete", "produto": "rabanete", "rende": 2, "tempoSeg": 60, "estagios": 4, "regas": 1, "xp": 3, "nivel": 1 },
+  "milho": { "nome": "Milho", "semente": "semente-milho", "produto": "milho", "rende": 3, "tempoSeg": 600, "estagios": 5, "regas": 2, "xp": 8, "nivel": 2 }
+}

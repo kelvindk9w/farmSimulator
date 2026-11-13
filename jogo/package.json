@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "node build.mjs",
-    "testar": "node --test testes/",
+    "testar": "node --test \"testes/*.test.mjs\"",
     "verificar": "node tools/verificar.mjs",
     "bot": "node tools/bot.mjs",
     "servir": "node tools/servir.mjs dist 8091",

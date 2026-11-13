@@ -2,7 +2,7 @@
 // Regra da água: a cultura pede "regas" regas até ficar pronta. Cada rega molha a terra e faz a planta crescer
 // um trecho (tempoSeg / regas); acabou o trecho, a terra seca e a planta espera a próxima rega. Nunca morre.
 // O crescimento guarda instantes absolutos (secaEm), então o tempo fora do jogo se resolve por conta, sem simular.
-import { registrarSistema, registrarAcao, registrarModo, registrarAutomatico } from '../registro.js';
+import { registrarSistema, registrarAcao, registrarModo, registrarAutomatico, registrarEvento } from '../registro.js';
 import { GRAMA, ARADA } from '../local.js';
 import { somar } from '../util.js';
 import { espacoNoCesto, porNoCesto, ferramentaNoCinto } from './posses.js';
@@ -84,7 +84,7 @@ registrarAcao({
 });
 
 registrarAcao({
-  id: 'semear', dur: 0.7, efeitoEm: 0.45, estadoVisual: 'semear',
+  id: 'semear', ajudante: 'plantadeira', dur: 0.7, efeitoEm: 0.45, estadoVisual: 'semear',
   pode(m, alvo, args) {
     const loc = m.local, i = idx(m, alvo), s = args && args.semente, c = m.dados.culturas[m.dados.culturaDaSemente[s]];
     if (!c) return NAO('sem-semente-escolhida', null, true);
@@ -141,6 +141,7 @@ registrarAcao({
     porNoCesto(m, c.produto, c.rende);
     loc.plantas[i] = null;
     loc.plantadas.splice(loc.plantadas.indexOf(i), 1);
+    if (m.dados.regras.reararAposColher) loc.chao[i] = GRAMA; // a casa volta a pedir enxada antes de plantar de novo
     m.eventos.emitir('chaoMudou', { local: loc.id, x: alvo.x, z: alvo.z });
     m.eventos.emitir('colheu', { cultura: c.id, item: c.produto, n: c.rende, x: alvo.x, z: alvo.z });
     darXp(m, c.xp, 'colher');
@@ -187,10 +188,17 @@ registrarModo({
     const pl = loc.plantas[i];
     if (!pl) return filaTem(m, 'semear', x, z) ? { acao: 'regar' } : loc.chao[i] === ARADA ? { acao: null, texto: 'nada-para-regar' } : null;
     const e = estadoDaPlanta(m, pl);
-    if (e === 'sede') return filaTem(m, 'regar', x, z) ? { acao: null, texto: 'na-fila' } : { acao: 'regar' };
+    if (e === 'sede') return filaTem(m, 'regar', x, z) ? { acao: null, texto: 'na-fila' } : semAgua(m) ? { acao: null, texto: 'regador-vazio', falta: true } : { acao: 'regar' };
     return { acao: null, texto: e === 'pronta' ? 'ja-pronta' : 'ja-regada', dados: { cultura: pl.cultura, seg: segundosDeAgua(m, pl) } };
   },
 });
+
+// o regador do cinto não tem água para mais uma rega além das que já estão na fila? (com ida ao poço na fila, tem)
+function semAgua(m) {
+  const reg = ferramentaNoCinto(m, 'regador');
+  if (!reg || filaTem(m, 'encher')) return false; // sem regador no cinto ela vai buscar; a conta se faz lá
+  return m.posses.ferramentas[reg].agua - contarNaFila(m, 'regar') <= 0;
+}
 
 // modo "mão": rega o que tem sede, colhe o que está pronto
 registrarAutomatico((m, x, z) => {
@@ -200,9 +208,16 @@ registrarAutomatico((m, x, z) => {
   if (!pl) return loc.chao[i] === ARADA ? { acao: null, texto: 'terra-arada-vazia' } : null;
   const e = estadoDaPlanta(m, pl);
   if (e === 'pronta') return { acao: 'colher', dados: { cultura: pl.cultura } };
-  if (e === 'sede') return { acao: 'regar', dados: { cultura: pl.cultura } };
+  if (e === 'sede') return filaTem(m, 'regar', x, z) ? { acao: null, texto: 'na-fila' } : semAgua(m) ? { acao: null, texto: 'regador-vazio', falta: true } : { acao: 'regar', dados: { cultura: pl.cultura } };
   return { acao: null, texto: 'crescendo', dados: { cultura: pl.cultura, seg: segundosDeAgua(m, pl) } };
 });
+
+registrarEvento('arou', { campos: ['x', 'z'] });
+registrarEvento('plantou', { campos: ['cultura', 'item', 'x', 'z'], aceita: (dados, f) => naLista(f.item, (s) => !!dados.culturaDaSemente[s]) && naLista(f.cultura, (c) => !!dados.culturas[c]) });
+registrarEvento('regou', { campos: ['cultura', 'x', 'z', 'agua'] });
+registrarEvento('colheu', { campos: ['cultura', 'item', 'n', 'x', 'z'], aceita: (dados, f) => naLista(f.item, (it) => Object.values(dados.culturas).some((c) => c.produto === it)) && naLista(f.cultura, (c) => !!dados.culturas[c]) });
+// o valor pedido pelo filtro (um só ou uma lista de "qualquer um destes") existe para este jogo?
+function naLista(v, existe) { return v === undefined || (Array.isArray(v) ? v.some(existe) : existe(v)); }
 
 registrarSistema({
   id: 'lavoura',
