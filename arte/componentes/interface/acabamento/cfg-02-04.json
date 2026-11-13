@@ -1,0 +1,164 @@
+[
+ {
+  "arquivo": "interface-pecas-02/botoes-acao.png",
+  "pecas": [
+   {
+    "nome": "botao-verde-normal",
+    "fator": 0.72,
+    "familia": "botao",
+    "forma": true,
+    "so": "h"
+   },
+   {
+    "nome": "botao-verde-apertado",
+    "fator": 0.72,
+    "familia": "botao",
+    "forma": true,
+    "so": "h"
+   },
+   {
+    "nome": "botao-turquesa-normal",
+    "fator": 0.72,
+    "familia": "botao",
+    "forma": true,
+    "so": "h"
+   },
+   {
+    "nome": "botao-turquesa-apertado",
+    "fator": 0.72,
+    "familia": "botao",
+    "forma": true,
+    "so": "h"
+   },
+   {
+    "nome": "botao-verde-desativado",
+    "fator": 0.72,
+    "familia": "botao",
+    "forma": true,
+    "so": "h"
+   },
+   {
+    "nome": "botao-marrom",
+    "fator": 0.72,
+    "familia": "botao",
+    "forma": true,
+    "so": "h"
+   }
+  ]
+ },
+ {
+  "arquivo": "interface-pecas-03/botoes-quadrados.png",
+  "passo": 200,
+  "pecas": [
+   {
+    "nome": "botao-hud-normal",
+    "fator": 0.6,
+    "achatar": true,
+    "familia": "hud",
+    "so": "h",
+    "fatias": {
+     "topo": 84,
+     "baixo": 66,
+     "esquerda": 66,
+     "direita": 66
+    },
+    "tol_achatar": 55
+   },
+   {
+    "nome": "botao-hud-apertado",
+    "fator": 0.6,
+    "achatar": true,
+    "familia": "hud",
+    "so": "h",
+    "fatias": {
+     "topo": 84,
+     "baixo": 66,
+     "esquerda": 66,
+     "direita": 66
+    },
+    "tol_achatar": 55
+   },
+   {
+    "nome": "botao-hud-selecionado",
+    "fator": 0.6,
+    "familia": "hud",
+    "so": "h",
+    "fatias": {
+     "topo": 84,
+     "baixo": 66,
+     "esquerda": 66,
+     "direita": 66
+    }
+   },
+   {
+    "nome": "aba-normal",
+    "fator": 0.6,
+    "familia": "aba",
+    "fatias": {
+     "topo": 48,
+     "baixo": 12,
+     "esquerda": 54,
+     "direita": 54
+    },
+    "so": "h"
+   },
+   {
+    "nome": "aba-selecionada",
+    "fator": 0.6,
+    "achatar": true,
+    "familia": "aba",
+    "fatias": {
+     "topo": 48,
+     "baixo": 12,
+     "esquerda": 54,
+     "direita": 54
+    },
+    "so": "h"
+   }
+  ]
+ },
+ {
+  "arquivo": "interface-pecas-04/cartoes.png",
+  "passo": 200,
+  "pecas": [
+   {
+    "nome": "cartao-item-normal",
+    "fator": 0.9,
+    "achatar": true,
+    "familia": "cartao-item"
+   },
+   {
+    "nome": "cartao-item-travado",
+    "fator": 0.9,
+    "achatar": true,
+    "familia": "cartao-item"
+   },
+   {
+    "nome": "cartao-dia-aberto",
+    "fator": 0.85,
+    "achatar": true,
+    "familia": "cartao-dia"
+   },
+   {
+    "nome": "cartao-dia-hoje",
+    "fator": 0.85,
+    "folga": 30,
+    "achatar": true,
+    "familia": "cartao-dia",
+    "brilho": true
+   },
+   {
+    "nome": "cartao-dia-futuro",
+    "fator": 0.85,
+    "achatar": true,
+    "familia": "cartao-dia"
+   },
+   {
+    "nome": "cartao-dia-especial",
+    "fator": 0.85,
+    "achatar": true,
+    "familia": "cartao-dia"
+   }
+  ]
+ }
+]

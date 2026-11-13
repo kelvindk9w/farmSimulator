@@ -1,0 +1,1402 @@
+{
+ "escala": "3 px da imagem = 1 px do CSS no celular deitado (844 x 390). Fatia de 84 px na imagem = borda de 28 px no CSS.",
+ "pasta_no_jogo": "jogo/arte/interface/molduras/",
+ "como_usar_9_fatias": "border-image com \"fill\" e \"stretch\": os quatro cantos ficam como estão, os lados e o miolo esticam. border-image-width = fatias / 3. A espessura de border-width (o que empurra o conteúdo) pode ser menor que border-image-width; use padding para afastar o texto da moldura. Peças \"só largura\" (pílula, aviso, botões compridos, barra, fita) têm a altura certa em altura_css: use essa altura.",
+ "estados": "Os estados de uma família (normal, apertado, desativado...) têm o mesmo tamanho e as mesmas fatias: troque só o url().",
+ "margem": "Molduras sem margem transparente (a borda da imagem é a borda da peça). Peças fixas aparadas rente ao desenho.",
+ "pecas": {
+  "painel": {
+   "arquivo": "painel.png",
+   "largura": 192,
+   "altura": 195,
+   "tipo": "9 fatias",
+   "familia": "painel",
+   "estados_da_familia": "normal",
+   "uso": "Fundo de todos os painéis (loja, presente, mochila, construir, subiu de nível).",
+   "tamanho_no_celular_css": "livre",
+   "estica": "largura e altura",
+   "apoio": [
+    96,
+    97
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 84,
+    "direita": 84,
+    "baixo": 87,
+    "esquerda": 84
+   },
+   "borda_css": {
+    "topo": 28,
+    "direita": 28,
+    "baixo": 29,
+    "esquerda": 28
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/painel.png) 84 84 87 84 fill / 28px 28px 29px 28px stretch;",
+   "origem": "interface-pecas-01/paineis.png"
+  },
+  "painel-moldura": {
+   "arquivo": "painel-moldura.png",
+   "largura": 192,
+   "altura": 195,
+   "tipo": "9 fatias",
+   "familia": "painel-moldura",
+   "estados_da_familia": "normal",
+   "uso": "Só a moldura do painel, sem miolo: para pôr por cima de outro fundo.",
+   "tamanho_no_celular_css": "livre",
+   "estica": "largura e altura",
+   "apoio": [
+    96,
+    97
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 84,
+    "direita": 84,
+    "baixo": 87,
+    "esquerda": 84
+   },
+   "borda_css": {
+    "topo": 28,
+    "direita": 28,
+    "baixo": 29,
+    "esquerda": 28
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/painel-moldura.png) 84 84 87 84 fill / 28px 28px 29px 28px stretch;",
+   "origem": "interface-pecas-01/paineis.png (painel sem o miolo)"
+  },
+  "painel-fundo": {
+   "arquivo": "painel-fundo.png",
+   "largura": 124,
+   "altura": 118,
+   "tipo": "9 fatias",
+   "familia": "painel-fundo",
+   "estados_da_familia": "normal",
+   "uso": "Só o miolo creme do painel: área de dentro (atrás das abas e dos cartões).",
+   "tamanho_no_celular_css": "livre",
+   "estica": "largura e altura",
+   "apoio": [
+    62,
+    59
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 48,
+    "direita": 51,
+    "baixo": 48,
+    "esquerda": 51
+   },
+   "borda_css": {
+    "topo": 16,
+    "direita": 17,
+    "baixo": 16,
+    "esquerda": 17
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/painel-fundo.png) 48 51 48 51 fill / 16px 17px 16px 17px stretch;",
+   "origem": "interface-pecas-01/paineis.png (miolo do painel)"
+  },
+  "menu-lista": {
+   "arquivo": "menu-lista.png",
+   "largura": 183,
+   "altura": 159,
+   "tipo": "9 fatias",
+   "familia": "menu-lista",
+   "estados_da_familia": "normal",
+   "uso": "Lista que desce do botão Menu; o biquinho fica no canto de cima, à direita.",
+   "tamanho_no_celular_css": "livre",
+   "estica": "largura e altura",
+   "apoio": [
+    91,
+    79
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 81,
+    "direita": 108,
+    "baixo": 54,
+    "esquerda": 51
+   },
+   "borda_css": {
+    "topo": 27,
+    "direita": 36,
+    "baixo": 18,
+    "esquerda": 17
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/menu-lista.png) 81 108 54 51 fill / 27px 36px 18px 17px stretch;",
+   "origem": "interface-pecas-01/paineis.png"
+  },
+  "balao": {
+   "arquivo": "balao.png",
+   "largura": 156,
+   "altura": 153,
+   "tipo": "9 fatias",
+   "familia": "balao",
+   "estados_da_familia": "normal",
+   "uso": "Balão do vizinho (retrato, título, fala e barra vão por cima, no HTML).",
+   "tamanho_no_celular_css": "livre (~95 de altura)",
+   "estica": "largura e altura",
+   "apoio": [
+    78,
+    76
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 63,
+    "direita": 66,
+    "baixo": 66,
+    "esquerda": 66
+   },
+   "borda_css": {
+    "topo": 21,
+    "direita": 22,
+    "baixo": 22,
+    "esquerda": 22
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/balao.png) 63 66 66 66 fill / 21px 22px 22px 22px stretch;",
+   "origem": "interface-pecas-01/paineis.png"
+  },
+  "pilula": {
+   "arquivo": "pilula.png",
+   "largura": 132,
+   "altura": 109,
+   "tipo": "9 fatias",
+   "familia": "pilula",
+   "estados_da_familia": "normal",
+   "uso": "Pílula do HUD (ouro, cash, cesto, água, experiência) e de recompensa.",
+   "tamanho_no_celular_css": "36 de altura",
+   "estica": "só largura",
+   "apoio": [
+    66,
+    54
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 54,
+    "direita": 54,
+    "baixo": 54,
+    "esquerda": 54
+   },
+   "borda_css": {
+    "topo": 18,
+    "direita": 18,
+    "baixo": 18,
+    "esquerda": 18
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/pilula.png) 54 54 54 54 fill / 18px 18px 18px 18px stretch;",
+   "altura_css": 36,
+   "origem": "interface-pecas-01/paineis.png"
+  },
+  "aviso": {
+   "arquivo": "aviso.png",
+   "largura": 114,
+   "altura": 86,
+   "tipo": "9 fatias",
+   "familia": "aviso",
+   "estados_da_familia": "normal",
+   "uso": "Aviso curto (toast) do alto da tela; o visto e o texto vão por cima.",
+   "tamanho_no_celular_css": "28 de altura",
+   "estica": "só largura",
+   "apoio": [
+    57,
+    43
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 45,
+    "direita": 45,
+    "baixo": 42,
+    "esquerda": 45
+   },
+   "borda_css": {
+    "topo": 15,
+    "direita": 15,
+    "baixo": 14,
+    "esquerda": 15
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/aviso.png) 45 45 42 45 fill / 15px 15px 14px 15px stretch;",
+   "altura_css": 29,
+   "origem": "interface-pecas-01/paineis.png"
+  },
+  "cabecalho": {
+   "arquivo": "cabecalho.png",
+   "largura": 797,
+   "altura": 136,
+   "tipo": "9 fatias",
+   "familia": "cabecalho",
+   "estados_da_familia": "normal",
+   "uso": "Tábua do título do painel (\"Presente do dia\"), com os dois pregos.",
+   "tamanho_no_celular_css": "45 de altura",
+   "estica": "só largura",
+   "apoio": [
+    398,
+    68
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 66,
+    "direita": 84,
+    "baixo": 66,
+    "esquerda": 84
+   },
+   "borda_css": {
+    "topo": 22,
+    "direita": 28,
+    "baixo": 22,
+    "esquerda": 28
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/cabecalho.png) 66 84 66 84 fill / 22px 28px 22px 28px stretch;",
+   "altura_css": 45,
+   "origem": "interface-pecas-06/compridas.png"
+  },
+  "botao-verde-normal": {
+   "arquivo": "botao-verde-normal.png",
+   "largura": 132,
+   "altura": 130,
+   "tipo": "9 fatias",
+   "familia": "botao-verde",
+   "estados_da_familia": "normal, apertado, desativado",
+   "uso": "Botão de ação principal e de preço em ouro (Comprar, Receber, Continuar).",
+   "tamanho_no_celular_css": "43 de altura (até ~55)",
+   "estica": "largura e altura",
+   "apoio": [
+    66,
+    65
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 54,
+    "direita": 54,
+    "baixo": 45,
+    "esquerda": 54
+   },
+   "borda_css": {
+    "topo": 18,
+    "direita": 18,
+    "baixo": 15,
+    "esquerda": 18
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/botao-verde-normal.png) 54 54 45 54 fill / 18px 18px 15px 18px stretch;",
+   "origem": "interface-pecas-02/botoes-acao.png"
+  },
+  "botao-verde-apertado": {
+   "arquivo": "botao-verde-apertado.png",
+   "largura": 132,
+   "altura": 130,
+   "tipo": "9 fatias",
+   "familia": "botao-verde",
+   "estados_da_familia": "normal, apertado, desativado",
+   "uso": "Botão de ação principal e de preço em ouro (Comprar, Receber, Continuar).",
+   "tamanho_no_celular_css": "43 de altura (até ~55)",
+   "estica": "largura e altura",
+   "apoio": [
+    66,
+    65
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 54,
+    "direita": 54,
+    "baixo": 45,
+    "esquerda": 54
+   },
+   "borda_css": {
+    "topo": 18,
+    "direita": 18,
+    "baixo": 15,
+    "esquerda": 18
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/botao-verde-apertado.png) 54 54 45 54 fill / 18px 18px 15px 18px stretch;",
+   "origem": "interface-pecas-02/botoes-acao.png"
+  },
+  "botao-verde-desativado": {
+   "arquivo": "botao-verde-desativado.png",
+   "largura": 132,
+   "altura": 130,
+   "tipo": "9 fatias",
+   "familia": "botao-verde",
+   "estados_da_familia": "normal, apertado, desativado",
+   "uso": "Botão de ação principal e de preço em ouro (Comprar, Receber, Continuar).",
+   "tamanho_no_celular_css": "43 de altura (até ~55)",
+   "estica": "largura e altura",
+   "apoio": [
+    66,
+    65
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 54,
+    "direita": 54,
+    "baixo": 45,
+    "esquerda": 54
+   },
+   "borda_css": {
+    "topo": 18,
+    "direita": 18,
+    "baixo": 15,
+    "esquerda": 18
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/botao-verde-desativado.png) 54 54 45 54 fill / 18px 18px 15px 18px stretch;",
+   "origem": "interface-pecas-02/botoes-acao.png"
+  },
+  "botao-turquesa-normal": {
+   "arquivo": "botao-turquesa-normal.png",
+   "largura": 132,
+   "altura": 130,
+   "tipo": "9 fatias",
+   "familia": "botao-turquesa",
+   "estados_da_familia": "normal, apertado",
+   "uso": "Botão de preço em cash.",
+   "tamanho_no_celular_css": "43 de altura",
+   "estica": "largura e altura",
+   "apoio": [
+    66,
+    65
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 54,
+    "direita": 54,
+    "baixo": 45,
+    "esquerda": 54
+   },
+   "borda_css": {
+    "topo": 18,
+    "direita": 18,
+    "baixo": 15,
+    "esquerda": 18
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/botao-turquesa-normal.png) 54 54 45 54 fill / 18px 18px 15px 18px stretch;",
+   "origem": "interface-pecas-02/botoes-acao.png"
+  },
+  "botao-turquesa-apertado": {
+   "arquivo": "botao-turquesa-apertado.png",
+   "largura": 132,
+   "altura": 130,
+   "tipo": "9 fatias",
+   "familia": "botao-turquesa",
+   "estados_da_familia": "normal, apertado",
+   "uso": "Botão de preço em cash.",
+   "tamanho_no_celular_css": "43 de altura",
+   "estica": "largura e altura",
+   "apoio": [
+    66,
+    65
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 54,
+    "direita": 54,
+    "baixo": 45,
+    "esquerda": 54
+   },
+   "borda_css": {
+    "topo": 18,
+    "direita": 18,
+    "baixo": 15,
+    "esquerda": 18
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/botao-turquesa-apertado.png) 54 54 45 54 fill / 18px 18px 15px 18px stretch;",
+   "origem": "interface-pecas-02/botoes-acao.png"
+  },
+  "botao-marrom": {
+   "arquivo": "botao-marrom.png",
+   "largura": 132,
+   "altura": 130,
+   "tipo": "9 fatias",
+   "familia": "botao-marrom",
+   "estados_da_familia": "normal",
+   "uso": "Botão travado (\"Nível 6\").",
+   "tamanho_no_celular_css": "43 de altura",
+   "estica": "largura e altura",
+   "apoio": [
+    66,
+    65
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 54,
+    "direita": 54,
+    "baixo": 45,
+    "esquerda": 54
+   },
+   "borda_css": {
+    "topo": 18,
+    "direita": 18,
+    "baixo": 15,
+    "esquerda": 18
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/botao-marrom.png) 54 54 45 54 fill / 18px 18px 15px 18px stretch;",
+   "origem": "interface-pecas-02/botoes-acao.png"
+  },
+  "botao-hud-normal": {
+   "arquivo": "botao-hud-normal.png",
+   "largura": 156,
+   "altura": 238,
+   "tipo": "9 fatias",
+   "familia": "botao-hud",
+   "estados_da_familia": "normal, apertado, selecionado",
+   "uso": "Botão quadrado do HUD (Mochila, Loja, Construir, Menu) e da barra de ferramentas; também o botão creme de ação secundária.",
+   "tamanho_no_celular_css": "55 a 70",
+   "estica": "largura e altura",
+   "apoio": [
+    78,
+    119
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 84,
+    "direita": 66,
+    "baixo": 66,
+    "esquerda": 66
+   },
+   "borda_css": {
+    "topo": 28,
+    "direita": 22,
+    "baixo": 22,
+    "esquerda": 22
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/botao-hud-normal.png) 84 66 66 66 fill / 28px 22px 22px 22px stretch;",
+   "origem": "interface-pecas-03/botoes-quadrados.png"
+  },
+  "botao-hud-apertado": {
+   "arquivo": "botao-hud-apertado.png",
+   "largura": 156,
+   "altura": 238,
+   "tipo": "9 fatias",
+   "familia": "botao-hud",
+   "estados_da_familia": "normal, apertado, selecionado",
+   "uso": "Botão quadrado do HUD (Mochila, Loja, Construir, Menu) e da barra de ferramentas; também o botão creme de ação secundária.",
+   "tamanho_no_celular_css": "55 a 70",
+   "estica": "largura e altura",
+   "apoio": [
+    78,
+    119
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 84,
+    "direita": 66,
+    "baixo": 66,
+    "esquerda": 66
+   },
+   "borda_css": {
+    "topo": 28,
+    "direita": 22,
+    "baixo": 22,
+    "esquerda": 22
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/botao-hud-apertado.png) 84 66 66 66 fill / 28px 22px 22px 22px stretch;",
+   "origem": "interface-pecas-03/botoes-quadrados.png"
+  },
+  "botao-hud-selecionado": {
+   "arquivo": "botao-hud-selecionado.png",
+   "largura": 156,
+   "altura": 238,
+   "tipo": "9 fatias",
+   "familia": "botao-hud",
+   "estados_da_familia": "normal, apertado, selecionado",
+   "uso": "Botão quadrado do HUD (Mochila, Loja, Construir, Menu) e da barra de ferramentas; também o botão creme de ação secundária.",
+   "tamanho_no_celular_css": "55 a 70",
+   "estica": "largura e altura",
+   "apoio": [
+    78,
+    119
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 84,
+    "direita": 66,
+    "baixo": 66,
+    "esquerda": 66
+   },
+   "borda_css": {
+    "topo": 28,
+    "direita": 22,
+    "baixo": 22,
+    "esquerda": 22
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/botao-hud-selecionado.png) 84 66 66 66 fill / 28px 22px 22px 22px stretch;",
+   "origem": "interface-pecas-03/botoes-quadrados.png"
+  },
+  "aba-normal": {
+   "arquivo": "aba-normal.png",
+   "largura": 132,
+   "altura": 128,
+   "tipo": "9 fatias",
+   "familia": "aba",
+   "estados_da_familia": "normal, selecionada",
+   "uso": "Aba da loja; a selecionada é aberta embaixo e encosta no miolo do painel.",
+   "tamanho_no_celular_css": "43 de altura",
+   "estica": "largura e altura",
+   "apoio": [
+    66,
+    64
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 48,
+    "direita": 54,
+    "baixo": 12,
+    "esquerda": 54
+   },
+   "borda_css": {
+    "topo": 16,
+    "direita": 18,
+    "baixo": 4,
+    "esquerda": 18
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/aba-normal.png) 48 54 12 54 fill / 16px 18px 4px 18px stretch;",
+   "origem": "interface-pecas-03/botoes-quadrados.png"
+  },
+  "aba-selecionada": {
+   "arquivo": "aba-selecionada.png",
+   "largura": 132,
+   "altura": 128,
+   "tipo": "9 fatias",
+   "familia": "aba",
+   "estados_da_familia": "normal, selecionada",
+   "uso": "Aba da loja; a selecionada é aberta embaixo e encosta no miolo do painel.",
+   "tamanho_no_celular_css": "43 de altura",
+   "estica": "largura e altura",
+   "apoio": [
+    66,
+    64
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 48,
+    "direita": 54,
+    "baixo": 12,
+    "esquerda": 54
+   },
+   "borda_css": {
+    "topo": 16,
+    "direita": 18,
+    "baixo": 4,
+    "esquerda": 18
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/aba-selecionada.png) 48 54 12 54 fill / 16px 18px 4px 18px stretch;",
+   "origem": "interface-pecas-03/botoes-quadrados.png"
+  },
+  "cartao-item-normal": {
+   "arquivo": "cartao-item-normal.png",
+   "largura": 144,
+   "altura": 147,
+   "tipo": "9 fatias",
+   "familia": "cartao-item",
+   "estados_da_familia": "normal, travado",
+   "uso": "Cartão de item da loja.",
+   "tamanho_no_celular_css": "livre (~125 de altura)",
+   "estica": "largura e altura",
+   "apoio": [
+    72,
+    73
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 63,
+    "direita": 60,
+    "baixo": 60,
+    "esquerda": 60
+   },
+   "borda_css": {
+    "topo": 21,
+    "direita": 20,
+    "baixo": 20,
+    "esquerda": 20
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/cartao-item-normal.png) 63 60 60 60 fill / 21px 20px 20px 20px stretch;",
+   "origem": "interface-pecas-04/cartoes.png"
+  },
+  "cartao-item-travado": {
+   "arquivo": "cartao-item-travado.png",
+   "largura": 144,
+   "altura": 147,
+   "tipo": "9 fatias",
+   "familia": "cartao-item",
+   "estados_da_familia": "normal, travado",
+   "uso": "Cartão de item da loja.",
+   "tamanho_no_celular_css": "livre (~125 de altura)",
+   "estica": "largura e altura",
+   "apoio": [
+    72,
+    73
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 63,
+    "direita": 60,
+    "baixo": 60,
+    "esquerda": 60
+   },
+   "borda_css": {
+    "topo": 21,
+    "direita": 20,
+    "baixo": 20,
+    "esquerda": 20
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/cartao-item-travado.png) 63 60 60 60 fill / 21px 20px 20px 20px stretch;",
+   "origem": "interface-pecas-04/cartoes.png"
+  },
+  "cartao-dia-aberto": {
+   "arquivo": "cartao-dia-aberto.png",
+   "largura": 120,
+   "altura": 177,
+   "tipo": "9 fatias",
+   "familia": "cartao-dia",
+   "estados_da_familia": "aberto, hoje, futuro, especial",
+   "uso": "Cartão do dia do presente; o \"hoje\" tem brilho para fora (use border-image-outset).",
+   "tamanho_no_celular_css": "livre (~150 de altura)",
+   "estica": "largura e altura",
+   "apoio": [
+    60,
+    88
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 54,
+    "direita": 48,
+    "baixo": 99,
+    "esquerda": 48
+   },
+   "borda_css": {
+    "topo": 18,
+    "direita": 16,
+    "baixo": 33,
+    "esquerda": 16
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/cartao-dia-aberto.png) 54 48 99 48 fill / 18px 16px 33px 16px stretch;",
+   "origem": "interface-pecas-04/cartoes.png"
+  },
+  "cartao-dia-hoje": {
+   "arquivo": "cartao-dia-hoje.png",
+   "largura": 162,
+   "altura": 231,
+   "tipo": "9 fatias",
+   "familia": "cartao-dia",
+   "estados_da_familia": "aberto, hoje, futuro, especial",
+   "uso": "Cartão do dia do presente; o \"hoje\" tem brilho para fora (use border-image-outset).",
+   "tamanho_no_celular_css": "livre (~150 de altura)",
+   "estica": "largura e altura",
+   "apoio": [
+    81,
+    115
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 81,
+    "direita": 69,
+    "baixo": 126,
+    "esquerda": 69
+   },
+   "borda_css": {
+    "topo": 27,
+    "direita": 23,
+    "baixo": 42,
+    "esquerda": 23
+   },
+   "fora": {
+    "x": 21,
+    "y": 27
+   },
+   "fora_css": {
+    "x": 7,
+    "y": 9
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/cartao-dia-hoje.png) 81 69 126 69 fill / 27px 23px 42px 23px / 9px 7px stretch;",
+   "origem": "interface-pecas-04/cartoes.png"
+  },
+  "cartao-dia-futuro": {
+   "arquivo": "cartao-dia-futuro.png",
+   "largura": 120,
+   "altura": 177,
+   "tipo": "9 fatias",
+   "familia": "cartao-dia",
+   "estados_da_familia": "aberto, hoje, futuro, especial",
+   "uso": "Cartão do dia do presente; o \"hoje\" tem brilho para fora (use border-image-outset).",
+   "tamanho_no_celular_css": "livre (~150 de altura)",
+   "estica": "largura e altura",
+   "apoio": [
+    60,
+    88
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 54,
+    "direita": 48,
+    "baixo": 99,
+    "esquerda": 48
+   },
+   "borda_css": {
+    "topo": 18,
+    "direita": 16,
+    "baixo": 33,
+    "esquerda": 16
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/cartao-dia-futuro.png) 54 48 99 48 fill / 18px 16px 33px 16px stretch;",
+   "origem": "interface-pecas-04/cartoes.png"
+  },
+  "cartao-dia-especial": {
+   "arquivo": "cartao-dia-especial.png",
+   "largura": 120,
+   "altura": 177,
+   "tipo": "9 fatias",
+   "familia": "cartao-dia",
+   "estados_da_familia": "aberto, hoje, futuro, especial",
+   "uso": "Cartão do dia do presente; o \"hoje\" tem brilho para fora (use border-image-outset).",
+   "tamanho_no_celular_css": "livre (~150 de altura)",
+   "estica": "largura e altura",
+   "apoio": [
+    60,
+    88
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 54,
+    "direita": 48,
+    "baixo": 99,
+    "esquerda": 48
+   },
+   "borda_css": {
+    "topo": 18,
+    "direita": 16,
+    "baixo": 33,
+    "esquerda": 16
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/cartao-dia-especial.png) 54 48 99 48 fill / 18px 16px 33px 16px stretch;",
+   "origem": "interface-pecas-04/cartoes.png"
+  },
+  "barra-moldura": {
+   "arquivo": "barra-moldura.png",
+   "largura": 78,
+   "altura": 51,
+   "tipo": "9 fatias",
+   "familia": "barra-moldura",
+   "estados_da_familia": "normal",
+   "uso": "Trilho da barra de progresso (experiência, missão, produção).",
+   "tamanho_no_celular_css": "17 de altura",
+   "estica": "só largura",
+   "apoio": [
+    39,
+    25
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 24,
+    "direita": 27,
+    "baixo": 24,
+    "esquerda": 27
+   },
+   "borda_css": {
+    "topo": 8,
+    "direita": 9,
+    "baixo": 8,
+    "esquerda": 9
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/barra-moldura.png) 24 27 24 27 fill / 8px 9px 8px 9px stretch;",
+   "altura_css": 17,
+   "origem": "interface-pecas-06/compridas.png"
+  },
+  "barra-enchimento-dourado": {
+   "arquivo": "barra-enchimento-dourado.png",
+   "largura": 66,
+   "altura": 36,
+   "tipo": "9 fatias",
+   "familia": "barra-enchimento",
+   "estados_da_familia": "dourado, verde",
+   "uso": "Parte cheia da barra, por cima do trilho (dourada = experiência, verde = missão).",
+   "tamanho_no_celular_css": "12 de altura",
+   "estica": "só largura",
+   "apoio": [
+    33,
+    18
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 18,
+    "direita": 21,
+    "baixo": 18,
+    "esquerda": 21
+   },
+   "borda_css": {
+    "topo": 6,
+    "direita": 7,
+    "baixo": 6,
+    "esquerda": 7
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/barra-enchimento-dourado.png) 18 21 18 21 fill / 6px 7px 6px 7px stretch;",
+   "altura_css": 12,
+   "origem": "interface-pecas-06/compridas.png"
+  },
+  "barra-enchimento-verde": {
+   "arquivo": "barra-enchimento-verde.png",
+   "largura": 66,
+   "altura": 36,
+   "tipo": "9 fatias",
+   "familia": "barra-enchimento",
+   "estados_da_familia": "dourado, verde",
+   "uso": "Parte cheia da barra, por cima do trilho (dourada = experiência, verde = missão).",
+   "tamanho_no_celular_css": "12 de altura",
+   "estica": "só largura",
+   "apoio": [
+    33,
+    18
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 18,
+    "direita": 21,
+    "baixo": 18,
+    "esquerda": 21
+   },
+   "borda_css": {
+    "topo": 6,
+    "direita": 7,
+    "baixo": 6,
+    "esquerda": 7
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/barra-enchimento-verde.png) 18 21 18 21 fill / 6px 7px 6px 7px stretch;",
+   "altura_css": 12,
+   "origem": "interface-pecas-06/compridas.png"
+  },
+  "faixa-nivel": {
+   "arquivo": "faixa-nivel.png",
+   "largura": 744,
+   "altura": 235,
+   "tipo": "9 fatias",
+   "familia": "faixa-nivel",
+   "estados_da_familia": "normal",
+   "uso": "Fita vermelha \"Subiu de nível!\" sem texto; o texto vai por cima no HTML.",
+   "tamanho_no_celular_css": "78 de altura",
+   "estica": "só largura",
+   "apoio": [
+    372,
+    117
+   ],
+   "casas": null,
+   "fatias": {
+    "topo": 117,
+    "direita": 360,
+    "baixo": 117,
+    "esquerda": 360
+   },
+   "borda_css": {
+    "topo": 39,
+    "direita": 120,
+    "baixo": 39,
+    "esquerda": 120
+   },
+   "css": "border-style: solid; border-color: transparent; border-image: url(molduras/faixa-nivel.png) 117 360 117 360 fill / 39px 120px 39px 120px stretch;",
+   "altura_css": 78,
+   "origem": "interface-pecas-06/compridas.png"
+  },
+  "botao-fechar-normal": {
+   "arquivo": "botao-fechar-normal.png",
+   "largura": 187,
+   "altura": 189,
+   "tipo": "fixa",
+   "familia": "botao-fechar",
+   "estados_da_familia": "normal, apertado",
+   "uso": "Botão vermelho redondo de fechar (com o X desenhado).",
+   "tamanho_no_celular_css": "42 a 60",
+   "estica": "tamanho fixo",
+   "apoio": [
+    93,
+    94
+   ],
+   "casas": null,
+   "tamanho_css": [
+    62,
+    63
+   ],
+   "css": "background: url(molduras/botao-fechar-normal.png) center / contain no-repeat;",
+   "origem": "interface-pecas-05/redondos.png"
+  },
+  "botao-fechar-apertado": {
+   "arquivo": "botao-fechar-apertado.png",
+   "largura": 187,
+   "altura": 189,
+   "tipo": "fixa",
+   "familia": "botao-fechar",
+   "estados_da_familia": "normal, apertado",
+   "uso": "Botão vermelho redondo de fechar (com o X desenhado).",
+   "tamanho_no_celular_css": "42 a 60",
+   "estica": "tamanho fixo",
+   "apoio": [
+    93,
+    94
+   ],
+   "casas": null,
+   "tamanho_css": [
+    62,
+    63
+   ],
+   "css": "background: url(molduras/botao-fechar-apertado.png) center / contain no-repeat;",
+   "origem": "interface-pecas-05/redondos.png"
+  },
+  "selo-nivel": {
+   "arquivo": "selo-nivel.png",
+   "largura": 368,
+   "altura": 377,
+   "tipo": "fixa",
+   "familia": "selo-nivel",
+   "estados_da_familia": "normal",
+   "uso": "Selo do nível sem número (o número vai por cima no HTML).",
+   "tamanho_no_celular_css": "46 no HUD, 120 na tela de nível",
+   "estica": "tamanho fixo",
+   "apoio": [
+    184,
+    188
+   ],
+   "casas": null,
+   "tamanho_css": [
+    123,
+    126
+   ],
+   "css": "background: url(molduras/selo-nivel.png) center / contain no-repeat;",
+   "origem": "interface-pecas-05/redondos.png"
+  },
+  "botao-agir-normal": {
+   "arquivo": "botao-agir-normal.png",
+   "largura": 263,
+   "altura": 270,
+   "tipo": "fixa",
+   "familia": "botao-agir",
+   "estados_da_familia": "normal, apertado",
+   "uso": "Botão redondo de agir; o ícone (ui/mao, ui/enxada...) vai por cima.",
+   "tamanho_no_celular_css": "85",
+   "estica": "tamanho fixo",
+   "apoio": [
+    131,
+    135
+   ],
+   "casas": null,
+   "tamanho_css": [
+    88,
+    90
+   ],
+   "css": "background: url(molduras/botao-agir-normal.png) center / contain no-repeat;",
+   "origem": "interface-pecas-05/redondos.png"
+  },
+  "botao-agir-apertado": {
+   "arquivo": "botao-agir-apertado.png",
+   "largura": 263,
+   "altura": 270,
+   "tipo": "fixa",
+   "familia": "botao-agir",
+   "estados_da_familia": "normal, apertado",
+   "uso": "Botão redondo de agir; o ícone (ui/mao, ui/enxada...) vai por cima.",
+   "tamanho_no_celular_css": "85",
+   "estica": "tamanho fixo",
+   "apoio": [
+    131,
+    135
+   ],
+   "casas": null,
+   "tamanho_css": [
+    88,
+    90
+   ],
+   "css": "background: url(molduras/botao-agir-apertado.png) center / contain no-repeat;",
+   "origem": "interface-pecas-05/redondos.png"
+  },
+  "bolinha-contador": {
+   "arquivo": "bolinha-contador.png",
+   "largura": 78,
+   "altura": 80,
+   "tipo": "fixa",
+   "familia": "bolinha-contador",
+   "estados_da_familia": "normal",
+   "uso": "Bolinha azul do contador (o número vai por cima).",
+   "tamanho_no_celular_css": "20 a 24",
+   "estica": "tamanho fixo",
+   "apoio": [
+    39,
+    40
+   ],
+   "casas": null,
+   "tamanho_css": [
+    26,
+    27
+   ],
+   "css": "background: url(molduras/bolinha-contador.png) center / contain no-repeat;",
+   "origem": "interface-pecas-05/redondos.png"
+  },
+  "bolinha-novidade": {
+   "arquivo": "bolinha-novidade.png",
+   "largura": 54,
+   "altura": 55,
+   "tipo": "fixa",
+   "familia": "bolinha-novidade",
+   "estados_da_familia": "normal",
+   "uso": "Bolinha vermelha de novidade.",
+   "tamanho_no_celular_css": "12 a 16",
+   "estica": "tamanho fixo",
+   "apoio": [
+    27,
+    27
+   ],
+   "casas": null,
+   "tamanho_css": [
+    18,
+    18
+   ],
+   "css": "background: url(molduras/bolinha-novidade.png) center / contain no-repeat;",
+   "origem": "interface-pecas-07/alavanca.png"
+  },
+  "alavanca-base": {
+   "arquivo": "alavanca-base.png",
+   "largura": 337,
+   "altura": 341,
+   "tipo": "fixa",
+   "familia": "alavanca-base",
+   "estados_da_familia": "normal",
+   "uso": "Base da alavanca virtual; o miolo já vem meio transparente.",
+   "tamanho_no_celular_css": "110",
+   "estica": "tamanho fixo",
+   "apoio": [
+    168,
+    170
+   ],
+   "casas": null,
+   "tamanho_css": [
+    112,
+    114
+   ],
+   "css": "background: url(molduras/alavanca-base.png) center / contain no-repeat;",
+   "origem": "interface-pecas-07/alavanca.png (miolo com 55% de opacidade)"
+  },
+  "alavanca-pino": {
+   "arquivo": "alavanca-pino.png",
+   "largura": 145,
+   "altura": 147,
+   "tipo": "fixa",
+   "familia": "alavanca-pino",
+   "estados_da_familia": "normal",
+   "uso": "Pino da alavanca virtual.",
+   "tamanho_no_celular_css": "46",
+   "estica": "tamanho fixo",
+   "apoio": [
+    72,
+    73
+   ],
+   "casas": null,
+   "tamanho_css": [
+    48,
+    49
+   ],
+   "css": "background: url(molduras/alavanca-pino.png) center / contain no-repeat;",
+   "origem": "interface-pecas-07/alavanca.png"
+  },
+  "raios": {
+   "arquivo": "raios.png",
+   "largura": 900,
+   "altura": 900,
+   "tipo": "fixa",
+   "familia": "raios",
+   "estados_da_familia": "normal",
+   "uso": "Raios de sol atrás do selo na tela de nível; o centro dos raios é o centro da imagem (gira pelo CSS).",
+   "tamanho_no_celular_css": "~400",
+   "estica": "tamanho fixo",
+   "apoio": [
+    450,
+    450
+   ],
+   "casas": null,
+   "tamanho_css": [
+    300,
+    300
+   ],
+   "css": "background: url(molduras/raios.png) center / contain no-repeat;",
+   "origem": "interface-pecas-07/raios.png"
+  }
+ },
+ "icones": {
+  "ui/menu": {
+   "arquivo": "interface/menu.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": true,
+   "uso": "botão Menu"
+  },
+  "ui/missoes": {
+   "arquivo": "interface/missoes.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": true,
+   "uso": "Missões (caderno com visto)"
+  },
+  "ui/minha-fazenda": {
+   "arquivo": "interface/minha-fazenda.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": true,
+   "uso": "Minha fazenda"
+  },
+  "ui/mais": {
+   "arquivo": "interface/mais.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": true,
+   "uso": "o \"+\" da pílula do cash"
+  },
+  "ui/certo": {
+   "arquivo": "interface/certo.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": true,
+   "uso": "visto verde (aviso curto, \"Aberto\", missão cumprida)"
+  },
+  "ui/estrela": {
+   "arquivo": "interface/estrela.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": true,
+   "uso": "estrelas em volta do selo de nível"
+  },
+  "ui/mao": {
+   "arquivo": "interface/mao.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": true,
+   "uso": "Mão (luva amarela)"
+  },
+  "ui/semear": {
+   "arquivo": "interface/semear.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": true,
+   "uso": "Semear"
+  },
+  "ui/enxada": {
+   "arquivo": "interface/enxada.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": true,
+   "uso": "Enxada"
+  },
+  "ui/regar": {
+   "arquivo": "interface/regar.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  },
+  "ui/loja": {
+   "arquivo": "interface/loja.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  },
+  "ui/mochila": {
+   "arquivo": "interface/mochila.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  },
+  "ui/correio": {
+   "arquivo": "interface/correio.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  },
+  "ui/config": {
+   "arquivo": "interface/config.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  },
+  "ui/tela-cheia": {
+   "arquivo": "interface/tela-cheia.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  },
+  "ui/cadeado": {
+   "arquivo": "interface/cadeado.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  },
+  "ui/presente": {
+   "arquivo": "interface/presente.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  },
+  "ui/fechar": {
+   "arquivo": "interface/fechar.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  },
+  "ui/seta": {
+   "arquivo": "interface/seta.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  },
+  "ui/voltar": {
+   "arquivo": "interface/voltar.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  },
+  "icone/ouro": {
+   "arquivo": "icones/ouro.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  },
+  "icone/cash": {
+   "arquivo": "icones/cash.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  },
+  "icone/xp": {
+   "arquivo": "icones/xp.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  },
+  "icone/gota": {
+   "arquivo": "icones/gota.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  },
+  "icone/martelo": {
+   "arquivo": "icones/martelo.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  },
+  "icone/cesto": {
+   "arquivo": "icones/cesto-de-palha.png",
+   "largura": 128,
+   "altura": 128,
+   "apoio": [
+    64,
+    64
+   ],
+   "nesta_etapa": false,
+   "uso": "já existia e é igual ao mockup; continua"
+  }
+ }
+}

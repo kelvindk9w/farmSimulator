@@ -1,0 +1,66 @@
+[
+ {
+  "arquivo": "interface-pecas-06/compridas.png",
+  "pecas": [
+   {
+    "nome": "faixa-nivel",
+    "fator": 1.0,
+    "so": "h",
+    "fatias": {
+     "topo": 117,
+     "baixo": 117,
+     "esquerda": 360,
+     "direita": 360
+    },
+    "achatar_linhas": true
+   },
+   {
+    "nome": "cabecalho",
+    "fator": 0.7,
+    "so": "nenhum",
+    "fatias": {
+     "topo": 66,
+     "baixo": 66,
+     "esquerda": 84,
+     "direita": 84
+    },
+    "espelhar": false
+   },
+   {
+    "nome": "barra-moldura",
+    "fator": 0.46,
+    "so": "h",
+    "fatias": {
+     "topo": 24,
+     "baixo": 24,
+     "esquerda": 27,
+     "direita": 27
+    }
+   },
+   {
+    "nome": "barra-enchimento-dourado",
+    "fator": 0.414,
+    "so": "h",
+    "familia": "enchimento",
+    "fatias": {
+     "topo": 18,
+     "baixo": 18,
+     "esquerda": 21,
+     "direita": 21
+    }
+   },
+   {
+    "nome": "barra-enchimento-verde",
+    "fator": 0.414,
+    "so": "h",
+    "familia": "enchimento",
+    "fatias": {
+     "topo": 18,
+     "baixo": 18,
+     "esquerda": 21,
+     "direita": 21
+    }
+   }
+  ]
+ }
+]

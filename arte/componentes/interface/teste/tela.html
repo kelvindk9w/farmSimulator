@@ -1,0 +1,115 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Teste: tela do jogo</title><style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden}
+body{font:800 16px/1.15 system-ui,"Inter","DejaVu Sans",sans-serif;color:#4a2a12;
+ background:#73b23f;background-image:radial-gradient(circle at 20% 30%,#86c24c 0 8%,transparent 9%),radial-gradient(circle at 70% 60%,#86c24c 0 6%,transparent 7%),
+ radial-gradient(circle at 45% 80%,#64a335 0 7%,transparent 8%),linear-gradient(135deg,#7dbb45,#66a838);background-size:300px 300px,260px 260px,340px 340px,100% 100%}
+.terra{position:absolute;left:30%;top:18%;width:300px;height:170px;background:#c98d57;transform:skewX(-30deg) rotate(8deg);opacity:.9;border-radius:6px}
+.ab{position:absolute}
+.lin{display:flex;align-items:center}
+.ic{display:block;object-fit:contain}
+.num{font-size:19px;font-variant-numeric:tabular-nums}
+.branco{color:#fff;paint-order:stroke fill;-webkit-text-stroke:4px #3a1f0c}
+
+.n-painel{border-style:solid;border-color:transparent;border-image:url(../painel.png) 84 84 87 84 fill / 28px 28px 29px 28px stretch;}
+.n-painel-moldura{border-style:solid;border-color:transparent;border-image:url(../painel-moldura.png) 84 84 87 84 fill / 28px 28px 29px 28px stretch;}
+.n-painel-fundo{border-style:solid;border-color:transparent;border-image:url(../painel-fundo.png) 48 51 48 51 fill / 16px 17px 16px 17px stretch;}
+.n-menu-lista{border-style:solid;border-color:transparent;border-image:url(../menu-lista.png) 81 108 54 51 fill / 27px 36px 18px 17px stretch;}
+.n-balao{border-style:solid;border-color:transparent;border-image:url(../balao.png) 63 66 66 66 fill / 21px 22px 22px 22px stretch;}
+.n-pilula{border-style:solid;border-color:transparent;border-image:url(../pilula.png) 54 54 54 54 fill / 18px 18px 18px 18px stretch;}
+.n-aviso{border-style:solid;border-color:transparent;border-image:url(../aviso.png) 45 45 42 45 fill / 15px 15px 14px 15px stretch;}
+.n-cabecalho{border-style:solid;border-color:transparent;border-image:url(../cabecalho.png) 66 84 66 84 fill / 22px 28px 22px 28px stretch;}
+.n-botao-verde-normal{border-style:solid;border-color:transparent;border-image:url(../botao-verde-normal.png) 54 54 45 54 fill / 18px 18px 15px 18px stretch;}
+.n-botao-verde-apertado{border-style:solid;border-color:transparent;border-image:url(../botao-verde-apertado.png) 54 54 45 54 fill / 18px 18px 15px 18px stretch;}
+.n-botao-verde-desativado{border-style:solid;border-color:transparent;border-image:url(../botao-verde-desativado.png) 54 54 45 54 fill / 18px 18px 15px 18px stretch;}
+.n-botao-turquesa-normal{border-style:solid;border-color:transparent;border-image:url(../botao-turquesa-normal.png) 54 54 45 54 fill / 18px 18px 15px 18px stretch;}
+.n-botao-turquesa-apertado{border-style:solid;border-color:transparent;border-image:url(../botao-turquesa-apertado.png) 54 54 45 54 fill / 18px 18px 15px 18px stretch;}
+.n-botao-marrom{border-style:solid;border-color:transparent;border-image:url(../botao-marrom.png) 54 54 45 54 fill / 18px 18px 15px 18px stretch;}
+.n-botao-hud-normal{border-style:solid;border-color:transparent;border-image:url(../botao-hud-normal.png) 84 66 66 66 fill / 28px 22px 22px 22px stretch;}
+.n-botao-hud-apertado{border-style:solid;border-color:transparent;border-image:url(../botao-hud-apertado.png) 84 66 66 66 fill / 28px 22px 22px 22px stretch;}
+.n-botao-hud-selecionado{border-style:solid;border-color:transparent;border-image:url(../botao-hud-selecionado.png) 84 66 66 66 fill / 28px 22px 22px 22px stretch;}
+.n-aba-normal{border-style:solid;border-color:transparent;border-image:url(../aba-normal.png) 48 54 12 54 fill / 16px 18px 4px 18px stretch;}
+.n-aba-selecionada{border-style:solid;border-color:transparent;border-image:url(../aba-selecionada.png) 48 54 12 54 fill / 16px 18px 4px 18px stretch;}
+.n-cartao-item-normal{border-style:solid;border-color:transparent;border-image:url(../cartao-item-normal.png) 63 60 60 60 fill / 21px 20px 20px 20px stretch;}
+.n-cartao-item-travado{border-style:solid;border-color:transparent;border-image:url(../cartao-item-travado.png) 63 60 60 60 fill / 21px 20px 20px 20px stretch;}
+.n-cartao-dia-aberto{border-style:solid;border-color:transparent;border-image:url(../cartao-dia-aberto.png) 54 48 99 48 fill / 18px 16px 33px 16px stretch;}
+.n-cartao-dia-hoje{border-style:solid;border-color:transparent;border-image:url(../cartao-dia-hoje.png) 81 69 126 69 fill / 27px 23px 42px 23px / 9px 7px stretch;}
+.n-cartao-dia-futuro{border-style:solid;border-color:transparent;border-image:url(../cartao-dia-futuro.png) 54 48 99 48 fill / 18px 16px 33px 16px stretch;}
+.n-cartao-dia-especial{border-style:solid;border-color:transparent;border-image:url(../cartao-dia-especial.png) 54 48 99 48 fill / 18px 16px 33px 16px stretch;}
+.n-barra-moldura{border-style:solid;border-color:transparent;border-image:url(../barra-moldura.png) 24 27 24 27 fill / 8px 9px 8px 9px stretch;}
+.n-barra-enchimento-dourado{border-style:solid;border-color:transparent;border-image:url(../barra-enchimento-dourado.png) 18 21 18 21 fill / 6px 7px 6px 7px stretch;}
+.n-barra-enchimento-verde{border-style:solid;border-color:transparent;border-image:url(../barra-enchimento-verde.png) 18 21 18 21 fill / 6px 7px 6px 7px stretch;}
+.n-faixa-nivel{border-style:solid;border-color:transparent;border-image:url(../faixa-nivel.png) 117 360 117 360 fill / 39px 120px 39px 120px stretch;}
+.f-botao-fechar-normal{background:url(../botao-fechar-normal.png) center/contain no-repeat;}
+.f-botao-fechar-apertado{background:url(../botao-fechar-apertado.png) center/contain no-repeat;}
+.f-selo-nivel{background:url(../selo-nivel.png) center/contain no-repeat;}
+.f-botao-agir-normal{background:url(../botao-agir-normal.png) center/contain no-repeat;}
+.f-botao-agir-apertado{background:url(../botao-agir-apertado.png) center/contain no-repeat;}
+.f-bolinha-contador{background:url(../bolinha-contador.png) center/contain no-repeat;}
+.f-bolinha-novidade{background:url(../bolinha-novidade.png) center/contain no-repeat;}
+.f-alavanca-base{background:url(../alavanca-base.png) center/contain no-repeat;}
+.f-alavanca-pino{background:url(../alavanca-pino.png) center/contain no-repeat;}
+.f-raios{background:url(../raios.png) center/contain no-repeat;}
+.pil{height:36px;border-width:6px;padding:0 12px 0 2px;gap:4px}
+.hudbt{width:55px;height:55px;border-width:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.hudbt img{width:40px;height:40px}
+.ferr{width:69px;height:69px;border-width:8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;position:relative;padding-top:1px}
+.ferr img{width:38px;height:38px}
+.ferr span{font-size:15px;margin-top:-2px}
+.desk{display:none}
+@media (min-width:1000px){.desk{display:flex}}
+</style></head><body>
+<div class="terra"></div>
+<!-- canto de cima, à esquerda -->
+<div class="ab lin n-pilula pil" style="left:30px;top:9px;width:184px;padding-left:24px;gap:6px">
+  <div class="n-barra-moldura" style="width:90px;height:17px;border-width:3px;position:relative">
+    <div class="n-barra-enchimento-dourado" style="position:absolute;left:0;top:-1px;width:36%;height:12px;border-width:2px"></div></div>
+  <span class="num">15/40</span></div>
+<div class="ab f-selo-nivel lin" style="left:6px;top:4px;width:46px;height:47px;justify-content:center"><span class="branco" style="font-size:26px;margin-top:-2px">2</span></div>
+<div class="ab lin" style="left:222px;top:9px;gap:6px"><div class="lin n-pilula pil"><img class="ic" src="../../../../jogo/arte/icones/ouro.png" width="30" height="30"><span class="num">320</span></div>
+<div class="lin n-pilula pil" style="padding-right:4px"><img class="ic" src="../../../../jogo/arte/icones/cash.png" width="30" height="30"><span class="num" style="margin-right:6px">12</span><img class="ic" src="../../../../jogo/arte/interface/mais.png" width="28" height="28"></div></div>
+<div class="ab lin" style="left:12px;top:52px;gap:6px"><div class="lin n-pilula pil"><img class="ic" src="../../../../jogo/arte/icones/cesto-de-palha.png" width="30" height="30"><span class="num">4/12</span></div>
+<div class="lin n-pilula pil"><img class="ic" src="../../../../jogo/arte/interface/regar.png" width="30" height="30"><span class="num">3/4</span></div></div>
+<!-- aviso curto -->
+<div class="ab lin n-aviso" style="left:50%;transform:translateX(-50%);top:56px;height:28px;border-width:4px;padding:0 12px 0 4px;gap:5px;white-space:nowrap">
+  <img class="ic" src="../../../../jogo/arte/interface/certo.png" width="22" height="22"><span style="font-size:16px">Missão cumprida: Regar</span></div>
+<!-- botões do alto, à direita -->
+<div class="ab lin" style="right:8px;top:6px;gap:4px">
+  <div class="hudbt n-botao-hud-normal desk"><img src="../../../../jogo/arte/interface/correio.png"></div>
+  <div class="hudbt n-botao-hud-normal desk"><img src="../../../../jogo/arte/interface/missoes.png"></div>
+  <div class="hudbt n-botao-hud-normal desk"><img src="../../../../jogo/arte/interface/minha-fazenda.png"></div>
+  <div class="hudbt n-botao-hud-normal desk"><img src="../../../../jogo/arte/interface/config.png"></div>
+  <div class="hudbt n-botao-hud-normal desk"><img src="../../../../jogo/arte/interface/tela-cheia.png"></div>
+  <div class="hudbt n-botao-hud-normal"><img src="../../../../jogo/arte/interface/mochila.png"></div>
+  <div class="hudbt n-botao-hud-normal"><img src="../../../../jogo/arte/interface/loja.png"></div>
+  <div class="hudbt n-botao-hud-normal"><img src="../../../../jogo/arte/icones/martelo.png"></div>
+  <div class="hudbt n-botao-hud-apertado"><img src="../../../../jogo/arte/interface/menu.png" style="width:30px;height:26px;margin-top:2px"><span style="font-size:13px;margin-top:-1px">Menu</span>
+    <div class="ab f-bolinha-novidade" style="right:-6px;top:-6px;width:16px;height:16px"></div></div>
+</div>
+<!-- balão do vizinho -->
+<div class="ab lin n-balao" style="right:8px;top:68px;width:272px;height:96px;border-width:7px;padding:2px 8px 2px 4px;gap:8px">
+  <div style="width:62px;height:62px;border-radius:50%;border:4px solid #e8913a;box-shadow:0 0 0 2px #3a1f0c;overflow:hidden;background:#9fd3f0;flex:none">
+    <img src="../../../../jogo/arte/retratos/seu-tonho.png" style="width:62px;height:62px;margin:-2px 0 0 -4px"></div>
+  <div style="flex:1">
+    <div style="font-size:19px">Milho</div>
+    <div style="font-size:14px;line-height:1.15">Liberou o milho!<br>Colha 8 espigas.</div>
+    <div class="lin" style="gap:4px;margin-top:3px">
+      <div class="n-barra-moldura" style="width:110px;height:16px;border-width:3px;position:relative">
+        <div class="n-barra-enchimento-verde" style="position:absolute;left:0;top:-1px;width:38%;height:11px;border-width:2px"></div></div>
+      <img class="ic" src="../../../../jogo/arte/icones/milho.png" width="22" height="22"><span style="font-size:16px">3/8</span></div>
+  </div>
+</div>
+<!-- barra de ferramentas -->
+<div class="ab lin" style="left:50%;transform:translateX(-50%);bottom:8px;gap:5px">
+  <div class="ferr n-botao-hud-normal"><img src="../../../../jogo/arte/interface/mao.png"><span>Mão</span></div>
+  <div class="ferr n-botao-hud-selecionado"><img src="../../../../jogo/arte/interface/enxada.png"><span class="branco" style="-webkit-text-stroke-width:3px">Enxada</span></div>
+  <div class="ferr n-botao-hud-normal"><img src="../../../../jogo/arte/interface/semear.png"><span>Semear</span></div>
+  <div class="ferr n-botao-hud-normal"><img src="../../../../jogo/arte/interface/regar.png"><span>Regar</span>
+    <div class="ab f-bolinha-contador lin" style="right:-7px;top:-8px;width:24px;height:25px;justify-content:center"><span class="branco" style="font-size:13px;-webkit-text-stroke-width:3px">3</span></div></div>
+</div>
+<!-- alavanca e botão de agir -->
+<div class="ab f-alavanca-base" style="left:16px;bottom:20px;width:110px;height:111px"></div>
+<div class="ab f-alavanca-pino" style="left:48px;bottom:52px;width:46px;height:47px"></div>
+<div class="ab f-botao-agir-normal lin" style="right:16px;bottom:16px;width:85px;height:87px;justify-content:center"><img src="../../../../jogo/arte/interface/mao.png" width="54" height="54"></div>
+</body></html>

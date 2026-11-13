@@ -31,13 +31,17 @@ Construções, objetos, plantas, ícones e retratos do jogo, pedidos ao Codex de
 
 <!-- tabela:inicio -->
 
-No catálogo: 280 chaves (280 prontas, 0 pendentes).
+No catálogo: 297 chaves (297 prontas, 0 pendentes).
 
-### objetos (74)
+### objetos (86)
 
 | Chave | Arquivo | Quadro (px) | Apoio | Casas | Tamanho pedido | Pedido | Situação |
 |---|---|---|---|---|---|---|---|
 | `objeto/aprisco` | objetos/aprisco.png | 858 x 736 | 431, 512 | 5 x 4 | casas 5x4 | 34-aprisco.md | pronto |
+| `objeto/arame-caido-x` | objetos/arame-caido-x.png | 157 x 170 | 122, 147 | 1 x 1 | fator 0.3694 | 61-arame-farpado-r2.md | pronto |
+| `objeto/arame-caido-z` | objetos/arame-caido-z.png | 150 x 167 | 30, 146 | 1 x 1 | fator 0.3455 | 61-arame-farpado-r2.md | pronto |
+| `objeto/arame-x` | objetos/arame-x.png | 157 x 172 | 123, 149 | 1 x 1 | fator 0.3694 | 61-arame-farpado-r2.md | pronto |
+| `objeto/arame-z` | objetos/arame-z.png | 152 x 169 | 32, 147 | 1 x 1 | fator 0.348 | 61-arame-farpado-r2.md | pronto |
 | `objeto/arbusto` | objetos/arbusto.png | 170 x 142 | 85, 97 | 1 x 1 | largura 1.2 | 06-natureza.md | pronto |
 | `objeto/arvore` | objetos/mata.png (apelido) | 444 x 503 | 224, 457 | 1 x 1 | altura 4.3 | 07-arvores-enfeite.md | pronto |
 | `objeto/aspersor` | objetos/aspersor.png | 131 x 143 | 66, 113 | 1 x 1 | largura 0.9 | 41-decoracao-1.md | pronto |
@@ -51,10 +55,13 @@ No catálogo: 280 chaves (280 prontas, 0 pendentes).
 | `objeto/bebedouro-grande` | objetos/bebedouro-grande.png | 266 x 225 | 133, 145 | 2 x 1 | largura 1.95 | 28-pecas-de-trato.md | pronto |
 | `objeto/caixa-de-correio` | objetos/caixa-de-correio.png | 127 x 212 | 64, 197 | 1 x 1 | altura 1.8 | objeto-caixa-de-correio.md | pronto |
 | `objeto/caixote` | objetos/caixote.png | 161 x 173 | 81, 123 | 1 x 1 | largura 1.13 | 39-moveis-do-celeiro.md | pronto: câmera um pouco mais de cima que o resto (inclinação da base 0,70 em vez de 0,58) |
+| `objeto/caixote-de-venda` | objetos/caixote-de-venda.png | 168 x 151 | 84, 99 | 1 x 1 | casas 1x1 | 62-caixote-de-venda.md | pronto: caixote de venda da beira da estrada, vazio; na câmera do jogo (guia de 0,9 x 0,7 x 0,45) |
+| `objeto/caixote-de-venda-cheio` | objetos/caixote-de-venda-cheio.png | 168 x 151 | 84, 99 | 1 x 1 | casas 1x1 | 62-caixote-de-venda.md | pronto: o mesmo caixote com milho, alface e tomate; mesmo apoio do vazio |
 | `objeto/caminho-de-pedra` | objetos/caminho-de-pedra.png | 199 x 123 | 100, 62 | 1 x 1 | chão de 1 casa | 44-caminho-de-pedra.md | pronto: esticado na vertical para caber no losango da casa |
 | `objeto/canteiro-de-flores` | objetos/canteiro-de-flores.png | 182 x 151 | 91, 95 | 1 x 1 | largura 1.3 | 41-decoracao-1.md | pronto |
 | `objeto/carro-de-boi-antigo` | objetos/carro-de-boi-antigo.png | 349 x 291 | 175, 203 | 3 x 2 | largura 2.6 | 42-decoracao-2.md | pronto |
 | `objeto/casa` | objetos/casa.png | 681 x 642 | 340, 470 | 4 x 3 | casas 4x3 | 25-casa.md | pronto |
+| `objeto/casa-velha` | objetos/casa-velha.png | 681 x 642 | 340, 470 | 4 x 3 | fator 0.72637 | 59-casa-velha-r2.md | pronto: estado velho da casa (começo do jogo): mesma escala, mesmo quadro e mesmo apoio de objeto/casa (desenhada em cima da casa nova, na mesma guia); 2 rodadas, a 1ª saiu maior e com a parede da esquerda deitada |
 | `objeto/celeiro` | objetos/celeiro.png | 856 x 834 | 426, 601 | 5 x 4 | casas 5x4 | 23-celeiro-fechado.md | pronto |
 | `objeto/celeiro-2` | objetos/celeiro-2.png | 838 x 835 | 416, 615 | 5 x 4 | casas 5x4 | 49-celeiro-medio.md | pronto: primeira ampliação (Celeiro de tábua) |
 | `objeto/celeiro-2-aberto` | objetos/celeiro-2-aberto.png | 838 x 835 | 416, 615 | 5 x 4 | fator 0.904 | 52-celeiro-medio-aberto.md | pronto: igual ao fechado fora da porta (só a região que muda foi tirada do desenho aberto) |
@@ -74,6 +81,7 @@ No catálogo: 280 chaves (280 prontas, 0 pendentes).
 | `objeto/curral` | objetos/curral.png | 1009 x 769 | 504, 474 | 6 x 5 | cercado de 6x5 montado por código | 05-cercas.md, 28-pecas-de-trato.md, 43-sombra-do-curral.md | pronto: montado por código com as peças do catálogo; para pôr os bichos entre as cercas use curral-fundo e curral-frente |
 | `objeto/curral-frente` | objetos/curral-frente.png | 1009 x 769 | 504, 474 | 6 x 5 | cercado de 6x5 montado por código | 05-cercas.md, 28-pecas-de-trato.md, 43-sombra-do-curral.md | pronto: camada da frente (cercas da frente e porteira) |
 | `objeto/curral-fundo` | objetos/curral-fundo.png | 1009 x 769 | 504, 474 | 6 x 5 | cercado de 6x5 montado por código | 05-cercas.md, 28-pecas-de-trato.md, 43-sombra-do-curral.md | pronto: camada de trás (cercas do fundo e o que fica dentro) |
+| `objeto/enxada-escorada` | objetos/enxada-escorada.png | 140 x 153 | 22, 69 | 1 x 1 | fator 0.252 | 63-regador-e-enxada.md | pronto: enxada escorada na estaca do canto do campo (a estaca faz parte da peça); apoio no pé da estaca |
 | `objeto/espantalho` | objetos/espantalho.png | 165 x 240 | 78, 227 | 1 x 1 | altura 2.1 | 41-decoracao-1.md | pronto |
 | `objeto/estabulo` | objetos/estabulo.png | 769 x 770 | 380, 570 | 4 x 4 | casas 4x4 | 33-estabulo.md | pronto |
 | `objeto/fardo-de-feno` | objetos/fardo-de-feno.png | 179 x 162 | 90, 107 | 1 x 1 | largura 1.27 | 39-moveis-do-celeiro.md | pronto |
@@ -87,6 +95,8 @@ No catálogo: 280 chaves (280 prontas, 0 pendentes).
 | `objeto/mato` | objetos/mato.png | 144 x 158 | 72, 128 | 1 x 1 | largura 1.0 | 06-natureza.md | pronto |
 | `objeto/moinho` | objetos/moinho.png | 493 x 534 | 246, 389 | 3 x 3 | casas 3x3 | 30-moinho.md | pronto |
 | `objeto/mourao` | objetos/mourao.png | 50 x 117 | 25, 99 |  | fator 0.439 | 05-cercas.md | pronto |
+| `objeto/mourao-caido` | objetos/mourao-caido.png | 110 x 77 | 63, 41 | 1 x 1 | fator 0.32 | 61-arame-farpado.md | pronto: mourão deitado no chão com arame enrolado; corre em Z (sobe para a direita na tela); para a outra direção, espelhe; apoio no meio dele, no chão |
+| `objeto/mourao-velho` | objetos/mourao-velho.png | 64 x 109 | 30, 88 |  | fator 0.32 | 61-arame-farpado.md | pronto: mourão velho sozinho, torto, com raiz e um pedaço de arame; mesma escala dos trechos de arame; apoio no pé |
 | `objeto/ninho` | objetos/ninho.png | 108 x 78 | 54, 48 | 1 x 1 | largura 0.72 | 28-pecas-de-trato.md | pronto |
 | `objeto/parede-x` | objetos/parede-x.png | 109 x 382 | 54, 348 |  | parede de 1 unidade, altura 3 | 40-texturas-do-celeiro.md | pronto |
 | `objeto/parede-z` | objetos/parede-z.png | 109 x 382 | 54, 348 |  | parede de 1 unidade, altura 3 | 40-texturas-do-celeiro.md | pronto |
@@ -94,6 +104,7 @@ No catálogo: 280 chaves (280 prontas, 0 pendentes).
 | `objeto/piso-tabuas` | objetos/piso-tabuas.png | 198 x 121 | 99, 61 | 1 x 1 | piso de 1 casa | 40-texturas-do-celeiro.md | pronto |
 | `objeto/placa` | objetos/placa.png | 140 x 171 | 63, 158 | 1 x 1 | largo-px 124 | 05-cercas.md | pronto |
 | `objeto/poco` | objetos/poco.png | 308 x 441 | 142, 370 | 2 x 2 | largura 2.28 | 01-poco.md | pronto |
+| `objeto/poco-velho` | objetos/poco-velho.png | 275 x 424 | 136, 353 | 2 x 2 | fator 0.3466 | 60-poco-velho.md | pronto: estado velho do poço (começo do jogo): mureta do mesmo tamanho e apoio no mesmo ponto do chão que objeto/poco; sem manivela |
 | `objeto/porteira` | objetos/porteira.png | 252 x 292 | 126, 216 | 2 x 1 | fator 0.7016 | 05-cercas.md | pronto |
 | `objeto/porteira-aberta` | objetos/porteira-aberta.png | 252 x 311 | 126, 235 | 2 x 1 | fator 0.7016 | 05-cercas.md | pronto |
 | `objeto/poste-de-lampiao` | objetos/poste-de-lampiao.png | 169 x 311 | 121, 280 | 1 x 1 | altura 2.6 | 41-decoracao-1.md | pronto |
@@ -104,6 +115,7 @@ No catálogo: 280 chaves (280 prontas, 0 pendentes).
 | `objeto/prateleira-simples-cheia` | objetos/prateleira-simples-cheia.png | 263 x 327 | 125, 251 | 2 x 1 | fator 0.566 | 38-prateleira.md | pronto |
 | `objeto/prateleira-simples-meia` | objetos/prateleira-simples-meia.png | 253 x 326 | 126, 250 | 2 x 1 | fator 0.566 | 38-prateleira.md | pronto |
 | `objeto/quadro-de-pedidos` | objetos/quadro-de-pedidos.png | 185 x 257 | 93, 217 | 1 x 1 | altura 2.0 | 28-pecas-de-trato.md | pronto |
+| `objeto/regador-no-chao` | objetos/regador-no-chao.png | 120 x 103 | 68, 80 | 1 x 1 | largo-px 104 | 63-regador-e-enxada.md | pronto: regador de lata do começo pousado no chão, ao lado do poço; apoio no centro do fundo (centro da casa); largura igual à do regador na mão da personagem |
 | `objeto/rochedo` | objetos/rochedo.png | 189 x 143 | 95, 91 | 1 x 1 | largura 1.35 | 06-natureza.md | pronto |
 | `objeto/saco-de-sementes` | objetos/saco-de-sementes.png | 106 x 134 | 53, 104 | 1 x 1 | largura 0.7 | 39-moveis-do-celeiro.md | pronto |
 | `objeto/sombra-do-curral` | objetos/sombra-do-curral.png | 541 x 477 | 275, 346 | 3 x 2 | casas 3x2 | 43-sombra-do-curral.md | pronto |
@@ -305,7 +317,7 @@ No catálogo: 280 chaves (280 prontas, 0 pendentes).
 | `retrato/seu-tonho-explicando` | retratos/seu-tonho-explicando.png | 256 x 256 | 128, 248 |  | caixa 256 | 21-retratos-seu-tonho.md | pronto |
 | `retrato/seu-tonho-neutro` | retratos/seu-tonho.png (apelido) | 256 x 256 | 128, 248 |  | caixa 256 | 21-retratos-seu-tonho.md | pronto |
 
-### interface (33)
+### interface (38)
 
 | Chave | Arquivo | Quadro (px) | Apoio | Casas | Tamanho pedido | Pedido | Situação |
 |---|---|---|---|---|---|---|---|
@@ -314,11 +326,13 @@ No catálogo: 280 chaves (280 prontas, 0 pendentes).
 | `ui/bau-fechado` | interface/bau-fechado.png | 252 x 226 | 126, 218 |  | fator 0.5 | 22-nivel-e-bau.md | pronto |
 | `ui/cadeado` | interface/cadeado.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/caderno` | interface/caderno.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-modos-e-progresso.md | pronto |
+| `ui/certo` | interface/certo.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-interface-aprovada.md | pronto |
 | `ui/compartilhar` | interface/compartilhar.png | 128 x 128 | 64, 64 |  | caixa 128 | 48-icones-cosmeticos.md | pronto |
 | `ui/concluir` | interface/concluir.png | 128 x 128 | 64, 64 |  | caixa 128 | 48-icones-cosmeticos.md | pronto |
 | `ui/config` | interface/config.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/correio` | interface/correio.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-modos-e-progresso.md | pronto |
-| `ui/enxada` | interface/enxada.png | 128 x 128 | 64, 64 |  | caixa 128 | 18-icones-ferramentas.md | pronto: o mesmo desenho de icone/enxada-velha |
+| `ui/enxada` | interface/enxada.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-interface-aprovada.md | pronto |
+| `ui/estrela` | interface/estrela.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-interface-aprovada.md | pronto |
 | `ui/fazenda` | interface/fazenda.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-modos-e-progresso.md | pronto |
 | `ui/fechar` | interface/fechar.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/foto` | interface/foto.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-modos-e-progresso.md | pronto |
@@ -326,15 +340,18 @@ No catálogo: 280 chaves (280 prontas, 0 pendentes).
 | `ui/limpar` | interface/limpar.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-modos-e-progresso.md | pronto |
 | `ui/loja` | interface/loja.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/lote` | interface/lote.png | 128 x 128 | 64, 64 |  | caixa 128 | 54-icones-rega.md | pronto |
-| `ui/mao` | interface/mao.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
-| `ui/missoes` | interface/missoes.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
+| `ui/mais` | interface/mais.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-interface-aprovada.md | pronto |
+| `ui/mao` | interface/mao.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-interface-aprovada.md | pronto |
+| `ui/menu` | interface/menu.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-interface-aprovada.md | pronto |
+| `ui/minha-fazenda` | interface/minha-fazenda.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-interface-aprovada.md | pronto |
+| `ui/missoes` | interface/missoes.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-interface-aprovada.md | pronto |
 | `ui/mochila` | interface/mochila.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/mover` | interface/mover.png | 128 x 128 | 64, 64 |  | caixa 128 | 54-icones-rega.md | pronto |
 | `ui/pedidos` | interface/pedidos.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/presente` | interface/presente.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/regar` | interface/regar.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/relogio` | interface/relogio.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
-| `ui/semear` | interface/semear.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
+| `ui/semear` | interface/semear.png | 128 x 128 | 64, 64 |  | caixa 128 | ui-interface-aprovada.md | pronto |
 | `ui/seta` | interface/seta.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/som` | interface/som.png | 128 x 128 | 64, 64 |  | caixa 128 | 26-icones-interface.md | pronto |
 | `ui/subida-de-nivel` | interface/subida-de-nivel.png | 528 x 278 | 264, 270 |  | largo-px 512 | 22-nivel-e-bau.md | pronto |
