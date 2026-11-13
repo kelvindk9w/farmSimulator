@@ -333,6 +333,11 @@
    "pedido": "boi-parado-costas.md",
    "rodadas": 1,
    "nota": "Par da de frente. De costas o arado fica em primeiro plano, abaixo dos cascos: a figura inteira tem 358 pontos e o apoio fica no chão sob o corpo do boi (--chao 0.19 --apoio-dx 50), não na ponta do arado. Tamanho pela massa 226."
+  },
+  "animal/boi/puxar-costas": {
+   "pedido": "boi-puxar-costas.md",
+   "rodadas": 1,
+   "nota": "Par da de frente, em duas fileiras de 4; ampliada 1,09 vez. Apoio sob o corpo do boi (--chao 0.19 --apoio-dx 30)."
   }
  },
  "geral": [
