@@ -3975,6 +3975,79 @@
    "altura-livre": true
   }
  },
+ "personagem/andar-trouxa-costas": {
+  "chave": "personagem/andar-trouxa-costas",
+  "crua": "andar-trouxa-costas-junta.png",
+  "cruaTamanho": [
+   1536,
+   1025
+  ],
+  "linhasNaCrua": 2,
+  "figurasNaCrua": 8,
+  "referencia": false,
+  "modo": "ciclo",
+  "emPe": 294,
+  "emPeReal": 294,
+  "emPeFonte": 469,
+  "escala": 0.6269,
+  "casa": [
+   248,
+   312
+  ],
+  "apoio": [
+   124,
+   290
+  ],
+  "quadros": 8,
+  "desenhos": 8,
+  "qps": 10,
+  "laco": true,
+  "alturas": [
+   294,
+   273,
+   285,
+   291,
+   286,
+   285,
+   288,
+   288
+  ],
+  "tamanhoPelaMassa": [
+   155.2,
+   152.6,
+   149.9,
+   153,
+   158.2,
+   155.5,
+   152.9,
+   153.7
+  ],
+  "variacaoAltura": 7,
+  "tamanhoPelaCor": [
+   45.5,
+   44.6,
+   44.5,
+   45.2,
+   45.7,
+   45.2,
+   44.8,
+   44.8
+  ],
+  "bytes": 132864,
+  "avisos": [
+   "altura varia 7.0% entre quadros (294 273 285 291 286 285 288 288), esperado nesta ação"
+  ],
+  "falhas": [],
+  "ok": true,
+  "opcoes": {
+   "chave": "personagem/andar-trouxa-costas",
+   "quadros": "8",
+   "altura": "294",
+   "qps": "10",
+   "base": "0.5",
+   "altura-livre": true
+  }
+ },
  "personagem/andar-trouxa-frente": {
   "chave": "personagem/andar-trouxa-frente",
   "crua": "andar-trouxa-frente.png",
@@ -5935,46 +6008,44 @@
   "referencia": false,
   "modo": "molde",
   "emPe": 294,
-  "emPeReal": 278,
+  "emPeReal": 294,
   "emPeFonte": 697,
-  "escala": 0.3987,
+  "escala": 0.4218,
   "casa": [
-   200,
-   304
+   216,
+   320
   ],
   "apoio": [
-   100,
-   282
+   108,
+   298
   ],
   "quadros": 12,
   "desenhos": 3,
   "qps": 6,
   "laco": true,
   "alturas": [
-   278,
-   279,
-   281
+   294,
+   295,
+   297
   ],
   "tamanhoPelaMassa": [
-   148.7,
-   149,
-   149.7
+   157.3,
+   157.6,
+   158.4
   ],
   "variacaoAltura": 1.1,
   "tamanhoPelaCor": [
-   62.2,
-   61.7,
-   61.2
+   65.8,
+   65.3,
+   64.8
   ],
   "custosDoMolde": [
    0,
    17,
    15
   ],
-  "bytes": 58428,
-  "avisos": [
-   "a proporção entre cabeça e corpo difere 11% da folha de modelo"
-  ],
+  "bytes": 64632,
+  "avisos": [],
   "falhas": [],
   "ok": true,
   "opcoes": {
@@ -5984,8 +6055,7 @@
    "qps": "6",
    "alinhar": "molde",
    "em-pe-quadro": "1",
-   "tamanho-cor": "58.3",
-   "apoio-dx": "26",
+   "apoio-dx": "28",
    "sequencia": "1,1,2,3,3,3,2,1,1,1,1,1"
   }
  },

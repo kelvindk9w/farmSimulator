@@ -641,7 +641,7 @@
   "personagem/parada-trouxa-costas": {
    "pedido": "personagem-parada-trouxa-costas.md",
    "rodadas": 1,
-   "nota": "Par da de frente, vista de costas: trouxa à esquerda de quem olha, enxada apoiada no chão à esquerda. 3 desenhos em 12 quadros, como a parada-costas. O lenço de costas aparece grande: escala pelo alvo do lenço medido na parada-costas (--tamanho-cor 58.3), 278 px em pé, cabeça uns 6% maior que a da parada-costas. Apoio puxado 26 px para a direita (--apoio-dx 26), entre as botas."
+   "nota": "Par da de frente, vista de costas: trouxa à esquerda de quem olha, enxada apoiada no chão à esquerda. 3 desenhos em 12 quadros, como a parada-costas. Escala só pela altura (294 px), como a parada-costas: de costas o lenço aparece muito e enganaria a medida. Apoio puxado 28 px para a direita (--apoio-dx 28), entre as botas, e não no meio entre botas e enxada."
   },
   "personagem/andar-trouxa-frente": {
    "pedido": "personagem-andar-trouxa-frente.md",
@@ -652,6 +652,11 @@
    "pedido": "seu-tonho-acenar-frente.md",
    "rodadas": 1,
    "nota": "Seu Tonho dando as boas-vindas: 5 desenhos (descanso, ergue a mão, aceno para fora, aceno para dentro, abaixa) montados em 12 quadros a 8 por segundo (1,2,3,4,3,4,3,4,5,1,1,1): acena três vezes e descansa. Pés plantados (molde pelas pernas), mesma altura e mesmo pé da parado-frente (apoio 30 px acima do pé da casa nas duas); a casa é mais larga e mais alta por causa da mão erguida."
+  },
+  "personagem/andar-trouxa-costas": {
+   "pedido": "personagem-andar-trouxa-costas-r2.md",
+   "rodadas": 2,
+   "nota": "Duas rodadas. A 1ª (personagem-andar-trouxa-costas.md, duas fileiras) repetiu na fileira de baixo as pernas da de cima, como na andar-costas; o próprio Codex avisou. A 2ª pediu só o outro passo, em 4 quadros, com a perna de lá cruzando por trás: nos quadros de descida e passagem o pé no ar agora passa por TRÁS da perna plantada (na 1ª passava pela frente); o contato e a subida continuam parecidos com os da 1ª. A folha final junta a fileira de cima da 1ª com os 4 quadros da 2ª, reduzidos a 0,695 para a cabeça e a altura baterem (crua junta em /root/arte-codex/comeco-pecas-anim-andar-trouxa-costas-junta). Escala só pela altura (294 px), como a andar-costas."
   }
  },
  "geral": [
