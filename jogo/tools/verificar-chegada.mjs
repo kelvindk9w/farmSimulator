@@ -46,6 +46,8 @@ const semErros = (a, onde) => confere(a.erros.length === 0, `${onde}: erro no co
 const J = (pg, f, arg) => pg.evaluate(f, arg);
 // (no modo #teste o desenho anda a fala do vizinho 1 s por chamada: aqui desenha-se sem andar o relógio dela)
 const foto = async (pg, nome) => { await J(pg, () => window.__jogo.desenhar()); await esperar(150); await pg.screenshot({ path: path.join(capturas, nome), type: 'jpeg', quality: 84 }); };
+// (a foto do balão como está, sem desenhar de novo: o desenho andaria a fala)
+const retrato = async (pg, nome) => { await esperar(150); await pg.screenshot({ path: path.join(capturas, nome), type: 'jpeg', quality: 84 }); };
 const cena = (pg) => J(pg, () => {
   const j = window.__jogo, m = j.mundo, C = m.comeco, p = m.personagem, loc = m.locais.fazenda, b = document.querySelector('.pular-chegada');
   const balao = document.querySelector('.balao'), quem = balao && balao.querySelector('.quem'), rosto = quem && quem.querySelector('canvas');
@@ -115,11 +117,11 @@ try {
       await J(pg, () => window.__jogo.desenhar());
       c = await cena(pg);
       confere(c.balao && c.quem === NOME && c.rosto === 'retrato/personagem' && FALA1.test(c.fala), `o balão dela: nome, retrato e a primeira fala (veio ${c.quem}, ${c.rosto}: "${c.fala}")`);
-      await foto(pg, 'h-1280-fala-dela-1.jpg');
+      await retrato(pg, 'h-1280-fala-dela-1.jpg');
       await J(pg, () => window.__jogo.desenhar());
       c = await cena(pg);
       confere(c.balao && c.quem === NOME && c.rosto === 'retrato/personagem-alegre' && FALA2.test(c.fala) && c.sementes, `o segundo balão dela, alegre, com "+6 sementes de alface" saindo da trouxa (veio ${c.rosto}: "${c.fala}", sementes ${c.sementes})`);
-      await foto(pg, 'h-1280-fala-dela-2.jpg');
+      await retrato(pg, 'h-1280-fala-dela-2.jpg');
     }
     if (c.acenou && !viuAceno) {
       viuAceno = true;
@@ -127,7 +129,7 @@ try {
       await J(pg, () => window.__jogo.desenhar());
       c = await cena(pg);
       confere(c.balao && BOAS.test(c.fala) && c.quem === 'Seu Tonho' && c.rosto === 'retrato/seu-tonho-alegre', `com o aceno vêm as boas-vindas dele, com o retrato alegre (veio ${c.quem}, ${c.rosto}: "${c.fala.slice(0, 80)}")`);
-      await foto(pg, 'h-1280-boas-vindas.jpg');
+      await retrato(pg, 'h-1280-boas-vindas.jpg');
     }
   }
   confere(viuFala, 'ela falou');
@@ -308,6 +310,8 @@ try {
   let f2 = await fazenda(v.pg);
   confere(f2.nivel === 1 && f2.humilde && f2.casa === 'casa-velha' && f2.banca === 'caixote-de-venda' && f2.vizinho === 'vizinho' && !f2.celeiro && !f2.quadro && f2.chegada && f2.pular,
     `"Sim, começar de novo": a fazenda nova do começo humilde, com a cena da chegada (veio ${JSON.stringify(f2)})`);
+  const avisosV = await J(v.pg, () => window.__jogo.avisos());
+  confere(!avisosV.some((t) => /fora por/.test(t)), `e nenhum aviso da fazenda apagada (o "que bom te ver" da volta) fica na tela (veio ${JSON.stringify(avisosV)})`);
   await v.pg.screenshot({ path: path.join(capturas, 'h-1280-comeco-novo-sim.jpg'), type: 'jpeg', quality: 84 });
   await v.pg.waitForFunction(() => window.__jogo.mundo.comeco.chegou, null, { timeout: 20000 }).catch(() => {});
   await v.pg.reload();

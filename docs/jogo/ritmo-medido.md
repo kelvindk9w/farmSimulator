@@ -259,4 +259,4 @@ cosméticos, convite e compartilhar (não mudam o ritmo); nada que gaste cash.
 
 Não verificado: o que acontece depois do nível 23 e do D30; ovelha, vaca e cavalo chegando ao fim da vida; mais de um
 aspersor; o celeiro ampliado; a casa ampliada (varanda e além). A cena da chegada não entra no bot (é só da interface:
-no jogo novo ela dura uns 5 s ou um toque); quem confere a cena é `tools/verificar-chegada.mjs`.
+no jogo novo ela dura uns 10 s ou um toque); quem confere a cena é `tools/verificar-chegada.mjs`.

@@ -64,5 +64,10 @@ export function segurarAvisos(sim) {
     while (espera.length > ESPERA_MAX) espera.shift();
   } else escoar();
 }
+// some com todos, os da tela e os que esperam (a fazenda trocou: os avisos eram da outra)
+export function limparAvisos() {
+  for (const a of [...vivos]) { clearTimeout(a.some); a.e.remove(); }
+  vivos.length = 0; espera.length = 0;
+}
 export function avisosNaTela() { return vivos.map((a) => a.texto); }
 export function avisosEmEspera() { return espera.map((p) => p.texto); }

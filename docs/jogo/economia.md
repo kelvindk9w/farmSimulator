@@ -85,7 +85,7 @@ Dia em que cada perfil chega ao nível (conta; "~" é projeção):
 
 | Minuto | O que acontece |
 |---|---|
-| 0:00 a 0:11 | A chegada (no jogo, uns 5 s de cena, ou um toque para pular) e a conversa com o Seu Tonho: um toque nele |
+| 0:00 a 0:11 | A chegada (no jogo, uns 10 s de cena, com a fala dela e as boas-vindas dele, ou um toque para pular) e a conversa com o Seu Tonho: um toque nele |
 | 0:11 a 1:33 | Ara a primeira fileira do campo pequeno (6 casas, com a enxada que trouxe), planta a alface que ganhou, pega o regador velho no chão ao lado do poço, enche no poço velho (devagar) e rega (quatro missões curtas do Seu Tonho) |
 | 3:18 | Primeira colheita; **nível 2** |
 | 4:40 | Guarda as alfaces no baú da casa |

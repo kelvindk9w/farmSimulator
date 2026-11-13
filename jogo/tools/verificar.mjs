@@ -2,7 +2,9 @@
 //   1280x720 (computador: mouse e teclado), 844x390 (celular deitado, toque) e 390x844 (celular em pé, girado).
 // Joga o começo (arar, semear, encher o regador, regar, avançar o relógio, colher, vender, comprar), confere a tela
 // de subida de nível, os painéis, o foco pelas setas, gravar e recarregar, exportar e importar, e que não há erro
-// no console. Grava as capturas em capturas/ (JPEG). Termina com "Tudo certo." ou com a lista das falhas.
+// no console. No fim, abre o jogo sem #teste para conferir a tela de carregando (aparece, anda com rede lenta, some
+// sozinha, não deixa nada por cima, o erro quando o main.js não chega; fotos carga-*.jpg).
+// Grava as capturas em capturas/ (JPEG). Termina com "Tudo certo." ou com a lista das falhas.
 //   node tools/verificar.mjs            (monte antes: npm run build)
 //   JOGO_DIST=dist-x JOGO_CAPTURAS=capturas-x node tools/verificar.mjs   (outra pasta montada, outras capturas)
 import fs from 'node:fs';
@@ -74,6 +76,128 @@ async function dedo(cdp, pontos, pausa = 30) {
 
 const CAMPO = [[26, 51], [27, 51], [28, 51], [26, 52], [27, 52], [28, 52]];
 const semErros = (a, onde) => confere(a.erros.length === 0, `${onde}: erro no console: ${a.erros.slice(0, 3).join(' | ')}`);
+
+// ---------- a tela de carregando (index.html e src/ui/carregando.js): o jogo aberto sem #teste ----------
+// opc.segurar: o main.js só chega quando chamar solta(); opc.atraso(url) = ms de espera de cada arquivo (rede lenta);
+// opc.falhar: o main.js não chega
+async function abrirCarga(w, h, opc = {}) {
+  const ctx = await nav.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1, hasTouch: !!opc.toque, isMobile: !!opc.toque });
+  const pg = await ctx.newPage();
+  const erros = [];
+  pg.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()); });
+  pg.on('pageerror', (e) => erros.push('exceção: ' + e.message));
+  let solta = () => {};
+  const segura = opc.segurar ? new Promise((r) => { solta = r; }) : null;
+  await pg.route('**/*', async (r) => {
+    const u = r.request().url().slice(srv.url.length);
+    if (u === 'main.js' && opc.falhar && !pg.__deixar) return r.abort();
+    if (u === 'main.js' && segura) await segura;
+    const ms = opc.atraso ? opc.atraso(u) : 0;
+    if (ms) await esperar(ms);
+    return r.continue();
+  });
+  // o andar da barra, de 100 em 100 ms, e o evento de quando a tela sai
+  await ctx.addInitScript(() => {
+    window.__amostras = [];
+    window.addEventListener('jogo-carregou', () => { window.__carregouEm = performance.now(); });
+    const olhar = () => { const b = document.querySelector('#carga .carga-barra'); if (b) window.__amostras.push(+b.getAttribute('aria-valuenow')); if (!window.__carregouEm) setTimeout(olhar, 100); };
+    setTimeout(olhar, 30);
+  });
+  await pg.goto(srv.url, { waitUntil: 'commit' });
+  await pg.waitForSelector('#carga', { timeout: 10000 });
+  return { ctx, pg, erros, solta, w, h };
+}
+const carga = (pg) => pg.evaluate(() => {
+  const c = document.getElementById('carga');
+  if (!c) return null;
+  const r = c.getBoundingClientRect(), b = c.querySelector('.carga-barra'), i = b.querySelector('i'), d = c.querySelector('.carga-dica');
+  return {
+    cobre: r.left <= 0 && r.top <= 0 && r.right >= innerWidth && r.bottom >= innerHeight && getComputedStyle(c).opacity === '1',
+    placa: c.querySelector('.carga-placa').textContent, versao: c.querySelector('.carga-versao').textContent, dica: d.textContent,
+    dicaAlta: d.getBoundingClientRect().height, barraAlta: b.getBoundingClientRect().height, placaLarga: c.querySelector('.carga-placa').getBoundingClientRect().width,
+    valor: +b.getAttribute('aria-valuenow'), enchida: i.getBoundingClientRect().width / b.getBoundingClientRect().width,
+    fundo: c.classList.contains('com-fundo'), qual: window.__cargaFundo, atributo: document.documentElement.dataset.carregando,
+    erro: !c.querySelector('.carga-erro').hidden ? c.querySelector('.carga-erro').textContent.replace(/\s+/g, ' ').trim() : null,
+    erroAlto: c.querySelector('.carga-erro').getBoundingClientRect().height,
+  };
+});
+
+async function telaDeCarregando() {
+  // 1. aparece na hora (o main.js ainda não chegou), com o fundo, a placa, a versão, a barra e uma dica; a barra anda sozinha até uns 30%
+  for (const [w, h, toque] of [[844, 390, true], [1280, 720, false], [1920, 1080, false]]) {
+    const t = await abrirCarga(w, h, { toque, segurar: true });
+    await t.pg.waitForFunction(() => document.querySelector('#carga.com-fundo'), null, { timeout: 10000 }).catch(() => {});
+    await esperar(900);
+    let c = await carga(t.pg);
+    confere(c && c.cobre, `${w}x${h}: a tela de carregando aparece antes do main.js e cobre a tela`);
+    if (!c) { await t.ctx.close(); continue; }
+    igual(c.placa, 'Fazenda', `${w}x${h}: a placa diz o nome do jogo`);
+    igual(c.versao, 'Versão de teste', `${w}x${h}: a linha da versão de teste`);
+    confere(c.dica.length > 10, `${w}x${h}: mostra uma dica (veio "${c.dica}")`);
+    confere(c.fundo, `${w}x${h}: o fundo desenhado chegou`);
+    igual(c.qual, toque ? 'carregando/fundo-m.js' : 'carregando/fundo.js', `${w}x${h}: o fundo ${toque ? 'leve (celular)' : 'inteiro'}`);
+    igual(c.atributo, '1', `${w}x${h}: o <html> marca data-carregando enquanto a tela está à vista`);
+    const a1 = c.valor;
+    await esperar(800);
+    c = await carga(t.pg);
+    confere(a1 > 0 && c.valor > a1 && c.valor <= 30, `${w}x${h}: enquanto o main.js baixa, a barra anda devagar até uns 30% (veio ${a1}% e depois ${c.valor}%)`);
+    // a foto com a barra pela metade
+    await t.pg.evaluate(() => window.__carga.andar(0.5));
+    await esperar(600);
+    c = await carga(t.pg);
+    confere(Math.abs(c.enchida - 0.5) < 0.06, `${w}x${h}: com 50%, a barra fica pela metade (veio ${(c.enchida * 100).toFixed(0)}%)`);
+    const esc = Math.max(1, Math.min(w / 1100, h / 560, 2.4));
+    confere(c.placaLarga >= 290 * esc && c.barraAlta >= 26 * esc, `${w}x${h}: a placa e a barra crescem com a tela (placa ${c.placaLarga.toFixed(0)} px, barra ${c.barraAlta.toFixed(0)} px)`);
+    await t.pg.screenshot({ path: path.join(capturas, `carga-${w}x${h}.jpg`), type: 'jpeg', quality: 86 });
+    // o main.js chega: a barra passa dos 35% e a tela some sozinha, com tudo da primeira cena carregado
+    t.solta();
+    await t.pg.waitForFunction(() => !document.getElementById('carga'), null, { timeout: 25000 }).catch(() => {});
+    const fim = await t.pg.evaluate(() => ({
+      foi: !document.getElementById('carga'), evento: window.__carregouEm || 0, atributo: document.documentElement.dataset.carregando,
+      arte: window.__jogo && window.__jogo.atlas.paginas.filter((p) => p.estado !== 'nao').every((p) => p.estado === 'pronta'),
+      por: [[0.5, 0.5], [0.05, 0.05], [0.95, 0.05], [0.05, 0.95], [0.95, 0.95]].map(([x, y]) => { const e = document.elementFromPoint(innerWidth * x, innerHeight * y); return e ? (e.closest('#carga') ? 'carga' : e.id || e.className || e.tagName) : 'nada'; }),
+    }));
+    confere(fim.foi, `${w}x${h}: a tela de carregando some sozinha depois que o main.js chega`);
+    confere(fim.arte, `${w}x${h}: quando ela some, a arte que a primeira cena pediu já chegou`);
+    confere(fim.evento > 0 && fim.atributo === undefined, `${w}x${h}: ao sumir, tira o data-carregando e avisa com o evento "jogo-carregou"`);
+    confere(!fim.por.includes('carga') && fim.por[0] === 'tela', `${w}x${h}: nada da tela de carregando fica por cima do jogo (no meio e nos cantos: ${fim.por.join(', ')})`);
+    semErros(t, `tela de carregando ${w}x${h}`);
+    await t.ctx.close();
+  }
+
+  // 2. rede lenta: a barra anda conforme o que chega (o main.js, depois as páginas de arte e as molduras) e a tela fica pelo menos 0,8 s
+  const lenta = await abrirCarga(1280, 720, { atraso: (u) => (u === 'main.js' ? 1500 : /^arte\//.test(u) ? 300 + ((u.length * 37) % 600) : /^molduras\//.test(u) ? 150 : 0) });
+  await lenta.pg.waitForFunction(() => !document.getElementById('carga'), null, { timeout: 30000 }).catch(() => {});
+  const r = await lenta.pg.evaluate(() => ({ foi: !document.getElementById('carga'), amostras: window.__amostras, em: window.__carregouEm || 0 }));
+  const passos = [...new Set(r.amostras)];
+  confere(r.foi, 'rede lenta: a tela some sozinha');
+  confere(passos.filter((v) => v > 0 && v <= 30).length >= 3 && passos.filter((v) => v > 35 && v < 100).length >= 2 && passos.includes(100),
+    `rede lenta: a barra anda aos poucos até 30% e depois conforme chega a arte, até 100% (passou por ${passos.join(', ')})`);
+  confere(r.amostras.every((v, i) => !i || v >= r.amostras[i - 1]), 'rede lenta: a barra nunca volta');
+  semErros(lenta, 'tela de carregando, rede lenta');
+  await lenta.ctx.close();
+  // rede rápida: não pisca (fica uns 0,8 s) e não segura além disso
+  const rapida = await abrirCarga(1280, 720);
+  await rapida.pg.waitForFunction(() => !document.getElementById('carga'), null, { timeout: 20000 }).catch(() => {});
+  const em = await rapida.pg.evaluate(() => window.__carregouEm || 0);
+  confere(em >= 800 && em < 6000, `rede rápida: a tela fica pelo menos 0,8 s e sai logo depois (saiu com ${(em / 1000).toFixed(2)} s)`);
+  semErros(rapida, 'tela de carregando, rede rápida');
+  await rapida.ctx.close();
+
+  // 3. o main.js não chega: a tela troca a barra pelo aviso, e o toque recarrega (desta vez dá certo)
+  const ruim = await abrirCarga(844, 390, { toque: true, falhar: true });
+  await ruim.pg.waitForSelector('#carga .carga-erro:not([hidden])', { timeout: 10000 }).catch(() => {});
+  await esperar(400);
+  const ce = await carga(ruim.pg);
+  igual(ce && ce.erro, 'Não deu para carregar. Toque para tentar de novo.', 'sem o main.js, a tela diz que não deu para carregar');
+  confere(ce && ce.erroAlto >= 44, `o aviso de erro tem pelo menos 44 px de altura para o toque (veio ${ce && ce.erroAlto.toFixed(0)})`);
+  await ruim.pg.screenshot({ path: path.join(capturas, 'carga-erro.jpg'), type: 'jpeg', quality: 86 });
+  ruim.pg.__deixar = true;
+  await ruim.pg.touchscreen.tap(422, 120);
+  await ruim.pg.waitForFunction(() => window.__jogo && window.__jogo.pronto && !document.getElementById('carga'), null, { timeout: 20000 }).catch(() => {});
+  confere(await ruim.pg.evaluate(() => !!(window.__jogo && window.__jogo.pronto) && !document.getElementById('carga')), 'o toque no aviso de erro recarrega a página, e o jogo abre');
+  await ruim.ctx.close();
+}
 
 try {
   // =====================================================================================================
@@ -414,6 +538,10 @@ try {
   igual(e.aradas, 1, 'em pé, o toque cai na casa certa (coordenadas corrigidas)');
   semErros(a, '390x844');
   await a.ctx.close();
+
+  // =====================================================================================================
+  console.log('tela de carregando (o jogo aberto sem #teste): 844x390, 1280x720, 1920x1080, rede lenta e erro');
+  await telaDeCarregando();
 } catch (err) {
   falhas.push('a verificação parou: ' + (err && err.stack ? err.stack.split('\n').slice(0, 3).join(' ') : err));
   console.log('  ✗ ' + falhas[falhas.length - 1]);

@@ -17,7 +17,7 @@ import { aoInstalarMundo } from './ligacoes.js';
 import { botao } from './dom.js';
 import { T } from './textos.js';
 import { J } from '../contexto.js';
-import { avisar } from './avisos.js';
+import { avisar, limparAvisos } from './avisos.js';
 import { perguntar } from './dialogo.js';
 import { nomeDoItem } from './textos.js';
 import { som } from '../plataforma/som.js';
@@ -124,7 +124,8 @@ aoInstalarMundo((m, ctx) => {
   if (primeira && !J.teste && querComecoNovo(m)) depoisDoCarregando(() => {
     if (J.mundo !== m || !querComecoNovo(m)) return;
     const P = T.comeco.comecoNovo;
-    if (!perguntar({ titulo: P.titulo, texto: P.texto, nota: P.nota, sim: P.sim, nao: P.nao, classeSim: 'ruim', aoSim: () => J.trocarMundo(null) })) return;
+    // (sim: os avisos da fazenda velha, como o "que bom te ver" da volta, somem com ela)
+    if (!perguntar({ titulo: P.titulo, texto: P.texto, nota: P.nota, sim: P.sim, nao: P.nao, classeSim: 'ruim', aoSim: () => { limparAvisos(); J.trocarMundo(null); } })) return;
     m.comando({ tipo: 'perguntouComecoNovo' });
     J.gravarLogo();
   });

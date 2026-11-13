@@ -40,6 +40,7 @@ async function pronto(pg) {
   await pg.evaluate(() => window.__jogo.baixarArte());
   await pg.waitForFunction(() => window.__jogo.arteBaixada(), null, { timeout: 20000 });
   await pg.waitForFunction(() => !!window.__jogo.progresso, null, { timeout: 5000 });
+  await pg.waitForFunction(() => !document.getElementById('carga'), null, { timeout: 20000 }); // sem #teste (o convite), a tela de carregando cobre até a primeira cena
   await pg.evaluate(() => window.__jogo.desenhar());
   await esperar(250);
 }
